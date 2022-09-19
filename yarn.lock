@@ -1682,6 +1682,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dahlia-labs/use-ethers@npm:^0.8.1":
+  version: 0.8.1
+  resolution: "@dahlia-labs/use-ethers@npm:0.8.1"
+  dependencies:
+    "@dahlia-labs/celo-contrib": ^0.8.1
+    "@dahlia-labs/token-utils": ^0.8.1
+    "@ethersproject/abi": ^5.7.0
+    "@ethersproject/abstract-signer": ^5.7.0
+    "@ethersproject/address": ^5.7.0
+    "@ethersproject/constants": ^5.7.0
+    "@ethersproject/contracts": ^5.7.0
+    "@ethersproject/providers": ^5.7.1
+    "@ubeswap/token-math": ^5.2.1
+    lodash: ^4.17.21
+    tiny-invariant: ^1.2.0
+    tslib: ^2.4.0
+  peerDependencies:
+    bn.js: ^4 || ^5
+    jsbi: ^3 || ^4
+  checksum: 131302c241ae12ba7ae916efd966d2909bed20f41feeee74ee7ea977430b7bfa1c902a66f20f9c3bb19bb7ae718b31716bf84fb7b97bd5ca320f240d78eef8e7
+  languageName: node
+  linkType: hard
+
 "@emotion/babel-plugin-jsx-pragmatic@npm:^0.2.0":
   version: 0.2.0
   resolution: "@emotion/babel-plugin-jsx-pragmatic@npm:0.2.0"
@@ -2861,21 +2884,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@saberhq/eslint-config-react@npm:^2.0.5":
-  version: 2.0.5
-  resolution: "@saberhq/eslint-config-react@npm:2.0.5"
+"@saberhq/eslint-config-react@npm:2.0.4":
+  version: 2.0.4
+  resolution: "@saberhq/eslint-config-react@npm:2.0.4"
   dependencies:
-    "@saberhq/eslint-config": ^2.0.5
+    "@saberhq/eslint-config": ^2.0.4
     eslint-plugin-jsx-a11y: ^6.6.1
-    eslint-plugin-react: ^7.31.7
+    eslint-plugin-react: ^7.30.1
     eslint-plugin-react-hooks: ^4.6.0
   peerDependencies:
     eslint: ">=7"
-  checksum: c8788f197655f7ff6bdaea8dcfb693dc1cda445b212c3634a76c7eca2bc3cdb3b53ca6a7dba4ba3e41ee08539e35ff63ef12db023c01bbf3305edaf21875c725
+  checksum: 307b25235eaad17c321acacbdbdd6012e94c2665ea5b761d5bfd32bbb34e8752cefcf42c5ea2a50cd6788bd852681332be98f3c64ee699c532025d4bc978f2f7
   languageName: node
   linkType: hard
 
-"@saberhq/eslint-config@npm:^2.0.5":
+"@saberhq/eslint-config@npm:^2.0.4":
   version: 2.0.5
   resolution: "@saberhq/eslint-config@npm:2.0.5"
   dependencies:
@@ -7737,7 +7760,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react@npm:^7.27.1, eslint-plugin-react@npm:^7.31.7":
+"eslint-plugin-react@npm:^7.27.1, eslint-plugin-react@npm:^7.30.1":
   version: 7.31.8
   resolution: "eslint-plugin-react@npm:7.31.8"
   dependencies:
@@ -14218,6 +14241,7 @@ __metadata:
     "@dahlia-labs/celo-contrib": ^0.8.1
     "@dahlia-labs/celo-tokens": ^0.8.1
     "@dahlia-labs/token-utils": ^0.8.1
+    "@dahlia-labs/use-ethers": ^0.8.1
     "@emotion/babel-plugin": ^11.10.2
     "@emotion/babel-preset-css-prop": ^11.10.0
     "@emotion/core": ^11.0.0
@@ -14233,7 +14257,7 @@ __metadata:
     "@ethersproject/units": ^5.7.0
     "@rainbow-me/rainbowkit": ^0.6.0
     "@rushstack/eslint-patch": ^1.2.0
-    "@saberhq/eslint-config-react": ^2.0.5
+    "@saberhq/eslint-config-react": 2.0.4
     "@saberhq/tsconfig": ^2.0.5
     "@simbathesailor/babel-plugin-use-what-changed": ^2.1.0
     "@simbathesailor/use-what-changed": ^2.0.0

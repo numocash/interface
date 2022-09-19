@@ -7,6 +7,7 @@
     "@dahlia-labs/celo-contrib": "^0.8.1",
     "@dahlia-labs/celo-tokens": "^0.8.1",
     "@dahlia-labs/token-utils": "^0.8.1",
+    "@dahlia-labs/use-ethers": "^0.8.1",
     "@emotion/core": "^11.0.0",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
@@ -73,7 +74,7 @@
     "@emotion/babel-plugin": "^11.10.2",
     "@emotion/babel-preset-css-prop": "^11.10.0",
     "@rushstack/eslint-patch": "^1.2.0",
-    "@saberhq/eslint-config-react": "^2.0.5",
+    "@saberhq/eslint-config-react": "2.0.4",
     "@saberhq/tsconfig": "^2.0.5",
     "@simbathesailor/babel-plugin-use-what-changed": "^2.1.0",
     "@simbathesailor/use-what-changed": "^2.0.0",
@@ -129,6 +130,11 @@
   },
   "engines": {
     "node": ">=14.x"
+  },
+  "babelMacros": {
+    "twin": {
+      "preset": "emotion"
+    }
   },
   "packageManager": "yarn@3.2.3"
 }

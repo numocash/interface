@@ -49,13 +49,6 @@ module.exports = {
 
       config.ignoreWarnings = [/Failed to parse source map/];
 
-      // // https://github.com/rustwasm/wasm-pack/issues/835
-      // config.module.rules.push({
-      //   test: /\.wasm$/,
-      //   type: "webassembly/sync",
-      // });
-      // config.experiments = { syncWebAssembly: true };
-
       config.resolve.fallback = {
         util: false,
       };

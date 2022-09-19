@@ -10,7 +10,7 @@ module.exports = {
     es2021: true,
   },
   ignorePatterns: ["*.js", "src/generated/*"],
-  extends: ["@saberhq/eslint-config-react"],
+  extends: ["@saberhq/eslint-config-react", "plugin:jsx-a11y/recommended"],
   parserOptions: {
     project: "tsconfig.json",
   },
