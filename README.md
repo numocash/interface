@@ -1,6 +1,4 @@
-# Web3 Template
-
-Interface with components using ethers
+# Numoen Interface
 
 ## Developing
 
