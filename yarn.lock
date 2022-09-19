@@ -2973,9 +2973,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rainbow-me/rainbowkit@npm:^0.5.1":
-  version: 0.5.1
-  resolution: "@rainbow-me/rainbowkit@npm:0.5.1"
+"@rainbow-me/rainbowkit@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "@rainbow-me/rainbowkit@npm:0.6.0"
   dependencies:
     "@vanilla-extract/css": 1.7.0
     "@vanilla-extract/dynamic": 2.0.2
@@ -2988,7 +2988,7 @@ __metadata:
     react: ">=17"
     react-dom: ">=17"
     wagmi: 0.5.x || 0.6.x
-  checksum: a456e39ac3f15d6ec1f02c1be152310c20ae1d07d535d61f64a9bfd868197bc0f1fd22a182c634fbea27ec9fb85ede6d7e6b27b71145c85ff11e63b2c3db527b
+  checksum: 02f4a976afacfe6e8b9e3351d5746c0062629263654a75bb14d60f9898fd1bc7ff766d7eea041451ea72d2ac3bd8caf6ad03dcf3394ab455a8d70ec3b282b95b
   languageName: node
   linkType: hard
 
@@ -4456,9 +4456,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wagmi/core@npm:^0.5.4":
-  version: 0.5.4
-  resolution: "@wagmi/core@npm:0.5.4"
+"@wagmi/core@npm:^0.5.6":
+  version: 0.5.6
+  resolution: "@wagmi/core@npm:0.5.6"
   dependencies:
     eventemitter3: ^4.0.7
     zustand: ^4.0.0
@@ -4471,7 +4471,7 @@ __metadata:
       optional: true
     "@walletconnect/ethereum-provider":
       optional: true
-  checksum: 7041c4158f69178a31f88d41e4545e0d02195e80cbb8f790cf1d1a95c2683caf0f0d74fac8f65c44870ec2b01feb5d41ac884ab7e30e02058a5a334e9e23575a
+  checksum: 74a8f8520ba684124841ebb361cc84f897d64cd5d43a4f12e8cb343199c6e60b2635c0a73b4824349cc16759cd797437b88b91e22f706f817ac3a085bf830d7e
   languageName: node
   linkType: hard
 
@@ -14687,7 +14687,7 @@ __metadata:
     "@ethersproject/contracts": ^5.7.0
     "@ethersproject/providers": ^5.7.1
     "@ethersproject/units": ^5.7.0
-    "@rainbow-me/rainbowkit": ^0.5.1
+    "@rainbow-me/rainbowkit": ^0.6.0
     "@rushstack/eslint-patch": ^1.2.0
     "@saberhq/eslint-config-react": ^2.0.5
     "@saberhq/tsconfig": ^2.0.5
@@ -14750,7 +14750,7 @@ __metadata:
     typechain: ^8.1.0
     typescript: 4.7.4
     unstated-next: ^1.1.0
-    wagmi: ^0.6.4
+    wagmi: ^0.6.6
     webpack: ^5.74.0
     webpack-bundle-analyzer: ^4.6.1
   languageName: unknown
@@ -16699,21 +16699,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wagmi@npm:^0.6.4":
-  version: 0.6.4
-  resolution: "wagmi@npm:0.6.4"
+"wagmi@npm:^0.6.6":
+  version: 0.6.6
+  resolution: "wagmi@npm:0.6.6"
   dependencies:
     "@coinbase/wallet-sdk": ^3.3.0
     "@tanstack/query-sync-storage-persister": ^4.0.10
     "@tanstack/react-query": ^4.0.10
     "@tanstack/react-query-persist-client": ^4.0.10
-    "@wagmi/core": ^0.5.4
+    "@wagmi/core": ^0.5.6
     "@walletconnect/ethereum-provider": ^1.7.8
     use-sync-external-store: ^1.2.0
   peerDependencies:
     ethers: ">=5.5.1"
     react: ">=17.0.0"
-  checksum: 4afa6b894a11e558734f9bc10b03b277ec6ed79aa48e52c4664931dceca3361eafa79dd7d8b5da544fad9a567f776a4a7fcec1efff2b139274f32d767cb2f891
+  checksum: 69d002c29528c86993d75b919d7875e7c60eb4838d96f591ef48a4b6410f00d247baecc71fba14d30f031cfb8dcb613b096c3bacf4fc1b1f69723c9f79499e53
   languageName: node
   linkType: hard
 
