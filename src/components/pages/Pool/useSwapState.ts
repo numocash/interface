@@ -2,11 +2,16 @@ import type { Token } from "@dahlia-labs/token-utils";
 import { TokenAmount } from "@dahlia-labs/token-utils";
 import type { ParsedQs } from "qs";
 import { parse } from "qs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
-import { useAddressToToken, useCusd } from "../../../hooks/useTokens";
+import {
+  useAddressToToken,
+  useCelo,
+  useMarketTokens,
+} from "../../../hooks/useTokens";
 import { useTrade } from "./useTrade";
 
 export enum Field {
@@ -69,26 +74,25 @@ export const useParsedQueryString = (): ParsedQs => {
 // for swaps, one of the fields is dependent of the other field
 const useSwapStateInternal = (): UseSwapStateValues => {
   const parsedQs = useParsedQueryString();
-  const cusd = useCusd();
+  const celo = useCelo();
+  const marketTokens = useMarketTokens();
+  const marketToken = useMemo(() => marketTokens[0], [marketTokens]);
+  invariant(marketToken);
 
-  const defaultSwapToken = cusd;
+  const tokenA = useAddressToToken(parsedQs.inputToken as string) ?? celo;
 
-  const tokenA =
-    useAddressToToken(parsedQs.inputToken as string) ??
-    defaultSwapToken ??
-    undefined;
-
-  const tokenB = useAddressToToken(parsedQs.outputToken as string) ?? undefined;
+  const tokenB =
+    useAddressToToken(parsedQs.outputToken as string) ?? marketToken;
 
   // TODO: consider make form state seralizable (store only token addr)
   const [fieldState, setFieldState] = useState<SwapFieldState>({
     independentField: Field.Input,
     typedValue: "",
     [Field.Input]: {
-      token: null,
+      token: tokenA,
     },
     [Field.Output]: {
-      token: null,
+      token: tokenB,
     },
   });
 
@@ -98,16 +102,17 @@ const useSwapStateInternal = (): UseSwapStateValues => {
   const dependentField =
     fieldState.independentField === Field.Input ? Field.Output : Field.Input;
 
-  useEffect(() => {
-    const parsedOutputToken = tokenB ?? undefined;
-    const parsedInputToken = tokenA ?? undefined;
+  // useEffect(() => {
+  //   const parsedInputToken = tokenA ?? undefined;
+  //   const parsedOutputToken = tokenB ?? undefined;
+  //   console.log(1);
 
-    setFieldState((p) => ({
-      ...p,
-      [Field.Input]: { token: parsedInputToken },
-      [Field.Output]: { token: parsedOutputToken },
-    }));
-  }, [tokenA, tokenB]);
+  //   setFieldState((p) => ({
+  //     ...p,
+  //     [Field.Input]: { token: parsedInputToken },
+  //     [Field.Output]: { token: parsedOutputToken },
+  //   }));
+  // }, [tokenA, tokenB]);
 
   const selectedFrom = fieldState[Field.Input].token ?? null;
   const selectedTo = fieldState[Field.Output].token ?? null;

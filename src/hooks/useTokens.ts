@@ -21,8 +21,7 @@ export const useAddressToToken = (address: string | null): Token | null => {
 
 export const useFeaturedTokens = (): { [address: string]: Token } => {
   const celo = useCelo();
-  const cusd = useCusd();
-  return { [celo.address]: celo, [cusd.address]: cusd };
+  return { [celo.address]: celo };
 };
 
 export const useMarketTokens = (): readonly Token[] => {
@@ -40,11 +39,7 @@ export const useMarketTokens = (): readonly Token[] => {
 
 export const useAllTokens = (): readonly Token[] => {
   const marketTokens = useMarketTokens();
-  return [
-    CELO[ChainId.Mainnet],
-    CUSD[ChainId.Mainnet],
-    ...marketTokens,
-  ] as const;
+  return [CELO[ChainId.Mainnet], ...marketTokens] as const;
 };
 
 export const getTokensPerMarket = (market: IMarket): [Token, Token] => {
