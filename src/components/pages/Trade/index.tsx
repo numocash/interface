@@ -1,14 +1,14 @@
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { useTokenContract } from "../../hooks/useContract";
-import { useTokenBalance } from "../../hooks/useTokenBalance";
-import { useCelo } from "../../hooks/useTokens";
-import { useBeet } from "../../utils/beet";
-import { AsyncButton } from "../common/AsyncButton";
-import { Module } from "../common/Module";
+import { useTokenContract } from "../../../hooks/useContract";
+import { useTokenBalance } from "../../../hooks/useTokenBalance";
+import { useCelo } from "../../../hooks/useTokens";
+import { useBeet } from "../../../utils/beet";
+import { AsyncButton } from "../../common/AsyncButton";
+import { Module } from "../../common/Module";
 
-export const View: React.FC = () => {
+export const Trade: React.FC = () => {
   const celo = useCelo();
   const { address } = useAccount();
   const celoBalance = useTokenBalance(celo, address);

@@ -26,10 +26,25 @@ const grays = {
   900: "#070011",
 };
 
+const custom = {
+  container: "", // white
+  action: "#F7F8FA",
+  outline: "#CED0D9",
+  container: {
+    DEFAULT: "#FFFFFF",
+    d: "#212429", //0f141a
+  }, // black
+  "action-d": "#2C2F36",
+  "outline-d": "#40444F",
+};
+
 const textColor = {
-  DEFAULT: "#FFFFFF",
-  default: "#FFFFFF",
+  DEFAULT: "#000000",
+  default: "#000000",
   secondary: grays[400],
+  "default-d": "#000000",
+  secondary: "#888D9B",
+  "secondary-d": "#C3C5CB",
 };
 
 module.exports = {
@@ -54,6 +69,7 @@ module.exports = {
       },
       colors: {
         ...colors,
+        ...custom,
         brand: brandColors,
         gray: grays,
         primary: brandColors,

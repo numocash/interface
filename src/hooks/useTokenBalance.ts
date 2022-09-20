@@ -1,35 +1,68 @@
 import type { Token } from "@dahlia-labs/token-utils";
 import { TokenAmount } from "@dahlia-labs/token-utils";
+import { tokenInterface } from "@dahlia-labs/use-ethers";
 import { AddressZero } from "@ethersproject/constants";
-import invariant from "tiny-invariant";
 
 import { parseFunctionReturn } from "../utils/parseFunctionReturn";
 import type { Call } from "./useBlockQuery";
 import { useBlockQuery } from "./useBlockQuery";
-import { useTokenContractFromAddress } from "./useContract";
 
 export const useTokenBalance = (
-  token: Token,
-  address: string | null | undefined
+  token: Token | null,
+  address: string | null
 ): TokenAmount | null => {
-  const tokenContract = useTokenContractFromAddress(AddressZero, false);
-  invariant(tokenContract);
-
   const call: Call = {
-    target: token.address,
-    callData: tokenContract.interface.encodeFunctionData("balanceOf", [
+    target: token?.address ?? AddressZero,
+    callData: tokenInterface.encodeFunctionData("balanceOf", [
       address ?? AddressZero,
     ]),
   };
 
-  const { data } = useBlockQuery("balance", [call], [token.address, address]);
-  if (!data || !address) return null;
+  const { data } = useBlockQuery(
+    "balance",
+    [call],
+    [token?.address, address],
+    !!address && !!token
+  );
+  if (!data || !token) return null;
   return new TokenAmount(
     token,
     parseFunctionReturn(
-      tokenContract.interface,
+      tokenInterface,
       "balanceOf",
       data?.returnData[0]
     ).toString()
+  );
+};
+
+export const useTokenBalances = (
+  tokens: (Token | null)[],
+  address?: string | null
+): (TokenAmount | null)[] | null => {
+  const calls: Call[] = tokens.map((t) => ({
+    target: t?.address ?? AddressZero,
+    callData: tokenInterface.encodeFunctionData("balanceOf", [
+      address ?? AddressZero,
+    ]),
+  }));
+
+  const { data } = useBlockQuery(
+    "balance",
+    calls,
+    [address].concat(tokens.map((t) => t?.address)),
+    !!address
+  );
+  if (!data) return null;
+  return tokens.map((t, i) =>
+    t
+      ? new TokenAmount(
+          t,
+          parseFunctionReturn(
+            tokenInterface,
+            "balanceOf",
+            data?.returnData[i]
+          ).toString()
+        )
+      : null
   );
 };

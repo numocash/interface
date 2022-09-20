@@ -1,13 +1,81 @@
 import { ChainId } from "@dahlia-labs/celo-contrib";
 import { CELO, CUSD } from "@dahlia-labs/celo-tokens";
+import { Token } from "@dahlia-labs/token-utils";
+import { getAddress } from "@ethersproject/address";
+import { useCallback } from "react";
 
-export const useCelo = () => {
-  const chainId = ChainId.Mainnet;
-  return CELO[chainId];
+import type { IMarket } from "../contexts/environment";
+import { useEnvironment } from "../contexts/environment";
+
+export const useCelo = () => CELO[ChainId.Mainnet];
+
+export const useCusd = () => CUSD[ChainId.Mainnet];
+
+export const useAddressToToken = (address: string | null): Token | null => {
+  const tokens = [CELO[ChainId.Mainnet], CUSD[ChainId.Mainnet]] as const;
+  if (!address) return null;
+  return (
+    tokens.find((t) => getAddress(t.address) === getAddress(address)) ?? null
+  );
 };
 
-export const useCusd = () => {
-  const chainId = ChainId.Mainnet;
+export const useFeaturedTokens = (): { [address: string]: Token } => {
+  const celo = useCelo();
+  const cusd = useCusd();
+  return { [celo.address]: celo, [cusd.address]: cusd };
+};
 
-  return CUSD[chainId];
+export const useMarketTokens = (): readonly Token[] => {
+  return useEnvironment().markets.map(
+    (m) =>
+      new Token({
+        chainId: ChainId.Mainnet,
+        decimals: 18,
+        name: `Squared ${m.speculativeToken.symbol} / ${m.baseToken.symbol}`,
+        symbol: `sq${m.speculativeToken.symbol}/${m.baseToken.symbol}`,
+        address: m.address,
+      })
+  );
+};
+
+export const useAllTokens = (): readonly Token[] => {
+  const marketTokens = useMarketTokens();
+  return [
+    CELO[ChainId.Mainnet],
+    CUSD[ChainId.Mainnet],
+    ...marketTokens,
+  ] as const;
+};
+
+export const getTokensPerMarket = (market: IMarket): [Token, Token] => {
+  return [market.speculativeToken, market.baseToken];
+};
+
+export const useMarketsPerToken = (token: Token) => {
+  const environments = useEnvironment();
+  return useCallback(
+    () =>
+      environments.markets.filter(
+        (m) => m.baseToken === token || m.speculativeToken === token
+      ),
+    [environments.markets, token]
+  );
+};
+
+/**
+ * Dedupes a list of tokens, picking the first instance of the token in a list.
+ * @param tokens
+ * @returns
+ */
+const dedupeTokens = (tokens: Token[]): Token[] => {
+  const seen = new Set<string>();
+  return tokens.filter((token) => {
+    const tokenID = `${token.address}_${token.chainId}`;
+    if (seen.has(tokenID)) {
+      return false;
+    } else {
+      seen.add(tokenID);
+      return true;
+    }
+  });
 };

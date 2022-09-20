@@ -13,6 +13,8 @@ import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
 import { App } from "./App";
 import { BlockProvider } from "./contexts/block";
+import { EnvironmentProvider } from "./contexts/environment";
+import { SettingsProvider } from "./contexts/settings";
 import { theme } from "./theme";
 
 const celoChain: Chain = {
@@ -59,11 +61,20 @@ export const AppWithProviders: React.FC = () => {
     <React.StrictMode>
       <ThemeProvider theme={theme}>
         <WagmiConfig client={wagmiClient}>
-          <RainbowKitProvider coolMode theme={darkTheme()} chains={chains}>
+          <RainbowKitProvider
+            coolMode
+            theme={darkTheme()}
+            chains={chains}
+            initialChain={42220}
+          >
             <BlockProvider>
               <QueryClientProvider client={queryClient}>
                 <ReactQueryDevtools initialIsOpen={false} />
-                <App />
+                <EnvironmentProvider>
+                  <SettingsProvider>
+                    <App />
+                  </SettingsProvider>
+                </EnvironmentProvider>
               </QueryClientProvider>
             </BlockProvider>
           </RainbowKitProvider>

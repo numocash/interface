@@ -1,12 +1,12 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 
-import { View } from "./components/pages";
+import { Trade } from "./components/pages/Pool";
 
 export const AppRouter: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<View />} />
+      <Route path="/trade" element={<Trade />} />
     </Routes>
   );
 };
