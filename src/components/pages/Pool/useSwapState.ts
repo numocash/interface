@@ -102,18 +102,6 @@ const useSwapStateInternal = (): UseSwapStateValues => {
   const dependentField =
     fieldState.independentField === Field.Input ? Field.Output : Field.Input;
 
-  // useEffect(() => {
-  //   const parsedInputToken = tokenA ?? undefined;
-  //   const parsedOutputToken = tokenB ?? undefined;
-  //   console.log(1);
-
-  //   setFieldState((p) => ({
-  //     ...p,
-  //     [Field.Input]: { token: parsedInputToken },
-  //     [Field.Output]: { token: parsedOutputToken },
-  //   }));
-  // }, [tokenA, tokenB]);
-
   const selectedFrom = fieldState[Field.Input].token ?? null;
   const selectedTo = fieldState[Field.Output].token ?? null;
 

@@ -5,7 +5,6 @@ import { useIsMarket } from "../../../contexts/environment";
 import { useTokenBalances } from "../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
-import { Button } from "../../common/Button";
 import { CenterSwitch } from "../../common/CenterSwitch";
 import { Module } from "../../common/Module";
 import { Settings } from "../../common/Settings";
@@ -111,16 +110,10 @@ export const Swap: React.FC = () => {
           </div>
         ) : null} */}
         {mint ? (
-          <>
-            <p tw="mt-1">Select Bound</p>
-            <div tw="flex w-full gap-3 mt-2">
-              {[2, 7.5].map((n) => (
-                <Button key={n} tw="w-full" variant="muted">
-                  {n}
-                </Button>
-              ))}
-            </div>
-          </>
+          <div tw="flex w-full mt-1 justify-between text-default">
+            <p>Bound</p>
+            <p>2.5 CELO/cUSD</p>
+          </div>
         ) : null}
         <AsyncButton
           variant="primary"
