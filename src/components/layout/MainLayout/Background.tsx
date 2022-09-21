@@ -1,13 +1,13 @@
 import { keyframes } from "@emotion/react";
 import { styled } from "twin.macro";
 
+import gradient from "./BackgroundImages/gradient.png";
 import stars from "./BackgroundImages/stars.png";
 import twinkling from "./BackgroundImages/twinkling.png";
 
 export const Background: React.FC = () => (
   <>
-    <Stars />
-    <Twinkling />
+    <Gradient />
   </>
 );
 
@@ -25,6 +25,11 @@ const BGLayer = styled.div`
 const Stars = styled(BGLayer)`
   z-index: -2;
   background: #000 url(${stars}) repeat top center;
+`;
+
+const Gradient = styled(BGLayer)`
+  z-index: -2;
+  background: #fff url(${gradient}) repeat top center;
 `;
 
 const moveTwinkBack = keyframes`

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { useIsMarket } from "../../../contexts/environment";
@@ -8,6 +8,7 @@ import { AsyncButton } from "../../common/AsyncButton";
 import { CenterSwitch } from "../../common/CenterSwitch";
 import { Module } from "../../common/Module";
 import { Settings } from "../../common/Settings";
+import Chart from "./Chart";
 import { ConfirmModal } from "./ConfirmModal";
 import { Field, useSwapState } from "./useSwapState";
 
@@ -115,6 +116,9 @@ export const Swap: React.FC = () => {
             <p>2.5 CELO/cUSD</p>
           </div>
         ) : null}
+
+        <Chart tw="grid h-32 w-32" />
+
         <AsyncButton
           variant="primary"
           tw="flex w-full text-xl h-16 p-0 mt-2"
