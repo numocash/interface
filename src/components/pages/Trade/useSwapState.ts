@@ -7,6 +7,7 @@ import { useLocation } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
+import type { IMarket } from "../../../contexts/environment";
 import {
   useAddressToToken,
   useCelo,
@@ -24,6 +25,7 @@ export type Trade = {
   output: TokenAmount;
   fee: TokenAmount;
   minimumOutput: TokenAmount;
+  market: IMarket | null;
 };
 
 interface UseSwapStateValues {

@@ -1,4 +1,5 @@
-import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
+import type { Token } from "@dahlia-labs/token-utils";
+import { TokenAmount } from "@dahlia-labs/token-utils";
 import { useCallback, useMemo } from "react";
 import { useAccount } from "wagmi";
 
@@ -37,16 +38,18 @@ export const useTrade = ({
 
   const approval = useApproval(fromAmount, address, markets[0]?.address);
 
-  // const trade =
-  //   fromAmount && toToken && fromToken
-  //     ? {
-  //         input: fromAmount,
-  //         output: new TokenAmount(toToken, 0),
-  //         fee: new TokenAmount(fromToken, 0),
-  //         minimumOutput: new TokenAmount(toToken, 0),
-  //       }
-  //     : null;
-  const trade = null;
+  const market = markets[0];
+
+  const trade =
+    fromAmount && toToken && fromToken && market
+      ? {
+          input: fromAmount,
+          output: new TokenAmount(toToken, 0),
+          fee: new TokenAmount(fromToken, 0),
+          minimumOutput: new TokenAmount(toToken, 0),
+          market,
+        }
+      : null;
 
   const handleTrade = useCallback(() => {
     console.log("trade");

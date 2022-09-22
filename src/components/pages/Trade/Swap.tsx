@@ -6,6 +6,7 @@ import { useTokenBalances } from "../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { CenterSwitch } from "../../common/CenterSwitch";
+import { LongPayoff } from "../../common/LongPayoff";
 import { Module } from "../../common/Module";
 import { Settings } from "../../common/Settings";
 import { ConfirmModal } from "./ConfirmModal";
@@ -115,6 +116,8 @@ export const Swap: React.FC = () => {
             <p>2.5 CELO/cUSD</p>
           </div>
         ) : null}
+
+        <LongPayoff bound={trade?.market?.pair.bound ?? null} />
 
         <AsyncButton
           variant="primary"
