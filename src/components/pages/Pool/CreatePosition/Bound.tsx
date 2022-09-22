@@ -9,9 +9,9 @@ export const Bound: React.FC = () => {
 
   return (
     <Module tw="flex flex-col w-full py-3">
-      <p tw="text-default">Upper Bound</p>
+      <p tw="text-default">Bound</p>
       <p tw="text-default font-semibold text-xl">
-        {bound?.toFixed(2)}{" "}
+        {bound.toFixed(2)}{" "}
         <span tw="font-medium text-sm">
           {bound.baseCurrency.symbol} / {bound.quoteCurrency.symbol}
         </span>

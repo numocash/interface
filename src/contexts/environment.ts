@@ -65,6 +65,15 @@ const testMarket: IMarket = {
   pair: testPair,
 };
 
+export const useAddressToMarket = (
+  address: string | null | undefined
+): IMarket | null => {
+  const { markets } = useEnvironment();
+  if (!address) return null;
+
+  return markets.find((m) => m.address === address) ?? null;
+};
+
 export const useIsMarket = (address: string | null): boolean => {
   const environment = useEnvironment();
   if (address === null) return false;

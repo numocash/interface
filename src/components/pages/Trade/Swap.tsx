@@ -8,7 +8,6 @@ import { AsyncButton } from "../../common/AsyncButton";
 import { CenterSwitch } from "../../common/CenterSwitch";
 import { Module } from "../../common/Module";
 import { Settings } from "../../common/Settings";
-import Chart from "./Chart";
 import { ConfirmModal } from "./ConfirmModal";
 import { Field, useSwapState } from "./useSwapState";
 
@@ -116,8 +115,6 @@ export const Swap: React.FC = () => {
             <p>2.5 CELO/cUSD</p>
           </div>
         ) : null}
-
-        <Chart tw="grid h-32 w-32" />
 
         <AsyncButton
           variant="primary"

@@ -2,13 +2,15 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
+import numoenSmall from "../../../common/images/numoen-small.svg";
 import { Nav } from "./Nav";
 
 export const Header: React.FC = () => {
   return (
     <div tw="relative flex items-center justify-between py-4 md:mt-4">
       <div tw="z-50 flex items-center">
-        <div tw="flex items-center">
+        <div tw="flex items-center gap-4">
+          <img src={numoenSmall} alt="nl" tw="h-16" />
           <NavLink to="/">
             <div tw="flex gap-2 font-bold text-2xl text-default">Numoen</div>
           </NavLink>

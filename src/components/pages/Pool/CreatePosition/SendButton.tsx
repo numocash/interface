@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { Button } from "../../../common/Button";
 import { useCreatePair } from ".";
 
-export const PreviewButton: React.FC = () => {
+export const SendButton: React.FC = () => {
   const {
     speculativeToken,
     baseToken,

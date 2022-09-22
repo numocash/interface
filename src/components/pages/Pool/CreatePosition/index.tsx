@@ -1,13 +1,15 @@
 import type { Price, Token, TokenAmount } from "@dahlia-labs/token-utils";
 import { useState } from "react";
+import { FaChevronLeft } from "react-icons/fa";
+import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
 import { useEnvironment } from "../../../../contexts/environment";
 import { useCelo, useCusd } from "../../../../hooks/useTokens";
-import { PreviewButton } from "./PreviewButton";
 import { Review } from "./Review";
 import { SelectPair } from "./SelectPair";
+import { SendButton } from "./SendButton";
 
 interface ICreatePair {
   speculativeToken: Token | null;
@@ -65,10 +67,16 @@ export const { Provider: CreatePairProvider, useContainer: useCreatePair } =
 export const CreatePosition: React.FC = () => {
   return (
     <div tw="flex flex-col gap-3 max-w-2xl w-full">
+      <NavLink to={`/pool`} tw="flex items-center text-xs">
+        <div tw="text-xs flex gap-1.5 items-center text-default ">
+          <FaChevronLeft />
+          Back to pool list
+        </div>
+      </NavLink>
       <CreatePairProvider>
         <SelectPair />
         <Review />
-        <PreviewButton />
+        <SendButton />
       </CreatePairProvider>
     </div>
   );
