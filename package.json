@@ -146,9 +146,6 @@
     "mini-css-extract-plugin": "2.4.5",
     "jsbi": "^4"
   },
-  "engines": {
-    "node": ">=14.x"
-  },
   "babelMacros": {
     "twin": {
       "preset": "emotion"

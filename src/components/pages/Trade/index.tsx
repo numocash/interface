@@ -1,59 +1,37 @@
-import invariant from "tiny-invariant";
-import { useAccount } from "wagmi";
-
-import { useTokenContract } from "../../../hooks/useContract";
-import { useTokenBalance } from "../../../hooks/useTokenBalance";
-import { useCelo } from "../../../hooks/useTokens";
-import { useBeet } from "../../../utils/beet";
-import { AsyncButton } from "../../common/AsyncButton";
-import { Module } from "../../common/Module";
+import { Swap } from "./Swap";
+import { SwapStateProvider } from "./useSwapState";
 
 export const Trade: React.FC = () => {
-  const celo = useCelo();
-  const { address } = useAccount();
-  const celoBalance = useTokenBalance(celo, address);
-
-  const Beet = useBeet();
-
-  const celoContract = useTokenContract(celo, true);
-
-  const disableReason = !celoBalance
-    ? "Loading"
-    : celoBalance.lessThan(1)
-    ? "Insufficient Celo"
-    : null;
-
   return (
-    <Module>
-      Your Celo Balance: {celoBalance?.toFixed(2, { groupSeparator: "," })}
-      <AsyncButton
-        size="md"
-        variant="primary"
-        tw="flex-1"
-        disabled={!!disableReason}
-        onClick={async () => {
-          invariant(celoContract);
-
-          await Beet("Transfer to Kyle", [
-            {
-              stageTitle: "Transfer to Kyle",
-              parallelTransactions: [
-                {
-                  title: "Transfer to Kyle",
-                  description: "Transfer 1 CELO to Kyle",
-                  txEnvelope: async () =>
-                    celoContract.transfer(
-                      "0x59A6AbC89C158ef88d5872CaB4aC3B08474883D9",
-                      "1000000000000000000"
-                    ),
-                },
-              ],
-            },
-          ]);
-        }}
+    <div tw="flex flex-col gap-4">
+      {/* <Module
+        tw="w-full flex max-w-lg flex-col gap-2"
+        css={css`
+          background-image: radial-gradient(
+            100% 100% at 50% 10%,
+            #35d07f 10%,
+            #3488ec 100%
+          );
+        `}
       >
-        {disableReason ?? "Send 1 Celo to Kyle"}
-      </AsyncButton>
-    </Module>
+        <div tw="font-semibold text-lg text-default dark:text-default-d">
+          New Interface 🫡
+        </div>
+        <span tw="text-default dark:text-default-d">
+          To use the legacy interface visit{" "}
+          <a
+            tw="underline"
+            target="_blank"
+            href="https://www.legacy.mobius.money"
+            rel="noreferrer"
+          >
+            legacy.mobius.money
+          </a>
+        </span>
+      </Module> */}
+      <SwapStateProvider>
+        <Swap />
+      </SwapStateProvider>
+    </div>
   );
 };

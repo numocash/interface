@@ -32,10 +32,10 @@ const custom = {
   outline: "#CED0D9",
   container: {
     DEFAULT: "#FFFFFF",
-    d: "#212429", //0f141a
+    d: "#FFFFFF", //0f141a
   }, // black
-  "action-d": "#2C2F36",
-  "outline-d": "#40444F",
+  "action-d": "#F7F8FA",
+  "outline-d": "#CED0D9",
 };
 
 const textColor = {
@@ -49,7 +49,6 @@ const textColor = {
 
 module.exports = {
   content: ["./src/**/*.{html,ts,tsx}"],
-  darkMode: false,
   mode: "jit",
   theme: {
     screens: {

@@ -1,10 +1,6 @@
 import { ThemeProvider } from "@emotion/react";
 import type { Chain } from "@rainbow-me/rainbowkit";
-import {
-  darkTheme,
-  getDefaultWallets,
-  RainbowKitProvider,
-} from "@rainbow-me/rainbowkit";
+import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
@@ -61,12 +57,7 @@ export const AppWithProviders: React.FC = () => {
     <React.StrictMode>
       <ThemeProvider theme={theme}>
         <WagmiConfig client={wagmiClient}>
-          <RainbowKitProvider
-            coolMode
-            theme={darkTheme()}
-            chains={chains}
-            initialChain={42220}
-          >
+          <RainbowKitProvider coolMode chains={chains} initialChain={42220}>
             <BlockProvider>
               <QueryClientProvider client={queryClient}>
                 <ReactQueryDevtools initialIsOpen={false} />

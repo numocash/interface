@@ -30,8 +30,8 @@ export const useMarketTokens = (): readonly Token[] => {
       new Token({
         chainId: ChainId.Mainnet,
         decimals: 18,
-        name: `Squared ${m.speculativeToken.symbol} / ${m.baseToken.symbol}`,
-        symbol: `sq${m.speculativeToken.symbol}/${m.baseToken.symbol}`,
+        name: `Squared ${m.pair.speculativeToken.symbol} / ${m.pair.baseToken.symbol}`,
+        symbol: `sq${m.pair.speculativeToken.symbol}/${m.pair.baseToken.symbol}`,
         address: m.address,
       })
   );
@@ -43,7 +43,7 @@ export const useAllTokens = (): readonly Token[] => {
 };
 
 export const getTokensPerMarket = (market: IMarket): [Token, Token] => {
-  return [market.speculativeToken, market.baseToken];
+  return [market.pair.speculativeToken, market.pair.baseToken];
 };
 
 export const useMarketsPerToken = (token: Token) => {
@@ -51,7 +51,7 @@ export const useMarketsPerToken = (token: Token) => {
   return useCallback(
     () =>
       environments.markets.filter(
-        (m) => m.baseToken === token || m.speculativeToken === token
+        (m) => m.pair.baseToken === token || m.pair.speculativeToken === token
       ),
     [environments.markets, token]
   );

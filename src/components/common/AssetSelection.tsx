@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import tw, { css, styled } from "twin.macro";
 
 import useWindowDimensions from "../../utils/useWindowDimensions";
-import SelectTokenDialog from "../pages/Pool/SelectTokenDialog";
+import SelectTokenDialog from "../pages/Trade/SelectTokenDialog";
 import { BigNumericInput } from "./inputs/BigNumericInput";
 import { TokenAmountDisplay } from "./TokenAmountDisplay";
 import { TokenIcon } from "./TokenIcon";
