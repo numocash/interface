@@ -1,21 +1,24 @@
+import type { Call, Multicall2 } from "@dahlia-labs/use-ethers";
+import type { QueryKey } from "@tanstack/react-query";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useBlock } from "../contexts/block";
 import { useMulticall } from "./useContract";
 
-export interface Call {
-  target: string;
-  callData: string;
-}
-
 const blockHistory = 10;
+
+export type Return = Awaited<ReturnType<Multicall2["callStatic"]["aggregate"]>>;
+
+type CreateMutable<Type> = {
+  -readonly [Property in keyof Type]: Type[Property];
+};
 
 export const useBlockQuery = (
   name: string,
-  calls: Call[],
-  deps: (string | number | boolean | null | undefined)[] | null = null,
+  calls: readonly Call[],
+  deps: Readonly<QueryKey> | null = null,
   block = true
-) => {
+): Return | undefined => {
   const { blocknumber } = useBlock();
   const queryClient = useQueryClient();
   const multicall = useMulticall();
@@ -24,7 +27,8 @@ export const useBlockQuery = (
 
   const query = useQuery(
     [name, ...hash, block ? blocknumber ?? 0 : null],
-    async () => await multicall?.callStatic.aggregate(calls),
+    async () =>
+      await multicall.callStatic.aggregate(calls as CreateMutable<Call[]>),
     {
       staleTime: Infinity,
       placeholderData:
@@ -40,5 +44,5 @@ export const useBlockQuery = (
     }
   );
 
-  return query;
+  return query.data;
 };

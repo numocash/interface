@@ -4,7 +4,7 @@ import invariant from "tiny-invariant";
 export const parseFunctionReturn = (
   _interface: Interface,
   func: string,
-  returnData: string | undefined | unknown
+  returnData: string | undefined
 ): Result => {
   invariant(typeof returnData === "string", "return data not found");
   return _interface.decodeFunctionResult(func, returnData);

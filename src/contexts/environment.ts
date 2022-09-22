@@ -1,5 +1,6 @@
 import { ChainId } from "@dahlia-labs/celo-contrib";
 import { CELO, CUSD } from "@dahlia-labs/celo-tokens";
+import type { TokenAmount } from "@dahlia-labs/token-utils";
 import { Price, Token } from "@dahlia-labs/token-utils";
 import { createContainer } from "unstated-next";
 
@@ -20,6 +21,13 @@ export interface IPair {
   bound: Price;
 
   address: string;
+}
+
+export interface IPairInfo {
+  speculativeAmount: TokenAmount;
+  baseAmount: TokenAmount;
+
+  totalLPSupply: TokenAmount;
 }
 
 interface Environment {

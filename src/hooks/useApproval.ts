@@ -1,5 +1,6 @@
 import type { Token } from "@dahlia-labs/token-utils";
 import { TokenAmount } from "@dahlia-labs/token-utils";
+import type { Call } from "@dahlia-labs/use-ethers";
 import { tokenInterface } from "@dahlia-labs/use-ethers";
 import { AddressZero, MaxUint256 } from "@ethersproject/constants";
 import { useCallback, useMemo } from "react";
@@ -7,7 +8,6 @@ import invariant from "tiny-invariant";
 
 import { useSettings } from "../contexts/settings";
 import { parseFunctionReturn } from "../utils/parseFunctionReturn";
-import type { Call } from "./useBlockQuery";
 import { useBlockQuery } from "./useBlockQuery";
 import { useTokenContractFromAddress } from "./useContract";
 
@@ -24,7 +24,7 @@ export const useTokenAllowance = (
     ]),
   };
 
-  const { data } = useBlockQuery(
+  const data = useBlockQuery(
     "allowance",
     [call],
     [token?.address, address, spender],
@@ -70,7 +70,7 @@ export const useTokenAllowances = (
     ]),
   }));
 
-  const { data } = useBlockQuery(
+  const data = useBlockQuery(
     "allowance",
     calls,
     [...tokens.map((t) => t?.address), address, spender],

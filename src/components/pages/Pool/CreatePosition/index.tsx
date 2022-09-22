@@ -5,6 +5,7 @@ import { createContainer } from "unstated-next";
 
 import { useEnvironment } from "../../../../contexts/environment";
 import { useCelo, useCusd } from "../../../../hooks/useTokens";
+import { PreviewButton } from "./PreviewButton";
 import { Review } from "./Review";
 import { SelectPair } from "./SelectPair";
 
@@ -67,6 +68,7 @@ export const CreatePosition: React.FC = () => {
       <CreatePairProvider>
         <SelectPair />
         <Review />
+        <PreviewButton />
       </CreatePairProvider>
     </div>
   );

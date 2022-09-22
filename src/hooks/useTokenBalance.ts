@@ -1,10 +1,10 @@
 import type { Token } from "@dahlia-labs/token-utils";
 import { TokenAmount } from "@dahlia-labs/token-utils";
+import type { Call } from "@dahlia-labs/use-ethers";
 import { tokenInterface } from "@dahlia-labs/use-ethers";
 import { AddressZero } from "@ethersproject/constants";
 
 import { parseFunctionReturn } from "../utils/parseFunctionReturn";
-import type { Call } from "./useBlockQuery";
 import { useBlockQuery } from "./useBlockQuery";
 
 export const useTokenBalance = (
@@ -18,7 +18,7 @@ export const useTokenBalance = (
     ]),
   };
 
-  const { data } = useBlockQuery(
+  const data = useBlockQuery(
     "balance",
     [call],
     [token?.address, address],
@@ -46,7 +46,7 @@ export const useTokenBalances = (
     ]),
   }));
 
-  const { data } = useBlockQuery(
+  const data = useBlockQuery(
     "balance",
     calls,
     [address].concat(tokens.map((t) => t?.address)),
