@@ -1,6 +1,6 @@
 import { styled } from "twin.macro";
 
-import gradient from "./BackgroundImages/gradient.png";
+import d from "../../common/images/numoen-large.png";
 
 export const Background: React.FC = () => (
   <>
@@ -22,8 +22,9 @@ const BGLayer = styled.div`
 const Gradient = styled(BGLayer)`
   z-index: -2;
   background-color: #ffffff;
-  background-image: url(${gradient});
+  background-image: url(${d});
   background-repeat: no-repeat;
   background-position: bottom;
-  background-size: auto;
+  background-size: contain;
+  filter: blur(8px);
 `;

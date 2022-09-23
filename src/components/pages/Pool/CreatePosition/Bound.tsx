@@ -8,7 +8,7 @@ export const Bound: React.FC = () => {
   invariant(bound && speculativeToken && baseToken);
 
   return (
-    <Module tw="flex flex-col w-full py-3">
+    <Module tw="flex flex-col w-full py-3 max-w-2xl">
       <p tw="text-default">Bound</p>
       <p tw="text-default font-semibold text-xl">
         {bound.toFixed(2)}{" "}

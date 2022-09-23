@@ -5,7 +5,7 @@ import { useCreatePair } from ".";
 export const PoolMeta: React.FC = () => {
   const { baseToken, speculativeToken } = useCreatePair();
   return (
-    <Module tw="flex flex-col">
+    <Module tw="flex flex-col max-w-2xl">
       <div tw="w-full justify-between flex">
         <p tw="text-secondary">Position Returns</p>
         <p tw="text-default font-semibold">80% APR</p>

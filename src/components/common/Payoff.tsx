@@ -75,6 +75,6 @@ export const Payoff: React.FC<Props> = ({ bound }) => {
     },
   ];
   return (
-    <Chart options={options} series={series} type="line" width="300" grid />
+    <Chart options={options} series={series} type="line" width="500" grid />
   );
 };
