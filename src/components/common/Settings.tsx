@@ -36,15 +36,15 @@ export const Settings: React.FC = () => {
         target={targetRef}
         placement="auto"
       >
-        <div tw="bg-container dark:bg-container-d flex rounded-xl border-2 text-default dark:text-default-d border-outline dark:border-outline-d p-3 flex-col gap-1">
+        <div tw="bg-container flex rounded-xl border-2 text-default border-outline  p-3 flex-col gap-1">
           <div tw="flex justify-between items-center">
             <div tw="font-semibold text-lg">Settings</div>
             <ToastExitButton onClick={onDismiss}>×</ToastExitButton>
           </div>
-          <div tw="flex flex-col bg-action dark:bg-action-d rounded-xl p-2 gap-1">
+          <div tw="flex flex-col bg-action  rounded-xl p-2 gap-1">
             <div tw="flex justify-start">Transaction Deadline</div>
             <div tw="flex items-center gap-1">
-              <div tw="flex rounded-xl border-2 border-outline p-1 bg-container dark:(border-outline-d bg-container-d)">
+              <div tw="flex rounded-xl border-2 border-outline p-1 bg-container ">
                 <BigNumericInput
                   tw="text-right text-lg"
                   placeholder={settings.timeout.toString()}
@@ -58,10 +58,10 @@ export const Settings: React.FC = () => {
               <div tw="text-secondary text-sm">Minutes</div>
             </div>
           </div>
-          <div tw="flex flex-col bg-action dark:bg-action-d rounded-xl p-2 gap-1">
+          <div tw="flex flex-col bg-action rounded-xl p-2 gap-1">
             <div tw="flex justify-start">Allowed Slippage</div>
             <div tw="flex items-center gap-1">
-              <div tw="flex rounded-xl border-2 border-outline p-1 bg-container dark:(border-outline-d bg-container-d)">
+              <div tw="flex rounded-xl border-2 border-outline p-1 bg-container ">
                 <BigNumericInput
                   tw="text-right text-lg"
                   placeholder={settings.maxSlippagePercent.toFixed(0)}
@@ -75,7 +75,7 @@ export const Settings: React.FC = () => {
               <div tw="text-secondary text-sm">%</div>
             </div>
           </div>
-          <div tw="flex bg-action dark:bg-action-d rounded-xl p-2 gap-1 justify-between items-center">
+          <div tw="flex bg-action rounded-xl p-2 gap-1 justify-between items-center">
             <div tw="">Infinite Approval</div>
             <div tw="">
               <Switch
@@ -84,7 +84,7 @@ export const Settings: React.FC = () => {
               />
             </div>
           </div>
-          <div tw="flex bg-action dark:bg-action-d rounded-xl p-2 gap-1 justify-between items-center">
+          <div tw="flex bg-action rounded-xl p-2 gap-1 justify-between items-center">
             <div tw="">Minima API</div>
             <div tw="">
               <Switch
@@ -95,10 +95,7 @@ export const Settings: React.FC = () => {
           </div>
         </div>
       </Drop>
-      <div
-        tw="text-default dark:text-default-d flex items-center text-lg"
-        ref={setTargetRef}
-      >
+      <div tw="text-default  flex items-center text-lg" ref={setTargetRef}>
         <FontAwesomeIcon
           tw="cursor-pointer"
           icon={faGear}

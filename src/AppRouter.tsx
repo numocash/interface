@@ -1,10 +1,10 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
-import { Pool } from "./components/pages/Pool";
-import { AddPosition } from "./components/pages/Pool/AddPosition";
-import { CreatePosition } from "./components/pages/Pool/CreatePosition";
-import { RemovePosition } from "./components/pages/Pool/RemovePosition";
+import { Earn } from "./components/pages/Earn";
+import { AddPosition } from "./components/pages/Earn/AddPosition";
+import { CreatePosition } from "./components/pages/Earn/CreatePosition";
+import { RemovePosition } from "./components/pages/Earn/RemovePosition";
 import { Trade } from "./components/pages/Trade";
 
 export const AppRouter: React.FC = () => {
@@ -12,16 +12,18 @@ export const AppRouter: React.FC = () => {
     <Routes>
       <Route path="/trade" element={<Trade />} />
 
-      <Route path="/pool" element={<Pool />} />
-      <Route path="/pool/create-position" element={<CreatePosition />} />
+      <Route path="/earn" element={<Earn />} />
+      <Route path="/earn/create-position" element={<CreatePosition />} />
       <Route
-        path="/pool/add-position/:marketAddress"
+        path="/earn/add-position/:marketAddress"
         element={<AddPosition />}
       />
       <Route
-        path="/pool/remove-position/:marketAddress"
+        path="/earn/remove-position/:marketAddress"
         element={<RemovePosition />}
       />
+
+      <Route path="" element={<Navigate to="trade" replace />} />
     </Routes>
   );
 };

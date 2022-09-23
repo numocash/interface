@@ -16,8 +16,8 @@ const AssetSelectButton = styled.button(
     tw`relative flex items-center justify-between flex-none px-2 text-left`,
     tw`text-base appearance-none cursor-pointer`,
     tw`h-10 whitespace-nowrap rounded-xl`,
-    tw`text-default dark:text-default-d`,
-    tw`hover:(bg-outline ) active:bg-outline shadow-none dark:(hover:bg-outline-d active:bg-outline-d )`,
+    tw`text-default`,
+    tw`hover:(bg-outline ) active:bg-outline shadow-none`,
     noAsset && tw`text-white bg-brand `,
   ]
 );
@@ -81,7 +81,7 @@ export const AssetSelection: React.FC<Props> = ({
     <div
       css={[
         !hideInput &&
-          tw`rounded-xl bg-action border border-action hover:(border-outline) dark:(bg-action-d  border-action-d hover:(border-outline-d))`,
+          tw`rounded-xl bg-action border border-action hover:(border-outline)`,
       ]}
     >
       <div
@@ -90,10 +90,8 @@ export const AssetSelection: React.FC<Props> = ({
           !hideInput && tw`px-4 pt-3`,
         ]}
       >
-        <div tw="text-sm font-semibold text-default dark:text-default-d">
-          {label}
-        </div>
-        <div tw="pt-0 text-secondary dark:text-secondary-d font-normal">
+        <div tw="text-sm font-semibold text-default ">{label}</div>
+        <div tw="pt-0 text-secondary font-normal">
           {selectedValue && (
             <Section>
               {currentAmount && !hideInput ? (
@@ -116,7 +114,7 @@ export const AssetSelection: React.FC<Props> = ({
                     }
                   >
                     <TokenAmountDisplay
-                      tw="text-default dark:text-default-d"
+                      tw="text-default "
                       amount={
                         currentAmount.amount ??
                         new TokenAmount(selectedValue, 0)
@@ -190,7 +188,7 @@ export const AssetSelection: React.FC<Props> = ({
             {!hideInput && (
               <div tw="flex flex-grow flex-1">
                 <BigNumericInput
-                  tw="text-right dark:text-default-d text-default"
+                  tw="text-right text-default"
                   disabled={inputDisabled}
                   value={inputValue}
                   onChange={inputOnChange}

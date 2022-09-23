@@ -8,7 +8,7 @@ interface Props {
 
 export const Switch: React.FC<Props> = ({ selected, onSelect }) => {
   return (
-    <div tw="flex rounded-3xl p-1 justify-between items-center bg-container border-2 border-outline dark:(bg-container-d border-outline-d)">
+    <div tw="flex rounded-3xl p-1 justify-between items-center bg-container border-2 border-outline ">
       <SwitchButton
         onClick={() => onSelect(false)}
         active={!selected}
@@ -26,7 +26,7 @@ export const Switch: React.FC<Props> = ({ selected, onSelect }) => {
 const SwitchButton = styled.button<{ active: boolean; selected: boolean }>(
   ({ active, selected }) => [
     tw`flex-1 p-3 font-semibold transition rounded-xl`,
-    active && !selected && tw`bg-outline dark:bg-outline-d`,
+    active && !selected && tw`bg-outline `,
     active && selected && tw`bg-primary`,
   ]
 );

@@ -136,11 +136,9 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
       {/*  aria-hidden="true"*/}
       {/*/>*/}
 
-      <div tw="p-4 border-b border-outline dark:border-outline-d flex flex-col gap-4">
+      <div tw="p-4 border-b border-outline  flex flex-col gap-4">
         <div tw="flex items-center justify-between">
-          <div tw="font-semibold text-base text-default dark:text-default-d">
-            Select a token
-          </div>
+          <div tw="font-semibold text-base text-default">Select a token</div>
         </div>
         <div>
           <SearchInput
@@ -172,7 +170,7 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
           />
         )}
       </div>
-      <div tw="p-4 py-2 bg-action dark:bg-action-d flex justify-between text-default dark:text-default-d">
+      <div tw="p-4 py-2 bg-action flex justify-between text-default">
         <div tw="text-sm">{results.length} Tokens</div>
         <div tw="flex items-center space-x-1.5">
           <div tw="text-sm font-semibold">Mobius Token Browser</div>

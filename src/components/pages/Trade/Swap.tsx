@@ -57,9 +57,7 @@ export const Swap: React.FC = () => {
           <ConfirmModal onDismiss={() => setShowModal(false)} />
         ) : null}
         <div tw="flex justify-between px-2">
-          <div tw="flex text-default dark:text-default-d font-semibold">
-            Swap
-          </div>
+          <div tw="flex text-default  font-semibold">Swap</div>
           <Settings />
         </div>
         <div tw="mt-4 pb-0">

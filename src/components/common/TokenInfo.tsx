@@ -38,11 +38,11 @@ const TokenMeta = styled.div<{ small?: boolean }>(({ small }) => [
 ]);
 
 const TokenSymbol = styled.div<{ small?: boolean }>(({ small }) => [
-  tw`text-xl font-semibold leading-none text-default dark:text-default-d`,
+  tw`text-xl font-semibold leading-none text-default `,
   small && tw`text-base`,
 ]);
 
 const TokenName = styled.div<{ small?: boolean }>(({ small }) => [
-  tw`text-lg text-secondary dark:text-secondary-d`,
+  tw`text-lg text-secondary `,
   small && tw`text-sm leading-none`,
 ]);

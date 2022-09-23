@@ -17,13 +17,16 @@ const brandColors = {
 const grays = {
   ...colors.gray,
   100: "#F4F3F5",
-  200: "#D9DCE4",
+  200: "#DDDDDD",
   300: "#CED3DD",
-  400: "#a6a9B0",
-  600: "#6c687d",
-  700: "#514C5F",
-  800: "#46494E",
-  900: "#070011",
+  350: "#A8A8A8",
+  400: "#A4A4A4",
+  500: "#6c687d",
+  600: "#303236",
+  700: "#2B2B2B",
+  750: "#1E1E23",
+  800: "#121218",
+  900: "#111214",
 };
 
 const custom = {
@@ -32,19 +35,13 @@ const custom = {
   outline: "#CED0D9",
   container: {
     DEFAULT: "#FFFFFF",
-    d: "#FFFFFF", //0f141a
   }, // black
-  "action-d": "#F7F8FA",
-  "outline-d": "#CED0D9",
 };
 
 const textColor = {
-  DEFAULT: "#000000",
-  default: "#000000",
+  DEFAULT: "#FFFFFF",
+  default: "#FFFFFF",
   secondary: grays[400],
-  "default-d": "#000000",
-  secondary: "#888D9B",
-  "secondary-d": "#C3C5CB",
 };
 
 module.exports = {

@@ -5,9 +5,7 @@ import tw, { styled } from "twin.macro";
 
 import { TokenInfo } from "../../../common/TokenInfo";
 
-const Balance = styled.div(() => [
-  tw`text-base text-secondary dark:text-secondary-d`,
-]);
+const Balance = styled.div(() => [tw`text-base text-secondary`]);
 
 const TokenOption = styled.div(() => [
   tw`flex items-center justify-between w-full`,
@@ -15,7 +13,7 @@ const TokenOption = styled.div(() => [
 ]);
 
 const Wrapper = styled.div<{ disabled?: boolean }>(({ disabled }) => [
-  tw`px-4 flex hover:(bg-action) hover:dark:bg-action-d`,
+  tw`px-4 flex hover:(bg-action)`,
   disabled && tw`opacity-50 pointer-events-none`,
 ]);
 

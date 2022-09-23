@@ -7,7 +7,7 @@ export const Nav: React.FC = () => {
     <div tw="fixed bottom-0 left-0 flex w-full items-center justify-center pl-0  xl:(justify-center pl-0) z-10 md:(absolute top-0 bottom-0)">
       <div tw="flex justify-center items-center border-t-2  md:(rounded-xl w-auto h-auto) pb-4 pt-7 h-[70px] border-outline bg-container md:(border-none bg-opacity-0) p-1 w-full">
         <NavLink to="/trade">Trade</NavLink>
-        <NavLink to="/pool">Pool</NavLink>
+        <NavLink to="/earn">Earn</NavLink>
       </div>
     </div>
   );
