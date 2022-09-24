@@ -102,11 +102,11 @@ export const StyledButton = styled.button<AdditionalButtonProps>(
     tw`transition-transform`,
 
     variant === "outline" &&
-      tw`text-white border border-brand hover:border-gray-300`,
-    variant === "primary" && tw`text-white bg-black shadow`,
+      tw`text-white border border-brand hover:border-white`,
+    variant === "primary" && tw`text-white bg-[#083DF5] shadow`,
     variant === "muted" && tw`text-gray-200 bg-neutral-700 hover:bg-opacity-50`,
 
-    variant === "danger" && tw`font-bold text-black bg-red-500`,
+    variant === "danger" && tw`font-bold text-[#083DF5] bg-red-500`,
     size === "swap" && tw`w-full text-xl font-bold shadow h-14`,
 
     tw`disabled:(bg-[#EDEEEF] text-gray-400 cursor-not-allowed)`,

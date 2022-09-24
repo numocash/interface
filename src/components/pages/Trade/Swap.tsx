@@ -53,7 +53,7 @@ export const Swap: React.FC = () => {
       <div tw="rounded-xl overflow-hidden bg-white shadow-2xl">
         <div tw="flex justify-between w-full bg-container h-[68px] py-3 px-6 items-center justify-between">
           <p tw=" font-semibold text-xl text-default">
-            Trade Numoen derivatives
+            Trade option perpetuals
           </p>
           <Settings />
         </div>
