@@ -1,9 +1,18 @@
+import invariant from "tiny-invariant";
+
+import { useEnvironment } from "../../../../contexts/environment";
+import { usePair } from "../../../../hooks/usePair";
 import { ShareMetric } from "../../../common/ShareMetric";
 import { TokenIcon } from "../../../common/TokenIcon";
 import { useCreatePair } from ".";
 
 export const Stats: React.FC = () => {
   const { speculativeToken, baseToken } = useCreatePair();
+  const { markets } = useEnvironment();
+  const market = markets[0];
+  invariant(market);
+
+  const pairInfo = usePair(market.pair);
 
   const apr = (
     <ShareMetric
@@ -27,7 +36,9 @@ export const Stats: React.FC = () => {
               {[speculativeToken, baseToken].map((c, i) => (
                 <div tw="flex flex-row items-center gap-1 text-black" key={i}>
                   <TokenIcon token={c} />
-                  90,12
+                  {pairInfo?.speculativeAmount.toFixed(2, {
+                    groupSeparator: ",",
+                  }) ?? "--"}
                   <div>{c?.symbol}</div>
                 </div>
               ))}

@@ -7,7 +7,9 @@ import { useProvider, useSigner } from "wagmi";
 
 import ERC20_ABI from "../abis/erc20.json";
 import LENDGINE_ABI from "../abis/Lendgine.json";
-import type { Erc20, Lendgine, Multicall2 } from "../generated";
+import MINTROUTER_ABI from "../abis/MintRouter.json";
+import { MINT_ROUTER } from "../contexts/environment";
+import type { Erc20, Lendgine, MintRouter, Multicall2 } from "../generated";
 
 export function useTokenContractFromAddress(
   tokenAddress: string | undefined,
@@ -40,6 +42,16 @@ export function useLendgineContract(
     LENDGINE_ABI.abi,
     withSignerIfPossible
   ) as Lendgine | null;
+}
+
+export function useMintRouterContract(
+  withSignerIfPossible: boolean
+): MintRouter | null {
+  return useContract(
+    MINT_ROUTER,
+    MINTROUTER_ABI.abi,
+    withSignerIfPossible
+  ) as MintRouter | null;
 }
 
 export function useMulticall(): Multicall2 {

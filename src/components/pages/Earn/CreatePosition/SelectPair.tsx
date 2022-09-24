@@ -1,5 +1,7 @@
+import { TokenAmount } from "@dahlia-labs/token-utils";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useTokenBalances } from "../../../../hooks/useTokenBalance";
@@ -9,7 +11,12 @@ import { useCreatePair } from ".";
 export const SelectPair: React.FC = () => {
   const { address } = useAccount();
 
-  const { speculativeToken, baseToken } = useCreatePair();
+  const {
+    speculativeToken,
+    baseToken,
+    setSpeculativeTokenAmount,
+    setBaseTokenAmount,
+  } = useCreatePair();
 
   const [speculativeInput, setSpeculativeInput] = useState("");
   const [baseInput, setBaseInput] = useState("");
@@ -24,7 +31,13 @@ export const SelectPair: React.FC = () => {
           label={"Speculative Asset"}
           selectedValue={speculativeToken}
           inputValue={speculativeInput}
-          inputOnChange={(value) => setSpeculativeInput(value)}
+          inputOnChange={(value) => {
+            setSpeculativeInput(value);
+            invariant(speculativeToken);
+            setSpeculativeTokenAmount(
+              TokenAmount.parse(speculativeToken, value)
+            );
+          }}
           currentAmount={{
             amount: balances && balances[0] ? balances[0] : undefined,
             allowSelect: true,
@@ -36,7 +49,11 @@ export const SelectPair: React.FC = () => {
           label={"Base Asset"}
           selectedValue={baseToken}
           inputValue={baseInput}
-          inputOnChange={(value) => setBaseInput(value)}
+          inputOnChange={(value) => {
+            setBaseInput(value);
+            invariant(baseToken);
+            setBaseTokenAmount(TokenAmount.parse(baseToken, value));
+          }}
           currentAmount={{
             amount: balances && balances[1] ? balances[1] : undefined,
             allowSelect: true,

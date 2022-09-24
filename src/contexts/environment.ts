@@ -73,6 +73,8 @@ export const FACTORY = "0xb0C7E6bC7577706F766efA012f6604919056D0f7";
 
 export const UBE_FACTORY = "0x62d5b84bE28a183aBB507E125B384122D2C25fAE";
 
+export const MINT_ROUTER = "0x5B16b6dECf57a1f7c88Bc7B1A8776aE69189b318";
+
 export const useAddressToMarket = (
   address: string | null | undefined
 ): IMarket | null => {

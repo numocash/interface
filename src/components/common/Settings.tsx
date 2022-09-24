@@ -5,9 +5,6 @@ import { useCallback, useState } from "react";
 import { styled } from "twin.macro";
 
 import { useSettings } from "../../contexts/settings";
-import { Drop } from "./Drop";
-import { BigNumericInput } from "./inputs/BigNumericInput";
-import { Switch } from "./inputs/Switch";
 
 export const Settings: React.FC = () => {
   const settings = useSettings();
@@ -30,7 +27,7 @@ export const Settings: React.FC = () => {
 
   return (
     <div>
-      <Drop
+      {/* <Drop
         onDismiss={onDismiss}
         show={show}
         target={targetRef}
@@ -94,7 +91,7 @@ export const Settings: React.FC = () => {
             </div>
           </div>
         </div>
-      </Drop>
+      </Drop> */}
       <div tw="text-default  flex items-center text-lg" ref={setTargetRef}>
         <FontAwesomeIcon
           tw="cursor-pointer"
