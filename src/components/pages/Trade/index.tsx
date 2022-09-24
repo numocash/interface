@@ -10,8 +10,8 @@ export const Trade: React.FC = () => {
           Warning: Alpha Version
         </div>
         <span tw="text-default">
-          This program is to be considered extremely exploratory and is to only
-          be used for testing with trival amounts of funds.
+          This program is to be considered experimental and is to only be used
+          for testing with trival amounts of funds.
         </span>
       </Module>
       <SwapStateProvider>

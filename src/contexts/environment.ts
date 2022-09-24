@@ -64,6 +64,11 @@ const testMarket: IMarket = {
 
   pair: testPair,
 };
+// 0xE4dC493B18894D721bd2E288F01F682D61D4BE85 factory
+
+export const FACTORY = "0xb0C7E6bC7577706F766efA012f6604919056D0f7";
+
+export const UBE_FACTORY = "0x62d5b84bE28a183aBB507E125B384122D2C25fAE";
 
 export const useAddressToMarket = (
   address: string | null | undefined
