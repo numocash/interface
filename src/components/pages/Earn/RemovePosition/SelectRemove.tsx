@@ -16,7 +16,9 @@ export const SelectRemove: React.FC = () => {
           onChange={setRemovePercent}
         />
       </div>
-      <FaArrowDown tw="text-default justify-self-center" />
+      <div tw="flex w-full justify-center">
+        <FaArrowDown tw="text-default justify-self-center" />
+      </div>
 
       <div tw="flex flex-col items-center text-default w-full p-4 bg-action rounded-xl gap-4">
         {[

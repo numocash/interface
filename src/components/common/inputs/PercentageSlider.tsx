@@ -45,8 +45,6 @@ export const PercentageSlider: React.FC<Props> = ({
 
 const styledSlider = styled(ReachSlider);
 
-// TODO: could we reuse the other one
-
 export const SliderInput = styledSlider(
   () => css`
     background: none;
@@ -60,16 +58,16 @@ export const SliderInput = styledSlider(
     }
 
     [data-reach-slider-handle] {
-      ${tw`bg-action`}
+      ${tw`bg-gray-200 mt-[-6px]`}
 
-      width: 22px;
-      height: 22px;
-      border-radius: 15px;
+      width: 18px;
+      height: 18px;
+      border-radius: 12px;
 
       -webkit-appearance: none;
       appearance: none;
       cursor: pointer;
-      // box-shadow: 0px 6px 12px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: 0px 6px 12px 8px rgba(0, 0, 0, 0.3);
     }
   `
 );

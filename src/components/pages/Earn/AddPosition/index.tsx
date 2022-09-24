@@ -3,6 +3,7 @@ import { useState } from "react";
 import { createContainer } from "unstated-next";
 
 import type { IMarket } from "../../../../contexts/environment";
+import { ConfirmButton } from "./Button";
 import { SelectAmount } from "./SelectAmount";
 
 interface IAddPosition {
@@ -49,6 +50,7 @@ export const AddPosition: React.FC<Props> = ({ market }) => {
     <div tw="flex flex-col gap-3  w-full">
       <AddPositionProvider initialState={{ market }}>
         <SelectAmount />
+        <ConfirmButton />
       </AddPositionProvider>
     </div>
   );
