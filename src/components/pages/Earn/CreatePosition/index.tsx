@@ -85,7 +85,7 @@ export const CreatePosition: React.FC = () => {
               <p tw="text-xl font-semibold text-black">
                 Select tokens and amounts
               </p>
-              <p tw="text-default">Provide two-token liquidity by setting the amount and confirming the transaction</p>
+              <p tw="text-default">Provide two-token liquidity and get an LP share.</p>
             </>
           </div>
           <SelectPair />
