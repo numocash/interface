@@ -54,11 +54,11 @@ export const SliderInput = styledSlider(
     }
 
     [data-reach-slider-track] {
-      ${tw`h-1 bg-gray-800 rounded bg-gradient-to-r from-gray-600 to-gray-200`}
+      ${tw`h-1 bg-white rounded bg-gradient-to-r from-white to-gray-600`}
     }
 
     [data-reach-slider-handle] {
-      ${tw`bg-gray-200 mt-[-6px]`}
+      ${tw`bg-white mt-[-6px]`}
 
       width: 18px;
       height: 18px;

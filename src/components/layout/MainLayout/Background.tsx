@@ -19,7 +19,7 @@ const BGLayer = styled.div`
 
 const Gradient = styled(BGLayer)`
   z-index: -2;
-  background-color: #d6e2ff;
+  background-color: #D9D9D9;
   background-repeat: no-repeat;
   background-size: auto;
 `;
