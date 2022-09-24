@@ -96,7 +96,7 @@ export const Swap: React.FC = () => {
               inputDisabled={independentField === Field.Input}
               onSelect={(value) => onFieldSelect(Field.Output, value)}
               selectedValue={selectedTo}
-              inputValue={formattedAmounts[Field.Output] ?? ""}
+              inputValue={trade?.output.toFixed(2) ?? ""}
               inputOnChange={(value) => onFieldInput(Field.Output, value)}
               currentAmount={{
                 amount: balances && balances[1] ? balances[1] : undefined,

@@ -113,6 +113,8 @@ const useSwapStateInternal = (): UseSwapStateValues => {
     return token ? TokenAmount.parse(token, fieldState.typedValue) : undefined;
   }, [isExactIn, inputToken, outputToken, fieldState]);
 
+  console.log(parsedAmount?.toFixed(2));
+
   const { swapDisabledReason, trade, handleTrade } = useTrade({
     fromAmount: parsedAmount,
     fromToken: selectedFrom ?? parsedAmount?.token ?? undefined,

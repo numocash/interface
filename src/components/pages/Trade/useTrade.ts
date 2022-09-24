@@ -1,5 +1,6 @@
 import type { Token } from "@dahlia-labs/token-utils";
-import { TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
+import JSBI from "jsbi";
 import { useCallback, useMemo } from "react";
 import { useAccount } from "wagmi";
 
@@ -14,6 +15,9 @@ export interface UseTradeParams {
   fromToken?: Token;
   toToken?: Token;
 }
+export const scale = new Fraction(
+  JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18))
+);
 
 export type ITradeCallback = () => void;
 
@@ -44,7 +48,12 @@ export const useTrade = ({
     fromAmount && toToken && fromToken && market
       ? {
           input: fromAmount,
-          output: new TokenAmount(toToken, 0),
+          output: new TokenAmount(
+            toToken,
+            fromAmount.token === market.pair.speculativeToken
+              ? fromAmount.multiply(scale).divide(10).quotient.toString()
+              : fromAmount.multiply(scale).multiply(10).quotient.toString()
+          ),
           fee: new TokenAmount(fromToken, 0),
           minimumOutput: new TokenAmount(toToken, 0),
           market,
