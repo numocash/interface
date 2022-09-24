@@ -12,6 +12,10 @@ export interface IMarket {
   pair: IPair;
 }
 
+export interface IMarketUserInfo {
+  liquidity: TokenAmount;
+}
+
 export interface IPair {
   speculativeToken: Token;
   baseToken: Token;
@@ -43,12 +47,12 @@ const testPair: IPair = {
     symbol: "NLP",
     decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0xE2eeEBAf210502aA815008618C89CA9d98d97924",
+    address: "0x6ae85c154e67ad0d08634957da1907ad7d23b325",
   }),
 
   bound: new Price(CUSD[ChainId.Mainnet], CELO[ChainId.Mainnet], 2, 5),
 
-  address: "0xE2eeEBAf210502aA815008618C89CA9d98d97924",
+  address: "0x6ae85c154e67ad0d08634957da1907ad7d23b325",
 };
 
 const testMarket: IMarket = {
@@ -57,14 +61,13 @@ const testMarket: IMarket = {
     symbol: "NLDG",
     decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0xE2eeEBAf210502aA815008618C89CA9d98d97924",
+    address: "0x6fbb3a7063842ef77cd75baeb4ac7776cd988166",
   }),
 
-  address: "0xE2eeEBAf210502aA815008618C89CA9d98d97924",
+  address: "0x6fbb3a7063842ef77cd75baeb4ac7776cd988166",
 
   pair: testPair,
 };
-// 0xE4dC493B18894D721bd2E288F01F682D61D4BE85 factory
 
 export const FACTORY = "0xb0C7E6bC7577706F766efA012f6604919056D0f7";
 

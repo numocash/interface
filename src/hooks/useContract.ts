@@ -6,7 +6,8 @@ import { useMemo } from "react";
 import { useProvider, useSigner } from "wagmi";
 
 import ERC20_ABI from "../abis/erc20.json";
-import type { Erc20, Multicall2 } from "../generated";
+import LENDGINE_ABI from "../abis/Lendgine.json";
+import type { Erc20, Lendgine, Multicall2 } from "../generated";
 
 export function useTokenContractFromAddress(
   tokenAddress: string | undefined,
@@ -28,6 +29,17 @@ export function useTokenContract(
     ERC20_ABI,
     withSignerIfPossible
   ) as Erc20 | null;
+}
+
+export function useLendgineContract(
+  address: string | undefined,
+  withSignerIfPossible: boolean
+): Lendgine | null {
+  return useContract(
+    address,
+    LENDGINE_ABI.abi,
+    withSignerIfPossible
+  ) as Lendgine | null;
 }
 
 export function useMulticall(): Multicall2 {
