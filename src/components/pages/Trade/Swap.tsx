@@ -1,13 +1,11 @@
 import React, { useMemo, useState } from "react";
+import { FaArrowDown } from "react-icons/fa";
 import { useAccount } from "wagmi";
 
 import { useIsMarket } from "../../../contexts/environment";
 import { useTokenBalances } from "../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
-import { CenterSwitch } from "../../common/CenterSwitch";
-import { LongPayoff } from "../../common/LongPayoff";
-import { Module } from "../../common/Module";
 import { Settings } from "../../common/Settings";
 import { ConfirmModal } from "./ConfirmModal";
 import { Field, useSwapState } from "./useSwapState";
@@ -52,53 +50,61 @@ export const Swap: React.FC = () => {
 
   return (
     <>
-      <Module tw="max-w-lg">
-        {showModal ? (
-          <ConfirmModal onDismiss={() => setShowModal(false)} />
-        ) : null}
-        <div tw="flex justify-between px-2">
-          <div tw="flex text-default  font-semibold">Swap</div>
+      <div tw="rounded-xl overflow-hidden bg-white shadow-2xl">
+        <div tw="flex justify-between w-full bg-container h-[68px] py-3 px-6 items-center justify-between">
+          <p tw=" font-semibold text-xl text-default">
+            Trade Numoen derivatives
+          </p>
           <Settings />
         </div>
-        <div tw="mt-4 pb-0">
-          <AssetSelection
-            label={
-              independentField === Field.Output ? (
-                <span>From (Estimate)</span>
-              ) : (
-                <span>From</span>
-              )
-            }
-            onSelect={(value) => onFieldSelect(Field.Input, value)}
-            selectedValue={selectedFrom}
-            inputValue={formattedAmounts[Field.Input] ?? ""}
-            inputOnChange={(value) => onFieldInput(Field.Input, value)}
-            currentAmount={{
-              amount: balances && balances[0] ? balances[0] : undefined,
-              allowSelect: true,
-            }}
-          />
-          <CenterSwitch onClick={invertSwap} icon="arrow" />
-          <AssetSelection
-            label={
-              independentField === Field.Input ? (
-                <span>To (Estimate)</span>
-              ) : (
-                <span>To</span>
-              )
-            }
-            inputDisabled={independentField === Field.Input}
-            onSelect={(value) => onFieldSelect(Field.Output, value)}
-            selectedValue={selectedTo}
-            inputValue={formattedAmounts[Field.Output] ?? ""}
-            inputOnChange={(value) => onFieldInput(Field.Output, value)}
-            currentAmount={{
-              amount: balances && balances[1] ? balances[1] : undefined,
-              allowSelect: false,
-            }}
-          />
-        </div>
-        {/* {trade ? (
+        <div tw="max-w-lg">
+          {showModal ? (
+            <ConfirmModal onDismiss={() => setShowModal(false)} />
+          ) : null}
+
+          <div tw=" pb-0 gap-2 flex flex-col  shadow-2xl bg-action p-6">
+            <AssetSelection
+              label={
+                independentField === Field.Output ? (
+                  <span>From (Estimate)</span>
+                ) : (
+                  <span>From</span>
+                )
+              }
+              onSelect={(value) => onFieldSelect(Field.Input, value)}
+              selectedValue={selectedFrom}
+              inputValue={formattedAmounts[Field.Input] ?? ""}
+              inputOnChange={(value) => onFieldInput(Field.Input, value)}
+              currentAmount={{
+                amount: balances && balances[0] ? balances[0] : undefined,
+                allowSelect: true,
+              }}
+            />
+            {/* <CenterSwitch onClick={invertSwap} icon="arrow" /> */}
+            <div tw="flex w-full justify-center mb-3">
+              <FaArrowDown tw="text-default justify-self-center" />
+            </div>
+            <AssetSelection
+              label={
+                independentField === Field.Input ? (
+                  <span>To (Estimate)</span>
+                ) : (
+                  <span>To</span>
+                )
+              }
+              tw=""
+              inputDisabled={independentField === Field.Input}
+              onSelect={(value) => onFieldSelect(Field.Output, value)}
+              selectedValue={selectedTo}
+              inputValue={formattedAmounts[Field.Output] ?? ""}
+              inputOnChange={(value) => onFieldInput(Field.Output, value)}
+              currentAmount={{
+                amount: balances && balances[1] ? balances[1] : undefined,
+                allowSelect: false,
+              }}
+            />
+          </div>
+          {/* {trade ? (
           <div tw="flex justify-between m-1 text-default dark:text-default-d">
             <div>Price</div>
             <TradePrice
@@ -108,24 +114,18 @@ export const Swap: React.FC = () => {
             />
           </div>
         ) : null} */}
-        {mint ? (
-          <div tw="flex w-full mt-1 justify-between text-default">
-            <p>Bound</p>
-            <p>2.5 CELO/cUSD</p>
-          </div>
-        ) : null}
 
-        <LongPayoff bound={trade?.market?.pair.bound ?? null} />
-
-        <AsyncButton
-          variant="primary"
-          tw="flex w-full text-xl h-16 p-0 mt-2"
-          disabled={!!swapDisabledReason}
-          onClick={() => setShowModal(true)}
-        >
-          {swapDisabledReason ?? "Swap"}
-        </AsyncButton>
-      </Module>
+          {/* <LongPayoff bound={trade?.market?.pair.bound ?? null} /> */}
+        </div>
+      </div>
+      <AsyncButton
+        variant="primary"
+        tw="flex w-full text-xl h-12 p-0"
+        disabled={!!swapDisabledReason}
+        onClick={() => setShowModal(true)}
+      >
+        {swapDisabledReason ?? "Swap"}
+      </AsyncButton>
     </>
   );
 };
