@@ -1,5 +1,7 @@
 import React from "react";
-import tw, { styled } from "twin.macro";
+import { css, styled } from "twin.macro";
+
+import { breakpoints } from "../../../theme/breakpoints";
 
 interface IProps
   extends Omit<
@@ -51,10 +53,31 @@ export const BigNumericInput: React.FC<IProps> = ({
   />
 );
 
-const StyledInput = styled.input<{ hasBackground?: boolean }>(
-  ({ hasBackground }) => [
-    tw`p-0 outline-none w-full h-full bg-transparent border-none appearance-none focus:(border-container ring-0)`,
-    tw`text-2xl font-medium  placeholder-gray-400  disabled:(cursor-not-allowed)`,
-    hasBackground && tw`p-3 bg-action`,
-  ]
-);
+const StyledInput = styled.input<{ hasBackground?: boolean }>`
+  color: ${({ theme }) => theme.colors.text.bold};
+  font-weight: 400;
+  font-size: 24px;
+  &:disabled {
+    color: ${({ theme }) => theme.colors.text.default};
+  }
+  &::placeholder {
+    color: #888;
+  }
+  padding-right: 8px;
+  padding-left: 2px;
+  border-radius: 8px;
+  border: none;
+
+  ${breakpoints.mobile} {
+    font-size: 20px;
+  }
+
+  background: transparent;
+  // outline: none;
+  ${(props) =>
+    props.hasBackground &&
+    css`
+      padding: 0 24px;
+      border-radius: 8px;
+    `}
+`;

@@ -1,7 +1,5 @@
 import { styled } from "twin.macro";
 
-import purple from "./BackgroundImages/purple.png";
-
 export const Background: React.FC = () => (
   <>
     <Gradient />
@@ -21,8 +19,7 @@ const BGLayer = styled.div`
 
 const Gradient = styled(BGLayer)`
   z-index: -2;
-  background-color: #ffffff;
-  background-image: url(${purple});
+  background-color: #d6e2ff;
   background-repeat: no-repeat;
   background-size: auto;
 `;

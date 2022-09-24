@@ -1,13 +1,8 @@
 import type { TokenAmount } from "@dahlia-labs/token-utils";
 import { useState } from "react";
-import { FaChevronLeft } from "react-icons/fa";
-import { NavLink, useParams } from "react-router-dom";
 import { createContainer } from "unstated-next";
 
 import type { IMarket } from "../../../../contexts/environment";
-import { useAddressToMarket } from "../../../../contexts/environment";
-import { LoadingPage } from "../../../common/LoadingPage";
-import { Review } from "./Review";
 import { SelectAmount } from "./SelectAmount";
 
 interface IAddPosition {
@@ -45,27 +40,16 @@ const useAddPositionInternal = ({
 export const { Provider: AddPositionProvider, useContainer: useAddPosition } =
   createContainer(useAddPositionInternal);
 
-export const AddPosition: React.FC = () => {
-  const { marketAddress } = useParams<{
-    marketAddress: string;
-  }>();
+interface Props {
+  market: IMarket;
+}
 
-  const market = useAddressToMarket(marketAddress ?? null);
-
-  return market ? (
-    <div tw="flex flex-col gap-3 max-w-2xl w-full">
-      <NavLink to={`/pool`} tw="flex items-center text-xs">
-        <div tw="text-xs flex gap-1.5 items-center text-default ">
-          <FaChevronLeft />
-          Back to pool list
-        </div>
-      </NavLink>
+export const AddPosition: React.FC<Props> = ({ market }) => {
+  return (
+    <div tw="flex flex-col gap-3  w-full">
       <AddPositionProvider initialState={{ market }}>
         <SelectAmount />
-        <Review />
       </AddPositionProvider>
     </div>
-  ) : (
-    <LoadingPage />
   );
 };

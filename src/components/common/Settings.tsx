@@ -36,7 +36,7 @@ export const Settings: React.FC = () => {
         target={targetRef}
         placement="auto"
       >
-        <div tw="bg-container flex rounded-xl border-2 text-default border-outline  p-3 flex-col gap-1">
+        <div tw="bg-container flex rounded-xl text-default  p-3 flex-col gap-1">
           <div tw="flex justify-between items-center">
             <div tw="font-semibold text-lg">Settings</div>
             <ToastExitButton onClick={onDismiss}>×</ToastExitButton>
@@ -44,7 +44,7 @@ export const Settings: React.FC = () => {
           <div tw="flex flex-col bg-action  rounded-xl p-2 gap-1">
             <div tw="flex justify-start">Transaction Deadline</div>
             <div tw="flex items-center gap-1">
-              <div tw="flex rounded-xl border-2 border-outline p-1 bg-container ">
+              <div tw="flex rounded-xl p-1 bg-container ">
                 <BigNumericInput
                   tw="text-right text-lg"
                   placeholder={settings.timeout.toString()}
@@ -61,7 +61,7 @@ export const Settings: React.FC = () => {
           <div tw="flex flex-col bg-action rounded-xl p-2 gap-1">
             <div tw="flex justify-start">Allowed Slippage</div>
             <div tw="flex items-center gap-1">
-              <div tw="flex rounded-xl border-2 border-outline p-1 bg-container ">
+              <div tw="flex rounded-xl p-1 bg-container ">
                 <BigNumericInput
                   tw="text-right text-lg"
                   placeholder={settings.maxSlippagePercent.toFixed(0)}

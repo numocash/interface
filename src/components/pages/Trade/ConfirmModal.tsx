@@ -36,7 +36,7 @@ export const ConfirmModal: React.FC<Props> = ({ onDismiss }: Props) => {
           <ToastExitButton onClick={onDismiss}>×</ToastExitButton>
         </div>
 
-        <div tw="rounded-xl bg-action border border-action hover:(border-outline) p-3 flex">
+        <div tw="rounded-xl bg-action border border-action  p-3 flex">
           <div tw="justify-between flex w-full">
             <div tw="text-2xl">
               {trade.input.toFixed(6, { groupSeparator: "," })}
@@ -52,7 +52,7 @@ export const ConfirmModal: React.FC<Props> = ({ onDismiss }: Props) => {
         </div>
 
         <CenterSwitch icon="arrow" />
-        <div tw="rounded-xl bg-action border border-action hover:(border-outline) p-3 flex">
+        <div tw="rounded-xl bg-action border border-action  p-3 flex">
           <div tw="justify-between flex w-full">
             <div tw="text-2xl">
               {trade.output.toFixed(6, { groupSeparator: "," })}
@@ -67,7 +67,7 @@ export const ConfirmModal: React.FC<Props> = ({ onDismiss }: Props) => {
           </div>
         </div>
 
-        <div tw="rounded-xl bg-action border border-action hover:(border-outline) p-3 flex flex-col gap-2">
+        <div tw="rounded-xl bg-action p-3 flex flex-col gap-2">
           {/* <div tw="flex w-full justify-between text-sm">
             <div>Minimum Output</div>
             <div>{minimumOutput.toFixed(6, { groupSeparator: "," })}</div>

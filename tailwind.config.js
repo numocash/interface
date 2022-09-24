@@ -1,12 +1,12 @@
 const colors = require("tailwindcss/colors");
 
 const brandColors = {
-  DEFAULT: "#A21E7C",
+  DEFAULT: "#808799",
   50: "#EA8ECF",
   100: "#E77CC8",
   200: "#E05ABA",
   300: "#DA38AB",
-  400: "#C42496",
+  400: "#888D9B",
   500: "#A21E7C",
   600: "#731558",
   700: "#430C34",
@@ -20,7 +20,7 @@ const grays = {
   200: "#DDDDDD",
   300: "#CED3DD",
   350: "#A8A8A8",
-  400: "#A4A4A4",
+  400: "#888D9B",
   500: "#6c687d",
   600: "#303236",
   700: "#2B2B2B",
@@ -30,17 +30,16 @@ const grays = {
 };
 
 const custom = {
-  container: "", // white
-  action: "#F7F8FA",
-  outline: "#CED0D9",
+  container: "#EDEEEF", // white
+  action: "#FFFFFF",
   container: {
-    DEFAULT: "#FFFFFF",
+    DEFAULT: "#EDEEEF",
   }, // black
 };
 
 const textColor = {
-  DEFAULT: "#FFFFFF",
-  default: "#FFFFFF",
+  DEFAULT: "#000000",
+  default: "#000000",
   secondary: grays[400],
 };
 

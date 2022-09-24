@@ -4,6 +4,7 @@ import { Token } from "@dahlia-labs/token-utils";
 import { getAddress } from "@ethersproject/address";
 import { useCallback } from "react";
 
+import powerCELO from "../components/common/images/PowerCelo.svg";
 import type { IMarket } from "../contexts/environment";
 import { useEnvironment } from "../contexts/environment";
 
@@ -33,6 +34,7 @@ export const useMarketTokens = (): readonly Token[] => {
         name: `Squared ${m.pair.speculativeToken.symbol} / ${m.pair.baseToken.symbol}`,
         symbol: `${m.pair.speculativeToken.symbol}²`,
         address: m.address,
+        logoURI: powerCELO,
       })
   );
 };

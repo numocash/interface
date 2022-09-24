@@ -1,23 +1,22 @@
 import { TokenAmount } from "@dahlia-labs/token-utils";
+import { FaArrowDown } from "react-icons/fa";
 
-import { CenterSwitch } from "../../../common/CenterSwitch";
 import { PercentageSlider } from "../../../common/inputs/PercentageSlider";
-import { Module } from "../../../common/Module";
 import { TokenInfo } from "../../../common/TokenInfo";
 import { useRemovePosition } from ".";
 
 export const SelectRemove: React.FC = () => {
   const { removePercent, setRemovePercent, market } = useRemovePosition();
   return market ? (
-    <Module tw="flex flex-col w-full  max-w-2xl">
-      <div tw="flex flex-col items-center rounded-xl bg-action text-default p-4">
+    <div tw="flex flex-col gap-3 w-full ">
+      <div tw="text-default p-4">
         <PercentageSlider
           disabled={false}
           input={removePercent}
           onChange={setRemovePercent}
         />
       </div>
-      <CenterSwitch icon="arrow" />
+      <FaArrowDown tw="text-default justify-self-center" />
 
       <div tw="flex flex-col items-center text-default w-full p-4 bg-action rounded-xl gap-4">
         {[
@@ -37,6 +36,6 @@ export const SelectRemove: React.FC = () => {
           </div>
         ))}
       </div>
-    </Module>
+    </div>
   ) : null;
 };

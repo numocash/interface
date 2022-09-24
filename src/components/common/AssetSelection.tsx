@@ -13,12 +13,12 @@ import { TokenIcon } from "./TokenIcon";
 
 const AssetSelectButton = styled.button(
   ({ noAsset }: { noAsset?: boolean }) => [
-    tw`relative flex items-center justify-between flex-none px-2 text-left`,
+    tw`relative flex items-center justify-between flex-none px-2 text-left text-black bg-[#EDEEEF]`,
     tw`text-base appearance-none cursor-pointer`,
-    tw`h-10 whitespace-nowrap rounded-xl`,
-    tw`text-default`,
-    tw`hover:(bg-outline ) active:bg-outline shadow-none`,
-    noAsset && tw`text-white bg-brand `,
+    tw`p-3 rounded-lg whitespace-nowrap`,
+    tw`text-black`,
+    tw`hover:(bg-gray-600 ) active:bg-gray-600 shadow-none`,
+    noAsset && tw`text-black bg-brand `,
   ]
 );
 
@@ -78,66 +78,11 @@ export const AssetSelection: React.FC<Props> = ({
   const [show, setShow] = useState(false);
 
   return (
-    <div
-      css={[
-        !hideInput &&
-          tw`rounded-xl bg-action border border-action hover:(border-outline)`,
-      ]}
-    >
-      <div
-        css={[
-          tw`flex items-center justify-between text-sm font-medium`,
-          !hideInput && tw`px-4 pt-3`,
-        ]}
-      >
-        <div tw="text-sm font-semibold text-default ">{label}</div>
-        <div tw="pt-0 text-secondary font-normal">
-          {selectedValue && (
-            <Section>
-              {currentAmount && !hideInput ? (
-                <Balance>
-                  <span>{currentAmount.label ?? "Balance"}:</span>
-                  <Accent
-                    onClick={
-                      currentAmount.allowSelect && inputOnChange
-                        ? () => {
-                            if (
-                              !currentAmount.amount ||
-                              currentAmount.amount.equalTo("0")
-                            ) {
-                              inputOnChange("0");
-                              return;
-                            }
-                            inputOnChange(currentAmount.amount.toExact());
-                          }
-                        : undefined
-                    }
-                  >
-                    <TokenAmountDisplay
-                      tw="text-default "
-                      amount={
-                        currentAmount.amount ??
-                        new TokenAmount(selectedValue, 0)
-                      }
-                      locale="en-US"
-                      numberFormatOptions={{
-                        minimumFractionDigits: uiDecimals,
-                        maximumFractionDigits: uiDecimals,
-                      }}
-                    />
-                  </Accent>
-                </Balance>
-              ) : (
-                <div />
-              )}
-            </Section>
-          )}
-        </div>
-      </div>
-      <div css={[!hideInput && tw`p-3 pl-4`]}>
+    <div tw="flex w-full flex-col gap-1">
+      <div tw="flex gap-3 w-full">
         <div>
           <SelectTokenDialog
-            tw="rounded-xl"
+            tw="rounded-xl w-full"
             isOpen={show}
             onDismiss={() => setShow(false)}
             selectedToken={selectedValue ?? undefined}
@@ -185,20 +130,122 @@ export const AssetSelection: React.FC<Props> = ({
                   ))}
               </AssetSelectButton>
             </div>
-            {!hideInput && (
-              <div tw="flex flex-grow flex-1">
-                <BigNumericInput
-                  tw="text-right text-default"
-                  disabled={inputDisabled}
-                  value={inputValue}
-                  onChange={inputOnChange}
-                  placeholder="0.0"
-                />
-              </div>
-            )}
           </div>
         </div>
+        {!hideInput && (
+          <div tw="flex flex-grow flex-1">
+            <BigNumericInput
+              tw="text-right text-default w-full bg-[#EDEEEF]"
+              disabled={inputDisabled}
+              value={inputValue}
+              onChange={inputOnChange}
+              placeholder="0.0"
+            />
+          </div>
+        )}
       </div>
+      <>
+        {/* <div tw="text-sm font-semibold text-default ">{label}</div> */}
+        <div tw="pt-0 text-secondary font-normal justify-end flex">
+          {selectedValue && (
+            <Section>
+              {currentAmount && !hideInput ? (
+                <Balance>
+                  <span>{currentAmount.label ?? "Balance"}:</span>
+                  <Accent
+                    onClick={
+                      currentAmount.allowSelect && inputOnChange
+                        ? () => {
+                            if (
+                              !currentAmount.amount ||
+                              currentAmount.amount.equalTo("0")
+                            ) {
+                              inputOnChange("0");
+                              return;
+                            }
+                            inputOnChange(currentAmount.amount.toExact());
+                          }
+                        : undefined
+                    }
+                  >
+                    <TokenAmountDisplay
+                      tw="text-default "
+                      amount={
+                        currentAmount.amount ??
+                        new TokenAmount(selectedValue, 0)
+                      }
+                      locale="en-US"
+                      numberFormatOptions={{
+                        minimumFractionDigits: uiDecimals,
+                        maximumFractionDigits: uiDecimals,
+                      }}
+                    />
+                  </Accent>
+                </Balance>
+              ) : (
+                <div />
+              )}
+            </Section>
+          )}
+        </div>
+      </>
     </div>
   );
 };
+
+const BalanceAndOutputOverflowPrevention = styled.div`
+  position: relative;
+  padding: 8px 0;
+  height: 36px; // 20px line height 8px padding
+`;
+const BalanceAndOutput = styled.div`
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  line-height: 20px;
+
+  gap: 8px;
+  white-space: nowrap;
+`;
+const Output = styled.div`
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.text.default};
+`;
+
+const NoAmount = styled.span`
+  margin-left: 0.3em;
+  color: ${({ theme }) => theme.colors.text.default};
+`;
+
+const TextButton = styled.button<{ onClick?: () => void }>`
+  margin-left: 0.3em;
+  color: ${({ theme }) => theme.colors.text.accent};
+  ${({ onClick }) =>
+    onClick !== undefined &&
+    css`
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
+      }
+    `}
+
+  padding: 0;
+  border: 0;
+  display: inline;
+  background: none;
+`;
+
+// const Balance = styled.div`
+//   font-weight: normal;
+//   font-size: 13px;
+//   color: ${({ theme }) => theme.colors.text.default};
+
+//   display: flex;
+//   align-items: center;
+// `;
+
+const TokenBox = styled.div``;

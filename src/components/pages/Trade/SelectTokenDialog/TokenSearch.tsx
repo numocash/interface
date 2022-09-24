@@ -136,7 +136,7 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
       {/*  aria-hidden="true"*/}
       {/*/>*/}
 
-      <div tw="p-4 border-b border-outline  flex flex-col gap-4">
+      <div tw="p-4 flex flex-col gap-4">
         <div tw="flex items-center justify-between">
           <div tw="font-semibold text-base text-default">Select a token</div>
         </div>

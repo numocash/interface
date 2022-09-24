@@ -95,24 +95,24 @@ export const Button: React.FC<ButtonProps> = ({
 
 export const StyledButton = styled.button<AdditionalButtonProps>(
   ({ size = "sm", variant = "default", icon }) => [
-    tw`flex flex-row items-center justify-center  leading-normal`,
-    tw`rounded`,
+    tw`flex flex-row items-center justify-center leading-normal`,
+    tw`rounded-lg`,
     tw`text-sm font-semibold`,
-    tw`transform active:scale-98 text-white hover:bg-opacity-90`,
+    tw`text-white transform active:scale-98 hover:bg-opacity-90`,
     tw`transition-transform`,
 
     variant === "outline" &&
-      tw`border text-white border-brand hover:border-gray-300`,
-    variant === "primary" && tw`text-white bg-brand shadow`,
+      tw`text-white border border-brand hover:border-gray-300`,
+    variant === "primary" && tw`text-white bg-black shadow`,
     variant === "muted" && tw`text-gray-200 bg-neutral-700 hover:bg-opacity-50`,
 
-    variant === "danger" && tw`bg-red-500 text-black font-bold`,
-    size === "swap" && tw`shadow font-bold w-full text-xl h-14`,
+    variant === "danger" && tw`font-bold text-black bg-red-500`,
+    size === "swap" && tw`w-full text-xl font-bold shadow h-14`,
 
-    tw`disabled:(bg-gray-400 text-gray-600 cursor-not-allowed)`,
+    tw`disabled:(bg-[#EDEEEF] text-gray-400 cursor-not-allowed)`,
 
     size === "sm" && tw`py-1.5 px-2 text-base`,
-    size === "md" && tw`py-3 px-5 text-base`,
+    size === "md" && tw`px-5 py-3 text-base`,
 
     icon && tw`rounded-full w-7 h-7 p-0!`,
   ]

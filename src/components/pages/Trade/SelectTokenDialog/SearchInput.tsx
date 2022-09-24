@@ -15,7 +15,7 @@ export const SearchInput: React.FC<Props> = ({
 }) => {
   const showClear = searchQuery.length > 0;
   return (
-    <div tw="flex items-stretch focus-within:(ring-brand border-brand) border border-outline relative bg-action rounded-xl">
+    <div tw="flex items-stretch focus-within:(ring-brand border-brand) border border-action relative bg-action rounded-xl">
       <input
         css={[
           tw`bg-transparent border-none flex-grow focus:(outline-none ring-0 border-0) text-default  placeholder-gray-400 text-lg font-medium appearance-none w-full p-4 pr-0 outline-none overflow-hidden`,
@@ -36,7 +36,7 @@ export const SearchInput: React.FC<Props> = ({
         <button
           onClick={() => onClear()}
           type="button"
-          tw="z-10 px-4 appearance-none flex items-center text-gray-400 hover:(text-outline) text-xl"
+          tw="z-10 px-4 appearance-none flex items-center text-gray-400  text-xl"
         >
           <FontAwesomeIcon icon={faTimes} fixedWidth />
         </button>

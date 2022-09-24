@@ -33,7 +33,11 @@ export const SendButton: React.FC = () => {
     ]
   );
   return (
-    <Button variant="primary" disabled={!!disableReason} tw="max-w-md">
+    <Button
+      variant="primary"
+      disabled={!!disableReason}
+      tw="justify-center items-center w-full h-12 text-xl "
+    >
       {disableReason ?? "Preview Transaction"}
     </Button>
   );
