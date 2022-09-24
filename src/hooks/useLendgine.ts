@@ -2,6 +2,7 @@ import { TokenAmount } from "@dahlia-labs/token-utils";
 import type { Call } from "@dahlia-labs/use-ethers";
 import { AbiCoder } from "@ethersproject/abi";
 import type { BigNumber } from "@ethersproject/bignumber";
+import { AddressZero } from "@ethersproject/constants";
 import { keccak256 } from "ethers/lib/utils";
 import invariant from "tiny-invariant";
 
@@ -18,7 +19,7 @@ export const useLendgine = (
   invariant(lendgineContract);
   const abiCoder = new AbiCoder();
 
-  const bytes = abiCoder.encode(["address"], [address]);
+  const bytes = abiCoder.encode(["address"], [address ?? AddressZero]);
 
   const call: Call = {
     target: market.address,
