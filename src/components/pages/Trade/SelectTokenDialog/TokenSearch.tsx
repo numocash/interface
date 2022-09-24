@@ -173,7 +173,7 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
       <div tw="p-4 py-2 bg-action flex justify-between text-default">
         <div tw="text-sm">{results.length} Tokens</div>
         <div tw="flex items-center space-x-1.5">
-          <div tw="text-sm font-semibold">Mobius Token Browser</div>
+          <div tw="text-sm font-semibold">Numoen Token Browser</div>
         </div>
       </div>
     </div>

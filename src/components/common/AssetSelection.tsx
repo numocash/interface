@@ -17,7 +17,7 @@ const AssetSelectButton = styled.button(
     tw`text-base appearance-none cursor-pointer`,
     tw`p-3 rounded-lg whitespace-nowrap`,
     tw`text-black`,
-    tw`hover:(bg-gray-600 ) active:bg-gray-600 shadow-none`,
+    tw`hover:(bg-gray-400 ) active:bg-gray-600 shadow-none`,
     noAsset && tw`text-black bg-brand `,
   ]
 );

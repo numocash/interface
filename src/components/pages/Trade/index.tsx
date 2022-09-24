@@ -1,34 +1,19 @@
+import { Module } from "../../common/Module";
 import { Swap } from "./Swap";
 import { SwapStateProvider } from "./useSwapState";
 
 export const Trade: React.FC = () => {
   return (
     <div tw="flex flex-col gap-4">
-      {/* <Module
-        tw="w-full flex max-w-lg flex-col gap-2"
-        css={css`
-          background-image: radial-gradient(
-            100% 100% at 50% 10%,
-            #35d07f 10%,
-            #3488ec 100%
-          );
-        `}
-      >
-        <div tw="font-semibold text-lg text-default dark:text-default-d">
-          New Interface 🫡
+      <Module tw="w-full flex max-w-lg flex-col gap-2 border-4 border-red-500">
+        <div tw="font-semibold text-lg text-default">
+          Warning: Alpha Version
         </div>
-        <span tw="text-default dark:text-default-d">
-          To use the legacy interface visit{" "}
-          <a
-            tw="underline"
-            target="_blank"
-            href="https://www.legacy.mobius.money"
-            rel="noreferrer"
-          >
-            legacy.mobius.money
-          </a>
+        <span tw="text-default">
+          This program is to be considered extremely exploratory and is to only
+          be used for testing with trival amounts of funds.
         </span>
-      </Module> */}
+      </Module>
       <SwapStateProvider>
         <Swap />
       </SwapStateProvider>
