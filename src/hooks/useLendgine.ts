@@ -21,6 +21,8 @@ export const useLendgine = (
 
   const bytes = abiCoder.encode(["address"], [address ?? AddressZero]);
 
+  console.log(keccak256(bytes));
+
   const call: Call = {
     target: market.address,
     callData: lendgineContract.interface.encodeFunctionData("positions", [

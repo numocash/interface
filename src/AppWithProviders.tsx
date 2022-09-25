@@ -4,10 +4,12 @@ import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
-import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { chain, configureChains, createClient, WagmiConfig } from "wagmi";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
+import { publicProvider } from "wagmi/providers/public";
 
 import { App } from "./App";
+import aurora from "./components/common/images/14803.png";
 import { BlockProvider } from "./contexts/block";
 import { EnvironmentProvider } from "./contexts/environment";
 import { SettingsProvider } from "./contexts/settings";
@@ -34,9 +36,30 @@ const celoChain: Chain = {
   testnet: false,
 };
 
+const auroraTestnet: Chain = {
+  id: 1313161555,
+  name: "Aurora Testnet",
+  network: "aurora",
+  iconUrl: aurora,
+  iconBackground: "#fff",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Aurora Ether",
+    symbol: "ETH",
+  },
+  rpcUrls: {
+    default: "https://testnet.aurora.dev",
+  },
+  testnet: true,
+};
+
 const { provider, chains } = configureChains(
-  [celoChain],
-  [jsonRpcProvider({ rpc: (chain) => ({ http: chain.rpcUrls.default }) })]
+  [celoChain, chain.goerli, auroraTestnet],
+  [
+    jsonRpcProvider({ rpc: (chain) => ({ http: chain.rpcUrls.default }) }),
+    publicProvider(),
+    jsonRpcProvider({ rpc: (chain) => ({ http: chain.rpcUrls.default }) }),
+  ]
 );
 
 const { connectors } = getDefaultWallets({

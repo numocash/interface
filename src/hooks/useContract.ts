@@ -1,6 +1,7 @@
 import { ChainId } from "@dahlia-labs/celo-contrib";
 import type { Token } from "@dahlia-labs/token-utils";
 import { getContract, getMulticall } from "@dahlia-labs/use-ethers";
+import { Interface } from "@ethersproject/abi";
 import type { Contract, ContractInterface } from "@ethersproject/contracts";
 import { useMemo } from "react";
 import { useProvider, useSigner } from "wagmi";
@@ -8,8 +9,10 @@ import { useProvider, useSigner } from "wagmi";
 import ERC20_ABI from "../abis/erc20.json";
 import LENDGINE_ABI from "../abis/Lendgine.json";
 import MINTROUTER_ABI from "../abis/MintRouter.json";
+import POSITION_ABI from "../abis/Position.json";
 import { MINT_ROUTER } from "../contexts/environment";
 import type { Erc20, Lendgine, MintRouter, Multicall2 } from "../generated";
+import type { PositionInterface } from "../generated/Position";
 
 export function useTokenContractFromAddress(
   tokenAddress: string | undefined,
@@ -53,6 +56,10 @@ export function useMintRouterContract(
     withSignerIfPossible
   ) as MintRouter | null;
 }
+
+export const positionInterface = new Interface(
+  POSITION_ABI.abi
+) as PositionInterface;
 
 export function useMulticall(): Multicall2 {
   const provider = useProvider();
