@@ -1,12 +1,17 @@
 import { useState } from "react";
 import tw, { css } from "twin.macro";
 
-import type { IMarket } from "../../../../contexts/environment";
+import type {
+  IMarket,
+  IMarketUserInfo,
+} from "../../../../contexts/environment";
+import { tickToAPR } from "../../../../utils/tick";
 import { AddPosition } from "../AddPosition";
 import { RemovePosition } from "../RemovePosition";
 
 interface Props {
   market: IMarket;
+  userInfo: IMarketUserInfo;
   isOpen: boolean;
 }
 
@@ -15,7 +20,10 @@ export enum ActionType {
   Remove = "Remove",
 }
 
-export const PositionCardInner: React.FC<Props> = ({ market }: Props) => {
+export const PositionCardInner: React.FC<Props> = ({
+  market,
+  userInfo,
+}: Props) => {
   const [action, setAction] = useState<ActionType>(ActionType.Add);
 
   const Tabs = (
@@ -50,15 +58,6 @@ export const PositionCardInner: React.FC<Props> = ({ market }: Props) => {
             ) : (
               <RemovePosition market={market} />
             )}
-
-            {/* <DepositWidget
-              token={safebox.underlying}
-              deposit={deposit}
-              safebox={safebox.pAsset}
-              safeboxAmount={safeboxAmount}
-              exchangeRate={exchangeRate}
-              convertSafeboxAmount={convertSafeboxAmount}
-            /> */}
           </div>
           <div tw="flex flex-col gap-2">
             <div tw="sm:(flex-row gap-10) p-4">
@@ -74,23 +73,20 @@ export const PositionCardInner: React.FC<Props> = ({ market }: Props) => {
                     <span>Upper Bound</span>
                   </div>
                   <div tw="flex-1 text-default font-semibold">
-                    <span>10.0</span>
+                    <span>{market.pair.bound.toFixed(2)}</span>{" "}
+                    <span tw="text-secondary font-normal text-sm">
+                      {market.pair.baseToken.symbol} /{" "}
+                      {market.pair.speculativeToken.symbol}
+                    </span>
                   </div>
                 </div>
                 <div tw="flex flex-col sm:(flex-row gap-10) mt-2">
                   <div tw="flex-1 text-secondary">
-                    <span>Upper Bound</span>
+                    <span>Your Rate</span>
                   </div>
                   <div tw="flex-1 text-default font-semibold">
-                    <span>Celo</span>
-                  </div>
-                </div>
-                <div tw="flex flex-col sm:(flex-row gap-10) mt-2">
-                  <div tw="flex-1 text-secondary">
-                    <span>cUSD</span>
-                  </div>
-                  <div tw="flex-1 text-default font-semibold">
-                    <span>10.0</span>
+                    <span>{tickToAPR(userInfo.tick)}%</span>{" "}
+                    <span tw="text-secondary font-normal text-sm">APR</span>
                   </div>
                 </div>
               </div>

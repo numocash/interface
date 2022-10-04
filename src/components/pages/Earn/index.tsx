@@ -30,7 +30,9 @@ export const Earn: React.FC = () => {
       ) : userMarketInfo === [] ? (
         <EmptyPosition />
       ) : (
-        <PositionCard market={market} />
+        userMarketInfo.map((m) => (
+          <PositionCard key={m.tokenID} userInfo={m} market={market} />
+        ))
       )}
     </div>
   );

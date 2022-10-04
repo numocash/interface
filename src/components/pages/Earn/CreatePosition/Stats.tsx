@@ -43,17 +43,20 @@ export const Stats: React.FC = () => {
         value={
           <div tw="flex items-center">
             <div tw="flex-col flex gap-1">
-              {[market.pair.baseToken, market.pair.speculativeToken].map(
-                (c, i) => (
-                  <div tw="flex flex-row items-center gap-1 text-black" key={i}>
-                    <TokenIcon token={c} />
-                    {pairInfo?.speculativeAmount.toFixed(2, {
-                      groupSeparator: ",",
-                    }) ?? "--"}
-                    <div>{c?.symbol}</div>
-                  </div>
-                )
-              )}
+              <div tw="flex flex-row items-center gap-1 text-black">
+                <TokenIcon token={market.pair.speculativeToken} />
+                {pairInfo?.speculativeAmount.toFixed(2, {
+                  groupSeparator: ",",
+                }) ?? "--"}
+                <div>{market.pair.speculativeToken.symbol}</div>
+              </div>{" "}
+              <div tw="flex flex-row items-center gap-1 text-black">
+                <TokenIcon token={market.pair.baseToken} />
+                {pairInfo?.baseAmount.toFixed(2, {
+                  groupSeparator: ",",
+                }) ?? "--"}
+                <div>{market.pair.baseToken.symbol}</div>
+              </div>
             </div>
           </div>
         }

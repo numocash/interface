@@ -1,17 +1,22 @@
 import React, { useRef, useState } from "react";
 import tw, { css, styled } from "twin.macro";
 
-import type { IMarket } from "../../../../contexts/environment";
+import type {
+  IMarket,
+  IMarketUserInfo,
+} from "../../../../contexts/environment";
 import { breakpoints } from "../../../../theme/breakpoints";
 import { TokenIcon } from "../../../common/TokenIcon";
+import { scale } from "../../Trade/useTrade";
 import { PositionCardInner } from "./PositionCardInner";
 
 interface Props {
   market: IMarket;
+  userInfo: IMarketUserInfo;
 }
 
-export const PositionCard: React.FC<Props> = ({ market }: Props) => {
-  const { bound, speculativeToken, baseToken } = market.pair;
+export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
+  const { speculativeToken, baseToken } = market.pair;
   const [isOpen, setOpen] = useState(false);
   const reFocusButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -36,7 +41,10 @@ export const PositionCard: React.FC<Props> = ({ market }: Props) => {
       className="noMobile"
     >
       <>
-        <VerticalItemData>10 {speculativeToken.symbol}</VerticalItemData>
+        <VerticalItemData>
+          {userInfo.liquidity.divide(scale).toFixed(2, { groupSeparator: "," })}{" "}
+          {baseToken.symbol}
+        </VerticalItemData>
         <VerticalItemLabel>Your Balance</VerticalItemLabel>
       </>
     </VerticalItem>
@@ -80,7 +88,13 @@ export const PositionCard: React.FC<Props> = ({ market }: Props) => {
         </div>
       </div>
       <Bellows className={isOpen ? "expanded" : "closed"} tabIndex={-1}>
-        {isOpen && <PositionCardInner market={market} isOpen={isOpen} />}
+        {isOpen && (
+          <PositionCardInner
+            userInfo={userInfo}
+            market={market}
+            isOpen={isOpen}
+          />
+        )}
       </Bellows>
     </div>
     // <Module tw="flex w-full max-w-2xl pb-0">
