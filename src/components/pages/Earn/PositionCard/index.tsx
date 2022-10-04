@@ -1,11 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import tw, { css, styled } from "twin.macro";
 
 import type {
   IMarket,
   IMarketUserInfo,
 } from "../../../../contexts/environment";
+import { useLendgine } from "../../../../hooks/useLendgine";
 import { breakpoints } from "../../../../theme/breakpoints";
+import { tickToAPR } from "../../../../utils/tick";
 import { TokenIcon } from "../../../common/TokenIcon";
 import { scale } from "../../Trade/useTrade";
 import { PositionCardInner } from "./PositionCardInner";
@@ -17,8 +19,19 @@ interface Props {
 
 export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
   const { speculativeToken, baseToken } = market.pair;
+  const marketInfo = useLendgine(market);
   const [isOpen, setOpen] = useState(false);
   const reFocusButtonRef = useRef<HTMLButtonElement>(null);
+
+  const apr = useMemo(
+    () =>
+      !marketInfo
+        ? null
+        : marketInfo.currentTick > userInfo.tick
+        ? tickToAPR(userInfo.tick)
+        : 0,
+    [marketInfo, userInfo.tick]
+  );
 
   const verticalItemAPY = (
     <VerticalItem
@@ -27,7 +40,7 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
       `}
     >
       <>
-        <VerticalItemData>80%</VerticalItemData>
+        <VerticalItemData>{apr ?? "--"}%</VerticalItemData>
         <VerticalItemLabel>APR</VerticalItemLabel>
       </>
     </VerticalItem>
