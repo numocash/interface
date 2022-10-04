@@ -2,9 +2,9 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { MINT_ROUTER } from "../../../../contexts/environment";
+import { LIQUIDITYMANAGER } from "../../../../contexts/environment";
 import { useApproval, useApprove } from "../../../../hooks/useApproval";
-import { useMintRouterContract } from "../../../../hooks/useContract";
+import { useLiquidityManager } from "../../../../hooks/useContract";
 import { useTokenBalances } from "../../../../hooks/useTokenBalance";
 import type { BeetStage, BeetTx } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
@@ -20,7 +20,7 @@ export const SendButton: React.FC = () => {
     baseTokenAmount,
   } = useCreatePair();
 
-  const mintRouterContract = useMintRouterContract(true);
+  const liquidityManagerContract = useLiquidityManager(true);
 
   const Beet = useBeet();
 
@@ -28,10 +28,14 @@ export const SendButton: React.FC = () => {
 
   const balances = useTokenBalances([speculativeToken, baseToken], address);
 
-  const approvalS = useApproval(speculativeTokenAmount, address, MINT_ROUTER);
-  const approvalB = useApproval(baseTokenAmount, address, MINT_ROUTER);
-  const approveS = useApprove(speculativeTokenAmount, MINT_ROUTER);
-  const approveB = useApprove(baseTokenAmount, MINT_ROUTER);
+  const approvalS = useApproval(
+    speculativeTokenAmount,
+    address,
+    LIQUIDITYMANAGER
+  );
+  const approvalB = useApproval(baseTokenAmount, address, LIQUIDITYMANAGER);
+  const approveS = useApprove(speculativeTokenAmount, LIQUIDITYMANAGER);
+  const approveB = useApprove(baseTokenAmount, LIQUIDITYMANAGER);
 
   //loading, insufficient balance
   const disableReason = useMemo(
@@ -68,7 +72,7 @@ export const SendButton: React.FC = () => {
       tw="justify-center items-center w-full h-12 text-xl "
       onClick={async () => {
         invariant(
-          mintRouterContract && speculativeTokenAmount && baseTokenAmount
+          liquidityManagerContract && speculativeTokenAmount && baseTokenAmount
         );
         const approveStage: BeetStage[] =
           approvalS || approvalB
@@ -95,26 +99,26 @@ export const SendButton: React.FC = () => {
               ]
             : [];
 
-        await Beet(
-          "Add liquidity to pool",
-          approveStage.concat({
-            stageTitle: "Add liquidity to pool",
-            parallelTransactions: [
-              {
-                title: "Add liquidity to pool",
-                description: "Add liquidity to pool",
-                txEnvelope: () =>
-                  mintRouterContract.mintMaker(
-                    speculativeTokenAmount.raw.toString(),
-                    baseTokenAmount.raw.toString(),
-                    speculativeTokenAmount.token.address,
-                    baseTokenAmount.token.address,
-                    "2500000000000000000"
-                  ),
-              },
-            ],
-          })
-        );
+        // await Beet(
+        //   "Add liquidity to pool",
+        //   approveStage.concat({
+        //     stageTitle: "Add liquidity to pool",
+        //     parallelTransactions: [
+        //       {
+        //         title: "Add liquidity to pool",
+        //         description: "Add liquidity to pool",
+        //         txEnvelope: () =>
+        //         liquidityManagerContract.mintMaker(
+        //             speculativeTokenAmount.raw.toString(),
+        //             baseTokenAmount.raw.toString(),
+        //             speculativeTokenAmount.token.address,
+        //             baseTokenAmount.token.address,
+        //             "2500000000000000000"
+        //           ),
+        //       },
+        //     ],
+        //   })
+        // );
       }}
     >
       {disableReason ?? "Add liquidity"}

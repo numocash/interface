@@ -47,12 +47,11 @@ const testPair: IPair = {
     symbol: "NLP",
     decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0x6ae85c154e67ad0d08634957da1907ad7d23b325",
+    address: "0x63dB6522a34ab2F8E5f3B5766725462F7147Ef16",
   }),
 
-  bound: new Price(CUSD[ChainId.Mainnet], CELO[ChainId.Mainnet], 2, 5),
-
-  address: "0x6ae85c154e67ad0d08634957da1907ad7d23b325",
+  bound: new Price(CUSD[ChainId.Mainnet], CELO[ChainId.Mainnet], 1, 5),
+  address: "0x63dB6522a34ab2F8E5f3B5766725462F7147Ef16",
 };
 
 const testMarket: IMarket = {
@@ -61,19 +60,15 @@ const testMarket: IMarket = {
     symbol: "NLDG",
     decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0x6fbb3a7063842ef77cd75baeb4ac7776cd988166",
+    address: "0x0BDd71913078E1930F882a56Ea7f537D0a84Aec0",
   }),
 
-  address: "0x6fbb3a7063842ef77cd75baeb4ac7776cd988166",
-
+  address: "0x0BDd71913078E1930F882a56Ea7f537D0a84Aec0",
   pair: testPair,
 };
 
-export const FACTORY = "0xb0C7E6bC7577706F766efA012f6604919056D0f7";
-
-export const UBE_FACTORY = "0x62d5b84bE28a183aBB507E125B384122D2C25fAE";
-
-export const MINT_ROUTER = "0x5B16b6dECf57a1f7c88Bc7B1A8776aE69189b318";
+export const FACTORY = "0x8391fAeB0fED26D3B57A08E4809575fCD1D2d00C";
+export const LIQUIDITYMANAGER = "0x25B1FbeC46A08c9bB3026c95A6394ACae4F462AF";
 
 export const useAddressToMarket = (
   address: string | null | undefined

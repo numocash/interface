@@ -8,10 +8,15 @@ import { useProvider, useSigner } from "wagmi";
 
 import ERC20_ABI from "../abis/erc20.json";
 import LENDGINE_ABI from "../abis/Lendgine.json";
-import MINTROUTER_ABI from "../abis/MintRouter.json";
+import LM_ABI from "../abis/LiquidityManager.json";
 import POSITION_ABI from "../abis/Position.json";
-import { MINT_ROUTER } from "../contexts/environment";
-import type { Erc20, Lendgine, MintRouter, Multicall2 } from "../generated";
+import { LIQUIDITYMANAGER } from "../contexts/environment";
+import type {
+  Erc20,
+  Lendgine,
+  LiquidityManager,
+  Multicall2,
+} from "../generated";
 import type { PositionInterface } from "../generated/Position";
 
 export function useTokenContractFromAddress(
@@ -47,14 +52,14 @@ export function useLendgineContract(
   ) as Lendgine | null;
 }
 
-export function useMintRouterContract(
+export function useLiquidityManager(
   withSignerIfPossible: boolean
-): MintRouter | null {
+): LiquidityManager | null {
   return useContract(
-    MINT_ROUTER,
-    MINTROUTER_ABI.abi,
+    LIQUIDITYMANAGER,
+    LM_ABI.abi,
     withSignerIfPossible
-  ) as MintRouter | null;
+  ) as LiquidityManager | null;
 }
 
 export const positionInterface = new Interface(
