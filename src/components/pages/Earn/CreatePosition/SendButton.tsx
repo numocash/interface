@@ -3,22 +3,20 @@ import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { LIQUIDITYMANAGER } from "../../../../contexts/environment";
+import { useSettings } from "../../../../contexts/settings";
 import { useApproval, useApprove } from "../../../../hooks/useApproval";
 import { useLiquidityManager } from "../../../../hooks/useContract";
 import { useTokenBalances } from "../../../../hooks/useTokenBalance";
 import type { BeetStage, BeetTx } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
 import { AsyncButton } from "../../../common/AsyncButton";
+import { scale } from "../../Trade/useTrade";
 import { useCreatePair } from ".";
 
 export const SendButton: React.FC = () => {
-  const {
-    speculativeToken,
-    baseToken,
-    bound,
-    speculativeTokenAmount,
-    baseTokenAmount,
-  } = useCreatePair();
+  const { market, tick, speculativeTokenAmount, baseTokenAmount } =
+    useCreatePair();
+  const settings = useSettings();
 
   const liquidityManagerContract = useLiquidityManager(true);
 
@@ -26,7 +24,10 @@ export const SendButton: React.FC = () => {
 
   const { address } = useAccount();
 
-  const balances = useTokenBalances([speculativeToken, baseToken], address);
+  const balances = useTokenBalances(
+    [market.pair.baseToken, market.pair.speculativeToken],
+    address
+  );
 
   const approvalS = useApproval(
     speculativeTokenAmount,
@@ -40,27 +41,23 @@ export const SendButton: React.FC = () => {
   //loading, insufficient balance
   const disableReason = useMemo(
     () =>
-      !speculativeToken || !baseToken
-        ? "Select a token"
-        : !baseTokenAmount || !speculativeTokenAmount
+      !baseTokenAmount || !speculativeTokenAmount
         ? "Enter an amount"
-        : baseTokenAmount?.equalTo(0) || speculativeTokenAmount?.equalTo(0)
+        : baseTokenAmount?.equalTo(0) && speculativeTokenAmount?.equalTo(0)
         ? "Enter an amount"
-        : !bound
-        ? "Select an upper bound"
+        : tick === 0
+        ? "Invalid Tick"
         : !balances || approvalS === null || approvalB === null
         ? "Loading..."
-        : (balances[0] && speculativeTokenAmount.greaterThan(balances[0])) ||
-          (balances[1] && baseTokenAmount.greaterThan(balances[1]))
+        : (balances[1] && speculativeTokenAmount.greaterThan(balances[1])) ||
+          (balances[0] && baseTokenAmount.greaterThan(balances[0]))
         ? "Insufficient funds"
         : null,
     [
-      balances,
-      baseToken,
       baseTokenAmount,
-      bound,
-      speculativeToken,
       speculativeTokenAmount,
+      tick,
+      balances,
       approvalS,
       approvalB,
     ]
@@ -99,26 +96,35 @@ export const SendButton: React.FC = () => {
               ]
             : [];
 
-        // await Beet(
-        //   "Add liquidity to pool",
-        //   approveStage.concat({
-        //     stageTitle: "Add liquidity to pool",
-        //     parallelTransactions: [
-        //       {
-        //         title: "Add liquidity to pool",
-        //         description: "Add liquidity to pool",
-        //         txEnvelope: () =>
-        //         liquidityManagerContract.mintMaker(
-        //             speculativeTokenAmount.raw.toString(),
-        //             baseTokenAmount.raw.toString(),
-        //             speculativeTokenAmount.token.address,
-        //             baseTokenAmount.token.address,
-        //             "2500000000000000000"
-        //           ),
-        //       },
-        //     ],
-        //   })
-        // );
+        invariant(address);
+
+        await Beet(
+          "Add liquidity to pool",
+          approveStage.concat({
+            stageTitle: "Add liquidity to pool",
+            parallelTransactions: [
+              {
+                title: "Add liquidity to pool",
+                description: "Add liquidity to pool",
+                txEnvelope: () =>
+                  liquidityManagerContract.mint({
+                    base: market.pair.baseToken.address,
+                    speculative: market.pair.speculativeToken.address,
+                    upperBound: market.pair.bound.asFraction
+                      .multiply(scale)
+                      .quotient.toString(),
+                    tick: tick,
+                    amount0: baseTokenAmount.raw.toString(),
+                    amount1: speculativeTokenAmount.raw.toString(),
+                    liquidityMin: 0,
+                    recipient: address,
+                    deadline:
+                      Math.round(Date.now() / 1000) + settings.timeout * 60,
+                  }),
+              },
+            ],
+          })
+        );
       }}
     >
       {disableReason ?? "Add liquidity"}

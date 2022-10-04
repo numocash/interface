@@ -17,6 +17,7 @@ import type {
   LiquidityManager,
   Multicall2,
 } from "../generated";
+import type { LendgineInterface } from "../generated/Lendgine";
 import type { PositionInterface } from "../generated/Position";
 
 export function useTokenContractFromAddress(
@@ -51,6 +52,10 @@ export function useLendgineContract(
     withSignerIfPossible
   ) as Lendgine | null;
 }
+
+export const lendgineInterface = new Interface(
+  LENDGINE_ABI.abi
+) as LendgineInterface;
 
 export function useLiquidityManager(
   withSignerIfPossible: boolean

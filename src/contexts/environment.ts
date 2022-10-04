@@ -8,11 +8,19 @@ export interface IMarket {
   token: Token;
 
   address: string;
-
   pair: IPair;
 }
 
+export interface IMarketInfo {
+  currentTick: number;
+  currentLiquidity: TokenAmount;
+  interestNumerator: TokenAmount;
+  totalLiquidityBorrowed: TokenAmount;
+}
+
 export interface IMarketUserInfo {
+  tokenID: number;
+  tick: number;
   liquidity: TokenAmount;
 }
 
@@ -47,11 +55,11 @@ const testPair: IPair = {
     symbol: "NLP",
     decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0x63dB6522a34ab2F8E5f3B5766725462F7147Ef16",
+    address: "0x925A837CDF8D85C3D93800B6817F9379289055aF",
   }),
 
   bound: new Price(CUSD[ChainId.Mainnet], CELO[ChainId.Mainnet], 1, 5),
-  address: "0x63dB6522a34ab2F8E5f3B5766725462F7147Ef16",
+  address: "0x925A837CDF8D85C3D93800B6817F9379289055aF",
 };
 
 const testMarket: IMarket = {
@@ -60,15 +68,16 @@ const testMarket: IMarket = {
     symbol: "NLDG",
     decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0x0BDd71913078E1930F882a56Ea7f537D0a84Aec0",
+    address: "0xcbfE63545dc97D20d22dbf3391fcDc7845a5E454",
   }),
 
-  address: "0x0BDd71913078E1930F882a56Ea7f537D0a84Aec0",
+  address: "0xcbfE63545dc97D20d22dbf3391fcDc7845a5E454",
   pair: testPair,
 };
 
-export const FACTORY = "0x8391fAeB0fED26D3B57A08E4809575fCD1D2d00C";
-export const LIQUIDITYMANAGER = "0x25B1FbeC46A08c9bB3026c95A6394ACae4F462AF";
+export const FACTORY = "0x519C8f2D26a656d12582f418d6B460e57867ee5e";
+export const LIQUIDITYMANAGER = "0x9ac00d1e4220b2c6a9e95f3f20dee107be771aa2";
+export const GENESIS = 15447817;
 
 export const useAddressToMarket = (
   address: string | null | undefined

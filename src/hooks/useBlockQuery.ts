@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useBlock } from "../contexts/block";
 import { useMulticall } from "./useContract";
 
-const blockHistory = 10;
+export const blockHistory = 10;
 
 export type Return = Awaited<ReturnType<Multicall2["callStatic"]["aggregate"]>>;
 

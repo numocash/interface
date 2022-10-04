@@ -3,7 +3,7 @@ import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment";
-import { useLendgine } from "../../../hooks/useLendgine";
+import { useUserLendgine } from "../../../hooks/useLendgine";
 import { Button } from "../../common/Button";
 import { LoadingPage } from "../../common/LoadingPage";
 import { EmptyPosition } from "./EmptyPosition";
@@ -15,7 +15,7 @@ export const Earn: React.FC = () => {
 
   const market = markets[0];
   invariant(market);
-  const userMarketInfo = useLendgine(address, market);
+  const userMarketInfo = useUserLendgine(address, market);
 
   return (
     <div tw="w-full max-w-3xl flex flex-col gap-2">
@@ -25,9 +25,9 @@ export const Earn: React.FC = () => {
           <Button variant="primary">New Position</Button>
         </NavLink>
       </div>
-      {!userMarketInfo ? (
+      {userMarketInfo === null ? (
         <LoadingPage />
-      ) : userMarketInfo.liquidity.equalTo(0) ? (
+      ) : userMarketInfo === [] ? (
         <EmptyPosition />
       ) : (
         <PositionCard market={market} />

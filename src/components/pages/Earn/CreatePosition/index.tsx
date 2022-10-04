@@ -1,23 +1,20 @@
-import type { Price, Token, TokenAmount } from "@dahlia-labs/token-utils";
+import type { TokenAmount } from "@dahlia-labs/token-utils";
 import { useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
+import type { IMarket } from "../../../../contexts/environment";
 import { useEnvironment } from "../../../../contexts/environment";
-import { useCelo, useCusd } from "../../../../hooks/useTokens";
 import { Settings } from "../../../common/Settings";
+import { InterestRate } from "./InterestRate";
 import { SelectPair } from "./SelectPair";
 import { SendButton } from "./SendButton";
 import { Stats } from "./Stats";
 
 interface ICreatePair {
-  speculativeToken: Token | null;
-  setSpeculativeToken: (val: Token) => void;
-
-  baseToken: Token | null;
-  setBaseToken: (val: Token) => void;
+  market: IMarket;
 
   speculativeTokenAmount: TokenAmount | null;
   setSpeculativeTokenAmount: (val: TokenAmount) => void;
@@ -25,16 +22,11 @@ interface ICreatePair {
   baseTokenAmount: TokenAmount | null;
   setBaseTokenAmount: (val: TokenAmount) => void;
 
-  bound: Price | null;
+  tick: number;
+  setTick: (val: number) => void;
 }
 
 const useCreatePairInternal = (): ICreatePair => {
-  const celo = useCelo();
-  const cUSD = useCusd();
-
-  const [speculativeToken, setSpeculativeToken] = useState<Token | null>(celo);
-  const [baseToken, setBaseToken] = useState<Token | null>(cUSD);
-
   const [speculativeTokenAmount, setSpeculativeTokenAmount] =
     useState<TokenAmount | null>(null);
 
@@ -42,23 +34,21 @@ const useCreatePairInternal = (): ICreatePair => {
     null
   );
 
+  const [tick, setTick] = useState(10);
+
   const { markets } = useEnvironment();
 
   const market = markets[0];
   invariant(market);
 
-  const bound = market.pair.bound;
-
   return {
-    speculativeToken,
-    setSpeculativeToken,
-    baseToken,
-    setBaseToken,
+    market: market,
     speculativeTokenAmount,
     setSpeculativeTokenAmount,
     baseTokenAmount,
     setBaseTokenAmount,
-    bound,
+    tick,
+    setTick,
   };
 };
 
@@ -85,10 +75,15 @@ export const CreatePosition: React.FC = () => {
               <p tw="text-xl font-semibold text-black">
                 Select tokens and amounts
               </p>
-              <p tw="text-default">Provide two-token liquidity and get an LP share.</p>
+              <p tw="text-default">
+                Provide two-token liquidity and get an LP share.
+              </p>
             </>
           </div>
           <SelectPair />
+        </div>
+        <div tw="flex justify-center">
+          <InterestRate tw="flex justify-center items-center" />
         </div>
         <div tw="flex justify-center">
           <SendButton tw="flex justify-center items-center" />

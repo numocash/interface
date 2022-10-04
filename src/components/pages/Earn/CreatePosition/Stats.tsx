@@ -1,25 +1,35 @@
-import invariant from "tiny-invariant";
+import { Percent } from "@dahlia-labs/token-utils";
+import { useMemo } from "react";
 
-import { useEnvironment } from "../../../../contexts/environment";
+import { useLendgine } from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
 import { ShareMetric } from "../../../common/ShareMetric";
 import { TokenIcon } from "../../../common/TokenIcon";
 import { useCreatePair } from ".";
 
 export const Stats: React.FC = () => {
-  const { speculativeToken, baseToken } = useCreatePair();
-  const { markets } = useEnvironment();
-  const market = markets[0];
-  invariant(market);
+  const { market } = useCreatePair();
 
+  const lendgineInfo = useLendgine(market);
   const pairInfo = usePair(market.pair);
+
+  const rate = useMemo(
+    () =>
+      lendgineInfo && !lendgineInfo.totalLiquidityBorrowed.equalTo(0)
+        ? new Percent(
+            lendgineInfo.interestNumerator.quotient,
+            lendgineInfo.totalLiquidityBorrowed.quotient
+          )
+        : null,
+    [lendgineInfo]
+  );
 
   const apr = (
     <ShareMetric
       title="APR"
       value={
         <div tw="grid gap-4">
-          <div tw="text-xl text-black">80%</div>
+          <div tw="text-xl text-black">{!rate ? 0 : rate.toFixed(2)}%</div>
         </div>
       }
     />
@@ -33,22 +43,30 @@ export const Stats: React.FC = () => {
         value={
           <div tw="flex items-center">
             <div tw="flex-col flex gap-1">
-              {[speculativeToken, baseToken].map((c, i) => (
-                <div tw="flex flex-row items-center gap-1 text-black" key={i}>
-                  <TokenIcon token={c} />
-                  {pairInfo?.speculativeAmount.toFixed(2, {
-                    groupSeparator: ",",
-                  }) ?? "--"}
-                  <div>{c?.symbol}</div>
-                </div>
-              ))}
+              {[market.pair.baseToken, market.pair.speculativeToken].map(
+                (c, i) => (
+                  <div tw="flex flex-row items-center gap-1 text-black" key={i}>
+                    <TokenIcon token={c} />
+                    {pairInfo?.speculativeAmount.toFixed(2, {
+                      groupSeparator: ",",
+                    }) ?? "--"}
+                    <div>{c?.symbol}</div>
+                  </div>
+                )
+              )}
             </div>
           </div>
         }
       />
       <ShareMetric
         title="Upper Bound"
-        value={<div tw="h-7 flex items-center text-black">2.5 cUSD / CELO</div>}
+        value={
+          <div tw="h-7 flex items-center text-black">
+            {market.pair.bound.toFixed(2, { groupSeparator: "," })}{" "}
+            {market.pair.baseToken.symbol} /{" "}
+            {market.pair.speculativeToken.symbol}
+          </div>
+        }
       />
     </div>
   );

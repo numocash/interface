@@ -1,7 +1,6 @@
 import { TokenAmount } from "@dahlia-labs/token-utils";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useTokenBalances } from "../../../../hooks/useTokenBalance";
@@ -11,17 +10,16 @@ import { useCreatePair } from ".";
 export const SelectPair: React.FC = () => {
   const { address } = useAccount();
 
-  const {
-    speculativeToken,
-    baseToken,
-    setSpeculativeTokenAmount,
-    setBaseTokenAmount,
-  } = useCreatePair();
+  const { market, setSpeculativeTokenAmount, setBaseTokenAmount } =
+    useCreatePair();
 
   const [speculativeInput, setSpeculativeInput] = useState("");
   const [baseInput, setBaseInput] = useState("");
 
-  const balances = useTokenBalances([speculativeToken, baseToken], address);
+  const balances = useTokenBalances(
+    [market.pair.speculativeToken, market.pair.baseToken],
+    address
+  );
 
   return (
     <div tw="p-6 flex flex-col justify-between">
@@ -29,13 +27,12 @@ export const SelectPair: React.FC = () => {
         <AssetSelection
           tw="flex w-full max-w-2xl"
           label={"Speculative Asset"}
-          selectedValue={speculativeToken}
+          selectedValue={market.pair.speculativeToken}
           inputValue={speculativeInput}
           inputOnChange={(value) => {
             setSpeculativeInput(value);
-            invariant(speculativeToken);
             setSpeculativeTokenAmount(
-              TokenAmount.parse(speculativeToken, value)
+              TokenAmount.parse(market.pair.speculativeToken, value)
             );
           }}
           currentAmount={{
@@ -47,12 +44,11 @@ export const SelectPair: React.FC = () => {
 
         <AssetSelection
           label={"Base Asset"}
-          selectedValue={baseToken}
+          selectedValue={market.pair.baseToken}
           inputValue={baseInput}
           inputOnChange={(value) => {
             setBaseInput(value);
-            invariant(baseToken);
-            setBaseTokenAmount(TokenAmount.parse(baseToken, value));
+            setBaseTokenAmount(TokenAmount.parse(market.pair.baseToken, value));
           }}
           currentAmount={{
             amount: balances && balances[1] ? balances[1] : undefined,
