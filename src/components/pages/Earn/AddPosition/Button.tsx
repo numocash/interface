@@ -37,7 +37,6 @@ export const ConfirmButton: React.FC = () => {
   const approveS = useApprove(speculativeTokenAmount, LIQUIDITYMANAGER);
   const approveB = useApprove(baseTokenAmount, LIQUIDITYMANAGER);
 
-  //loading, insufficient balance
   const disableReason = useMemo(
     () =>
       !baseTokenAmount || !speculativeTokenAmount

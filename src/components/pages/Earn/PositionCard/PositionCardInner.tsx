@@ -56,7 +56,7 @@ export const PositionCardInner: React.FC<Props> = ({
             {action === ActionType.Add ? (
               <AddPosition market={market} userInfo={userInfo} />
             ) : (
-              <RemovePosition market={market} />
+              <RemovePosition market={market} userInfo={userInfo} />
             )}
           </div>
           <div tw="flex flex-col gap-2">
