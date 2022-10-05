@@ -21,11 +21,11 @@ export enum Field {
 }
 
 export type Trade = {
-  input: TokenAmount;
-  output: TokenAmount;
-  fee: TokenAmount;
-  minimumOutput: TokenAmount;
-  market: IMarket | null;
+  mint: boolean;
+  market: IMarket;
+  inputAmount: TokenAmount;
+  outputAmount: TokenAmount;
+  baseAmount: TokenAmount;
 };
 
 interface UseSwapStateValues {
@@ -36,18 +36,13 @@ interface UseSwapStateValues {
 
   invertSwap: () => void;
   typedValue: string;
-  independentField: Field;
-  dependentField: Field;
 
   swapDisabledReason?: string;
-  handleTrade: () => void;
+  handleTrade: () => Promise<void>;
   trade: Trade | null;
-
-  parsedAmounts: { [field in Field]: TokenAmount | undefined };
 }
 
 interface SwapFieldState {
-  readonly independentField: Field;
   readonly typedValue: string;
   readonly [Field.Input]: {
     readonly token: Token | undefined | null;
@@ -88,7 +83,6 @@ const useSwapStateInternal = (): UseSwapStateValues => {
 
   // TODO: consider make form state seralizable (store only token addr)
   const [fieldState, setFieldState] = useState<SwapFieldState>({
-    independentField: Field.Input,
     typedValue: "",
     [Field.Input]: {
       token: tokenA,
@@ -100,20 +94,14 @@ const useSwapStateInternal = (): UseSwapStateValues => {
 
   const inputToken = fieldState[Field.Input].token;
   const outputToken = fieldState[Field.Output].token;
-  const independentField = fieldState.independentField;
-  const dependentField =
-    fieldState.independentField === Field.Input ? Field.Output : Field.Input;
 
   const selectedFrom = fieldState[Field.Input].token ?? null;
   const selectedTo = fieldState[Field.Output].token ?? null;
 
-  const isExactIn: boolean = independentField === Field.Input;
   const parsedAmount = useMemo(() => {
-    const token = isExactIn ? inputToken : outputToken;
+    const token = inputToken;
     return token ? TokenAmount.parse(token, fieldState.typedValue) : undefined;
-  }, [isExactIn, inputToken, outputToken, fieldState]);
-
-  console.log(parsedAmount?.toFixed(2));
+  }, [inputToken, fieldState]);
 
   const { swapDisabledReason, trade, handleTrade } = useTrade({
     fromAmount: parsedAmount,
@@ -153,40 +141,24 @@ const useSwapStateInternal = (): UseSwapStateValues => {
     [setFieldState, fieldState]
   );
 
-  const parsedAmounts = useMemo(
-    () => ({
-      [Field.Input]:
-        independentField === Field.Input ? parsedAmount : trade?.input,
-      [Field.Output]:
-        independentField === Field.Output ? parsedAmount : trade?.output,
-    }),
-    [independentField, parsedAmount, trade]
-  );
-
   const invertSwap = useCallback(() => {
     setFieldState((prevState) => {
-      const typedValue = parsedAmounts[Field.Output]?.toExact() ?? "";
-
       return {
         ...prevState,
-        typedValue,
         [Field.Input]: { token: prevState[Field.Output].token },
         [Field.Output]: { token: prevState[Field.Input].token },
       };
     });
-  }, [setFieldState, parsedAmounts]);
+  }, [setFieldState]);
 
   return {
     selectedFrom,
     selectedTo,
-    parsedAmounts,
 
     invertSwap,
     onFieldInput,
     onFieldSelect,
 
-    dependentField,
-    independentField,
     typedValue: fieldState.typedValue,
 
     swapDisabledReason: swapDisabledReason ?? undefined,

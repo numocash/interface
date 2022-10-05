@@ -36,7 +36,7 @@ export const SearchInput: React.FC<Props> = ({
         <button
           onClick={() => onClear()}
           type="button"
-          tw="z-10 px-4 appearance-none flex items-center text-gray-400  text-xl"
+          tw="z-10 px-4 appearance-none flex items-center text-gray-400 text-xl"
         >
           <FontAwesomeIcon icon={faTimes} fixedWidth />
         </button>

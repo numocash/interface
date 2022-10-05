@@ -47,6 +47,8 @@ export const useUserLendgine = (
 
   const tokenIDs = filteredEvents?.data?.map((d) => +d.args[1].toString());
 
+  console.log(tokenIDs);
+
   const calls: Call[] = tokenIDs
     ? tokenIDs.map((t) => ({
         target: LIQUIDITYMANAGER,
@@ -57,10 +59,7 @@ export const useUserLendgine = (
       }))
     : [];
 
-  const data = useBlockQuery("user lp positions", calls, [
-    market?.address,
-    address,
-  ]);
+  const data = useBlockQuery("user lp positions", calls);
   if (tokenIDs === []) return [];
   if (
     !data ||
@@ -108,6 +107,10 @@ export const useLendgine = (market: IMarket): IMarketInfo | null => {
       target: market.address,
       callData: lendgineInterface.encodeFunctionData("totalLiquidityBorrowed"),
     },
+    {
+      target: market.address,
+      callData: lendgineInterface.encodeFunctionData("totalSupply"),
+    },
   ];
 
   const data = useBlockQuery("lendgine", calls, [market.address]);
@@ -141,6 +144,14 @@ export const useLendgine = (market: IMarket): IMarketInfo | null => {
         lendgineInterface,
         "totalLiquidityBorrowed",
         data.returnData[3]
+      ).toString()
+    ),
+    totalSupply: new TokenAmount(
+      market.token,
+      parseFunctionReturn(
+        lendgineInterface,
+        "totalSupply",
+        data.returnData[4]
       ).toString()
     ),
   };

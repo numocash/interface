@@ -30,7 +30,7 @@ export const useMarketTokens = (): readonly Token[] => {
     (m) =>
       new Token({
         chainId: ChainId.Mainnet,
-        decimals: 18,
+        decimals: 36,
         name: `Squared ${m.pair.speculativeToken.symbol} / ${m.pair.baseToken.symbol}`,
         symbol: `${m.pair.speculativeToken.symbol}²`,
         address: m.address,

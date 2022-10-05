@@ -39,13 +39,15 @@ export const ConfirmModal: React.FC<Props> = ({ onDismiss }: Props) => {
         <div tw="rounded-xl bg-action border border-action  p-3 flex">
           <div tw="justify-between flex w-full">
             <div tw="text-2xl">
-              {trade.input.toFixed(6, { groupSeparator: "," })}
+              {trade.inputAmount.toFixed(6, { groupSeparator: "," })}
             </div>
 
             <div tw="flex items-center space-x-2">
-              <TokenIcon size={24} token={trade.input.token} />
+              <TokenIcon size={24} token={trade.inputAmount.token} />
               <div tw="mr-1 space-y-1">
-                <div tw="text-xl leading-none">{trade.input.token.symbol}</div>
+                <div tw="text-xl leading-none">
+                  {trade.inputAmount.token.symbol}
+                </div>
               </div>
             </div>
           </div>
@@ -55,13 +57,15 @@ export const ConfirmModal: React.FC<Props> = ({ onDismiss }: Props) => {
         <div tw="rounded-xl bg-action border border-action  p-3 flex">
           <div tw="justify-between flex w-full">
             <div tw="text-2xl">
-              {trade.output.toFixed(6, { groupSeparator: "," })}
+              {trade.outputAmount.toFixed(6, { groupSeparator: "," })}
             </div>
 
             <div tw="flex items-center space-x-2">
-              <TokenIcon size={24} token={trade.output.token} />
+              <TokenIcon size={24} token={trade.outputAmount.token} />
               <div tw="mr-1 space-y-1">
-                <div tw="text-xl leading-none">{trade.output.token.symbol}</div>
+                <div tw="text-xl leading-none">
+                  {trade.outputAmount.token.symbol}
+                </div>
               </div>
             </div>
           </div>
@@ -81,8 +85,8 @@ export const ConfirmModal: React.FC<Props> = ({ onDismiss }: Props) => {
         <AsyncButton
           variant="primary"
           tw="h-12 text-xl mt-2"
-          onClick={() => {
-            handleTrade();
+          onClick={async () => {
+            await handleTrade();
             onFieldInput(Field.Input, "");
             onFieldInput(Field.Output, "");
 

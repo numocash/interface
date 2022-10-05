@@ -16,6 +16,7 @@ export interface IMarketInfo {
   currentLiquidity: TokenAmount;
   interestNumerator: TokenAmount;
   totalLiquidityBorrowed: TokenAmount;
+  totalSupply: TokenAmount;
 }
 
 export interface IMarketUserInfo {
@@ -66,7 +67,7 @@ const testMarket: IMarket = {
   token: new Token({
     name: "Numoen Lendgine",
     symbol: "NLDG",
-    decimals: 18,
+    decimals: 36,
     chainId: ChainId.Mainnet,
     address: "0xcbfE63545dc97D20d22dbf3391fcDc7845a5E454",
   }),
@@ -77,6 +78,7 @@ const testMarket: IMarket = {
 
 export const FACTORY = "0x519C8f2D26a656d12582f418d6B460e57867ee5e";
 export const LIQUIDITYMANAGER = "0x9ac00d1e4220b2c6a9e95f3f20dee107be771aa2";
+export const LENDGINEROUTER = "0x87Cf4f31EE557F7188C90FE3E9b7aEDA0B805a61";
 export const GENESIS = 15447817;
 
 export const useAddressToMarket = (

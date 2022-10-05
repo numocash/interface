@@ -8,12 +8,14 @@ import { useProvider, useSigner } from "wagmi";
 
 import ERC20_ABI from "../abis/erc20.json";
 import LENDGINE_ABI from "../abis/Lendgine.json";
+import LR_ABI from "../abis/LendgineRouter.json";
 import LM_ABI from "../abis/LiquidityManager.json";
 import POSITION_ABI from "../abis/Position.json";
-import { LIQUIDITYMANAGER } from "../contexts/environment";
+import { LENDGINEROUTER, LIQUIDITYMANAGER } from "../contexts/environment";
 import type {
   Erc20,
   Lendgine,
+  LendgineRouter,
   LiquidityManager,
   Multicall2,
 } from "../generated";
@@ -65,6 +67,16 @@ export function useLiquidityManager(
     LM_ABI.abi,
     withSignerIfPossible
   ) as LiquidityManager | null;
+}
+
+export function useLendgineRouter(
+  withSignerIfPossible: boolean
+): LendgineRouter | null {
+  return useContract(
+    LENDGINEROUTER,
+    LR_ABI.abi,
+    withSignerIfPossible
+  ) as LendgineRouter | null;
 }
 
 export const positionInterface = new Interface(
