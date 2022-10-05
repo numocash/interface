@@ -47,8 +47,6 @@ export const useUserLendgine = (
 
   const tokenIDs = filteredEvents?.data?.map((d) => +d.args[1].toString());
 
-  console.log(tokenIDs);
-
   const calls: Call[] = tokenIDs
     ? tokenIDs.map((t) => ({
         target: LIQUIDITYMANAGER,

@@ -20,6 +20,7 @@ interface Props {
 export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
   const { speculativeToken, baseToken } = market.pair;
   const marketInfo = useLendgine(market);
+
   const [isOpen, setOpen] = useState(false);
   const reFocusButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -27,7 +28,7 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
     () =>
       !marketInfo
         ? null
-        : marketInfo.currentTick > userInfo.tick
+        : marketInfo.currentTick >= userInfo.tick
         ? tickToAPR(userInfo.tick)
         : 0,
     [marketInfo, userInfo.tick]
@@ -90,7 +91,6 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
             onClick={(e) => {
               e.stopPropagation();
               setOpen(!isOpen);
-              // setHasbeenLoaded(true);
             }}
             className={isOpen ? "isOpen" : ""}
           >
