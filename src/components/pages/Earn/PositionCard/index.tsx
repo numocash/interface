@@ -5,7 +5,7 @@ import type {
   IMarket,
   IMarketUserInfo,
 } from "../../../../contexts/environment";
-import { useLendgine } from "../../../../hooks/useLendgine";
+import { useLendgine, useTick } from "../../../../hooks/useLendgine";
 import { breakpoints } from "../../../../theme/breakpoints";
 import { tickToAPR } from "../../../../utils/tick";
 import { TokenIcon } from "../../../common/TokenIcon";
@@ -20,18 +20,26 @@ interface Props {
 export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
   const { speculativeToken, baseToken } = market.pair;
   const marketInfo = useLendgine(market);
+  const tickInfo = useTick(market, userInfo.tick);
 
   const [isOpen, setOpen] = useState(false);
   const reFocusButtonRef = useRef<HTMLButtonElement>(null);
 
   const apr = useMemo(
     () =>
-      !marketInfo
+      !marketInfo || !tickInfo
         ? null
-        : marketInfo.currentTick >= userInfo.tick
+        : marketInfo.currentTick > userInfo.tick
         ? tickToAPR(userInfo.tick)
+        : marketInfo.currentTick === userInfo.tick
+        ? (+userInfo.liquidity
+            .divide(tickInfo.liquidity)
+            .multiply(100)
+            .quotient.toString() *
+            tickToAPR(userInfo.tick)) /
+          100
         : 0,
-    [marketInfo, userInfo.tick]
+    [marketInfo, tickInfo, userInfo.liquidity, userInfo.tick]
   );
 
   const verticalItemAPY = (

@@ -9,6 +9,7 @@ import type {
   IMarket,
   IMarketInfo,
   IMarketUserInfo,
+  ITickInfo,
 } from "../contexts/environment";
 import { GENESIS, LIQUIDITYMANAGER } from "../contexts/environment";
 import { parseFunctionReturn } from "../utils/parseFunctionReturn";
@@ -152,5 +153,34 @@ export const useLendgine = (market: IMarket): IMarketInfo | null => {
         data.returnData[4]
       ).toString()
     ),
+  };
+};
+
+export const useTick = (
+  market: IMarket,
+  tick: number | null
+): ITickInfo | null => {
+  const calls: Call[] = [
+    {
+      target: market.address,
+      callData: lendgineInterface.encodeFunctionData("ticks", [tick ?? 0]),
+    },
+  ];
+
+  const data = useBlockQuery("tick", calls);
+  if (!data || !tick) return null;
+
+  interface TicksRet {
+    liquidity: BigNumber;
+  }
+
+  const tickData = parseFunctionReturn(
+    lendgineInterface,
+    "ticks",
+    data.returnData[0]
+  ) as unknown as TicksRet;
+
+  return {
+    liquidity: new TokenAmount(market.pair.lp, tickData.liquidity.toString()),
   };
 };

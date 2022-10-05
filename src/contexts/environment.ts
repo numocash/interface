@@ -19,6 +19,10 @@ export interface IMarketInfo {
   totalSupply: TokenAmount;
 }
 
+export interface ITickInfo {
+  liquidity: TokenAmount;
+}
+
 export interface IMarketUserInfo {
   tokenID: number;
   tick: number;
