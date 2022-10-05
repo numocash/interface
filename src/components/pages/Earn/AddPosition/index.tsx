@@ -2,12 +2,16 @@ import type { TokenAmount } from "@dahlia-labs/token-utils";
 import { useState } from "react";
 import { createContainer } from "unstated-next";
 
-import type { IMarket } from "../../../../contexts/environment";
+import type {
+  IMarket,
+  IMarketUserInfo,
+} from "../../../../contexts/environment";
 import { ConfirmButton } from "./Button";
 import { SelectAmount } from "./SelectAmount";
 
 interface IAddPosition {
   market: IMarket | null;
+  userInfo: IMarketUserInfo | null;
 
   speculativeTokenAmount: TokenAmount | null;
   setSpeculativeTokenAmount: (val: TokenAmount) => void;
@@ -18,8 +22,10 @@ interface IAddPosition {
 
 const useAddPositionInternal = ({
   market,
+  userInfo,
 }: {
   market?: IMarket;
+  userInfo?: IMarketUserInfo;
 } = {}): IAddPosition => {
   const [speculativeTokenAmount, setSpeculativeTokenAmount] =
     useState<TokenAmount | null>(null);
@@ -30,6 +36,7 @@ const useAddPositionInternal = ({
 
   return {
     market: market ?? null,
+    userInfo: userInfo ?? null,
 
     speculativeTokenAmount,
     setSpeculativeTokenAmount,
@@ -43,12 +50,13 @@ export const { Provider: AddPositionProvider, useContainer: useAddPosition } =
 
 interface Props {
   market: IMarket;
+  userInfo: IMarketUserInfo;
 }
 
-export const AddPosition: React.FC<Props> = ({ market }) => {
+export const AddPosition: React.FC<Props> = ({ market, userInfo }) => {
   return (
     <div tw="flex flex-col gap-3  w-full">
-      <AddPositionProvider initialState={{ market }}>
+      <AddPositionProvider initialState={{ market, userInfo }}>
         <SelectAmount />
         <ConfirmButton />
       </AddPositionProvider>

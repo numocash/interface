@@ -17,7 +17,7 @@ import { lendgineInterface, useLiquidityManager } from "./useContract";
 
 export const useUserLendgine = (
   address: string | undefined,
-  market: IMarket
+  market: IMarket | null
 ): IMarketUserInfo[] | null => {
   const liquidityManagerContract = useLiquidityManager(false);
   invariant(liquidityManagerContract);
@@ -58,11 +58,16 @@ export const useUserLendgine = (
     : [];
 
   const data = useBlockQuery("user lp positions", calls, [
-    market.address,
+    market?.address,
     address,
   ]);
   if (tokenIDs === []) return [];
-  if (!data || !tokenIDs || data.returnData.length !== tokenIDs.length)
+  if (
+    !data ||
+    !market ||
+    !tokenIDs ||
+    data.returnData.length !== tokenIDs.length
+  )
     return null;
 
   interface LendgineRet {
