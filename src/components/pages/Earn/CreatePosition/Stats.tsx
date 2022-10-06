@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
+import { tickToAPR } from "../../../../utils/tick";
 import { ShareMetric } from "../../../common/ShareMetric";
 import { TokenIcon } from "../../../common/TokenIcon";
 import { useCreatePair } from ".";
@@ -16,9 +17,11 @@ export const Stats: React.FC = () => {
   const rate = useMemo(
     () =>
       lendgineInfo && !lendgineInfo.totalLiquidityBorrowed.equalTo(0)
-        ? new Percent(
-            lendgineInfo.interestNumerator.quotient,
-            lendgineInfo.totalLiquidityBorrowed.quotient
+        ? tickToAPR(
+            new Percent(
+              lendgineInfo?.interestNumerator.quotient,
+              lendgineInfo?.totalLiquidityBorrowed.quotient
+            ).asNumber
           )
         : null,
     [lendgineInfo]

@@ -32,14 +32,14 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
         : marketInfo.currentTick > userInfo.tick
         ? tickToAPR(userInfo.tick)
         : marketInfo.currentTick === userInfo.tick
-        ? (+userInfo.liquidity
+        ? (+marketInfo.currentLiquidity
             .divide(tickInfo.liquidity)
             .multiply(100)
             .quotient.toString() *
             tickToAPR(userInfo.tick)) /
           100
         : 0,
-    [marketInfo, tickInfo, userInfo.liquidity, userInfo.tick]
+    [marketInfo, tickInfo, userInfo.tick]
   );
 
   const verticalItemAPY = (
