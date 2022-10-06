@@ -21,7 +21,8 @@ export const outputAmount = (
           market.token,
           lpAmount
             .multiply(marketInfo.totalSupply)
-            .divide(marketInfo.totalLiquidityBorrowed).quotient
+            .divide(marketInfo.totalLiquidityBorrowed)
+            .multiply(scale).quotient
         );
 
     const baseAmount = new TokenAmount(

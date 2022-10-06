@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { FaArrowDown, FaPlus } from "react-icons/fa";
 import { useAccount } from "wagmi";
 
@@ -7,13 +7,10 @@ import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { Button } from "../../common/Button";
 import { Settings } from "../../common/Settings";
-import { ConfirmModal } from "./ConfirmModal";
 import { Field, useSwapState } from "./useSwapState";
 
 export const Swap: React.FC = () => {
   const { address } = useAccount();
-
-  const [showModal, setShowModal] = useState(false);
 
   const {
     selectedFrom,
@@ -27,6 +24,7 @@ export const Swap: React.FC = () => {
 
     swapDisabledReason,
     trade,
+    handleTrade,
   } = useSwapState();
 
   const tokenAccounts = useMemo(
@@ -64,10 +62,6 @@ export const Swap: React.FC = () => {
           <Settings />
         </div>
         <div tw="max-w-lg">
-          {showModal ? (
-            <ConfirmModal onDismiss={() => setShowModal(false)} />
-          ) : null}
-
           <div tw=" pb-0 gap-2 flex flex-col  shadow-2xl bg-action p-6">
             <AssetSelection
               label={<span>From</span>}
@@ -125,7 +119,10 @@ export const Swap: React.FC = () => {
         variant="primary"
         tw="flex w-full text-xl h-12 p-0"
         disabled={!!swapDisabledReason}
-        onClick={() => setShowModal(true)}
+        onClick={async () => {
+          await handleTrade();
+          onFieldInput(Field.Input, "");
+        }}
       >
         {swapDisabledReason ?? "Swap"}
       </AsyncButton>

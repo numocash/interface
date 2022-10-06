@@ -17,8 +17,6 @@ export const Earn: React.FC = () => {
   invariant(market);
   const userMarketInfo = useUserLendgine(address, market);
 
-  console.log(userMarketInfo);
-
   return (
     <div tw="w-full max-w-3xl flex flex-col gap-2">
       <div tw="flex justify-between w-full">

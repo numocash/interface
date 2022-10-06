@@ -1,5 +1,5 @@
 import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
-import { Fraction } from "@dahlia-labs/token-utils";
+import { Fraction, Percent } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 import { useCallback, useMemo } from "react";
 import invariant from "tiny-invariant";
@@ -81,14 +81,20 @@ export const useTrade = ({
                 approval
                   ? {
                       title: "Approve",
-                      description: "Approve",
+                      description: `Approve ${
+                        fromAmount?.toFixed(2, {
+                          groupSeparator: ",",
+                        }) ?? ""
+                      } ${fromToken?.symbol ?? ""}`,
                       txEnvelope: approve,
                     }
                   : null,
                 !trade?.mint && baseApproval
                   ? {
-                      title: "Approve cUSD",
-                      description: "Approve cUSD",
+                      title: "Approve",
+                      description: `Approve ${trade?.baseAmount.toFixed(2, {
+                        groupSeparator: ",",
+                      })} ${trade?.market.pair.baseToken.symbol}`,
                       txEnvelope: baseApprove,
                     }
                   : null,
@@ -99,14 +105,14 @@ export const useTrade = ({
 
     trade.mint
       ? await beet(
-          "Mint",
+          "Buy option",
           approveStage.concat([
             {
-              stageTitle: "mint",
+              stageTitle: "Buy option",
               parallelTransactions: [
                 {
-                  title: "mint",
-                  description: "mint",
+                  title: "Buy option",
+                  description: `Buy ${trade.market.pair.speculativeToken.symbol} squared option`,
                   txEnvelope: () =>
                     lengineRouterContract.mint({
                       base: market.pair.baseToken.address,
@@ -115,7 +121,9 @@ export const useTrade = ({
                         .multiply(scale)
                         .quotient.toString(),
                       amountS: trade.inputAmount.raw.toString(),
-                      sharesMin: 0,
+                      sharesMin: trade.outputAmount
+                        .reduceBy(settings.maxSlippagePercent)
+                        .raw.toString(),
                       recipient: address,
                       deadline:
                         Math.round(Date.now() / 1000) + settings.timeout * 60,
@@ -129,11 +137,11 @@ export const useTrade = ({
           "Burn",
           approveStage.concat([
             {
-              stageTitle: "burn",
+              stageTitle: "Sell option",
               parallelTransactions: [
                 {
-                  title: "burn",
-                  description: "burn",
+                  title: "Sell option",
+                  description: `Sell ${trade.market.pair.speculativeToken.symbol} squared option`,
                   txEnvelope: () =>
                     lengineRouterContract.burn({
                       base: market.pair.baseToken.address,
@@ -142,8 +150,14 @@ export const useTrade = ({
                         .multiply(scale)
                         .quotient.toString(),
                       shares: trade.inputAmount.raw.toString(),
-                      amountSMin: 0,
-                      amountBMax: trade.baseAmount.raw.toString(),
+                      amountSMin: trade.outputAmount
+                        .reduceBy(settings.maxSlippagePercent)
+                        .quotient.toString(),
+                      amountBMax: trade.baseAmount
+                        .scale(
+                          settings.maxSlippagePercent.add(Percent.ONE_HUNDRED)
+                        )
+                        .raw.toString(),
                       recipient: address,
                       deadline:
                         Math.round(Date.now() / 1000) + settings.timeout * 60,
@@ -160,10 +174,13 @@ export const useTrade = ({
     baseApproval,
     baseApprove,
     beet,
+    fromAmount,
+    fromToken?.symbol,
     lengineRouterContract,
     market.pair.baseToken.address,
     market.pair.bound.asFraction,
     market.pair.speculativeToken.address,
+    settings.maxSlippagePercent,
     settings.timeout,
     trade,
   ]);

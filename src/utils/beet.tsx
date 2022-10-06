@@ -316,7 +316,7 @@ export class DefaultToasterWrapper {
     hash?: string
   ) {
     return (
-      <ToastContainer tw="flex flex-col">
+      <ToastContainer tw="flex flex-col overflow-hidden">
         <div tw="flex font-semibold justify-between items-center">
           <span tw="flex items-center gap-1">
             {title}
