@@ -63,7 +63,7 @@ export const useUserLendgine = (
     : [];
 
   const data = useBlockQuery("user lp positions", calls);
-  if (tokenIDs === []) return [];
+  if (tokenIDs === [] || !address) return [];
   if (
     !data ||
     !market ||
