@@ -14,7 +14,11 @@ import type {
 import { GENESIS, LIQUIDITYMANAGER } from "../contexts/environment";
 import { parseFunctionReturn } from "../utils/parseFunctionReturn";
 import { blockHistory, useBlockQuery } from "./useBlockQuery";
-import { lendgineInterface, useLiquidityManager } from "./useContract";
+import {
+  lendgineInterface,
+  useLendgineContract,
+  useLiquidityManager,
+} from "./useContract";
 
 export const useUserLendgine = (
   address: string | undefined,
@@ -181,6 +185,77 @@ export const useTick = (
   ) as unknown as TicksRet;
 
   return {
+    tick,
     liquidity: new TokenAmount(market.pair.lp, tickData.liquidity.toString()),
   };
+};
+
+export const useTicks = (market: IMarket): ITickInfo[] | null => {
+  const lendgineContract = useLendgineContract(market.address, false);
+  invariant(lendgineContract);
+
+  const mintFilter = lendgineContract.filters.MintMaker();
+  const { blocknumber } = useBlock();
+  const queryClient = useQueryClient();
+
+  const filteredEvents = useQuery(
+    ["mintmaker", blocknumber ?? 0],
+    async () =>
+      await lendgineContract.queryFilter(
+        mintFilter,
+        GENESIS,
+        blocknumber ?? undefined
+      ),
+    {
+      staleTime: Infinity,
+      placeholderData: blocknumber
+        ? [...Array(blockHistory).keys()]
+            .map((i) => blocknumber - i - 1)
+            .reduce((acc, cur: number) => {
+              return acc ? acc : queryClient.getQueryData(["mintmaker", cur]);
+            }, undefined) ?? queryClient.getQueryData(["mintmaker", 0])
+        : undefined,
+    }
+  );
+
+  const allTicks = filteredEvents.data?.map((d) => d.args.tick as number);
+
+  const seen = new Set<number>();
+  const dedupedTicks = allTicks?.filter((t) => {
+    if (seen.has(t)) {
+      return false;
+    } else {
+      seen.add(t);
+      return true;
+    }
+  });
+
+  const sortedTicks = dedupedTicks?.sort((a: number, b: number) =>
+    a > b ? 1 : -1
+  );
+
+  const calls: Call[] =
+    sortedTicks?.map((t) => ({
+      target: market.address,
+      callData: lendgineInterface.encodeFunctionData("ticks", [t]),
+    })) ?? [];
+
+  const data = useBlockQuery("all ticks", calls, [market.address, sortedTicks]);
+  if (!data || !sortedTicks) return null;
+  interface TicksRet {
+    liquidity: BigNumber;
+  }
+
+  return sortedTicks.map((t, i) => {
+    const tickData = parseFunctionReturn(
+      lendgineInterface,
+      "ticks",
+      data.returnData[i]
+    ) as unknown as TicksRet;
+
+    return {
+      tick: t,
+      liquidity: new TokenAmount(market.pair.lp, tickData.liquidity.toString()),
+    };
+  });
 };

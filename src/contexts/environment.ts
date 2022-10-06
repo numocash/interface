@@ -20,6 +20,7 @@ export interface IMarketInfo {
 }
 
 export interface ITickInfo {
+  tick: number;
   liquidity: TokenAmount;
 }
 
@@ -60,11 +61,11 @@ const testPair: IPair = {
     symbol: "NLP",
     decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0x925A837CDF8D85C3D93800B6817F9379289055aF",
+    address: "0xDA4c13f913CA412C41FaF7a11D8A03D41b731551",
   }),
 
   bound: new Price(CUSD[ChainId.Mainnet], CELO[ChainId.Mainnet], 1, 5),
-  address: "0x925A837CDF8D85C3D93800B6817F9379289055aF",
+  address: "0xDA4c13f913CA412C41FaF7a11D8A03D41b731551",
 };
 
 const testMarket: IMarket = {
@@ -73,16 +74,16 @@ const testMarket: IMarket = {
     symbol: "NLDG",
     decimals: 36,
     chainId: ChainId.Mainnet,
-    address: "0xcbfE63545dc97D20d22dbf3391fcDc7845a5E454",
+    address: "0xF0c88240b6d25831dC5E8b542b65f198BAAEfA9F",
   }),
 
-  address: "0xcbfE63545dc97D20d22dbf3391fcDc7845a5E454",
+  address: "0xF0c88240b6d25831dC5E8b542b65f198BAAEfA9F",
   pair: testPair,
 };
 
-export const FACTORY = "0x519C8f2D26a656d12582f418d6B460e57867ee5e";
-export const LIQUIDITYMANAGER = "0x9ac00d1e4220b2c6a9e95f3f20dee107be771aa2";
-export const LENDGINEROUTER = "0x87Cf4f31EE557F7188C90FE3E9b7aEDA0B805a61";
+export const FACTORY = "0x95c62A69B6a7da59318256B2ef8a39fda347F7B2";
+export const LIQUIDITYMANAGER = "0x41036e7DA2eA3Df340DbFF9030821FCF44b6910b";
+export const LENDGINEROUTER = "0xaDF94da27b54a17C128f035BB7bA8165AF290265";
 export const GENESIS = 15447817;
 
 export const useAddressToMarket = (

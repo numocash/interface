@@ -84,15 +84,6 @@ export const Settings: React.FC = () => {
               />
             </div>
           </div>
-          <div tw="flex bg-action rounded-xl p-2 gap-1 justify-between items-center">
-            <div tw="">Minima API</div>
-            <div tw="">
-              <Switch
-                selected={settings.minimaApi}
-                onSelect={settings.setMinimaApi}
-              />
-            </div>
-          </div>
         </div>
       </Drop>
       <div tw="text-default  flex items-center text-lg" ref={setTargetRef}>

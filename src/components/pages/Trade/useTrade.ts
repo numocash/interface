@@ -66,8 +66,19 @@ export const useTrade = ({
         }
       : null;
 
-  const baseApproval = useApproval(trade?.baseAmount, address, LENDGINEROUTER);
-  const baseApprove = useApprove(trade?.baseAmount, LENDGINEROUTER);
+  const baseApproval = useApproval(
+    trade?.baseAmount.scale(
+      settings.maxSlippagePercent.add(Percent.ONE_HUNDRED)
+    ),
+    address,
+    LENDGINEROUTER
+  );
+  const baseApprove = useApprove(
+    trade?.baseAmount.scale(
+      settings.maxSlippagePercent.add(Percent.ONE_HUNDRED)
+    ),
+    LENDGINEROUTER
+  );
 
   const handleTrade = useCallback(async () => {
     invariant(lengineRouterContract && address && trade);

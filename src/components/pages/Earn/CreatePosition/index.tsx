@@ -34,7 +34,7 @@ const useCreatePairInternal = (): ICreatePair => {
     null
   );
 
-  const [tick, setTick] = useState(10);
+  const [tick, setTick] = useState(5);
 
   const { markets } = useEnvironment();
 
