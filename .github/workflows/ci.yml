@@ -31,5 +31,6 @@ jobs:
 
       - name: Install Yarn dependencies
         run: yarn install
+        run: yarn typechain
       - run: yarn typecheck
       - run: yarn lint
