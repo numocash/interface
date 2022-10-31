@@ -1,9 +1,9 @@
 import type { Network } from "@dahlia-labs/celo-contrib";
-import styled from "@emotion/styled";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import type { ToastPosition } from "react-hot-toast";
 import { toast } from "react-hot-toast";
+import { styled } from "twin.macro";
 
 interface INotifyArgs {
   message?: string;
