@@ -3,7 +3,6 @@ import "@reach/dialog/styles.css";
 import { DialogContent, DialogOverlay } from "@reach/dialog";
 import { animated, useSpring, useTransition } from "@react-spring/web";
 import React from "react";
-import { isMobile } from "react-device-detect";
 import { useGesture } from "react-use-gesture";
 import tw, { css, styled } from "twin.macro";
 
