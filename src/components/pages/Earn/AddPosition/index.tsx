@@ -53,7 +53,7 @@ interface Props {
   userInfo: IMarketUserInfo;
 }
 
-export const AddPosition: React.FC<Props> = ({ market, userInfo }) => {
+export const AddPosition: React.FC<Props> = ({ market, userInfo }: Props) => {
   return (
     <div tw="flex flex-col gap-3  w-full">
       <AddPositionProvider initialState={{ market, userInfo }}>

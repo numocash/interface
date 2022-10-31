@@ -1,10 +1,14 @@
 import invariant from "tiny-invariant";
 
 import { Module } from "../../../common/Module";
-import { useCreatePair } from ".";
+import { useCreatePair } from "./index";
 
 export const Bound: React.FC = () => {
-  const { bound, speculativeToken, baseToken } = useCreatePair();
+  const {
+    market: {
+      pair: { bound, speculativeToken, baseToken },
+    },
+  } = useCreatePair();
   invariant(bound && speculativeToken && baseToken);
 
   return (

@@ -6,7 +6,6 @@ import { useEnvironment } from "../../../contexts/environment";
 import { useUserLendgine } from "../../../hooks/useLendgine";
 import { Button } from "../../common/Button";
 import { LoadingPage } from "../../common/LoadingPage";
-import { EmptyPosition } from "./EmptyPosition";
 import { PositionCard } from "./PositionCard";
 
 export const Earn: React.FC = () => {
@@ -27,8 +26,6 @@ export const Earn: React.FC = () => {
       </div>
       {userMarketInfo === null ? (
         <LoadingPage />
-      ) : userMarketInfo === [] ? (
-        <EmptyPosition />
       ) : (
         userMarketInfo.map((m) => (
           <PositionCard key={m.tokenID} userInfo={m} market={market} />

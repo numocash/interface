@@ -58,21 +58,3 @@ export const useMarketsPerToken = (token: Token) => {
     [environments.markets, token]
   );
 };
-
-/**
- * Dedupes a list of tokens, picking the first instance of the token in a list.
- * @param tokens
- * @returns
- */
-const dedupeTokens = (tokens: Token[]): Token[] => {
-  const seen = new Set<string>();
-  return tokens.filter((token) => {
-    const tokenID = `${token.address}_${token.chainId}`;
-    if (seen.has(tokenID)) {
-      return false;
-    } else {
-      seen.add(tokenID);
-      return true;
-    }
-  });
-};

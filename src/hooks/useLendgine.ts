@@ -63,7 +63,7 @@ export const useUserLendgine = (
     : [];
 
   const data = useBlockQuery("user lp positions", calls);
-  if (tokenIDs === [] || !address) return [];
+  if (!address) return [];
   if (
     !data ||
     !market ||
@@ -218,7 +218,7 @@ export const useTicks = (market: IMarket): ITickInfo[] | null => {
     }
   );
 
-  const allTicks = filteredEvents.data?.map((d) => d.args.tick as number);
+  const allTicks = filteredEvents.data?.map((d) => d.args.tick);
 
   const seen = new Set<number>();
   const dedupedTicks = allTicks?.filter((t) => {

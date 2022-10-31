@@ -56,15 +56,18 @@ export const useTrade = ({
   const approval = useApproval(fromAmount, address, LENDGINEROUTER);
   const approve = useApprove(fromAmount, LENDGINEROUTER);
 
-  const trade =
-    fromAmount && toToken && fromToken && market && marketInfo
-      ? {
-          market,
-          mint: fromAmount.token === market.pair.speculativeToken,
-          inputAmount: fromAmount,
-          ...outputAmount(market, marketInfo, fromAmount),
-        }
-      : null;
+  const trade = useMemo(
+    () =>
+      fromAmount && toToken && fromToken && market && marketInfo
+        ? {
+            market,
+            mint: fromAmount.token === market.pair.speculativeToken,
+            inputAmount: fromAmount,
+            ...outputAmount(market, marketInfo, fromAmount),
+          }
+        : null,
+    [fromAmount, fromToken, market, marketInfo, toToken]
+  );
 
   const baseApproval = useApproval(
     trade?.baseAmount.scale(

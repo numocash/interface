@@ -8,7 +8,6 @@ import { createContainer } from "unstated-next";
 import type { IMarket } from "../../../../contexts/environment";
 import { useEnvironment } from "../../../../contexts/environment";
 import { Settings } from "../../../common/Settings";
-import { InterestRate } from "./InterestRate";
 import { SelectPair } from "./SelectPair";
 import { SendButton } from "./SendButton";
 import { Stats } from "./Stats";
@@ -81,9 +80,6 @@ export const CreatePosition: React.FC = () => {
             </>
           </div>
           <SelectPair />
-        </div>
-        <div tw="flex justify-center">
-          <InterestRate tw="flex justify-center items-center" />
         </div>
         <div tw="flex justify-center">
           <SendButton tw="flex justify-center items-center" />

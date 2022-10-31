@@ -44,7 +44,10 @@ interface Props {
   userInfo: IMarketUserInfo;
 }
 
-export const RemovePosition: React.FC<Props> = ({ market, userInfo }) => {
+export const RemovePosition: React.FC<Props> = ({
+  market,
+  userInfo,
+}: Props) => {
   return (
     <div tw="flex flex-col gap-3 max-w-2xl w-full">
       <RemovePositionProvider initialState={{ market, userInfo }}>

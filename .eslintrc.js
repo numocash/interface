@@ -8,6 +8,6 @@ module.exports = {
     project: "tsconfig.json",
   },
   rules: {
-    "react/no-unknown-property": ["error", { ignore: ["tw"] }],
+    "react/no-unknown-property": ["error", { ignore: ["tw", "css"] }],
   },
 };

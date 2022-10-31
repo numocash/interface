@@ -58,7 +58,6 @@ interface Props {
 }
 
 export const AssetSelection: React.FC<Props> = ({
-  label,
   onSelect,
   selectedValue,
   inputValue,
@@ -191,60 +190,3 @@ export const AssetSelection: React.FC<Props> = ({
     </div>
   );
 };
-
-const BalanceAndOutputOverflowPrevention = styled.div`
-  position: relative;
-  padding: 8px 0;
-  height: 36px; // 20px line height 8px padding
-`;
-const BalanceAndOutput = styled.div`
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  overflow: hidden;
-  line-height: 20px;
-
-  gap: 8px;
-  white-space: nowrap;
-`;
-const Output = styled.div`
-  font-size: 13px;
-  color: ${({ theme }) => theme.colors.text.default};
-`;
-
-const NoAmount = styled.span`
-  margin-left: 0.3em;
-  color: ${({ theme }) => theme.colors.text.default};
-`;
-
-const TextButton = styled.button<{ onClick?: () => void }>`
-  margin-left: 0.3em;
-  color: ${({ theme }) => theme.colors.text.accent};
-  ${({ onClick }) =>
-    onClick !== undefined &&
-    css`
-      cursor: pointer;
-      &:hover {
-        text-decoration: underline;
-      }
-    `}
-
-  padding: 0;
-  border: 0;
-  display: inline;
-  background: none;
-`;
-
-// const Balance = styled.div`
-//   font-weight: normal;
-//   font-size: 13px;
-//   color: ${({ theme }) => theme.colors.text.default};
-
-//   display: flex;
-//   align-items: center;
-// `;
-
-const TokenBox = styled.div``;

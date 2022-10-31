@@ -93,7 +93,6 @@ const useSwapStateInternal = (): UseSwapStateValues => {
   });
 
   const inputToken = fieldState[Field.Input].token;
-  const outputToken = fieldState[Field.Output].token;
 
   const selectedFrom = fieldState[Field.Input].token ?? null;
   const selectedTo = fieldState[Field.Output].token ?? null;
