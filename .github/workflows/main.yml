@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/yarn
+      - run: yarn typechain
+      - run: yarn typecheck
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/yarn
+      - run: yarn typechain
+      - run: yarn lint:ci
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/yarn
+      - run: yarn typechain
+      - run: yarn build
