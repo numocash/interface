@@ -1,11 +1,10 @@
-import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment";
 import { useUserLendgine } from "../../../hooks/useLendgine";
-import { Button } from "../../common/Button";
 import { LoadingPage } from "../../common/LoadingPage";
+import { Learn } from "./Learn";
 import { PositionCard } from "./PositionCard";
 
 export const Earn: React.FC = () => {
@@ -17,19 +16,25 @@ export const Earn: React.FC = () => {
   const userMarketInfo = useUserLendgine(address, market);
 
   return (
-    <div tw="w-full max-w-3xl flex flex-col gap-2">
-      <div tw="flex justify-between w-full">
-        <p tw=" font-semibold text-2xl text-default">Your Positions</p>
-        <NavLink to="/earn/create-position">
-          <Button variant="primary">New Position</Button>
-        </NavLink>
-      </div>
+    <div tw="grid w-full max-w-3xl flex-col gap-4">
+      <p tw="font-bold text-2xl text-default">Earn on your assets</p>
+      <p tw=" text-default">
+        Provide liquidity to Numoen pools and lend your position to options
+        buyers to earn yield.
+      </p>
+      <p tw="text-sm text-default">
+        Displaying <span tw="font-semibold">{markets.length} markets</span>
+      </p>
+      <Learn />
+      {/* TODO: show all when wallet disconnected */}
       {userMarketInfo === null ? (
         <LoadingPage />
       ) : (
-        userMarketInfo.map((m) => (
-          <PositionCard key={m.tokenID} userInfo={m} market={market} />
-        ))
+        <div tw="grid md:grid-cols-2  gap-6">
+          {userMarketInfo.map((m) => (
+            <PositionCard key={m.tokenID} userInfo={m} market={market} />
+          ))}
+        </div>
       )}
     </div>
   );
