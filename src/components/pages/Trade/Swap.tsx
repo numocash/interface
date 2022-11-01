@@ -1,11 +1,9 @@
 import React, { useMemo } from "react";
-import { FaArrowDown, FaPlus } from "react-icons/fa";
 import { useAccount } from "wagmi";
 
 import { useTokenBalances } from "../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
-import { Button } from "../../common/Button";
 import { Settings } from "../../common/Settings";
 import { Field, useSwapState } from "./useSwapState";
 
@@ -16,7 +14,6 @@ export const Swap: React.FC = () => {
     selectedFrom,
     selectedTo,
 
-    invertSwap,
     onFieldInput,
     onFieldSelect,
 
@@ -37,32 +34,17 @@ export const Swap: React.FC = () => {
   );
   const balances = useTokenBalances(tokenAccounts, address);
 
-  const baseAmount = trade?.market ? (
-    <AssetSelection
-      label={<span>To (Estimate)</span>}
-      tw=""
-      inputDisabled={true}
-      selectedValue={trade.market.pair.baseToken}
-      inputValue={trade?.baseAmount.toSignificant(6)}
-      inputOnChange={(value) => onFieldInput(Field.Output, value)}
-      currentAmount={{
-        amount: balances && balances[2] ? balances[2] : undefined,
-        allowSelect: false,
-      }}
-    />
-  ) : null;
-
   return (
     <>
       <div tw="rounded-xl overflow-hidden bg-white shadow-2xl">
         <div tw="flex justify-between w-full bg-container h-[68px] py-3 px-6 items-center">
           <p tw=" font-semibold text-xl text-default">
-            Trade option perpetuals
+            Trade perpetual options
           </p>
           <Settings />
         </div>
-        <div tw="max-w-lg">
-          <div tw=" pb-0 gap-2 flex flex-col  shadow-2xl bg-action p-6">
+        <div tw="flex flex-col max-w-lg bg-amber-300">
+          <div tw=" pb-0 gap-2 flex flex-col p-6 bg-white">
             <AssetSelection
               label={<span>From</span>}
               onSelect={(value) => onFieldSelect(Field.Input, value)}
@@ -74,20 +56,11 @@ export const Swap: React.FC = () => {
                 allowSelect: true,
               }}
             />
-            {trade && !trade.mint ? (
-              <>
-                <div tw="flex w-full justify-center mb-3">
-                  <FaPlus tw="text-default justify-self-center" />
-                </div>
-                {baseAmount}
-              </>
-            ) : null}
-            <Button onClick={invertSwap}>
-              <div tw="flex w-full justify-center mb-3">
-                <FaArrowDown tw="text-default justify-self-center" />
-              </div>
-            </Button>
-
+          </div>
+          <div tw="flex items-center justify-center self-center">
+            <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-white w-0 " />
+          </div>
+          <div tw="flex flex-col gap-2 p-6 pt-2">
             <AssetSelection
               label={<span>To (Estimate)</span>}
               tw=""
@@ -101,18 +74,7 @@ export const Swap: React.FC = () => {
                 allowSelect: false,
               }}
             />
-
-            {trade && trade.mint ? (
-              <>
-                <div tw="flex w-full justify-center mb-3">
-                  <FaPlus tw="text-default justify-self-center" />
-                </div>
-                {baseAmount}
-              </>
-            ) : null}
           </div>
-
-          {/* <LongPayoff bound={trade?.market?.pair.bound ?? null} /> */}
         </div>
       </div>
       <AsyncButton

@@ -53,7 +53,10 @@ export const BigNumericInput: React.FC<IProps> = ({
   />
 );
 
-const StyledInput = styled.input<{ hasBackground?: boolean }>`
+const StyledInput = styled.input<{
+  hasBackground?: boolean;
+  disabled?: boolean;
+}>`
   color: ${({ theme }) => theme.colors.text.bold};
   font-weight: 400;
   font-size: 24px;
@@ -72,7 +75,15 @@ const StyledInput = styled.input<{ hasBackground?: boolean }>`
     font-size: 20px;
   }
 
-  background: transparent;
+  ${(props) =>
+    !props.disabled
+      ? css`
+          background-color: rgb(237 238 239);
+        `
+      : css`
+          background: transparent;
+        `}
+
   // outline: none;
   ${(props) =>
     props.hasBackground &&
