@@ -3003,10 +3003,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.0.2":
-  version: 1.0.2
-  resolution: "@remix-run/router@npm:1.0.2"
-  checksum: bf410f9cbb31308fc306bc8c5e3a732b9ad81ddb84281e37804bdd196b6db7ddd86abc29e15c5b21883e01b37f250d0b8db7bee5f5a9af6c7c532b68280676c9
+"@remix-run/router@npm:1.0.3":
+  version: 1.0.3
+  resolution: "@remix-run/router@npm:1.0.3"
+  checksum: 7e535f3c24bf6b0a48aff3de70ee74e5402fe93105aa9bd01f275d5d8f5a9a8a7cadec08d18cf5544d4f24bc9d7a091abc1c9d4ea8efb2893e9077f104a51459
   languageName: node
   linkType: hard
 
@@ -3388,10 +3388,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:4.13.4, @tanstack/query-core@npm:^4.13.4":
+"@tanstack/query-core@npm:4.13.4":
   version: 4.13.4
   resolution: "@tanstack/query-core@npm:4.13.4"
   checksum: 5cef6289ef815bd87f100408f413170fde0d2a1ebce84d51cf7551f023bf2ec91b90c98d14bfd4ac9436cc879792c61266ec97b63300d02f943964dc1743a84d
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-core@npm:4.14.1, @tanstack/query-core@npm:^4.14.1":
+  version: 4.14.1
+  resolution: "@tanstack/query-core@npm:4.14.1"
+  checksum: 632528627c2d3e8899e4d26ef47c6ff96db6aa1b94683eb2882f2372b6a0e70991f5b0e9729c0ba9e27751c509256453070d78067d5a89db3d7c5dbf9617f777
   languageName: node
   linkType: hard
 
@@ -3413,18 +3420,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-query-devtools@npm:^4.13.5":
-  version: 4.13.5
-  resolution: "@tanstack/react-query-devtools@npm:4.13.5"
+"@tanstack/react-query-devtools@npm:^4.14.1":
+  version: 4.14.1
+  resolution: "@tanstack/react-query-devtools@npm:4.14.1"
   dependencies:
     "@tanstack/match-sorter-utils": ^8.1.1
     superjson: ^1.10.0
     use-sync-external-store: ^1.2.0
   peerDependencies:
-    "@tanstack/react-query": 4.13.5
+    "@tanstack/react-query": 4.14.1
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 94f4195e2957c8b1eeb04cd459635224d2abd2cc6fb4afb0231b53ab15ecf68c65ea0c17fac1f8511558799b859f91f759ac2b4d644d170e0eeba5fe52bfe328
+  checksum: 5f24fbe8e9057b8612c425d497c8edcfe277f0c8cd0251d5d545dc7363c4b9edd924b6368194c5b4e0ae1e6f1043beb60afcf87ac8eeca52685ebc5fb70c4f9b
   languageName: node
   linkType: hard
 
@@ -3439,7 +3446,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:^4.10.1, @tanstack/react-query@npm:^4.13.5":
+"@tanstack/react-query@npm:^4.10.1":
   version: 4.13.5
   resolution: "@tanstack/react-query@npm:4.13.5"
   dependencies:
@@ -3455,6 +3462,25 @@ __metadata:
     react-native:
       optional: true
   checksum: 0e10a0aafa8f1d2810b6359a315f83a074f376b4359c4b5f4b3e378c87ea4832efecfc385aca692cd66fa3db91c840b27e51ed3a1987f2c37440380496aa2e29
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^4.14.1":
+  version: 4.14.1
+  resolution: "@tanstack/react-query@npm:4.14.1"
+  dependencies:
+    "@tanstack/query-core": 4.14.1
+    use-sync-external-store: ^1.2.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-native: "*"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+    react-native:
+      optional: true
+  checksum: 52397fedbb30bb5299045a66877c996e4a97f858f93436100fd7accc9731adf9ad61cf5a5e54d20e2f6b60ce7fdb9a2a209f3d5875d49793d758133e88048a10
   languageName: node
   linkType: hard
 
@@ -3507,9 +3533,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typechain/ethers-v5@npm:^10.1.0":
-  version: 10.1.0
-  resolution: "@typechain/ethers-v5@npm:10.1.0"
+"@typechain/ethers-v5@npm:^10.1.1":
+  version: 10.1.1
+  resolution: "@typechain/ethers-v5@npm:10.1.1"
   dependencies:
     lodash: ^4.17.15
     ts-essentials: ^7.0.1
@@ -3518,9 +3544,9 @@ __metadata:
     "@ethersproject/bytes": ^5.0.0
     "@ethersproject/providers": ^5.0.0
     ethers: ^5.1.3
-    typechain: ^8.1.0
+    typechain: ^8.1.1
     typescript: ">=4.3.0"
-  checksum: 452ad685ce792ddefebdcb8ae72f4343ed1411f91701250e273c1a0dd79753d0d40f311cff19ec0c4fd6a9b9cf23e55eb9ae1b94cb388fbc54c122ae4d0e6f47
+  checksum: 6264294a03d0af117f99bee1639461be38161418d7be340a5bf24c4197aeaf7956aabec922119c20f90dba38ea7c12e5c85e0baddd358d18d68f4865037671cb
   languageName: node
   linkType: hard
 
@@ -3785,13 +3811,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:^29.2.0":
-  version: 29.2.0
-  resolution: "@types/jest@npm:29.2.0"
+"@types/jest@npm:^29.2.1":
+  version: 29.2.1
+  resolution: "@types/jest@npm:29.2.1"
   dependencies:
     expect: ^29.0.0
     pretty-format: ^29.0.0
-  checksum: 6779e63d8d7507b116a61b2935a200e48531849fc1ac74090212759fe17716777ca6d2c3a8d927a563e9cfa474ae91d40b1688376ae80e3a08974b3c9e9691e1
+  checksum: 5610c9a44c57f6dc39cf54429ea8d04574ad4c3e3ddf9a2621882aa94a0758a42ca97a0d0aec41a8d0b149fa63bf3d077d1f07c1f1d82e3d89ad7408de211255
   languageName: node
   linkType: hard
 
@@ -3818,10 +3844,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:*, @types/lodash@npm:^4.14.186":
+"@types/lodash@npm:*":
   version: 4.14.186
   resolution: "@types/lodash@npm:4.14.186"
   checksum: ee0c1368a8100bb6efb88335107473a41928fc307ff1ef4ff1278868ccddba9c04c68c36d1ffe3a0392ef4a956e1955f7de3203ec09df4f1655dd1b88485c549
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:^4.14.187":
+  version: 4.14.187
+  resolution: "@types/lodash@npm:4.14.187"
+  checksum: 5f8a4fe6d8a6785b8ecbd9efdc8b7d3341b873f63c5390ad0f269a517508e92c1b1d7d43e97bdfb6bba5bba9a8501b30a54f791ef4c30b854382745c75c607d4
   languageName: node
   linkType: hard
 
@@ -3832,7 +3865,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^18.11.8":
+"@types/node@npm:*":
   version: 18.11.8
   resolution: "@types/node@npm:18.11.8"
   checksum: 60b358f97c1a029722dc785811b217615ef20249c3fbde60a65869cfd7a5cd5b1872ee95c79c187ef70e5a078f4ac7670d2129803985268b1f021ad6e8040af8
@@ -3843,6 +3876,13 @@ __metadata:
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
   checksum: e4f86785f4092706e0d3b0edff8dca5a13b45627e4b36700acd8dfe6ad53db71928c8dee914d4276c7fd3b6ccd829aa919811c9eb708a2c8e4c6eb3701178c37
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^18.11.9":
+  version: 18.11.9
+  resolution: "@types/node@npm:18.11.9"
+  checksum: cc0aae109e9b7adefc32eecb838d6fad931663bb06484b5e9cbbbf74865c721b03d16fd8d74ad90e31dbe093d956a7c2c306ba5429ba0c00f3f7505103d7a496
   languageName: node
   linkType: hard
 
@@ -14094,27 +14134,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.4.2":
-  version: 6.4.2
-  resolution: "react-router-dom@npm:6.4.2"
+"react-router-dom@npm:^6.4.3":
+  version: 6.4.3
+  resolution: "react-router-dom@npm:6.4.3"
   dependencies:
-    "@remix-run/router": 1.0.2
-    react-router: 6.4.2
+    "@remix-run/router": 1.0.3
+    react-router: 6.4.3
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: 858e6a5c4c5da56615dbf53118d576d61851157f077805dfe476b10c332329f8b1494062d75a8de6f1bdd35fbcb8a510f8e23beb2306440d2452b9f2fe4b079d
+  checksum: 67a44d8dc45761a1c88793cac73839bb657168ef61b9473eb39b186b4a3ea1472454fd96f8997dc541cb1e79a723d62f9503cbc9179b63b8f1d634ed6d2b079a
   languageName: node
   linkType: hard
 
-"react-router@npm:6.4.2":
-  version: 6.4.2
-  resolution: "react-router@npm:6.4.2"
+"react-router@npm:6.4.3":
+  version: 6.4.3
+  resolution: "react-router@npm:6.4.3"
   dependencies:
-    "@remix-run/router": 1.0.2
+    "@remix-run/router": 1.0.3
   peerDependencies:
     react: ">=16.8"
-  checksum: c229d65d9b0df88dd4e8c57bd59793e371f2c84b4cb200b77ead9f601c8fd7758f72acfffc9a2fc5cb31877af3a0e08ae24aeb75ab2b20681f3b1d33ca671552
+  checksum: b89c0495c6837b1457915c08c5acc4eb7a2e9e3fae0420faf9bfc6311ecdfe78627cc1034c0e975bccd9aeeb70d1dcc5021322779dd3053d94c47e37339d77eb
   languageName: node
   linkType: hard
 
@@ -14702,17 +14742,17 @@ __metadata:
     "@tailwindcss/aspect-ratio": ^0.4.2
     "@tailwindcss/forms": ^0.5.3
     "@tailwindcss/typography": ^0.5.7
-    "@tanstack/query-core": ^4.13.4
-    "@tanstack/react-query": ^4.13.5
-    "@tanstack/react-query-devtools": ^4.13.5
-    "@typechain/ethers-v5": ^10.1.0
+    "@tanstack/query-core": ^4.14.1
+    "@tanstack/react-query": ^4.14.1
+    "@tanstack/react-query-devtools": ^4.14.1
+    "@typechain/ethers-v5": ^10.1.1
     "@types/babel__core": ^7.1.19
     "@types/bn.js": ^5.1.1
     "@types/events": ^3.0.0
-    "@types/jest": ^29.2.0
-    "@types/lodash": ^4.14.186
+    "@types/jest": ^29.2.1
+    "@types/lodash": ^4.14.187
     "@types/lodash.mapvalues": ^4.6.7
-    "@types/node": ^18.11.8
+    "@types/node": ^18.11.9
     "@types/prop-types": ^15.7.5
     "@types/qs": ^6.9.7
     "@types/react": ^18.0.24
@@ -14759,7 +14799,7 @@ __metadata:
     react-hot-toast: ^2.4.0
     react-icons: ^4.6.0
     react-popper: ^2.3.0
-    react-router-dom: ^6.4.2
+    react-router-dom: ^6.4.3
     react-scripts: ^5.0.1
     react-use-gesture: ^9.1.3
     react-virtual: ^2.10.4
@@ -14767,7 +14807,7 @@ __metadata:
     tiny-invariant: ^1.3.1
     tslib: ^2.4.1
     twin.macro: ^2.8.2
-    typechain: ^8.1.0
+    typechain: ^8.1.1
     typescript: 4.8.4
     unstated-next: ^1.1.0
     use-debounce: ^8.0.4
@@ -16452,9 +16492,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typechain@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "typechain@npm:8.1.0"
+"typechain@npm:^8.1.1":
+  version: 8.1.1
+  resolution: "typechain@npm:8.1.1"
   dependencies:
     "@types/prettier": ^2.1.1
     debug: ^4.3.1
@@ -16470,7 +16510,7 @@ __metadata:
     typescript: ">=4.3.0"
   bin:
     typechain: dist/cli/cli.js
-  checksum: d8e05c4437d5ba54fd5dea28c20884c2aa259e911c6ffc9d1768a229633c661f378439e4b0a1a21f33372e8ed82adc324583381cde16f199af9440792a95da88
+  checksum: 77984239d9728befe5a484c4e1b55c8f194696fc8a78c44754f8e25ca8fd6d0208ddfcd9e71c90c1c35ac0689f5c3053107b54fdc2aab691c980614f6daf209b
   languageName: node
   linkType: hard
 
