@@ -7,10 +7,10 @@ import type {
   IMarketUserInfo,
 } from "../../../../contexts/environment";
 import { breakpoints } from "../../../../theme/breakpoints";
+import { ChartIcons } from "../../../common/ChartIcons";
 import { TokenIcon } from "../../../common/TokenIcon";
 import { scale } from "../../Trade/useTrade";
 import { Stats } from "./Stats";
-import { Types } from "./Types";
 
 interface Props {
   market: IMarket;
@@ -55,8 +55,9 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
           </div>
           <div tw="flex items-center">{verticalItemDeposit}</div>
         </div>
-        <div tw="flex w-auto">
-          <Types />
+        <div tw="flex w-auto gap-2">
+          <ChartIcons chart="up" token={market.pair.speculativeToken} />
+          <ChartIcons chart="down" token={market.pair.baseToken} />
         </div>
         <Stats />
       </div>
