@@ -10,7 +10,7 @@ interface Props {
 export const Module: React.FC<Props> = ({ children, className }: Props) => {
   return (
     <div
-      tw="p-6 rounded-3xl border border-neutral-700 bg-white  w-full shadow-2xl"
+      tw="p-6 rounded-lg border border-[#AEAEB2] bg-white  w-full shadow-2xl"
       className={className}
     >
       <ErrorBoundary
