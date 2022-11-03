@@ -8,10 +8,12 @@ import { LIQUIDITYMANAGER } from "../../../../contexts/environment";
 import type { ISettings } from "../../../../contexts/settings";
 import { useApproval, useApprove } from "../../../../hooks/useApproval";
 import { useLiquidityManager } from "../../../../hooks/useContract";
+import { usePair } from "../../../../hooks/usePair";
 import { useTokenBalances } from "../../../../hooks/useTokenBalance";
 import type { BeetStage, BeetTx } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
 import { scale } from "../../Trade/useTrade";
+import { pairInfoToPrice } from "../PositionCard/Stats";
 
 export const useDeposit = (
   market: IMarket,
@@ -23,6 +25,38 @@ export const useDeposit = (
   const liquidityManagerContract = useLiquidityManager(true);
   const Beet = useBeet();
   const { address } = useAccount();
+  const pairInfo = usePair(market.pair);
+  const price = useMemo(
+    () => (pairInfo ? pairInfoToPrice(pairInfo, market.pair) : null),
+    [market.pair, pairInfo]
+  );
+
+  const valid = useMemo(
+    () =>
+      price && baseTokenAmount && speculativeTokenAmount
+        ? price.asFraction
+            .multiply(price)
+            .multiply(speculativeTokenAmount)
+            .equalTo(
+              baseTokenAmount
+                .multiply(market.pair.bound.subtract(price))
+                .multiply(2)
+            )
+        : null,
+    [baseTokenAmount, market.pair.bound, price, speculativeTokenAmount]
+  );
+
+  const liquidity = useMemo(
+    () =>
+      price && baseTokenAmount
+        ? baseTokenAmount
+            .multiply(scale)
+            .divide(price.asFraction.multiply(price))
+        : null,
+    [baseTokenAmount, price]
+  );
+
+  console.log(liquidity?.quotient.toString());
 
   const balances = useTokenBalances(
     [market?.pair.baseToken ?? null, market?.pair.speculativeToken ?? null],
@@ -44,11 +78,18 @@ export const useDeposit = (
         ? "Enter an amount"
         : baseTokenAmount.equalTo(0) && speculativeTokenAmount.equalTo(0)
         ? "Enter an amount"
-        : !balances || approvalS === null || approvalB === null || !market
+        : !balances ||
+          approvalS === null ||
+          approvalB === null ||
+          !price ||
+          valid === null ||
+          !liquidity
         ? "Loading..."
         : (balances[1] && speculativeTokenAmount.greaterThan(balances[1])) ||
           (balances[0] && baseTokenAmount.greaterThan(balances[0]))
         ? "Insufficient funds"
+        : !valid
+        ? "Invalid combination"
         : null,
     [
       baseTokenAmount,
@@ -56,13 +97,18 @@ export const useDeposit = (
       balances,
       approvalS,
       approvalB,
-      market,
+      price,
+      valid,
+      liquidity,
     ]
   );
 
   const onSend = async () => {
     invariant(
-      liquidityManagerContract && speculativeTokenAmount && baseTokenAmount
+      liquidityManagerContract &&
+        speculativeTokenAmount &&
+        baseTokenAmount &&
+        liquidity
     );
     const approveStage: BeetStage[] =
       approvalS || approvalB
@@ -110,7 +156,7 @@ export const useDeposit = (
                   .quotient.toString(),
                 amount0: baseTokenAmount.raw.toString(),
                 amount1: speculativeTokenAmount.raw.toString(),
-                liquidity: "100000000000000000",
+                liquidity: liquidity.quotient.toString(),
                 recipient: address,
                 deadline: Math.round(Date.now() / 1000) + settings.timeout * 60,
               }),

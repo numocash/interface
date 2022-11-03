@@ -43,7 +43,7 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
 
   return (
     <NavLink to={`/earn/${market.address}`}>
-      <div tw="p-4 pb-2 rounded-xl bg-action flex flex-col hover:border-2 border border-[#AEAEB2]">
+      <div tw="p-4 pb-2 rounded-xl bg-action flex flex-col hover:border-2 border border-[#AEAEB2] shadow-2xl">
         <div tw="flex justify-between items-center ">
           <div tw="flex items-center gap-3">
             <div tw="flex items-center space-x--2">

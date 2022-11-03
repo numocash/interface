@@ -44,7 +44,7 @@ export const Swap: React.FC = () => {
           </p>
           <Settings />
         </div>
-        <div tw="flex flex-col max-w-lg bg-amber-300 rounded-lg">
+        <div tw="flex flex-col max-w-lg bg-gray-200 rounded-lg">
           <div tw=" pb-0 gap-2 flex flex-col p-6 bg-white">
             <AssetSelection
               label={<span>From</span>}
