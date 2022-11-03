@@ -10,7 +10,6 @@ import ERC20_ABI from "../abis/erc20.json";
 import LENDGINE_ABI from "../abis/Lendgine.json";
 import LR_ABI from "../abis/LendgineRouter.json";
 import LM_ABI from "../abis/LiquidityManager.json";
-import POSITION_ABI from "../abis/Position.json";
 import { LENDGINEROUTER, LIQUIDITYMANAGER } from "../contexts/environment";
 import type {
   Erc20,
@@ -20,7 +19,6 @@ import type {
   Multicall2,
 } from "../generated";
 import type { LendgineInterface } from "../generated/Lendgine";
-import type { PositionInterface } from "../generated/Position";
 
 export function useTokenContractFromAddress(
   tokenAddress: string | undefined,
@@ -78,10 +76,6 @@ export function useLendgineRouter(
     withSignerIfPossible
   ) as LendgineRouter | null;
 }
-
-export const positionInterface = new Interface(
-  POSITION_ABI.abi
-) as PositionInterface;
 
 export function useMulticall(): Multicall2 {
   const provider = useProvider();

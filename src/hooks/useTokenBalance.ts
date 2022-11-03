@@ -52,7 +52,7 @@ export const useTokenBalances = (
     [address].concat(tokens.map((t) => t?.address)),
     !!address
   );
-  if (!data) return null;
+  if (!data || !address) return null;
   return tokens.map((t, i) =>
     t
       ? new TokenAmount(

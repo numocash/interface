@@ -35,7 +35,7 @@ export const Top: React.FC = () => {
       </div>
 
       <div tw="pt-0 p-3">
-        <Stats />
+        <Stats market={market} />
       </div>
     </div>
   );

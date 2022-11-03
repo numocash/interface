@@ -38,7 +38,7 @@ interface UseSwapStateValues {
   typedValue: string;
 
   swapDisabledReason?: string;
-  handleTrade: () => Promise<void>;
+  handleTrade: () => Promise<void> | void;
   trade: Trade | null;
 }
 

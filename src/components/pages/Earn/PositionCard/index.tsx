@@ -13,8 +13,8 @@ import { scale } from "../../Trade/useTrade";
 import { Stats } from "./Stats";
 
 interface Props {
+  userInfo: IMarketUserInfo | null;
   market: IMarket;
-  userInfo: IMarketUserInfo;
 }
 
 export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
@@ -22,21 +22,24 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
   // const marketInfo = useLendgine(market);
   // const tickInfo = useTick(market, userInfo.tick);
 
-  const verticalItemDeposit = (
-    <VerticalItem
-      css={css`
-        min-width: 75px;
-      `}
-    >
-      <>
-        <VerticalItemData>
-          {userInfo.liquidity.divide(scale).toFixed(2, { groupSeparator: "," })}{" "}
-          {baseToken.symbol}
-        </VerticalItemData>
-        <VerticalItemLabel>Your Balance</VerticalItemLabel>
-      </>
-    </VerticalItem>
-  );
+  const verticalItemDeposit =
+    userInfo && userInfo.liquidity.greaterThan(0) ? (
+      <VerticalItem
+        css={css`
+          min-width: 75px;
+        `}
+      >
+        <>
+          <VerticalItemData>
+            {userInfo.liquidity
+              .divide(scale)
+              .toFixed(2, { groupSeparator: "," })}{" "}
+            {baseToken.symbol}
+          </VerticalItemData>
+          <VerticalItemLabel>Your Balance</VerticalItemLabel>
+        </>
+      </VerticalItem>
+    ) : null;
 
   return (
     <NavLink to={`/earn/${market.address}`}>
@@ -56,10 +59,10 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
           <div tw="flex items-center">{verticalItemDeposit}</div>
         </div>
         <div tw="flex w-auto gap-2">
-          <ChartIcons chart="up" token={market.pair.speculativeToken} />
-          <ChartIcons chart="down" token={market.pair.baseToken} />
+          <ChartIcons chart="up" token={speculativeToken} />
+          <ChartIcons chart="down" token={baseToken} />
         </div>
-        <Stats />
+        <Stats market={market} />
       </div>
     </NavLink>
   );

@@ -12,22 +12,17 @@ export interface IMarket {
 }
 
 export interface IMarketInfo {
-  currentTick: number;
-  currentLiquidity: TokenAmount;
-  interestNumerator: TokenAmount;
+  totalLiquidity: TokenAmount;
   totalLiquidityBorrowed: TokenAmount;
+  rewardPerLiquidityStored: TokenAmount;
   totalSupply: TokenAmount;
-}
-
-export interface ITickInfo {
-  tick: number;
-  liquidity: TokenAmount;
+  lastUpdate: number;
 }
 
 export interface IMarketUserInfo {
   tokenID: number;
-  tick: number;
   liquidity: TokenAmount;
+  market: IMarket;
 }
 
 export interface IPair {
@@ -37,6 +32,8 @@ export interface IPair {
   lp: Token;
 
   bound: Price;
+  baseScaleFactor: number;
+  speculativeScaleFactor: number;
 
   address: string;
 }
@@ -52,39 +49,68 @@ interface Environment {
   markets: readonly IMarket[];
 }
 
-const testPair: IPair = {
-  speculativeToken: CELO[ChainId.Mainnet],
-  baseToken: CUSD[ChainId.Mainnet],
-
-  lp: new Token({
-    name: "Numoen LP",
-    symbol: "NLP",
-    decimals: 18,
-    chainId: ChainId.Mainnet,
-    address: "0xDA4c13f913CA412C41FaF7a11D8A03D41b731551",
-  }),
-
-  bound: new Price(CUSD[ChainId.Mainnet], CELO[ChainId.Mainnet], 1, 5),
-  address: "0xDA4c13f913CA412C41FaF7a11D8A03D41b731551",
-};
-
-const testMarket: IMarket = {
+const LongCelo: IMarket = {
   token: new Token({
     name: "Numoen Lendgine",
     symbol: "NLDG",
-    decimals: 36,
+    decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0xF0c88240b6d25831dC5E8b542b65f198BAAEfA9F",
+    address: "0x83973A67C2F38CABcbD91181f1D9ed62917646A8",
   }),
 
-  address: "0xF0c88240b6d25831dC5E8b542b65f198BAAEfA9F",
-  pair: testPair,
+  address: "0x83973A67C2F38CABcbD91181f1D9ed62917646A8",
+  pair: {
+    speculativeToken: CELO[ChainId.Mainnet],
+    baseToken: CUSD[ChainId.Mainnet],
+
+    lp: new Token({
+      name: "Numoen LP",
+      symbol: "NLP",
+      decimals: 18,
+      chainId: ChainId.Mainnet,
+      address: "0xa3334Bb438096d7fa18b40118347fAF35c182207",
+    }),
+
+    bound: new Price(CUSD[ChainId.Mainnet], CELO[ChainId.Mainnet], 1, 5),
+    baseScaleFactor: 18,
+    speculativeScaleFactor: 18,
+    address: "0xa3334Bb438096d7fa18b40118347fAF35c182207",
+  },
 };
 
-export const FACTORY = "0x95c62A69B6a7da59318256B2ef8a39fda347F7B2";
-export const LIQUIDITYMANAGER = "0x41036e7DA2eA3Df340DbFF9030821FCF44b6910b";
-export const LENDGINEROUTER = "0xaDF94da27b54a17C128f035BB7bA8165AF290265";
-export const GENESIS = 15447817;
+const ShortCelo: IMarket = {
+  token: new Token({
+    name: "Numoen Lendgine",
+    symbol: "NLDG",
+    decimals: 18,
+    chainId: ChainId.Mainnet,
+    address: "0x40FCde0c9619969834BBBC63b7816716ace4B194",
+  }),
+
+  address: "0x40FCde0c9619969834BBBC63b7816716ace4B194",
+  pair: {
+    speculativeToken: CUSD[ChainId.Mainnet],
+    baseToken: CELO[ChainId.Mainnet],
+
+    lp: new Token({
+      name: "Numoen LP",
+      symbol: "NLP",
+      decimals: 18,
+      chainId: ChainId.Mainnet,
+      address: "0x8daE985062Ada6e316dC168012bA14EF19fB1Ac4",
+    }),
+
+    bound: new Price(CELO[ChainId.Mainnet], CUSD[ChainId.Mainnet], 1, 5),
+    baseScaleFactor: 18,
+    speculativeScaleFactor: 18,
+    address: "0x8daE985062Ada6e316dC168012bA14EF19fB1Ac4",
+  },
+};
+
+export const FACTORY = "0x2A4a8ea165aa1d7F45d7ac03BFd6Fa58F9F5F8CC";
+export const LIQUIDITYMANAGER = "0x8144a4e2c3f93c55d2973015a21b930f3b636ebd";
+export const LENDGINEROUTER = "0x5f77dd7e5e86fd9277b8375ebff1966a95e56be6";
+export const GENESIS = 15948000;
 
 export const useAddressToMarket = (
   address: string | null | undefined
@@ -103,7 +129,7 @@ export const useIsMarket = (address: string | null): boolean => {
 
 const useEnvironmentInternal = (): Environment => {
   return {
-    markets: [testMarket] as const,
+    markets: [LongCelo, ShortCelo] as const,
   };
 };
 

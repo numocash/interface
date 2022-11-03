@@ -2,7 +2,7 @@ import { Percent } from "@dahlia-labs/token-utils";
 import { useState } from "react";
 import { createContainer } from "unstated-next";
 
-interface ISettings {
+export interface ISettings {
   /**
    * Maximum amount of tolerated slippage, in [0, 1].
    */

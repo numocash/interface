@@ -1,37 +1,37 @@
 import { TokenAmount } from "@dahlia-labs/token-utils";
-import { useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { useTokenBalances } from "../../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../../common/AssetSelection";
-import { useCreatePair } from ".";
+import { useManage } from ".";
 
-export const SelectPair: React.FC = () => {
+export const Deposit: React.FC = () => {
+  const { market, setDepositSpeculativeAmount, setDepositBaseAmount } =
+    useManage();
   const { address } = useAccount();
-
-  const { market, setSpeculativeTokenAmount, setBaseTokenAmount } =
-    useCreatePair();
 
   const [speculativeInput, setSpeculativeInput] = useState("");
   const [baseInput, setBaseInput] = useState("");
 
   const balances = useTokenBalances(
-    [market.pair.speculativeToken, market.pair.baseToken],
+    useMemo(
+      () => [market.pair.speculativeToken, market.pair.baseToken],
+      [market.pair.baseToken, market.pair.speculativeToken]
+    ),
     address
   );
 
   return (
-    <div tw="p-6 flex flex-col justify-between">
-      <div tw="flex flex-col items-center text-default w-full pb-3">
+    <div tw="flex flex-col max-w-lg bg-amber-300">
+      <div tw=" pb-0 gap-2 flex flex-col p-6 bg-white">
         <AssetSelection
-          tw="flex w-full max-w-2xl"
-          label={"Speculative Asset"}
+          label={<span>Input</span>}
           selectedValue={market.pair.speculativeToken}
           inputValue={speculativeInput}
           inputOnChange={(value) => {
             setSpeculativeInput(value);
-            setSpeculativeTokenAmount(
+            setDepositSpeculativeAmount(
               TokenAmount.parse(market.pair.speculativeToken, value)
             );
           }}
@@ -40,15 +40,21 @@ export const SelectPair: React.FC = () => {
             allowSelect: true,
           }}
         />
-        <FaPlus tw="text-default mb-8 mt-4" />
-
+      </div>
+      <div tw="flex items-center justify-center self-center">
+        <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-white w-0 " />
+      </div>
+      <div tw="flex flex-col gap-2 p-6 pt-2">
         <AssetSelection
-          label={"Base Asset"}
+          label={<span>Input</span>}
+          tw=""
           selectedValue={market.pair.baseToken}
           inputValue={baseInput}
           inputOnChange={(value) => {
             setBaseInput(value);
-            setBaseTokenAmount(TokenAmount.parse(market.pair.baseToken, value));
+            setDepositBaseAmount(
+              TokenAmount.parse(market.pair.baseToken, value)
+            );
           }}
           currentAmount={{
             amount: balances && balances[1] ? balances[1] : undefined,

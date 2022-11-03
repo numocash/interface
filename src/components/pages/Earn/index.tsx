@@ -1,8 +1,9 @@
-import invariant from "tiny-invariant";
+import { useMemo } from "react";
 import { useAccount } from "wagmi";
 
+import type { IMarket, IMarketUserInfo } from "../../../contexts/environment";
 import { useEnvironment } from "../../../contexts/environment";
-import { useUserLendgine } from "../../../hooks/useLendgine";
+import { useUserLendgines } from "../../../hooks/useLendgine";
 import { LoadingPage } from "../../common/LoadingPage";
 import { Learn } from "./Learn";
 import { PositionCard } from "./PositionCard";
@@ -11,9 +12,27 @@ export const Earn: React.FC = () => {
   const { markets } = useEnvironment();
   const { address } = useAccount();
 
-  const market = markets[0];
-  invariant(market);
-  const userMarketInfo = useUserLendgine(address, market);
+  const userMarketInfo = useUserLendgines(address, markets);
+
+  type display = {
+    market: IMarket;
+    userInfo: IMarketUserInfo | null;
+  };
+
+  const displayMarkets: display[] = useMemo(() => {
+    const userMarkets: display[] =
+      userMarketInfo?.map((m) => ({
+        market: m.market,
+        userInfo: m,
+      })) ?? [];
+
+    const hold = userMarkets.map((m) => m.market);
+
+    const nonUserMarkets: display[] = markets
+      .filter((m) => !hold.includes(m))
+      .map((m) => ({ market: m, userInfo: null }));
+    return userMarkets.concat(nonUserMarkets);
+  }, [markets, userMarketInfo]);
 
   return (
     <div tw="grid w-full max-w-3xl flex-col gap-4">
@@ -31,8 +50,12 @@ export const Earn: React.FC = () => {
         <LoadingPage />
       ) : (
         <div tw="grid md:grid-cols-2  gap-6">
-          {userMarketInfo.map((m) => (
-            <PositionCard key={m.tokenID} userInfo={m} market={market} />
+          {displayMarkets.map((d) => (
+            <PositionCard
+              key={d.market.address}
+              userInfo={d.userInfo}
+              market={d.market}
+            />
           ))}
         </div>
       )}
