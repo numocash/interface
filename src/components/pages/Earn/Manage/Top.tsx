@@ -22,7 +22,7 @@ export const Top: React.FC = () => {
               <TokenIcon token={market.pair.baseToken} size={24} />
             </div>
             <div tw="grid gap-0.5">
-              <span tw="font-semibold text-lg text-default leading-tight">
+              <span tw="font-semibold text-xl text-default leading-tight">
                 {market.pair.speculativeToken.symbol} /{" "}
                 {market.pair.baseToken.symbol}
               </span>

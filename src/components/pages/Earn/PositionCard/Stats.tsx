@@ -16,7 +16,7 @@ interface Props {
   market: IMarket;
 }
 
-const pairInfoToPrice = (pairInfo: IPairInfo, pair: IPair): Price => {
+export const pairInfoToPrice = (pairInfo: IPairInfo, pair: IPair): Price => {
   if (pairInfo.totalLPSupply.equalTo(0))
     return new Price(pair.speculativeToken, pair.baseToken, 1, 0);
 

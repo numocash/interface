@@ -109,7 +109,7 @@ export const StyledButton = styled.button<AdditionalButtonProps>(
     variant === "danger" && tw`font-bold text-[#083DF5] bg-red-500`,
     size === "swap" && tw`w-full text-xl font-bold shadow h-14`,
 
-    tw`disabled:(bg-[#EDEEEF] text-gray-400 cursor-not-allowed)`,
+    tw`disabled:(border border-[#AEAEB2] bg-white text-secondary cursor-not-allowed)`,
 
     size === "sm" && tw`py-1.5 px-2 text-base`,
     size === "md" && tw`px-5 py-3 text-base`,

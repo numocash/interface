@@ -9,7 +9,7 @@ export const Action: React.FC = () => {
   const { action, setAction } = useManage();
 
   const Tabs = (
-    <div tw="flex gap-4 grid-flow-col text-sm justify-center w-min rounded bg-action">
+    <div tw="flex gap-4 grid-flow-col text-sm justify-center w-min bg-action rounded-lg px-6 pt-6">
       {[ActionType.Deposit, ActionType.Withdraw].map((s) => {
         return (
           <div key={s}>
@@ -30,7 +30,7 @@ export const Action: React.FC = () => {
   );
 
   return (
-    <Module>
+    <Module tw="p-0">
       {Tabs}
       {action === ActionType.Deposit ? <Deposit /> : <Withdraw />}
     </Module>

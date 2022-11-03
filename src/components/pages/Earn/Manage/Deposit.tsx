@@ -23,7 +23,7 @@ export const Deposit: React.FC = () => {
   );
 
   return (
-    <div tw="flex flex-col max-w-lg bg-amber-300">
+    <div tw="flex flex-col rounded-lg bg-amber-100">
       <div tw=" pb-0 gap-2 flex flex-col p-6 bg-white">
         <AssetSelection
           label={<span>Input</span>}
@@ -42,9 +42,10 @@ export const Deposit: React.FC = () => {
         />
       </div>
       <div tw="flex items-center justify-center self-center">
-        <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-white w-0 " />
+        <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-white w-0" />
+        <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-amber-100 w-0 mt-[-30px]  " />
       </div>
-      <div tw="flex flex-col gap-2 p-6 pt-2">
+      <div tw="flex flex-col gap-2 p-6">
         <AssetSelection
           label={<span>Input</span>}
           tw=""

@@ -11,6 +11,7 @@ import { Page } from "../../../common/Page";
 import { Action } from "./Action";
 import { Button } from "./Button";
 import { Invalid } from "./Invalid";
+import { Position } from "./Position";
 import { Top } from "./Top";
 import { useDeposit } from "./useDeposit";
 
@@ -98,6 +99,7 @@ export const Manage: React.FC = () => {
       ) : (
         <ManageProvider initialState={{ market }}>
           <Top />
+          <Position />
           <Action />
           <Button />
         </ManageProvider>

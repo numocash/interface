@@ -42,7 +42,7 @@ export const useDeposit = (
     () =>
       !baseTokenAmount || !speculativeTokenAmount
         ? "Enter an amount"
-        : baseTokenAmount?.equalTo(0) && speculativeTokenAmount?.equalTo(0)
+        : baseTokenAmount.equalTo(0) && speculativeTokenAmount.equalTo(0)
         ? "Enter an amount"
         : !balances || approvalS === null || approvalB === null || !market
         ? "Loading..."
