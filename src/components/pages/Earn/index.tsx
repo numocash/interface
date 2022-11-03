@@ -37,11 +37,12 @@ export const Earn: React.FC = () => {
   return (
     <div tw="grid w-full max-w-3xl flex-col gap-4">
       <p tw="font-bold text-2xl text-default">Earn on your assets</p>
+
       <p tw=" text-default">
         Provide liquidity to Numoen pools and lend your position to options
         buyers to earn yield.
       </p>
-      <p tw="text-sm text-default">
+      <p tw="text-xs text-default">
         Displaying <span tw="font-semibold">{markets.length} markets</span>
       </p>
       <Learn />

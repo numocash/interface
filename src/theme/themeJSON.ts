@@ -40,17 +40,10 @@ export const themeJSON = {
     cryptoselector: { base: { default: "#1a1b20", hover: "#212228" } },
     tabs: { base: { active: "#131419" } },
     brand: { logo: "#fff" },
-    gradients: {
-      phantom: "linear-gradient(0deg, #5347b7 0%, #551ff3 100%)",
-      sollet: "linear-gradient(0deg, #067ad7 0%, #2196f3 100%)",
-      ledger: "linear-gradient(0deg, #616774 0%, #403f4c 100%)",
-    },
+
     modal: { item: { base: { hover: "#101112" } }, base: { default: "#000" } },
   },
-  gradients: {
-    mathwallet: "linear-gradient(0deg, #8c8f97 0%, #565657 100%)",
-    solletextension: "linear-gradient(0deg, #2196f3 0%, #067ad7 100%)",
-  },
+
   buttontext: {
     fontWeight: 500,
     fontSize: "18px",

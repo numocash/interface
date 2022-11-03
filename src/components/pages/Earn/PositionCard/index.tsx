@@ -43,8 +43,8 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
 
   return (
     <NavLink to={`/earn/${market.address}`}>
-      <div tw="p-4 rounded-xl bg-action flex flex-col hover:border-container border border-action">
-        <div tw="flex justify-between items-center">
+      <div tw="p-4 rounded-xl bg-action flex flex-col hover:border-2 border border-[#AEAEB2]">
+        <div tw="flex justify-between items-center ">
           <div tw="flex items-center gap-3">
             <div tw="flex items-center space-x--2">
               <TokenIcon token={speculativeToken} size={24} />
@@ -58,9 +58,19 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
           </div>
           <div tw="flex items-center">{verticalItemDeposit}</div>
         </div>
-        <div tw="flex w-auto gap-2">
-          <ChartIcons chart="up" token={speculativeToken} />
-          <ChartIcons chart="down" token={baseToken} />
+        <div tw="flex w-auto gap-2 py-2">
+          {market.pair.speculativeToken.address <
+          market.pair.baseToken.address ? (
+            <>
+              <ChartIcons chart="up" token={market.pair.speculativeToken} />
+              <ChartIcons chart="down" token={market.pair.baseToken} />
+            </>
+          ) : (
+            <>
+              <ChartIcons chart="down" token={market.pair.baseToken} />
+              <ChartIcons chart="up" token={market.pair.speculativeToken} />
+            </>
+          )}
         </div>
         <Stats market={market} />
       </div>

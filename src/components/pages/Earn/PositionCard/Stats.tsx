@@ -98,19 +98,19 @@ export const Stats: React.FC<Props> = ({ market }: Props) => {
   );
 
   return (
-    <>
-      <RowBetween tw="pt-6">
+    <div tw="">
+      <RowBetween tw="">
         <p tw="text-default">APR</p>
-        <p tw="text-default">{rate ? rate.toFixed(1) : "--"}%</p>
+        <p tw="text-default font-semibold">{rate ? rate.toFixed(1) : "--"}%</p>
       </RowBetween>
-      <div tw="border-container border"></div>
+      <hr tw="border-[#AEAEB2] rounded " />
       <RowBetween>
         <p tw="text-default">TVL</p>
-        <p tw="text-default">
+        <p tw="text-default font-semibold">
           {tvl ? tvl.toFixed(2, { groupSeparator: "," }) : "--"}{" "}
           {market.pair.baseToken.symbol.toString()}
         </p>
       </RowBetween>
-    </>
+    </div>
   );
 };

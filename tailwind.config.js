@@ -53,14 +53,9 @@ module.exports = {
       lg: "976px",
       xl: "1220px",
     },
-    fontFamily: {
-      sans: ["Inter", "sans-serif"],
-    },
     extend: {
       fontSize: {
         xs: "0.8125rem",
-        xxs: ".6rem",
-        "3xl": "1.75rem",
       },
       colors: {
         ...colors,
@@ -74,36 +69,11 @@ module.exports = {
         98: ".98",
         102: "1.02",
       },
-      typography: {
-        DEFAULT: {
-          css: {
-            p: {
-              fontSize: "0.875rem",
-              fontWeight: "400",
-              lineHeight: "1.0625rem",
-              color: textColor.secondary,
-            },
-            h1: {
-              fontSize: "1.25rem",
-              fontWeight: "600",
-            },
-            h2: {
-              fontSize: "1.25rem",
-              fontWeight: "600",
-            },
-            h3: {
-              fontSize: "0.8125rem",
-              fontWeight: "400",
-              color: textColor.secondary,
-            },
-          },
-        },
-      },
     },
   },
   plugins: [
     require("@tailwindcss/aspect-ratio"),
     require("@tailwindcss/forms"),
-    // require("@tailwindcss/typography"),
+    require("@tailwindcss/typography"),
   ],
 };

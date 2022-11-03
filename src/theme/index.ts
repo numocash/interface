@@ -40,7 +40,6 @@ const buttonColors = {
 const functional = { button: buttonColors };
 
 export const theme = {
-  mono: `font-family: "Roboto Mono", monospace;`,
   colors,
   v2: raw.darkRaw,
   gen: raw.palette,

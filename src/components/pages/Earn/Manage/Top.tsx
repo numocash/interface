@@ -11,7 +11,7 @@ export const Top: React.FC = () => {
   const { market } = useManage();
   return (
     <div tw="rounded-xl overflow-hidden bg-white shadow-2xl">
-      <div tw="flex items-center justify-between mb-4  p-6 bg-[#EDEEEF]">
+      <div tw="flex items-center justify-between p-6 bg-[#EDEEEF]">
         <NavLink to={`/earn`} tw="flex items-center text-xl text-black">
           <FaChevronLeft />
         </NavLink>
@@ -30,8 +30,18 @@ export const Top: React.FC = () => {
         <Settings tw="hidden" />
       </div>
       <div tw="flex w-auto gap-2 p-4 pb-0">
-        <ChartIcons chart="up" token={market.pair.speculativeToken} />
-        <ChartIcons chart="down" token={market.pair.baseToken} />
+        {market.pair.speculativeToken.address <
+        market.pair.baseToken.address ? (
+          <>
+            <ChartIcons chart="up" token={market.pair.speculativeToken} />
+            <ChartIcons chart="down" token={market.pair.baseToken} />
+          </>
+        ) : (
+          <>
+            <ChartIcons chart="down" token={market.pair.baseToken} />
+            <ChartIcons chart="up" token={market.pair.speculativeToken} />
+          </>
+        )}
       </div>
 
       <div tw="pt-0 p-3">
