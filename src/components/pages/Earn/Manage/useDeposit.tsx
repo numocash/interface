@@ -56,8 +56,6 @@ export const useDeposit = (
     [baseTokenAmount, price]
   );
 
-  console.log(liquidity?.quotient.toString());
-
   const balances = useTokenBalances(
     [market?.pair.baseToken ?? null, market?.pair.speculativeToken ?? null],
     address

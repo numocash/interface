@@ -4,15 +4,19 @@ import { useAccount } from "wagmi";
 
 import { useTokenBalances } from "../../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../../common/AssetSelection";
-import { useManage } from ".";
+import { Input, useManage } from ".";
 
 export const Deposit: React.FC = () => {
-  const { market, setDepositSpeculativeAmount, setDepositBaseAmount } =
-    useManage();
+  const {
+    market,
+    setDepositAmount,
+    depositSpeculativeAmount,
+    depositBaseAmount,
+  } = useManage();
   const { address } = useAccount();
 
-  const [speculativeInput, setSpeculativeInput] = useState("");
-  const [baseInput, setBaseInput] = useState("");
+  const [input, setInput] = useState("");
+  const [selected, setSelected] = useState<Input | null>(null);
 
   const balances = useTokenBalances(
     useMemo(
@@ -23,15 +27,21 @@ export const Deposit: React.FC = () => {
   );
 
   return (
-    <div tw="flex flex-col rounded-lg bg-amber-100">
+    <div tw="flex flex-col rounded-lg bg-gray-100">
       <div tw=" pb-0 gap-2 flex flex-col p-6 bg-white">
         <AssetSelection
           label={<span>Input</span>}
           selectedValue={market.pair.speculativeToken}
-          inputValue={speculativeInput}
+          inputValue={
+            selected === Input.Speculative
+              ? input
+              : depositSpeculativeAmount?.toSignificant() ?? ""
+          }
           inputOnChange={(value) => {
-            setSpeculativeInput(value);
-            setDepositSpeculativeAmount(
+            setInput(value);
+            setSelected(Input.Speculative);
+            setDepositAmount(
+              Input.Speculative,
               TokenAmount.parse(market.pair.speculativeToken, value)
             );
           }}
@@ -43,17 +53,23 @@ export const Deposit: React.FC = () => {
       </div>
       <div tw="flex items-center justify-center self-center">
         <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-white w-0" />
-        <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-amber-100 w-0 mt-[-30px]  " />
+        <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-gray-100 w-0 mt-[-30px]  " />
       </div>
-      <div tw="flex flex-col gap-2 p-6">
+      <div tw="flex flex-col gap-2 p-6 pt-3">
         <AssetSelection
           label={<span>Input</span>}
           tw=""
           selectedValue={market.pair.baseToken}
-          inputValue={baseInput}
+          inputValue={
+            selected === Input.Base
+              ? input
+              : depositBaseAmount?.toSignificant() ?? ""
+          }
           inputOnChange={(value) => {
-            setBaseInput(value);
-            setDepositBaseAmount(
+            setInput(value);
+            setSelected(Input.Base);
+            setDepositAmount(
+              Input.Base,
               TokenAmount.parse(market.pair.baseToken, value)
             );
           }}

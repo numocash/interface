@@ -12,6 +12,7 @@ export const AppRouter: React.FC = () => {
 
       <Route path="/earn" element={<Earn />} />
       <Route path="/earn/:lendgineAddress" element={<Manage />} />
+      <Route path="/earn/:lendgineAddress/:tokenID" element={<Manage />} />
 
       <Route path="" element={<Navigate to="trade" replace />} />
     </Routes>

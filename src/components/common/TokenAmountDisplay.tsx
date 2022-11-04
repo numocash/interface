@@ -21,7 +21,6 @@ export interface IProps extends IFormatUint {
 
 export const TokenAmountDisplay: React.FC<IProps> = ({
   amount,
-  isMonoNumber = false,
   showIcon = false,
   showSymbol = true,
   percent,
@@ -38,9 +37,8 @@ export const TokenAmountDisplay: React.FC<IProps> = ({
           token={amount.token}
         />
       )}
-      <TheNumber isMonoNumber={isMonoNumber}>
-        {formatDisplayWithSoftLimit(Number(amount.toFixed(2)), 2, 10)}
-      </TheNumber>
+
+      {formatDisplayWithSoftLimit(Number(amount.toFixed(2)), 2, 10)}
 
       {showSymbol && (
         <span>
@@ -61,13 +59,4 @@ const PercentFmt = styled.span`
 const TokenAmountWrapper = styled.div`
   display: flex;
   align-items: center;
-`;
-
-const TheNumber = styled.span<{ isMonoNumber?: boolean }>`
-  ${({ theme, isMonoNumber }) =>
-    isMonoNumber === true
-      ? css`
-          ${theme.mono}
-        `
-      : undefined}
 `;

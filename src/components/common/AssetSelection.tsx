@@ -84,8 +84,8 @@ export const AssetSelection: React.FC<Props> = ({
     <div tw="flex w-full flex-col gap-1">
       <>
         <Section>
-          <div tw=" text-secondary ">{label}</div>
-          <div tw=" text-secondary flex">
+          <div tw=" text-secondary text-sm">{label}</div>
+          <div tw=" text-secondary text-sm flex">
             {selectedValue &&
               (currentAmount && !hideInput ? (
                 <Balance>

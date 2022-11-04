@@ -1,5 +1,5 @@
 import type { TokenAmount } from "@dahlia-labs/token-utils";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
@@ -7,7 +7,9 @@ import { createContainer } from "unstated-next";
 import type { IMarket } from "../../../../contexts/environment";
 import { useAddressToMarket } from "../../../../contexts/environment";
 import { useSettings } from "../../../../contexts/settings";
+import { usePair } from "../../../../hooks/usePair";
 import { Page } from "../../../common/Page";
+import { pairInfoToPrice } from "../PositionCard/Stats";
 import { Action } from "./Action";
 import { Button } from "./Button";
 import { Invalid } from "./Invalid";
@@ -20,8 +22,14 @@ export enum ActionType {
   Withdraw = "Withdraw",
 }
 
+export enum Input {
+  Base,
+  Speculative,
+}
+
 interface IManage {
   market: IMarket;
+  tokenID?: number;
 
   action: ActionType;
   setAction: (val: ActionType) => void;
@@ -30,9 +38,8 @@ interface IManage {
   setWithdrawPercent: (val: number) => void;
 
   depositBaseAmount: TokenAmount | null;
-  setDepositBaseAmount: (val: TokenAmount) => void;
   depositSpeculativeAmount: TokenAmount | null;
-  setDepositSpeculativeAmount: (val: TokenAmount) => void;
+  setDepositAmount: (input: Input, val: TokenAmount) => void;
 
   onSend: () => Promise<void> | void;
   disableReason: string | null;
@@ -40,10 +47,14 @@ interface IManage {
 
 const useManageInternal = ({
   market,
+  tokenID,
 }: {
   market?: IMarket;
+  tokenID?: number;
 } = {}): IManage => {
   invariant(market, "market provider");
+
+  const pairInfo = usePair(market.pair);
 
   const [action, setAction] = useState<ActionType>(ActionType.Deposit);
 
@@ -52,6 +63,38 @@ const useManageInternal = ({
     useState<TokenAmount | null>(null);
   const [depositSpeculativeAmount, setDepositSpeculativeAmount] =
     useState<TokenAmount | null>(null);
+
+  const price = useMemo(
+    () => (pairInfo ? pairInfoToPrice(pairInfo, market.pair) : null),
+    [market.pair, pairInfo]
+  );
+
+  const setDepositAmount = useCallback(
+    (input: Input, val: TokenAmount) => {
+      if (!price) return;
+      input === Input.Base
+        ? setDepositBaseAmount(val)
+        : setDepositSpeculativeAmount(val);
+
+      input === Input.Base
+        ? setDepositSpeculativeAmount(
+            val.scale(
+              market.pair.bound
+                .subtract(price)
+                .multiply(2)
+                .divide(price.asFraction.multiply(price))
+            )
+          )
+        : setDepositBaseAmount(
+            val.scale(
+              price.asFraction
+                .multiply(price)
+                .divide(market.pair.bound.subtract(price).multiply(2))
+            )
+          );
+    },
+    [market.pair.bound, price]
+  );
 
   const settings = useSettings();
   const { onSend, disableReason } = useDeposit(
@@ -63,6 +106,7 @@ const useManageInternal = ({
   );
   return {
     market,
+    tokenID,
 
     action,
     setAction,
@@ -71,9 +115,8 @@ const useManageInternal = ({
     setWithdrawPercent,
 
     depositBaseAmount,
-    setDepositBaseAmount,
     depositSpeculativeAmount,
-    setDepositSpeculativeAmount,
+    setDepositAmount,
 
     onSend,
     disableReason,
@@ -84,11 +127,11 @@ export const { Provider: ManageProvider, useContainer: useManage } =
   createContainer(useManageInternal);
 
 export const Manage: React.FC = () => {
-  const { lendgineAddress } = useParams<{
+  const { lendgineAddress, tokenID } = useParams<{
     lendgineAddress: string;
+    tokenID: string;
   }>();
   invariant(lendgineAddress, "pool address missing");
-  // TODO: don't error when address is wrong
 
   const market = useAddressToMarket(lendgineAddress);
 
@@ -97,9 +140,11 @@ export const Manage: React.FC = () => {
       {!market ? (
         <Invalid />
       ) : (
-        <ManageProvider initialState={{ market }}>
+        <ManageProvider
+          initialState={{ market, tokenID: tokenID ? +tokenID : undefined }}
+        >
           <Top />
-          <Position />
+          {!!tokenID && <Position />}
           <Action />
           <Button />
         </ManageProvider>

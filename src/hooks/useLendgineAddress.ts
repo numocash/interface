@@ -1,3 +1,4 @@
+import { scale } from "../components/pages/Trade/useTrade";
 import type { IMarket } from "../contexts/environment";
 
 interface LendgineProps {
@@ -16,12 +17,15 @@ export const lendgineAddress = (
   return (
     markets.find(
       (m) =>
-        m.pair.speculativeToken.address === lendgineProps.speculative &&
-        m.pair.baseToken.address === lendgineProps.base &&
+        m.pair.speculativeToken.address.toLowerCase() ===
+          lendgineProps.speculative.toLowerCase() &&
+        m.pair.baseToken.address.toLowerCase() ===
+          lendgineProps.base.toLowerCase() &&
         m.pair.baseScaleFactor === lendgineProps.baseScaleFactor &&
         m.pair.speculativeScaleFactor ===
           lendgineProps.speculativeScaleFactor &&
-        m.pair.bound.quotient.toString() === lendgineProps.upperBound
+        m.pair.bound.asFraction.multiply(scale).quotient.toString() ===
+          lendgineProps.upperBound
     ) ?? null
   );
 };

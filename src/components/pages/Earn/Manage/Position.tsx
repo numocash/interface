@@ -1,4 +1,4 @@
-import { Percent } from "@dahlia-labs/token-utils";
+import { Percent, TokenAmount } from "@dahlia-labs/token-utils";
 import {
   SliderHandle,
   SliderInput as ReachSlider,
@@ -6,17 +6,47 @@ import {
   SliderTrack,
 } from "@reach/slider";
 import { useMemo } from "react";
+import invariant from "tiny-invariant";
 import tw, { css, styled } from "twin.macro";
 
+import { useUserLendgine } from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
 import { Module } from "../../../common/Module";
 import { pairInfoToPrice } from "../PositionCard/Stats";
 import { useManage } from ".";
 
 export const Position: React.FC = () => {
-  const { market } = useManage();
+  const { market, tokenID } = useManage();
+  invariant(tokenID, "tokenID missing");
+  const userLendgineInfo = useUserLendgine(tokenID, market);
 
   const pairInfo = usePair(market.pair);
+
+  const { userBaseAmount, userSpeculativeAmount } = useMemo(() => {
+    if (pairInfo && pairInfo.totalLPSupply.equalTo(0))
+      return {
+        userBaseAmount: new TokenAmount(market.pair.baseToken, 0),
+        userSpeculativeAmount: new TokenAmount(market.pair.speculativeToken, 0),
+      };
+    const userBaseAmount =
+      userLendgineInfo && pairInfo
+        ? pairInfo.baseAmount
+            .multiply(userLendgineInfo.liquidity)
+            .divide(pairInfo.totalLPSupply)
+        : null;
+    const userSpeculativeAmount =
+      userLendgineInfo && pairInfo
+        ? pairInfo.speculativeAmount
+            .multiply(userLendgineInfo.liquidity)
+            .divide(pairInfo.totalLPSupply)
+        : null;
+    return { userBaseAmount, userSpeculativeAmount };
+  }, [
+    market.pair.baseToken,
+    market.pair.speculativeToken,
+    pairInfo,
+    userLendgineInfo,
+  ]);
 
   const proportion = useMemo(() => {
     const price = pairInfo ? pairInfoToPrice(pairInfo, market.pair) : null;
@@ -47,8 +77,18 @@ export const Position: React.FC = () => {
         </SliderInput>
       </div>
       <div tw="flex justify-between text-default font-bold text-lg mt-2">
-        <p>{10.03} cUSD</p>
-        <p>{3.9} CELO</p>
+        <p>
+          {userBaseAmount
+            ? userBaseAmount.toFixed(2, { groupSeparator: "," })
+            : "--"}{" "}
+          {market.pair.baseToken.symbol.toString()}
+        </p>
+        <p>
+          {userSpeculativeAmount
+            ? userSpeculativeAmount.toFixed(2, { groupSeparator: "," })
+            : "--"}{" "}
+          {market.pair.speculativeToken.symbol.toString()}
+        </p>
       </div>
     </Module>
   );

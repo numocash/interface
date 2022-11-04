@@ -19,7 +19,7 @@ export const Earn: React.FC = () => {
     userInfo: IMarketUserInfo | null;
   };
 
-  const displayMarkets: display[] = useMemo(() => {
+  const { displayMarkets, hasDeposit } = useMemo(() => {
     const userMarkets: display[] =
       userMarketInfo?.map((m) => ({
         market: m.market,
@@ -31,7 +31,10 @@ export const Earn: React.FC = () => {
     const nonUserMarkets: display[] = markets
       .filter((m) => !hold.includes(m))
       .map((m) => ({ market: m, userInfo: null }));
-    return userMarkets.concat(nonUserMarkets);
+    return {
+      displayMarkets: userMarkets.concat(nonUserMarkets),
+      hasDeposit: userMarkets.length > 0,
+    };
   }, [markets, userMarketInfo]);
 
   return (
@@ -46,6 +49,11 @@ export const Earn: React.FC = () => {
         Displaying <span tw="font-semibold">{markets.length} markets</span>
       </p>
       <Learn />
+      {hasDeposit && (
+        <p tw="text-xs text-amber-300 font-semibold mb-[-0.5rem]">
+          Your positions
+        </p>
+      )}
       {/* TODO: show all when wallet disconnected */}
       {userMarketInfo === null ? (
         <LoadingPage />
