@@ -10,8 +10,8 @@ export const Deposit: React.FC = () => {
   const {
     market,
     setDepositAmount,
-    depositSpeculativeAmount,
-    depositBaseAmount,
+    speculativeAmount: depositSpeculativeAmount,
+    baseAmount: depositBaseAmount,
   } = useManage();
   const { address } = useAccount();
 

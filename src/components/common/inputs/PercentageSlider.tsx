@@ -18,7 +18,7 @@ export const PercentageSlider: React.FC<Props> = ({
   disabled,
 }: Props) => {
   return (
-    <div tw="flex items-center justify-between w-full">
+    <div tw="flex items-center justify-between w-full rounded-lg">
       <div tw="flex">
         <div tw="rounded-xl text-2xl w-20 justify-center text-default">
           {input.toFixed(0)}%
@@ -50,15 +50,15 @@ export const SliderInput = styledSlider(
     background: none;
 
     [data-reach-slider-range] {
-      background: none;
+      ${tw`h-1 bg-blue-500 rounded`}
     }
 
     [data-reach-slider-track] {
-      ${tw`h-1 bg-white rounded bg-gradient-to-r from-white to-gray-600`}
+      ${tw`h-1 bg-gray-500 rounded`}
     }
 
     [data-reach-slider-handle] {
-      ${tw`bg-white mt-[-6px]`}
+      ${tw`bg-white mt-[-6px] `}
 
       width: 18px;
       height: 18px;
@@ -67,7 +67,7 @@ export const SliderInput = styledSlider(
       -webkit-appearance: none;
       appearance: none;
       cursor: pointer;
-      box-shadow: 0px 6px 12px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: 0px 0px 6px 6px rgba(0, 0, 0, 0.1);
     }
   `
 );

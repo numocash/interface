@@ -16,6 +16,7 @@ import { Invalid } from "./Invalid";
 import { Position } from "./Position";
 import { Top } from "./Top";
 import { useDeposit } from "./useDeposit";
+import { useWithdraw } from "./useWithdraw";
 
 export enum ActionType {
   Deposit = "Deposit",
@@ -37,8 +38,8 @@ interface IManage {
   withdrawPercent: number;
   setWithdrawPercent: (val: number) => void;
 
-  depositBaseAmount: TokenAmount | null;
-  depositSpeculativeAmount: TokenAmount | null;
+  baseAmount: TokenAmount | null;
+  speculativeAmount: TokenAmount | null;
   setDepositAmount: (input: Input, val: TokenAmount) => void;
 
   onSend: () => Promise<void> | void;
@@ -59,9 +60,8 @@ const useManageInternal = ({
   const [action, setAction] = useState<ActionType>(ActionType.Deposit);
 
   const [withdrawPercent, setWithdrawPercent] = useState(25);
-  const [depositBaseAmount, setDepositBaseAmount] =
-    useState<TokenAmount | null>(null);
-  const [depositSpeculativeAmount, setDepositSpeculativeAmount] =
+  const [baseAmount, setBaseAmount] = useState<TokenAmount | null>(null);
+  const [speculativeAmount, setSpeculativeAmount] =
     useState<TokenAmount | null>(null);
 
   const price = useMemo(
@@ -72,13 +72,11 @@ const useManageInternal = ({
   const setDepositAmount = useCallback(
     (input: Input, val: TokenAmount) => {
       if (!price) return;
-      input === Input.Base
-        ? setDepositBaseAmount(val)
-        : setDepositSpeculativeAmount(val);
+      input === Input.Base ? setBaseAmount(val) : setSpeculativeAmount(val);
 
       // TODO: change the input Token
       input === Input.Base
-        ? setDepositSpeculativeAmount(
+        ? setSpeculativeAmount(
             new TokenAmount(
               market.pair.speculativeToken,
               val.scale(
@@ -89,7 +87,7 @@ const useManageInternal = ({
               ).raw
             )
           )
-        : setDepositBaseAmount(
+        : setBaseAmount(
             new TokenAmount(
               market.pair.baseToken,
               val.scale(
@@ -109,13 +107,18 @@ const useManageInternal = ({
   );
 
   const settings = useSettings();
-  const { onSend, disableReason } = useDeposit(
-    market,
-    tokenID ?? null,
-    depositBaseAmount,
-    depositSpeculativeAmount,
-    settings
-  );
+  const { onSend: onSendDeposit, disableReason: disableReasonDeposit } =
+    useDeposit(
+      market,
+      tokenID ?? null,
+      baseAmount,
+      speculativeAmount,
+      settings
+    );
+
+  const { onSend: onSendWithdraw, disableReason: disableReasonWithdraw } =
+    useWithdraw(market, tokenID ?? null, withdrawPercent, settings);
+
   return {
     market,
     tokenID,
@@ -126,18 +129,23 @@ const useManageInternal = ({
     withdrawPercent,
     setWithdrawPercent,
 
-    depositBaseAmount,
-    depositSpeculativeAmount,
+    baseAmount,
+    speculativeAmount,
     setDepositAmount,
 
     onSend: async () => {
-      await onSend();
-      setDepositBaseAmount(new TokenAmount(market.pair.baseToken, 0));
-      setDepositSpeculativeAmount(
-        new TokenAmount(market.pair.speculativeToken, 0)
-      );
+      action === ActionType.Deposit
+        ? await onSendDeposit()
+        : await onSendWithdraw();
+      action === ActionType.Deposit &&
+        setBaseAmount(new TokenAmount(market.pair.baseToken, 0));
+      action === ActionType.Deposit &&
+        setSpeculativeAmount(new TokenAmount(market.pair.speculativeToken, 0));
     },
-    disableReason,
+    disableReason:
+      action === ActionType.Deposit
+        ? disableReasonDeposit
+        : disableReasonWithdraw,
   };
 };
 
