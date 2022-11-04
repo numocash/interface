@@ -70,12 +70,7 @@ export const useTokenAllowances = (
     ]),
   }));
 
-  const data = useBlockQuery(
-    "allowance",
-    calls,
-    [...tokens.map((t) => t?.address), address, spender],
-    address && spender ? true : false
-  );
+  const data = useBlockQuery("allowance", calls);
   if (!data) return null;
 
   return tokens.map((t, i) =>

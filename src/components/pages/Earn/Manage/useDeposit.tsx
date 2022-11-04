@@ -17,7 +17,7 @@ import { pairInfoToPrice } from "../PositionCard/Stats";
 
 export const useDeposit = (
   market: IMarket,
-  // tokenID: number | null,
+  tokenID: number | null,
   baseTokenAmount: TokenAmount | null,
   speculativeTokenAmount: TokenAmount | null,
   settings: ISettings
@@ -31,24 +31,9 @@ export const useDeposit = (
     [market.pair, pairInfo]
   );
 
-  const valid = useMemo(
-    () =>
-      price && baseTokenAmount && speculativeTokenAmount
-        ? price.asFraction
-            .multiply(price)
-            .multiply(speculativeTokenAmount)
-            .equalTo(
-              baseTokenAmount
-                .multiply(market.pair.bound.subtract(price))
-                .multiply(2)
-            )
-        : null,
-    [baseTokenAmount, market.pair.bound, price, speculativeTokenAmount]
-  );
-
   const liquidity = useMemo(
     () =>
-      price && baseTokenAmount
+      price && price && baseTokenAmount
         ? baseTokenAmount
             .multiply(scale)
             .divide(price.asFraction.multiply(price))
@@ -68,6 +53,7 @@ export const useDeposit = (
   );
   const approvalB = useApproval(baseTokenAmount, address, LIQUIDITYMANAGER);
   const approveS = useApprove(speculativeTokenAmount, LIQUIDITYMANAGER);
+
   const approveB = useApprove(baseTokenAmount, LIQUIDITYMANAGER);
 
   const disableReason = useMemo(
@@ -80,14 +66,11 @@ export const useDeposit = (
           approvalS === null ||
           approvalB === null ||
           !price ||
-          valid === null ||
           !liquidity
         ? "Loading..."
         : (balances[1] && speculativeTokenAmount.greaterThan(balances[1])) ||
           (balances[0] && baseTokenAmount.greaterThan(balances[0]))
         ? "Insufficient funds"
-        : !valid
-        ? "Invalid combination"
         : null,
     [
       baseTokenAmount,
@@ -96,7 +79,6 @@ export const useDeposit = (
       approvalS,
       approvalB,
       price,
-      valid,
       liquidity,
     ]
   );
@@ -135,33 +117,59 @@ export const useDeposit = (
 
     invariant(address);
 
-    await Beet(
-      "Add liquidity to pool",
-      approveStage.concat({
-        stageTitle: "Add liquidity to pool",
-        parallelTransactions: [
-          {
-            title: "Add liquidity to pool",
-            description: "Add liquidity to pool",
-            txEnvelope: () =>
-              liquidityManagerContract.mint({
-                base: market.pair.baseToken.address,
-                speculative: market.pair.speculativeToken.address,
-                baseScaleFactor: market.pair.baseScaleFactor,
-                speculativeScaleFactor: market.pair.speculativeScaleFactor,
-                upperBound: market.pair.bound.asFraction
-                  .multiply(scale)
-                  .quotient.toString(),
-                amount0: baseTokenAmount.raw.toString(),
-                amount1: speculativeTokenAmount.raw.toString(),
-                liquidity: liquidity.quotient.toString(),
-                recipient: address,
-                deadline: Math.round(Date.now() / 1000) + settings.timeout * 60,
-              }),
-          },
-        ],
-      })
-    );
+    !tokenID
+      ? await Beet(
+          "Add liquidity to pool",
+          approveStage.concat({
+            stageTitle: "Add liquidity to pool",
+            parallelTransactions: [
+              {
+                title: "Add liquidity to pool",
+                description: "Add liquidity to pool",
+                txEnvelope: () =>
+                  liquidityManagerContract.mint({
+                    base: market.pair.baseToken.address,
+                    speculative: market.pair.speculativeToken.address,
+                    baseScaleFactor: market.pair.baseScaleFactor,
+                    speculativeScaleFactor: market.pair.speculativeScaleFactor,
+                    upperBound: market.pair.bound.asFraction
+                      .multiply(scale)
+                      .quotient.toString(),
+                    amount0: baseTokenAmount.raw.toString(),
+                    amount1: speculativeTokenAmount.raw.toString(),
+                    liquidity: liquidity.quotient.toString(),
+                    recipient: address,
+                    deadline:
+                      Math.round(Date.now() / 1000) + settings.timeout * 60,
+                  }),
+              },
+            ],
+          })
+        )
+      : await Beet(
+          "Add liquidity to pool",
+          approveStage.concat({
+            stageTitle: "Add liquidity to pool",
+            parallelTransactions: [
+              {
+                title: "Add liquidity to pool",
+                description: "Add liquidity to pool",
+                txEnvelope: () =>
+                  liquidityManagerContract.increaseLiquidity({
+                    tokenID,
+                    amount0: baseTokenAmount.raw.toString(),
+                    amount1: speculativeTokenAmount.raw.toString(),
+                    liquidity: liquidity.quotient.toString(),
+                    deadline:
+                      Math.round(Date.now() / 1000) + settings.timeout * 60,
+                  }),
+              },
+            ],
+          })
+        );
+
+    // !tokenID && navigate(`/earn/`);
+    // TODO: determine next tokenID
   };
 
   return {

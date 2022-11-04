@@ -1,4 +1,4 @@
-import type { TokenAmount } from "@dahlia-labs/token-utils";
+import { TokenAmount } from "@dahlia-labs/token-utils";
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -76,30 +76,42 @@ const useManageInternal = ({
         ? setDepositBaseAmount(val)
         : setDepositSpeculativeAmount(val);
 
+      // TODO: change the input Token
       input === Input.Base
         ? setDepositSpeculativeAmount(
-            val.scale(
-              market.pair.bound
-                .subtract(price)
-                .multiply(2)
-                .divide(price.asFraction.multiply(price))
+            new TokenAmount(
+              market.pair.speculativeToken,
+              val.scale(
+                market.pair.bound
+                  .subtract(price)
+                  .multiply(2)
+                  .divide(price.asFraction.multiply(price))
+              ).raw
             )
           )
         : setDepositBaseAmount(
-            val.scale(
-              price.asFraction
-                .multiply(price)
-                .divide(market.pair.bound.subtract(price).multiply(2))
+            new TokenAmount(
+              market.pair.baseToken,
+              val.scale(
+                price.asFraction
+                  .multiply(price)
+                  .divide(market.pair.bound.subtract(price).multiply(2))
+              ).raw
             )
           );
     },
-    [market.pair.bound, price]
+    [
+      market.pair.baseToken,
+      market.pair.bound,
+      market.pair.speculativeToken,
+      price,
+    ]
   );
 
   const settings = useSettings();
   const { onSend, disableReason } = useDeposit(
     market,
-    // null,
+    tokenID ?? null,
     depositBaseAmount,
     depositSpeculativeAmount,
     settings
@@ -118,7 +130,13 @@ const useManageInternal = ({
     depositSpeculativeAmount,
     setDepositAmount,
 
-    onSend,
+    onSend: async () => {
+      await onSend();
+      setDepositBaseAmount(new TokenAmount(market.pair.baseToken, 0));
+      setDepositSpeculativeAmount(
+        new TokenAmount(market.pair.speculativeToken, 0)
+      );
+    },
     disableReason,
   };
 };
