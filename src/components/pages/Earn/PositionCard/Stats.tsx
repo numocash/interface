@@ -30,7 +30,7 @@ export const pairInfoToPrice = (pairInfo: IPairInfo, pair: IPair): Price => {
   );
 };
 
-const pricePerLP = (pairInfo: IPairInfo, pair: IPair): Price => {
+export const pricePerLP = (pairInfo: IPairInfo, pair: IPair): Price => {
   const price = pairInfoToPrice(pairInfo, pair);
   if (price.equalTo(0)) return new Price(pair.lp, pair.baseToken, 1, 0);
   const scale0 = pairInfo.baseAmount.divide(pairInfo.totalLPSupply);

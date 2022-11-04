@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import tw, { css, styled } from "twin.macro";
 
@@ -6,11 +6,11 @@ import type {
   IMarket,
   IMarketUserInfo,
 } from "../../../../contexts/environment";
+import { usePair } from "../../../../hooks/usePair";
 import { ChartIcons } from "../../../common/ChartIcons";
 import { Module } from "../../../common/Module";
 import { TokenIcon } from "../../../common/TokenIcon";
-import { scale } from "../../Trade/useTrade";
-import { Stats } from "./Stats";
+import { pricePerLP, Stats } from "./Stats";
 
 interface Props {
   userInfo: IMarketUserInfo | null;
@@ -40,9 +40,14 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
   const { speculativeToken, baseToken } = market.pair;
   // const marketInfo = useLendgine(market);
   // const tickInfo = useTick(market, userInfo.tick);
+  const pairInfo = usePair(market.pair);
+  const price = useMemo(
+    () => (pairInfo ? pricePerLP(pairInfo, market.pair) : null),
+    [market.pair, pairInfo]
+  );
 
   const verticalItemDeposit =
-    userInfo && userInfo.liquidity.greaterThan(0) ? (
+    price && userInfo && userInfo.liquidity.greaterThan(0) ? (
       <VerticalItem
         css={css`
           min-width: 75px;
@@ -51,7 +56,7 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
         <>
           <VerticalItemData>
             {userInfo.liquidity
-              .divide(scale)
+              .multiply(price)
               .toFixed(2, { groupSeparator: "," })}{" "}
             {baseToken.symbol}
           </VerticalItemData>
