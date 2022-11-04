@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import type {
   IMarket,
   IMarketInfo,
+  IMarketUserInfo,
   IPair,
   IPairInfo,
 } from "../../../../contexts/environment";
@@ -14,6 +15,7 @@ import { RowBetween } from "../../../common/RowBetween";
 
 interface Props {
   market: IMarket;
+  userInfo: IMarketUserInfo | null;
 }
 
 export const pairInfoToPrice = (pairInfo: IPairInfo, pair: IPair): Price => {
@@ -73,7 +75,7 @@ const borrowRate = (marketInfo: IMarketInfo): Percent => {
   }
 };
 
-const supplyRate = (marketInfo: IMarketInfo): Percent => {
+export const supplyRate = (marketInfo: IMarketInfo): Percent => {
   if (marketInfo.totalLiquidity.equalTo(0)) return new Percent(0);
   const utilization = Percent.fromFraction(
     marketInfo.totalLiquidityBorrowed.divide(marketInfo.totalLiquidity)
@@ -83,27 +85,38 @@ const supplyRate = (marketInfo: IMarketInfo): Percent => {
   return utilization.multiply(borrow);
 };
 
-export const Stats: React.FC<Props> = ({ market }: Props) => {
+export const Stats: React.FC<Props> = ({ market, userInfo }: Props) => {
   const marketInfo = useLendgine(market);
   const pairInfo = usePair(market.pair);
+  const price = useMemo(
+    () => (pairInfo ? pricePerLP(pairInfo, market.pair) : null),
+    [market.pair, pairInfo]
+  );
+
   const tvl = useMemo(
     () =>
       marketInfo && pairInfo ? totalValue(marketInfo, pairInfo, market) : null,
     [market, marketInfo, pairInfo]
   );
 
-  const rate = useMemo(
-    () => (marketInfo ? supplyRate(marketInfo) : null),
-    [marketInfo]
-  );
-
   return (
     <div tw="">
-      <RowBetween tw="">
-        <p tw="text-default">APR</p>
-        <p tw="text-default font-semibold">{rate ? rate.toFixed(1) : "--"}%</p>
-      </RowBetween>
-      <hr tw="border-[#AEAEB2] rounded " />
+      {userInfo && userInfo.liquidity.greaterThan(0) && (
+        <>
+          <RowBetween tw="">
+            <p tw="text-default">Your deposit</p>
+            <p tw="text-default font-semibold">
+              {price
+                ? userInfo.liquidity
+                    .multiply(price)
+                    .toFixed(2, { groupSeparator: "," })
+                : "--"}{" "}
+              {market.pair.baseToken.symbol}
+            </p>
+          </RowBetween>
+          <hr tw="border-[#AEAEB2] rounded " />
+        </>
+      )}
       <RowBetween>
         <p tw="text-default">TVL</p>
         <p tw="text-default font-semibold">

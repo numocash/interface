@@ -1,16 +1,15 @@
 import React, { useMemo } from "react";
 import { NavLink } from "react-router-dom";
-import tw, { css, styled } from "twin.macro";
 
 import type {
   IMarket,
   IMarketUserInfo,
 } from "../../../../contexts/environment";
-import { usePair } from "../../../../hooks/usePair";
+import { useLendgine } from "../../../../hooks/useLendgine";
 import { ChartIcons } from "../../../common/ChartIcons";
 import { Module } from "../../../common/Module";
 import { TokenIcon } from "../../../common/TokenIcon";
-import { pricePerLP, Stats } from "./Stats";
+import { Stats, supplyRate } from "./Stats";
 
 interface Props {
   userInfo: IMarketUserInfo | null;
@@ -38,32 +37,19 @@ const Wrapper: React.FC<WrapperProps> = ({
 
 export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
   const { speculativeToken, baseToken } = market.pair;
-  // const marketInfo = useLendgine(market);
-  // const tickInfo = useTick(market, userInfo.tick);
-  const pairInfo = usePair(market.pair);
-  const price = useMemo(
-    () => (pairInfo ? pricePerLP(pairInfo, market.pair) : null),
-    [market.pair, pairInfo]
+  const marketInfo = useLendgine(market);
+
+  const rate = useMemo(
+    () => (marketInfo ? supplyRate(marketInfo) : null),
+    [marketInfo]
   );
 
-  const verticalItemDeposit =
-    price && userInfo && userInfo.liquidity.greaterThan(0) ? (
-      <VerticalItem
-        css={css`
-          min-width: 75px;
-        `}
-      >
-        <>
-          <VerticalItemData>
-            {userInfo.liquidity
-              .multiply(price)
-              .toFixed(2, { groupSeparator: "," })}{" "}
-            {baseToken.symbol}
-          </VerticalItemData>
-          <VerticalItemLabel>Your Balance</VerticalItemLabel>
-        </>
-      </VerticalItem>
-    ) : null;
+  const verticalItemAPY = (
+    <div tw="flex flex-col items-center text-center">
+      <p tw="text-default font-bold">{rate ? rate.toFixed(1) : "--"}%</p>
+      <p tw="text-sm text-secondary">APR</p>
+    </div>
+  );
 
   return (
     <NavLink
@@ -102,29 +88,10 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
               )}
             </div>
           </div>
-          <div tw="">{verticalItemDeposit}</div>
+          <div tw="">{verticalItemAPY}</div>
         </div>
-        <Stats market={market} />
+        <Stats market={market} userInfo={userInfo} />
       </Wrapper>
     </NavLink>
   );
 };
-
-export const VerticalItem = styled.div`
-  ${tw`flex flex-col items-center text-center`}
-`;
-
-export const VerticalItemLabel = styled.div`
-  text-align: center;
-  font-size: 13px;
-  ${tw`text-secondary`};
-  line-height: 1;
-  white-space: nowrap;
-  padding-top: 5px;
-`;
-
-export const VerticalItemData = styled.div`
-  ${tw`flex items-center gap-1 text-default`};
-  line-height: 18px;
-  font-weight: 600;
-`;

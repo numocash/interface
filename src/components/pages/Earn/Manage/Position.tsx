@@ -94,6 +94,12 @@ export const Position: React.FC = () => {
         </span>
       </div>
       <hr tw="border-[#AEAEB2] rounded " />
+      <div tw="flex justify-between pt-4">
+        <p tw="text-default">Collectable Interest</p>
+        <p tw="text-default font-bold">
+          0.00 {market.pair.speculativeToken.symbol}
+        </p>
+      </div>
     </Module>
   );
 };

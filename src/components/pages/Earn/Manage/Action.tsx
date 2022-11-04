@@ -1,6 +1,7 @@
 import tw, { css } from "twin.macro";
 
 import { Module } from "../../../common/Module";
+import { Settings } from "../../../common/Settings";
 import { ActionType, useManage } from ".";
 import { Deposit } from "./Deposit";
 import { Withdraw } from "./Withdraw";
@@ -9,7 +10,7 @@ export const Action: React.FC = () => {
   const { action, setAction } = useManage();
 
   const Tabs = (
-    <div tw="flex gap-4 grid-flow-col text-sm justify-center w-min bg-action rounded-lg px-6 pt-6">
+    <div tw="flex gap-4 grid-flow-col text-sm justify-center">
       {[ActionType.Deposit, ActionType.Withdraw].map((s) => {
         return (
           <div key={s}>
@@ -31,7 +32,10 @@ export const Action: React.FC = () => {
 
   return (
     <Module tw="p-0">
-      {Tabs}
+      <div tw="flex justify-between px-6 pt-6">
+        {Tabs}
+        <Settings />
+      </div>
       {action === ActionType.Deposit ? <Deposit /> : <Withdraw />}
     </Module>
   );

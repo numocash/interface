@@ -1,21 +1,29 @@
+import { useMemo } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 
+import { useLendgine } from "../../../../hooks/useLendgine";
 import { ChartIcons } from "../../../common/ChartIcons";
-import { Settings } from "../../../common/Settings";
 import { TokenIcon } from "../../../common/TokenIcon";
-import { Stats } from "../PositionCard/Stats";
+import { Stats, supplyRate } from "../PositionCard/Stats";
 import { useManage } from ".";
 
 export const Top: React.FC = () => {
   const { market } = useManage();
+  const marketInfo = useLendgine(market);
+
+  const rate = useMemo(
+    () => (marketInfo ? supplyRate(marketInfo) : null),
+    [marketInfo]
+  );
   return (
     <>
       <NavLink to={`/earn`} tw="flex items-center text-xl text-black">
         <FaChevronLeft />
       </NavLink>
-      <div tw="p-6 pb-3 rounded-lg bg-action border border-[#AEAEB2]">
-        <div tw="flex items-center justify-between ">
+
+      <div tw="p-6 pb-3 rounded-lg bg-action border border-[#AEAEB2] ">
+        <div tw="flex justify-between align-top">
           <div tw="flex items-center gap-3">
             <div tw="flex items-center space-x--2">
               <TokenIcon token={market.pair.speculativeToken} size={24} />
@@ -28,9 +36,14 @@ export const Top: React.FC = () => {
               </span>
             </div>
           </div>
-          <Settings tw="hidden" />
+          <div tw="flex flex-col items-center text-center">
+            <p tw="text-default text-lg font-bold">
+              {rate ? rate.toFixed(1) : "--"}%
+            </p>
+            <p tw="text-sm text-secondary">APR</p>
+          </div>
         </div>
-        <div tw="flex w-auto gap-2 py-2">
+        <div tw="flex w-auto gap-2 pb-2">
           {market.pair.speculativeToken.address <
           market.pair.baseToken.address ? (
             <>
@@ -46,7 +59,7 @@ export const Top: React.FC = () => {
         </div>
 
         <div tw="">
-          <Stats market={market} />
+          <Stats market={market} userInfo={null} />
         </div>
       </div>
     </>
