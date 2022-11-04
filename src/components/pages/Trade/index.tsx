@@ -1,3 +1,5 @@
+import { NavLink } from "react-router-dom";
+
 import { Module } from "../../common/Module";
 import { Swap } from "./Swap";
 import { SwapStateProvider } from "./useSwapState";
@@ -12,7 +14,11 @@ export const Trade: React.FC = () => {
         </div>
         <span tw="text-default">
           This program is to be considered experimental. Contracts used have
-          been submitted to audit.
+          been submitted to{" "}
+          <NavLink tw="underline" to="https://www.certik.com/projects/numoen">
+            audit
+          </NavLink>
+          .
         </span>
       </Module>
       <SwapStateProvider>

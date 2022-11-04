@@ -12,6 +12,7 @@ import tw, { css, styled } from "twin.macro";
 import { useUserLendgine } from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
 import { Module } from "../../../common/Module";
+import { TokenIcon } from "../../../common/TokenIcon";
 import { pairInfoToPrice } from "../PositionCard/Stats";
 import { useManage } from ".";
 
@@ -76,20 +77,23 @@ export const Position: React.FC = () => {
           </SliderTrack>
         </SliderInput>
       </div>
-      <div tw="flex justify-between text-default font-bold text-lg mt-2">
-        <p>
+      <div tw="flex justify-between text-default font-bold text-lg py-4">
+        <span tw="flex items-center gap-1">
           {userBaseAmount
             ? userBaseAmount.toFixed(2, { groupSeparator: "," })
             : "--"}{" "}
+          <TokenIcon tw="ml-1" token={market.pair.baseToken} size={20} />
           {market.pair.baseToken.symbol.toString()}
-        </p>
-        <p>
+        </span>
+        <span tw="flex items-center gap-1">
           {userSpeculativeAmount
             ? userSpeculativeAmount.toFixed(2, { groupSeparator: "," })
             : "--"}{" "}
+          <TokenIcon tw="ml-1" token={market.pair.speculativeToken} size={20} />
           {market.pair.speculativeToken.symbol.toString()}
-        </p>
+        </span>
       </div>
+      <hr tw="border-[#AEAEB2] rounded " />
     </Module>
   );
 };
@@ -101,11 +105,11 @@ export const SliderInput = styledSlider(
     background: none;
 
     [data-reach-slider-range] {
-      ${tw`h-1 rounded-r bg-amber-500`}
+      ${tw`h-1 bg-black rounded-r`}
     }
 
     [data-reach-slider-track] {
-      ${tw`h-1 bg-blue-500 rounded`}
+      ${tw`h-1 bg-gray-300 rounded`}
     }
   `
 );
