@@ -2,9 +2,9 @@ import { TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
-import { useTokenBalances } from "../../../../hooks/useTokenBalance";
-import { AssetSelection } from "../../../common/AssetSelection";
-import { Input, useManage } from ".";
+import { useTokenBalances } from "../../../../../hooks/useTokenBalance";
+import { AssetSelection } from "../../../../common/AssetSelection";
+import { Input, useManage } from "..";
 
 export const Deposit: React.FC = () => {
   const {

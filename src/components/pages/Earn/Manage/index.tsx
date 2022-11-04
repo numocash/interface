@@ -12,11 +12,11 @@ import { Page } from "../../../common/Page";
 import { pairInfoToPrice } from "../PositionCard/Stats";
 import { Action } from "./Action";
 import { Button } from "./Button";
+import { useDeposit } from "./Deposit/useDeposit";
 import { Invalid } from "./Invalid";
 import { Position } from "./Position";
 import { Top } from "./Top";
-import { useDeposit } from "./useDeposit";
-import { useWithdraw } from "./useWithdraw";
+import { useWithdraw } from "./Withdraw/useWithdraw";
 
 export enum ActionType {
   Deposit = "Deposit",

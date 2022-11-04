@@ -3,17 +3,17 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import type { IMarket } from "../../../../contexts/environment";
-import { LIQUIDITYMANAGER } from "../../../../contexts/environment";
-import type { ISettings } from "../../../../contexts/settings";
-import { useApproval, useApprove } from "../../../../hooks/useApproval";
-import { useLiquidityManager } from "../../../../hooks/useContract";
-import { usePair } from "../../../../hooks/usePair";
-import { useTokenBalances } from "../../../../hooks/useTokenBalance";
-import type { BeetStage, BeetTx } from "../../../../utils/beet";
-import { useBeet } from "../../../../utils/beet";
-import { scale } from "../../Trade/useTrade";
-import { pairInfoToPrice } from "../PositionCard/Stats";
+import type { IMarket } from "../../../../../contexts/environment";
+import { LIQUIDITYMANAGER } from "../../../../../contexts/environment";
+import type { ISettings } from "../../../../../contexts/settings";
+import { useApproval, useApprove } from "../../../../../hooks/useApproval";
+import { useLiquidityManager } from "../../../../../hooks/useContract";
+import { usePair } from "../../../../../hooks/usePair";
+import { useTokenBalances } from "../../../../../hooks/useTokenBalance";
+import type { BeetStage, BeetTx } from "../../../../../utils/beet";
+import { useBeet } from "../../../../../utils/beet";
+import { scale } from "../../../Trade/useTrade";
+import { pairInfoToPrice } from "../../PositionCard/Stats";
 
 export const useDeposit = (
   market: IMarket,
@@ -90,6 +90,7 @@ export const useDeposit = (
         baseTokenAmount &&
         liquidity
     );
+    // TODO add amount to description
     const approveStage: BeetStage[] =
       approvalS || approvalB
         ? [
@@ -98,15 +99,15 @@ export const useDeposit = (
               parallelTransactions: [
                 approvalS
                   ? {
-                      title: "Approve CELO",
-                      description: "Approve CELO",
+                      title: `Approve ${speculativeTokenAmount.token.symbol}`,
+                      description: `Approve ${speculativeTokenAmount.token.symbol}`,
                       txEnvelope: approveS,
                     }
                   : null,
                 approvalB
                   ? {
-                      title: "Approve cUSD",
-                      description: "Approve cUSD",
+                      title: `Approve ${baseTokenAmount.token.symbol}`,
+                      description: `Approve ${baseTokenAmount.token.symbol}`,
                       txEnvelope: approveB,
                     }
                   : null,
