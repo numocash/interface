@@ -1,16 +1,11 @@
 import { ChainId } from "@dahlia-labs/celo-contrib";
 import { CELO, CUSD } from "@dahlia-labs/celo-tokens";
-import { Token } from "@dahlia-labs/token-utils";
+import type { Token } from "@dahlia-labs/token-utils";
 import { getAddress } from "@ethersproject/address";
-import { useCallback } from "react";
 
-import powerCELO from "../components/common/images/PowerCelo.svg";
-import type { IMarket } from "../contexts/environment";
 import { useEnvironment } from "../contexts/environment";
 
 export const useCelo = () => CELO[ChainId.Mainnet];
-
-export const useCusd = () => CUSD[ChainId.Mainnet];
 
 export const useAddressToToken = (address: string | null): Token | null => {
   const tokens = [CELO[ChainId.Mainnet], CUSD[ChainId.Mainnet]] as const;
@@ -26,35 +21,15 @@ export const useFeaturedTokens = (): { [address: string]: Token } => {
 };
 
 export const useMarketTokens = (): readonly Token[] => {
-  return useEnvironment().markets.map(
-    (m) =>
-      new Token({
-        chainId: ChainId.Mainnet,
-        decimals: 36,
-        name: `Squared ${m.pair.speculativeToken.symbol} / ${m.pair.baseToken.symbol}`,
-        symbol: `${m.pair.speculativeToken.symbol}²`,
-        address: m.address,
-        logoURI: powerCELO,
-      })
-  );
+  return useEnvironment().markets.map((m) => m.token);
+};
+
+export const useSpeculativeTokens = (): readonly Token[] => {
+  return useEnvironment().markets.map((m) => m.pair.speculativeToken);
 };
 
 export const useAllTokens = (): readonly Token[] => {
   const marketTokens = useMarketTokens();
-  return [CELO[ChainId.Mainnet], ...marketTokens] as const;
-};
-
-export const getTokensPerMarket = (market: IMarket): [Token, Token] => {
-  return [market.pair.speculativeToken, market.pair.baseToken];
-};
-
-export const useMarketsPerToken = (token: Token) => {
-  const environments = useEnvironment();
-  return useCallback(
-    () =>
-      environments.markets.filter(
-        (m) => m.pair.baseToken === token || m.pair.speculativeToken === token
-      ),
-    [environments.markets, token]
-  );
+  const speculativeTokens = useSpeculativeTokens();
+  return [...speculativeTokens, ...marketTokens] as const;
 };

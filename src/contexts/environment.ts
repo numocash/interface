@@ -2,6 +2,7 @@ import { ChainId } from "@dahlia-labs/celo-contrib";
 import { CELO, CUSD } from "@dahlia-labs/celo-tokens";
 import type { TokenAmount } from "@dahlia-labs/token-utils";
 import { Price, Token } from "@dahlia-labs/token-utils";
+import { useCallback } from "react";
 import { createContainer } from "unstated-next";
 
 export interface IMarket {
@@ -52,7 +53,7 @@ interface Environment {
 const LongCelo: IMarket = {
   token: new Token({
     name: "Numoen Lendgine",
-    symbol: "NLDG",
+    symbol: "CELO²",
     decimals: 18,
     chainId: ChainId.Mainnet,
     address: "0x83973A67C2F38CABcbD91181f1D9ed62917646A8",
@@ -81,7 +82,7 @@ const LongCelo: IMarket = {
 const ShortCelo: IMarket = {
   token: new Token({
     name: "Numoen Lendgine",
-    symbol: "NLDG",
+    symbol: "cUSD²",
     decimals: 18,
     chainId: ChainId.Mainnet,
     address: "0x40FCde0c9619969834BBBC63b7816716ace4B194",
@@ -109,7 +110,7 @@ const ShortCelo: IMarket = {
 
 export const FACTORY = "0x2A4a8ea165aa1d7F45d7ac03BFd6Fa58F9F5F8CC";
 export const LIQUIDITYMANAGER = "0x8144a4e2c3f93c55d2973015a21b930f3b636ebd";
-export const LENDGINEROUTER = "0x5f77dd7e5e86fd9277b8375ebff1966a95e56be6";
+export const LENDGINEROUTER = "0x4D843Fb998b885842203c4E7546a17E8D984cC92";
 export const GENESIS = 15948000;
 
 export const useAddressToMarket = (
@@ -119,6 +120,27 @@ export const useAddressToMarket = (
   if (!address) return null;
 
   return markets.find((m) => m.address === address) ?? null;
+};
+
+export const useGetAddressToMarket = () => {
+  const { markets } = useEnvironment();
+  return useCallback(
+    (address: string | null | undefined) => {
+      if (!address) return null;
+      return markets.find((m) => m.address === address) ?? null;
+    },
+    [markets]
+  );
+};
+
+export const useGetSpeculativeToMarket = () => {
+  const { markets } = useEnvironment();
+  return useCallback(
+    (speculative: Token) => {
+      return markets.find((m) => m.pair.speculativeToken === speculative);
+    },
+    [markets]
+  );
 };
 
 export const useIsMarket = (address: string | null): boolean => {
