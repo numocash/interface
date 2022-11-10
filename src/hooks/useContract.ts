@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { useProvider, useSigner } from "wagmi";
 
 import ERC20_ABI from "../abis/erc20.json";
+import UP_ABI from "../abis/IUniswapV2Pair.json";
 import LENDGINE_ABI from "../abis/Lendgine.json";
 import LR_ABI from "../abis/LendgineRouter.json";
 import LM_ABI from "../abis/LiquidityManager.json";
@@ -18,6 +19,7 @@ import type {
   LiquidityManager,
   Multicall2,
 } from "../generated";
+import type { IUniswapV2PairInterface } from "../generated/IUniswapV2Pair";
 import type { LendgineInterface } from "../generated/Lendgine";
 
 export function useTokenContractFromAddress(
@@ -56,6 +58,10 @@ export function useLendgineContract(
 export const lendgineInterface = new Interface(
   LENDGINE_ABI.abi
 ) as LendgineInterface;
+
+export const uniswapPairInterface = new Interface(
+  UP_ABI.abi
+) as IUniswapV2PairInterface;
 
 export function useLiquidityManager(
   withSignerIfPossible: boolean

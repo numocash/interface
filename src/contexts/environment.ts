@@ -10,6 +10,7 @@ export interface IMarket {
 
   address: string;
   pair: IPair;
+  referenceMarket: string;
 }
 
 export interface IMarketInfo {
@@ -77,6 +78,7 @@ const LongCelo: IMarket = {
     speculativeScaleFactor: 18,
     address: "0xa3334Bb438096d7fa18b40118347fAF35c182207",
   },
+  referenceMarket: "0x1e593f1fe7b61c53874b54ec0c59fd0d5eb8621e",
 };
 
 const ShortCelo: IMarket = {
@@ -106,6 +108,7 @@ const ShortCelo: IMarket = {
     speculativeScaleFactor: 18,
     address: "0x8daE985062Ada6e316dC168012bA14EF19fB1Ac4",
   },
+  referenceMarket: "0x1e593f1fe7b61c53874b54ec0c59fd0d5eb8621e",
 };
 
 export const FACTORY = "0x2A4a8ea165aa1d7F45d7ac03BFd6Fa58F9F5F8CC";

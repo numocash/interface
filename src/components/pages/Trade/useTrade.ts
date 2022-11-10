@@ -15,6 +15,7 @@ import { useLendgineRouter } from "../../../hooks/useContract";
 import { useLendgine } from "../../../hooks/useLendgine";
 import { usePair } from "../../../hooks/usePair";
 import { useTokenBalance } from "../../../hooks/useTokenBalance";
+import { useUniswapPair } from "../../../hooks/useUniswapPair";
 import type { BeetStage, BeetTx } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
 import { outputAmount, speculativeToLiquidity } from "../../../utils/trade";
@@ -60,6 +61,7 @@ export const useTrade = ({
   invariant(market);
   const marketInfo = useLendgine(market);
   const pairInfo = usePair(market.pair);
+  const uniswapInfo = useUniswapPair(market);
   const price = useMemo(
     () => (pairInfo ? pairInfoToPrice(pairInfo, market.pair) : null),
     [market.pair, pairInfo]
@@ -69,15 +71,36 @@ export const useTrade = ({
 
   const trade = useMemo(
     () =>
-      fromAmount && toToken && fromToken && market && marketInfo && price
+      fromAmount &&
+      toToken &&
+      fromToken &&
+      market &&
+      marketInfo &&
+      price &&
+      uniswapInfo
         ? {
             market,
             mint,
             inputAmount: fromAmount,
-            outputAmount: outputAmount(market, marketInfo, fromAmount, price),
+            outputAmount: outputAmount(
+              market,
+              marketInfo,
+              fromAmount,
+              price,
+              uniswapInfo
+            ),
           }
         : null,
-    [fromAmount, fromToken, market, marketInfo, mint, price, toToken]
+    [
+      fromAmount,
+      fromToken,
+      market,
+      marketInfo,
+      mint,
+      price,
+      toToken,
+      uniswapInfo,
+    ]
   );
 
   const handleTrade = useCallback(async () => {
@@ -142,41 +165,33 @@ export const useTrade = ({
             },
           ])
         )
-      : null;
-    // : await beet(
-    //     "Burn",
-    //     approveStage.concat([
-    //       {
-    //         stageTitle: "Sell option",
-    //         parallelTransactions: [
-    //           {
-    //             title: "Sell option",
-    //             description: `Sell ${trade.market.pair.speculativeToken.symbol} squared option`,
-    //             txEnvelope: () =>
-    //               lengineRouterContract.burn({
-    //                 base: market.pair.baseToken.address,
-    //                 speculative: market.pair.speculativeToken.address,
-    //                 upperBound: market.pair.bound.asFraction
-    //                   .multiply(scale)
-    //                   .quotient.toString(),
-    //                 shares: trade.inputAmount.raw.toString(),
-    //                 amountSMin: trade.outputAmount
-    //                   .reduceBy(settings.maxSlippagePercent)
-    //                   .quotient.toString(),
-    //                 amountBMax: trade.baseAmount
-    //                   .scale(
-    //                     settings.maxSlippagePercent.add(Percent.ONE_HUNDRED)
-    //                   )
-    //                   .raw.toString(),
-    //                 recipient: address,
-    //                 deadline:
-    //                   Math.round(Date.now() / 1000) + settings.timeout * 60,
-    //               }),
-    //           },
-    //         ],
-    //       },
-    //     ])
-    // );
+      : await beet("Burn", [
+          {
+            stageTitle: "Sell option",
+            parallelTransactions: [
+              {
+                title: "Sell option",
+                description: `Sell ${trade.market.pair.speculativeToken.symbol} squared option`,
+                txEnvelope: () =>
+                  lengineRouterContract.burn({
+                    base: market.pair.baseToken.address,
+                    speculative: market.pair.speculativeToken.address,
+                    baseScaleFactor: market.pair.baseScaleFactor,
+                    speculativeScaleFactor: market.pair.speculativeScaleFactor,
+                    price: price.asFraction.multiply(scale).quotient.toString(),
+                    liquidityMax: scale.quotient.toString(),
+                    upperBound: market.pair.bound.asFraction
+                      .multiply(scale)
+                      .quotient.toString(),
+                    shares: trade.inputAmount.raw.toString(),
+                    recipient: address,
+                    deadline:
+                      Math.round(Date.now() / 1000) + settings.timeout * 60,
+                  }),
+              },
+            ],
+          },
+        ]);
   }, [
     address,
     approval,

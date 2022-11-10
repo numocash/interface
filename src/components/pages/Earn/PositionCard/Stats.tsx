@@ -1,4 +1,4 @@
-import type { TokenAmount } from "@dahlia-labs/token-utils";
+import type { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 import { Percent, Price } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 
@@ -30,6 +30,17 @@ export const pairInfoToPrice = (pairInfo: IPairInfo, pair: IPair): Price => {
     priceFraction.denominator,
     priceFraction.numerator
   );
+};
+
+export const priceToPairReserves = (
+  price: Price,
+  liquidity: TokenAmount,
+  market: IMarket
+): [Fraction, Fraction] => {
+  const scale0 = price.asFraction.multiply(price);
+  const scale1 = market.pair.bound.subtract(price).multiply(2);
+
+  return [liquidity.multiply(scale0), liquidity.multiply(scale1)];
 };
 
 export const pricePerLP = (pairInfo: IPairInfo, pair: IPair): Price => {
