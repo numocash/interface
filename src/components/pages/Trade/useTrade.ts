@@ -154,8 +154,8 @@ export const useTrade = ({
                       price: price.asFraction
                         .multiply(scale)
                         .quotient.toString(),
-                      slippageBps: 100,
-                      sharesMin: 0,
+                      slippageBps: 2000,
+                      sharesMin: 0, // TODO: fix
                       recipient: address,
                       deadline:
                         Math.round(Date.now() / 1000) + settings.timeout * 60,
@@ -166,6 +166,7 @@ export const useTrade = ({
           ])
         )
       : await beet("Burn", [
+          // TODO: add approval
           {
             stageTitle: "Sell option",
             parallelTransactions: [

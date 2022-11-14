@@ -113,7 +113,7 @@ const ShortCelo: IMarket = {
 
 export const FACTORY = "0x2A4a8ea165aa1d7F45d7ac03BFd6Fa58F9F5F8CC";
 export const LIQUIDITYMANAGER = "0x8144a4e2c3f93c55d2973015a21b930f3b636ebd";
-export const LENDGINEROUTER = "0x4D843Fb998b885842203c4E7546a17E8D984cC92";
+export const LENDGINEROUTER = "0xf6dc5f1c2afc43c74e1e2b4e5bbdd98b2524671f";
 export const GENESIS = 15948000;
 
 export const useAddressToMarket = (
