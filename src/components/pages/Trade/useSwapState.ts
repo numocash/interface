@@ -9,14 +9,11 @@ import { createContainer } from "unstated-next";
 
 import type { IMarket } from "../../../contexts/environment";
 import {
+  useEnvironment,
   useGetAddressToMarket,
   useGetSpeculativeToMarket,
 } from "../../../contexts/environment";
-import {
-  useAddressToToken,
-  useCelo,
-  useMarketTokens,
-} from "../../../hooks/useTokens";
+import { useAddressToToken, useMarketTokens } from "../../../hooks/useTokens";
 import { useTrade } from "./useTrade";
 
 export enum Field {
@@ -73,17 +70,21 @@ export const useParsedQueryString = (): ParsedQs => {
 // for swaps, one of the fields is dependent of the other field
 const useSwapStateInternal = (): UseSwapStateValues => {
   const parsedQs = useParsedQueryString();
-  const celo = useCelo();
   const marketTokens = useMarketTokens();
-  const marketToken = useMemo(() => marketTokens[0], [marketTokens]);
+
+  const { markets } = useEnvironment();
+  const marketStart = markets[0];
+  invariant(marketStart);
+
   const getAddressToMarket = useGetAddressToMarket();
   const getSpeculativeToMarket = useGetSpeculativeToMarket();
-  invariant(marketToken);
 
-  const tokenA = useAddressToToken(parsedQs.inputToken as string) ?? celo;
+  const tokenA =
+    useAddressToToken(parsedQs.inputToken as string) ??
+    marketStart.pair.speculativeToken;
 
   const tokenB =
-    useAddressToToken(parsedQs.outputToken as string) ?? marketToken;
+    useAddressToToken(parsedQs.outputToken as string) ?? marketStart.token;
 
   // TODO: consider make form state seralizable (store only token addr)
   const [fieldState, setFieldState] = useState<SwapFieldState>({
