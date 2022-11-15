@@ -1,4 +1,4 @@
-import { Price, Token, TokenAmount } from "@dahlia-labs/token-utils";
+import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
 import { Fraction } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 import { useCallback, useMemo } from "react";
@@ -12,8 +12,7 @@ import {
 import { useSettings } from "../../../contexts/settings";
 import { useApproval, useApprove } from "../../../hooks/useApproval";
 import { useLendgineRouter } from "../../../hooks/useContract";
-import { useLendgine } from "../../../hooks/useLendgine";
-import { usePair } from "../../../hooks/usePair";
+import { useLendgine, usePrice } from "../../../hooks/useLendgine";
 import { useTokenBalance } from "../../../hooks/useTokenBalance";
 import { useUniswapPair } from "../../../hooks/useUniswapPair";
 import type { BeetStage, BeetTx } from "../../../utils/beet";
@@ -23,7 +22,6 @@ import {
   outputAmount,
   speculativeToLiquidity,
 } from "../../../utils/trade";
-import { pairInfoToPrice } from "../Earn/PositionCard/Stats";
 import type { Trade } from "./useSwapState";
 
 export interface UseTradeParams {
@@ -64,19 +62,8 @@ export const useTrade = ({
   const market = market0 ?? market1;
   invariant(market);
   const marketInfo = useLendgine(market);
-  const pairInfo = usePair(market.pair);
   const uniswapInfo = useUniswapPair(market);
-  // const price = useMemo(
-  //   () => (pairInfo ? pairInfoToPrice(pairInfo, market.pair) : null),
-  //   [market.pair, pairInfo]
-  // );
-  // console.log(price?.toFixed(8));
-  const price = new Price(
-    market.pair.speculativeToken,
-    market.pair.baseToken,
-    10 ** 5,
-    25
-  );
+  const price = usePrice(market);
   const borrowAmount = useMemo(
     () =>
       fromAmount && price
@@ -185,7 +172,6 @@ export const useTrade = ({
       : await beet(
           "Burn",
           approveStage.concat([
-            // TODO: add approval
             {
               stageTitle: "Sell option",
               parallelTransactions: [
@@ -199,7 +185,7 @@ export const useTrade = ({
                       baseScaleFactor: market.pair.baseScaleFactor,
                       speculativeScaleFactor:
                         market.pair.speculativeScaleFactor,
-                      liquidity: "50000000000000000000",
+                      liquidity: "500000000000000000000",
                       upperBound: market.pair.bound.asFraction
                         .multiply(scale)
                         .quotient.toString(),
@@ -217,6 +203,7 @@ export const useTrade = ({
     approval,
     approve,
     beet,
+    borrowAmount,
     fromAmount,
     fromToken?.symbol,
     lengineRouterContract,
@@ -252,6 +239,7 @@ export const useTrade = ({
       fromAmount,
       userFromBalance,
       approval,
+      borrowAmount,
       marketInfo,
       trade,
       price,

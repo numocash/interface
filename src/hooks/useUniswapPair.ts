@@ -1,5 +1,6 @@
 import { TokenAmount } from "@dahlia-labs/token-utils";
 import type { Call } from "@dahlia-labs/use-ethers";
+import { AddressZero } from "@ethersproject/constants";
 import type { BigNumber } from "ethers";
 
 import type { IMarket } from "../contexts/environment";
@@ -8,18 +9,18 @@ import { useBlockQuery } from "./useBlockQuery";
 import { uniswapPairInterface } from "./useContract";
 
 export const useUniswapPair = (
-  market: IMarket
+  market: IMarket | null
 ): [TokenAmount, TokenAmount] | null => {
   const calls: Call[] = [
     {
-      target: market.referenceMarket,
+      target: market?.referenceMarket ?? AddressZero,
       callData: uniswapPairInterface.encodeFunctionData("getReserves"),
     },
   ];
 
   const data = useBlockQuery("uni reference", calls);
 
-  if (!data) return null;
+  if (!data || !market) return null;
 
   interface ret {
     reserve0: BigNumber;

@@ -11,6 +11,7 @@ import UP_ABI from "../abis/IUniswapV2Pair.json";
 import LENDGINE_ABI from "../abis/Lendgine.json";
 import LR_ABI from "../abis/LendgineRouter.json";
 import LM_ABI from "../abis/LiquidityManager.json";
+import PAIR_ABI from "../abis/Pair.json";
 import { LENDGINEROUTER, LIQUIDITYMANAGER } from "../contexts/environment";
 import type {
   Erc20,
@@ -21,6 +22,7 @@ import type {
 } from "../generated";
 import type { IUniswapV2PairInterface } from "../generated/IUniswapV2Pair";
 import type { LendgineInterface } from "../generated/Lendgine";
+import type { PairInterface } from "../generated/Pair";
 
 export function useTokenContractFromAddress(
   tokenAddress: string | undefined,
@@ -62,6 +64,8 @@ export const lendgineInterface = new Interface(
 export const uniswapPairInterface = new Interface(
   UP_ABI.abi
 ) as IUniswapV2PairInterface;
+
+export const pairInterface = new Interface(PAIR_ABI.abi) as PairInterface;
 
 export function useLiquidityManager(
   withSignerIfPossible: boolean

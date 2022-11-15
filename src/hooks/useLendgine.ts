@@ -1,9 +1,10 @@
-import { TokenAmount } from "@dahlia-labs/token-utils";
+import { Price, TokenAmount } from "@dahlia-labs/token-utils";
 import type { Call } from "@dahlia-labs/use-ethers";
 import type { BigNumber } from "@ethersproject/bignumber";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
 
+import { pairInfoToPrice } from "../components/pages/Earn/PositionCard/Stats";
 import { useBlock } from "../contexts/block";
 import type {
   IMarket,
@@ -15,6 +16,8 @@ import { parseFunctionReturn } from "../utils/parseFunctionReturn";
 import { blockHistory, useBlockQuery } from "./useBlockQuery";
 import { lendgineInterface, useLiquidityManager } from "./useContract";
 import { lendgineAddress } from "./useLendgineAddress";
+import { usePair } from "./usePair";
+import { useUniswapPair } from "./useUniswapPair";
 
 export const useUserLendgines = (
   address: string | undefined,
@@ -209,4 +212,22 @@ export const useLendgine = (market: IMarket): IMarketInfo | null => {
       data.returnData[4]
     ).toString(),
   };
+};
+
+export const usePrice = (market: IMarket | null): Price | null => {
+  const pairInfo = usePair(market?.pair ?? null);
+  const uniInfo = useUniswapPair(market ?? null);
+
+  if ((!pairInfo && !uniInfo) || !market) return null;
+  if (pairInfo && pairInfo.totalLPSupply.greaterThan(0)) {
+    return pairInfoToPrice(pairInfo, market.pair);
+  } else {
+    invariant(uniInfo);
+    return new Price(
+      market.pair.speculativeToken,
+      market.pair.baseToken,
+      uniInfo[0].raw,
+      uniInfo[1].raw
+    );
+  }
 };

@@ -104,19 +104,32 @@ export const speculativeToLiquidity = (
   speculative: TokenAmount,
   market: IMarket
 ): TokenAmount => {
-  return speculative.scale(market.pair.bound.asFraction.multiply(2).invert());
+  return new TokenAmount(
+    market.pair.lp,
+    speculative.scale(market.pair.bound.asFraction.multiply(2).invert()).raw
+  );
 };
 
 export const liquidityToSpeculative = (
   liquidity: TokenAmount,
   market: IMarket
 ): TokenAmount => {
-  return liquidity.scale(market.pair.bound.asFraction.multiply(2));
+  return new TokenAmount(
+    market.pair.speculativeToken,
+    liquidity.scale(market.pair.bound.asFraction.multiply(2)).raw
+  );
 };
 
 export const convertShareToLiquidity = (
   share: TokenAmount,
+  market: IMarket,
   marketInfo: IMarketInfo
 ): TokenAmount => {
   // TODO: simulate accrual
+  return new TokenAmount(
+    market.token,
+    share.scale(
+      marketInfo.totalLiquidityBorrowed.divide(marketInfo.totalSupply)
+    ).raw
+  );
 };

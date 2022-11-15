@@ -81,36 +81,6 @@ const LongCelo: IMarket = {
   referenceMarket: "0x1e593f1fe7b61c53874b54ec0c59fd0d5eb8621e",
 };
 
-const ShortCelo: IMarket = {
-  token: new Token({
-    name: "Numoen Lendgine",
-    symbol: "cUSD²",
-    decimals: 18,
-    chainId: ChainId.Mainnet,
-    address: "0x40FCde0c9619969834BBBC63b7816716ace4B194",
-  }),
-
-  address: "0x40FCde0c9619969834BBBC63b7816716ace4B194",
-  pair: {
-    speculativeToken: CUSD[ChainId.Mainnet],
-    baseToken: CELO[ChainId.Mainnet],
-
-    lp: new Token({
-      name: "Numoen LP",
-      symbol: "NLP",
-      decimals: 18,
-      chainId: ChainId.Mainnet,
-      address: "0x8daE985062Ada6e316dC168012bA14EF19fB1Ac4",
-    }),
-
-    bound: new Price(CELO[ChainId.Mainnet], CUSD[ChainId.Mainnet], 1, 5),
-    baseScaleFactor: 18,
-    speculativeScaleFactor: 18,
-    address: "0x8daE985062Ada6e316dC168012bA14EF19fB1Ac4",
-  },
-  referenceMarket: "0x1e593f1fe7b61c53874b54ec0c59fd0d5eb8621e",
-};
-
 const Mobi: IMarket = {
   token: new Token({
     name: "Numoen Lendgine",
