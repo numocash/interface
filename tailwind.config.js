@@ -24,11 +24,9 @@ const grays = {
 };
 
 const custom = {
-  container: "#EDEEEF", // white
   action: "#FFFFFF",
-  container: {
-    DEFAULT: "#EDEEEF",
-  }, // black
+  red: "#FF4941",
+  blue: "#0e76fd",
 };
 
 const textColor = {

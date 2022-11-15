@@ -36,15 +36,15 @@ export const Settings: React.FC = () => {
         target={targetRef}
         placement="auto"
       >
-        <div tw="bg-container flex rounded-xl text-default  p-3 flex-col gap-1">
+        <div tw="bg-gray-100 flex rounded-xl text-default  p-3 flex-col gap-1">
           <div tw="flex justify-between items-center">
             <div tw="font-semibold text-lg">Settings</div>
             <ToastExitButton onClick={onDismiss}>×</ToastExitButton>
           </div>
-          <div tw="flex flex-col bg-action  rounded-xl p-2 gap-1">
+          <div tw="flex flex-col bg-white  rounded-xl p-2 gap-1">
             <div tw="flex justify-start">Transaction Deadline</div>
             <div tw="flex items-center gap-1">
-              <div tw="flex rounded-xl p-1 bg-container ">
+              <div tw="flex rounded-xl p-1 bg-gray-100 ">
                 <BigNumericInput
                   tw="text-right text-lg"
                   placeholder={settings.timeout.toString()}
@@ -58,10 +58,10 @@ export const Settings: React.FC = () => {
               <div tw="text-secondary text-sm">Minutes</div>
             </div>
           </div>
-          <div tw="flex flex-col bg-action rounded-xl p-2 gap-1">
+          <div tw="flex flex-col bg-white rounded-xl p-2 gap-1">
             <div tw="flex justify-start">Allowed Slippage</div>
             <div tw="flex items-center gap-1">
-              <div tw="flex rounded-xl p-1 bg-container ">
+              <div tw="flex rounded-xl p-1 bg-gray-100 ">
                 <BigNumericInput
                   tw="text-right text-lg"
                   placeholder={settings.maxSlippagePercent.toFixed(0)}
@@ -75,7 +75,7 @@ export const Settings: React.FC = () => {
               <div tw="text-secondary text-sm">%</div>
             </div>
           </div>
-          <div tw="flex bg-action rounded-xl p-2 gap-1 justify-between items-center">
+          <div tw="flex bg-white rounded-xl p-2 gap-1 justify-between items-center">
             <div tw="">Infinite Approval</div>
             <div tw="">
               <Switch

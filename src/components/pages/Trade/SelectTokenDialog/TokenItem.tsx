@@ -16,7 +16,7 @@ const TokenOption = styled.div(() => [
 ]);
 
 const Wrapper = styled.div<{ disabled?: boolean }>(({ disabled }) => [
-  tw`px-4 flex hover:(bg-action)`,
+  tw`px-4 flex hover:(bg-white)`,
   disabled && tw`opacity-50 pointer-events-none`,
 ]);
 

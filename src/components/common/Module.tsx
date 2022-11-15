@@ -15,9 +15,7 @@ export const Module: React.FC<Props> = ({ children, className }: Props) => {
     >
       <ErrorBoundary
         fallback={
-          <p tw="text-red-500">
-            An error occurred while loading this component.
-          </p>
+          <p tw="text-red">An error occurred while loading this component.</p>
         }
       >
         {children}

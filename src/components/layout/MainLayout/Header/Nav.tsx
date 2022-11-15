@@ -5,7 +5,7 @@ import tw, { styled } from "twin.macro";
 export const Nav: React.FC = () => {
   return (
     <div tw="fixed bottom-0 left-0 flex w-full items-center justify-center pl-0  xl:(justify-center pl-0) z-10 md:(absolute top-0 bottom-0)">
-      <div tw="flex justify-center items-center   md:(rounded-xl w-auto h-auto) pb-4 pt-7 h-[70px] bg-action md:(border-none bg-opacity-0 p-0) p-1 w-full">
+      <div tw="flex justify-center items-center   md:(rounded-xl w-auto h-auto) pb-4 pt-7 h-[70px] bg-white md:(border-none bg-opacity-0 p-0) p-1 w-full">
         <NavLink to="/trade">Trade</NavLink>
         <NavLink to="/earn">Earn</NavLink>
       </div>
@@ -16,15 +16,8 @@ export const Nav: React.FC = () => {
 const makeStyledLink = styled(Link);
 
 const StyledNavLink = makeStyledLink(({ active }: { active?: boolean }) => [
-  tw`relative px-3 text-2xl font-bold leading-5 text-secondary hover:text-primary`,
+  tw`relative px-3 text-2xl font-bold leading-5 text-secondary hover:text-default`,
   active && tw`text-default `,
-  // active &&
-  //   css`
-  //     &::after {
-  //       content: " ";
-  //       ${tw`block w-1 h-1 mt-1 md:(w-2 h-2 mt-2) rounded-full mx-auto bg-primary`};
-  //     }
-  //   `,
   tw`border-transparent`,
 ]);
 

@@ -27,6 +27,6 @@ const SwitchButton = styled.button<{ active: boolean; selected: boolean }>(
   ({ active, selected }) => [
     tw`flex-1 p-3 font-semibold transition rounded-xl`,
     active && !selected && tw``,
-    active && selected && tw`bg-primary`,
+    active && selected && tw`bg-blue`,
   ]
 );

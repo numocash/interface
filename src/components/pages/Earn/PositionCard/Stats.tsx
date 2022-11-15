@@ -117,6 +117,7 @@ export const Stats: React.FC<Props> = ({ market, userInfo }: Props) => {
           <RowBetween tw="">
             <p tw="text-default">Your deposit</p>
             <p tw="text-default font-semibold">
+              {/* Use proportion of total */}
               {price
                 ? userInfo.liquidity
                     .multiply(price)

@@ -50,7 +50,7 @@ export const SliderInput = styledSlider(
     background: none;
 
     [data-reach-slider-range] {
-      ${tw`h-1 bg-blue-500 rounded`}
+      ${tw`h-1 rounded bg-blue`}
     }
 
     [data-reach-slider-track] {
