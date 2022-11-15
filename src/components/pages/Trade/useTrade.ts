@@ -1,4 +1,4 @@
-import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
+import { Price, Token, TokenAmount } from "@dahlia-labs/token-utils";
 import { Fraction } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 import { useCallback, useMemo } from "react";
@@ -18,7 +18,11 @@ import { useTokenBalance } from "../../../hooks/useTokenBalance";
 import { useUniswapPair } from "../../../hooks/useUniswapPair";
 import type { BeetStage, BeetTx } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
-import { outputAmount, speculativeToLiquidity } from "../../../utils/trade";
+import {
+  determineBorrowAmount,
+  outputAmount,
+  speculativeToLiquidity,
+} from "../../../utils/trade";
 import { pairInfoToPrice } from "../Earn/PositionCard/Stats";
 import type { Trade } from "./useSwapState";
 
@@ -62,9 +66,23 @@ export const useTrade = ({
   const marketInfo = useLendgine(market);
   const pairInfo = usePair(market.pair);
   const uniswapInfo = useUniswapPair(market);
-  const price = useMemo(
-    () => (pairInfo ? pairInfoToPrice(pairInfo, market.pair) : null),
-    [market.pair, pairInfo]
+  // const price = useMemo(
+  //   () => (pairInfo ? pairInfoToPrice(pairInfo, market.pair) : null),
+  //   [market.pair, pairInfo]
+  // );
+  // console.log(price?.toFixed(8));
+  const price = new Price(
+    market.pair.speculativeToken,
+    market.pair.baseToken,
+    10 ** 5,
+    25
+  );
+  const borrowAmount = useMemo(
+    () =>
+      fromAmount && price
+        ? determineBorrowAmount(fromAmount, market, price, 100)
+        : null,
+    [fromAmount, price, market]
   );
   const approval = useApproval(fromAmount, address, LENDGINEROUTER);
   const approve = useApprove(fromAmount, LENDGINEROUTER);
@@ -104,7 +122,9 @@ export const useTrade = ({
   );
 
   const handleTrade = useCallback(async () => {
-    invariant(lengineRouterContract && address && trade && price);
+    invariant(
+      lengineRouterContract && address && trade && price && borrowAmount
+    );
 
     const approveStage: BeetStage[] = approval
       ? [
@@ -151,10 +171,7 @@ export const useTrade = ({
                         trade.inputAmount,
                         market
                       ).raw.toString(),
-                      price: price.asFraction
-                        .multiply(scale)
-                        .quotient.toString(),
-                      slippageBps: 2000,
+                      borrowAmount: borrowAmount.raw.toString(),
                       sharesMin: 0, // TODO: fix
                       recipient: address,
                       deadline:
@@ -165,34 +182,36 @@ export const useTrade = ({
             },
           ])
         )
-      : await beet("Burn", [
-          // TODO: add approval
-          {
-            stageTitle: "Sell option",
-            parallelTransactions: [
-              {
-                title: "Sell option",
-                description: `Sell ${trade.market.pair.speculativeToken.symbol} squared option`,
-                txEnvelope: () =>
-                  lengineRouterContract.burn({
-                    base: market.pair.baseToken.address,
-                    speculative: market.pair.speculativeToken.address,
-                    baseScaleFactor: market.pair.baseScaleFactor,
-                    speculativeScaleFactor: market.pair.speculativeScaleFactor,
-                    price: price.asFraction.multiply(scale).quotient.toString(),
-                    liquidityMax: scale.quotient.toString(),
-                    upperBound: market.pair.bound.asFraction
-                      .multiply(scale)
-                      .quotient.toString(),
-                    shares: trade.inputAmount.raw.toString(),
-                    recipient: address,
-                    deadline:
-                      Math.round(Date.now() / 1000) + settings.timeout * 60,
-                  }),
-              },
-            ],
-          },
-        ]);
+      : await beet(
+          "Burn",
+          approveStage.concat([
+            // TODO: add approval
+            {
+              stageTitle: "Sell option",
+              parallelTransactions: [
+                {
+                  title: "Sell option",
+                  description: `Sell ${trade.market.pair.speculativeToken.symbol} squared option`,
+                  txEnvelope: () =>
+                    lengineRouterContract.burn({
+                      base: market.pair.baseToken.address,
+                      speculative: market.pair.speculativeToken.address,
+                      baseScaleFactor: market.pair.baseScaleFactor,
+                      speculativeScaleFactor:
+                        market.pair.speculativeScaleFactor,
+                      liquidity: "50000000000000000000",
+                      upperBound: market.pair.bound.asFraction
+                        .multiply(scale)
+                        .quotient.toString(),
+                      recipient: address,
+                      deadline:
+                        Math.round(Date.now() / 1000) + settings.timeout * 60,
+                    }),
+                },
+              ],
+            },
+          ])
+        );
   }, [
     address,
     approval,
@@ -219,6 +238,7 @@ export const useTrade = ({
         ? "Enter an amount"
         : !userFromBalance ||
           approval === null ||
+          !borrowAmount ||
           !marketInfo ||
           !trade ||
           !price

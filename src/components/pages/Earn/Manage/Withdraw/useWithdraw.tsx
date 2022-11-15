@@ -92,12 +92,6 @@ export const useWithdraw = (
             txEnvelope: () =>
               liquidityManagerContract.decreaseLiquidity({
                 tokenID,
-                amount0: userBaseAmount
-                  .scale(new Fraction(withdrawPercent, 100))
-                  .raw.toString(),
-                amount1: userSpeculativeAmount
-                  .scale(new Fraction(withdrawPercent, 100))
-                  .raw.toString(),
                 liquidity: userLendgineInfo.liquidity
                   .scale(new Fraction(withdrawPercent, 100))
                   .raw.toString(),

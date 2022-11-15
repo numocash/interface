@@ -56,7 +56,7 @@ export const outputAmount = (
   }
 };
 
-const determineBorrowAmount = (
+export const determineBorrowAmount = (
   inputAmount: TokenAmount,
   market: IMarket,
   price: Price,
@@ -80,7 +80,9 @@ const determineBorrowAmount = (
     )
     .subtract(x1);
 
-  return numerator.scale(denominator.invert());
+  const s = new Fraction(10 ** 9);
+
+  return numerator.scale(denominator.invert()).scale(s.invert()).scale(s);
 };
 
 const determineRepayAmount = (
@@ -110,4 +112,11 @@ export const liquidityToSpeculative = (
   market: IMarket
 ): TokenAmount => {
   return liquidity.scale(market.pair.bound.asFraction.multiply(2));
+};
+
+export const convertShareToLiquidity = (
+  share: TokenAmount,
+  marketInfo: IMarketInfo
+): TokenAmount => {
+  // TODO: simulate accrual
 };

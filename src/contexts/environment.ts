@@ -1,5 +1,5 @@
 import { ChainId } from "@dahlia-labs/celo-contrib";
-import { CELO, CUSD } from "@dahlia-labs/celo-tokens";
+import { CELO, CUSD, MOBI } from "@dahlia-labs/celo-tokens";
 import type { TokenAmount } from "@dahlia-labs/token-utils";
 import { Price, Token } from "@dahlia-labs/token-utils";
 import { useCallback } from "react";
@@ -57,10 +57,10 @@ const LongCelo: IMarket = {
     symbol: "CELO²",
     decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0x83973A67C2F38CABcbD91181f1D9ed62917646A8",
+    address: "0x959bf9Ae65ED14f29dBCea1919456fF4CdF7Be22",
   }),
 
-  address: "0x83973A67C2F38CABcbD91181f1D9ed62917646A8",
+  address: "0x959bf9Ae65ED14f29dBCea1919456fF4CdF7Be22",
   pair: {
     speculativeToken: CELO[ChainId.Mainnet],
     baseToken: CUSD[ChainId.Mainnet],
@@ -70,13 +70,13 @@ const LongCelo: IMarket = {
       symbol: "NLP",
       decimals: 18,
       chainId: ChainId.Mainnet,
-      address: "0xa3334Bb438096d7fa18b40118347fAF35c182207",
+      address: "0x9c3486de1E41eA2b5e88ea5c8a04f4F93eBD248E",
     }),
 
     bound: new Price(CUSD[ChainId.Mainnet], CELO[ChainId.Mainnet], 1, 5),
     baseScaleFactor: 18,
     speculativeScaleFactor: 18,
-    address: "0xa3334Bb438096d7fa18b40118347fAF35c182207",
+    address: "0x9c3486de1E41eA2b5e88ea5c8a04f4F93eBD248E",
   },
   referenceMarket: "0x1e593f1fe7b61c53874b54ec0c59fd0d5eb8621e",
 };
@@ -111,9 +111,39 @@ const ShortCelo: IMarket = {
   referenceMarket: "0x1e593f1fe7b61c53874b54ec0c59fd0d5eb8621e",
 };
 
-export const FACTORY = "0x2A4a8ea165aa1d7F45d7ac03BFd6Fa58F9F5F8CC";
-export const LIQUIDITYMANAGER = "0x8144a4e2c3f93c55d2973015a21b930f3b636ebd";
-export const LENDGINEROUTER = "0xf6dc5f1c2afc43c74e1e2b4e5bbdd98b2524671f";
+const Mobi: IMarket = {
+  token: new Token({
+    name: "Numoen Lendgine",
+    symbol: "MOBI²",
+    decimals: 18,
+    chainId: ChainId.Mainnet,
+    address: "0xF0A7B77903c8689318010B47c122b00670D25CB3",
+  }),
+
+  address: "0xF0A7B77903c8689318010B47c122b00670D25CB3",
+  pair: {
+    speculativeToken: MOBI[ChainId.Mainnet],
+    baseToken: CUSD[ChainId.Mainnet],
+
+    lp: new Token({
+      name: "Numoen LP",
+      symbol: "NLP",
+      decimals: 18,
+      chainId: ChainId.Mainnet,
+      address: "0x9F65Eb0C206640683Ce0644344687e704119E3cF",
+    }),
+
+    bound: new Price(CUSD[ChainId.Mainnet], MOBI[ChainId.Mainnet], 1000, 1),
+    baseScaleFactor: 18,
+    speculativeScaleFactor: 18,
+    address: "0x9F65Eb0C206640683Ce0644344687e704119E3cF",
+  },
+  referenceMarket: "0x1eb738ec1d46c9befe95e830e19d0f537619f2d7",
+};
+
+export const FACTORY = "0x4Ef9A0Eea3B521478762Df70d6127eeF3d386B22";
+export const LIQUIDITYMANAGER = "0xb28901b0f30b261a81850fcf21892d4830475a3b";
+export const LENDGINEROUTER = "0x6805fecb7a01b1ce5cd322ce65cfe5dcd0ddbc4e";
 export const GENESIS = 15948000;
 
 export const useAddressToMarket = (
@@ -154,7 +184,7 @@ export const useIsMarket = (address: string | null): boolean => {
 
 const useEnvironmentInternal = (): Environment => {
   return {
-    markets: [LongCelo, ShortCelo] as const,
+    markets: [LongCelo, Mobi] as const,
   };
 };
 
