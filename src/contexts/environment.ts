@@ -87,10 +87,10 @@ const Mobi: IMarket = {
     symbol: "MOBI²",
     decimals: 18,
     chainId: ChainId.Mainnet,
-    address: "0xF0A7B77903c8689318010B47c122b00670D25CB3",
+    address: "0xf1aCcFdeA7836C514243EaBfeeFd9e48bEB3c3d9",
   }),
 
-  address: "0xF0A7B77903c8689318010B47c122b00670D25CB3",
+  address: "0xf1aCcFdeA7836C514243EaBfeeFd9e48bEB3c3d9",
   pair: {
     speculativeToken: MOBI[ChainId.Mainnet],
     baseToken: CUSD[ChainId.Mainnet],
@@ -100,20 +100,20 @@ const Mobi: IMarket = {
       symbol: "NLP",
       decimals: 18,
       chainId: ChainId.Mainnet,
-      address: "0x9F65Eb0C206640683Ce0644344687e704119E3cF",
+      address: "0xd57EA5D7C22291aEF925F7F41230e6946B3Fd90a",
     }),
 
     bound: new Price(CUSD[ChainId.Mainnet], MOBI[ChainId.Mainnet], 1000, 1),
     baseScaleFactor: 18,
     speculativeScaleFactor: 18,
-    address: "0x9F65Eb0C206640683Ce0644344687e704119E3cF",
+    address: "0xd57EA5D7C22291aEF925F7F41230e6946B3Fd90a",
   },
   referenceMarket: "0x1eb738ec1d46c9befe95e830e19d0f537619f2d7",
 };
 
-export const FACTORY = "0x4Ef9A0Eea3B521478762Df70d6127eeF3d386B22";
-export const LIQUIDITYMANAGER = "0xb28901b0f30b261a81850fcf21892d4830475a3b";
-export const LENDGINEROUTER = "0x6805fecb7a01b1ce5cd322ce65cfe5dcd0ddbc4e";
+export const FACTORY = "0x60ba0a7dcd2caa3eb171f0a8692a37d34900e247";
+export const LIQUIDITYMANAGER = "0x52acf4b93ef14072bd3d8b47b432e6ac0901aa83";
+export const LENDGINEROUTER = "0xb004e43ba5a34d95dfbce8834b359b523cbf358c";
 export const GENESIS = 15948000;
 
 export const useAddressToMarket = (
@@ -154,7 +154,7 @@ export const useIsMarket = (address: string | null): boolean => {
 
 const useEnvironmentInternal = (): Environment => {
   return {
-    markets: [LongCelo, Mobi] as const,
+    markets: [Mobi] as const,
   };
 };
 

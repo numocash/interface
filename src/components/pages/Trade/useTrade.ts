@@ -12,12 +12,13 @@ import {
 import { useSettings } from "../../../contexts/settings";
 import { useApproval, useApprove } from "../../../hooks/useApproval";
 import { useLendgineRouter } from "../../../hooks/useContract";
-import { useLendgine, usePrice } from "../../../hooks/useLendgine";
+import { useLendgine, useRefPrice } from "../../../hooks/useLendgine";
 import { useTokenBalance } from "../../../hooks/useTokenBalance";
 import { useUniswapPair } from "../../../hooks/useUniswapPair";
 import type { BeetStage, BeetTx } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
 import {
+  convertShareToLiquidity,
   determineBorrowAmount,
   outputAmount,
   speculativeToLiquidity,
@@ -63,7 +64,7 @@ export const useTrade = ({
   invariant(market);
   const marketInfo = useLendgine(market);
   const uniswapInfo = useUniswapPair(market);
-  const price = usePrice(market);
+  const price = useRefPrice(market);
   const borrowAmount = useMemo(
     () =>
       fromAmount && price
@@ -110,7 +111,13 @@ export const useTrade = ({
 
   const handleTrade = useCallback(async () => {
     invariant(
-      lengineRouterContract && address && trade && price && borrowAmount
+      lengineRouterContract &&
+        address &&
+        trade &&
+        price &&
+        borrowAmount &&
+        fromAmount &&
+        marketInfo
     );
 
     const approveStage: BeetStage[] = approval
@@ -185,7 +192,14 @@ export const useTrade = ({
                       baseScaleFactor: market.pair.baseScaleFactor,
                       speculativeScaleFactor:
                         market.pair.speculativeScaleFactor,
-                      liquidity: "500000000000000000000",
+                      liquidityMax: convertShareToLiquidity(
+                        trade.inputAmount,
+                        market,
+                        marketInfo
+                      )
+                        .scale(new Fraction(102, 100))
+                        .raw.toString(), // TODO: fix
+                      shares: trade.inputAmount.raw.toString(),
                       upperBound: market.pair.bound.asFraction
                         .multiply(scale)
                         .quotient.toString(),
@@ -208,6 +222,7 @@ export const useTrade = ({
     fromToken?.symbol,
     lengineRouterContract,
     market,
+    marketInfo,
     price,
     settings.timeout,
     trade,

@@ -1,4 +1,4 @@
-import type { TokenAmount } from "@dahlia-labs/token-utils";
+import { TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
@@ -8,12 +8,12 @@ import { LIQUIDITYMANAGER } from "../../../../../contexts/environment";
 import type { ISettings } from "../../../../../contexts/settings";
 import { useApproval, useApprove } from "../../../../../hooks/useApproval";
 import { useLiquidityManager } from "../../../../../hooks/useContract";
+import { usePrice } from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
 import { useTokenBalances } from "../../../../../hooks/useTokenBalance";
 import type { BeetStage, BeetTx } from "../../../../../utils/beet";
 import { useBeet } from "../../../../../utils/beet";
 import { scale } from "../../../Trade/useTrade";
-import { pairInfoToPrice } from "../../PositionCard/Stats";
 
 export const useDeposit = (
   market: IMarket,
@@ -26,20 +26,32 @@ export const useDeposit = (
   const Beet = useBeet();
   const { address } = useAccount();
   const pairInfo = usePair(market.pair);
-  const price = useMemo(
-    () => (pairInfo ? pairInfoToPrice(pairInfo, market.pair) : null),
-    [market.pair, pairInfo]
-  );
+  const price = usePrice(market);
 
-  const liquidity = useMemo(
-    () =>
-      price && price && baseTokenAmount
-        ? baseTokenAmount
-            .multiply(scale)
-            .divide(price.asFraction.multiply(price))
-        : null,
-    [baseTokenAmount, price]
-  );
+  const liquidity = useMemo(() => {
+    if (!pairInfo || !price || !baseTokenAmount || !speculativeTokenAmount)
+      return null;
+
+    if (pairInfo.totalLPSupply.equalTo(0)) {
+      return new TokenAmount(
+        market.pair.lp,
+        baseTokenAmount.scale(price.asFraction.multiply(price).invert()).raw
+      );
+    }
+
+    return new TokenAmount(
+      market.pair.lp,
+      pairInfo.totalLPSupply.scale(
+        baseTokenAmount.divide(pairInfo.baseAmount)
+      ).raw
+    );
+  }, [
+    baseTokenAmount,
+    market.pair.lp,
+    pairInfo,
+    price,
+    speculativeTokenAmount,
+  ]);
 
   const balances = useTokenBalances(
     [market?.pair.baseToken ?? null, market?.pair.speculativeToken ?? null],
@@ -136,8 +148,8 @@ export const useDeposit = (
                     upperBound: market.pair.bound.asFraction
                       .multiply(scale)
                       .quotient.toString(),
-                    amount0: baseTokenAmount.raw.toString(),
-                    amount1: speculativeTokenAmount.raw.toString(),
+                    amount0Min: baseTokenAmount.raw.toString(),
+                    amount1Min: speculativeTokenAmount.raw.toString(),
                     liquidity: liquidity.quotient.toString(),
                     recipient: address,
                     deadline:
@@ -158,9 +170,9 @@ export const useDeposit = (
                 txEnvelope: () =>
                   liquidityManagerContract.increaseLiquidity({
                     tokenID,
-                    amount0: baseTokenAmount.raw.toString(),
-                    amount1: speculativeTokenAmount.raw.toString(),
-                    liquidity: liquidity.quotient.toString(),
+                    amount0Min: baseTokenAmount.raw.toString(),
+                    amount1Min: speculativeTokenAmount.raw.toString(),
+                    liquidity: liquidity.raw.toString(),
                     deadline:
                       Math.round(Date.now() / 1000) + settings.timeout * 60,
                   }),

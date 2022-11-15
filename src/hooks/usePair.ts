@@ -11,15 +11,11 @@ export const usePair = (pair: IPair | null): IPairInfo | null => {
   const calls: readonly Call[] = [
     {
       target: pair?.address ?? AddressZero,
-      callData: pairInterface.encodeFunctionData("reserve0", [
-        pair?.address ?? AddressZero,
-      ]),
+      callData: pairInterface.encodeFunctionData("reserve0"),
     },
     {
       target: pair?.address ?? AddressZero,
-      callData: pairInterface.encodeFunctionData("reserve1", [
-        pair?.address ?? AddressZero,
-      ]),
+      callData: pairInterface.encodeFunctionData("reserve1"),
     },
     {
       target: pair?.address ?? AddressZero,
@@ -31,16 +27,16 @@ export const usePair = (pair: IPair | null): IPairInfo | null => {
   if (!data || !pair) return null;
 
   return {
-    speculativeAmount: new TokenAmount(
-      pair.speculativeToken,
+    baseAmount: new TokenAmount(
+      pair.baseToken,
       parseFunctionReturn(
         pairInterface,
         "reserve0",
         data.returnData[0]
       ).toString()
     ),
-    baseAmount: new TokenAmount(
-      pair.baseToken,
+    speculativeAmount: new TokenAmount(
+      pair.speculativeToken,
       parseFunctionReturn(
         pairInterface,
         "reserve1",

@@ -226,8 +226,21 @@ export const usePrice = (market: IMarket | null): Price | null => {
     return new Price(
       market.pair.speculativeToken,
       market.pair.baseToken,
-      uniInfo[0].raw,
-      uniInfo[1].raw
+      uniInfo[1].raw,
+      uniInfo[0].raw
     );
   }
+};
+
+export const useRefPrice = (market: IMarket | null): Price | null => {
+  const uniInfo = useUniswapPair(market ?? null);
+
+  if (!uniInfo || !market) return null;
+
+  return new Price(
+    market.pair.speculativeToken,
+    market.pair.baseToken,
+    uniInfo[1].raw,
+    uniInfo[0].raw
+  );
 };
