@@ -1,13 +1,13 @@
 import type { Price } from "@dahlia-labs/token-utils";
 import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 
-import { priceToPairReserves } from "../components/pages/Earn/PositionCard/Stats";
 import { scale } from "../components/pages/Trade/useTrade";
-import type { IMarket, IMarketInfo } from "../contexts/environment";
+import type { IMarket, IMarketInfo, IPairInfo } from "../contexts/environment";
 
 export const outputAmount = (
   market: IMarket,
   marketInfo: IMarketInfo,
+  pairInfo: IPairInfo,
   inputAmount: TokenAmount,
   price: Price,
   referenceMarket: [TokenAmount, TokenAmount]
@@ -30,23 +30,25 @@ export const outputAmount = (
         );
   } else {
     // BURN
-    const lpAmount = !marketInfo.totalSupply.equalTo(0)
-      ? inputAmount.scale(
-          marketInfo.totalLiquidityBorrowed.divide(marketInfo.totalSupply)
-        )
-      : new TokenAmount(inputAmount.token, 0);
+    const lpAmount = convertShareToLiquidity(inputAmount, market, marketInfo);
+    const speculativeAmount = liquidityToSpeculative(lpAmount, market);
 
-    // TODO: remove repay tokens
+    const r0 = lpAmount.scale(
+      pairInfo.baseAmount.divide(pairInfo.totalLPSupply)
+    );
+    const r1 = lpAmount.scale(
+      pairInfo.speculativeAmount.divide(pairInfo.totalLPSupply)
+    );
+
     const repayAmount = determineRepayAmount(
-      inputAmount,
-      market,
-      price,
+      r0,
+      r1,
       referenceMarket[0],
       referenceMarket[1]
     );
     return new TokenAmount(
       market.pair.speculativeToken,
-      liquidityToSpeculative(lpAmount, market).raw
+      speculativeAmount.raw
     ).subtract(
       new TokenAmount(
         market.pair.speculativeToken,
@@ -86,15 +88,11 @@ export const determineBorrowAmount = (
 };
 
 const determineRepayAmount = (
-  inputAmount: TokenAmount,
-  market: IMarket,
-  price: Price,
+  r0: TokenAmount,
+  r1: TokenAmount,
   u0: TokenAmount,
   u1: TokenAmount
 ) => {
-  const liquidity = speculativeToLiquidity(inputAmount, market);
-  const [r0, r1] = priceToPairReserves(price, liquidity, market);
-
   const numerator = u0.multiply(r1).add(u1.multiply(r0)).add(r0.multiply(r1));
   const denominator = u0.asFraction.subtract(r0);
   return numerator.multiply(1000).divide(denominator.multiply(997));

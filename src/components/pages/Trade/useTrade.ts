@@ -13,6 +13,7 @@ import { useSettings } from "../../../contexts/settings";
 import { useApproval, useApprove } from "../../../hooks/useApproval";
 import { useLendgineRouter } from "../../../hooks/useContract";
 import { useLendgine, useRefPrice } from "../../../hooks/useLendgine";
+import { usePair } from "../../../hooks/usePair";
 import { useTokenBalance } from "../../../hooks/useTokenBalance";
 import { useUniswapPair } from "../../../hooks/useUniswapPair";
 import type { BeetStage, BeetTx } from "../../../utils/beet";
@@ -63,6 +64,7 @@ export const useTrade = ({
   const market = market0 ?? market1;
   invariant(market);
   const marketInfo = useLendgine(market);
+  const pairInfo = usePair(market.pair);
   const uniswapInfo = useUniswapPair(market);
   const price = useRefPrice(market);
   const borrowAmount = useMemo(
@@ -83,7 +85,8 @@ export const useTrade = ({
       market &&
       marketInfo &&
       price &&
-      uniswapInfo
+      uniswapInfo &&
+      pairInfo
         ? {
             market,
             mint,
@@ -91,6 +94,7 @@ export const useTrade = ({
             outputAmount: outputAmount(
               market,
               marketInfo,
+              pairInfo,
               fromAmount,
               price,
               uniswapInfo
@@ -103,6 +107,7 @@ export const useTrade = ({
       market,
       marketInfo,
       mint,
+      pairInfo,
       price,
       toToken,
       uniswapInfo,
