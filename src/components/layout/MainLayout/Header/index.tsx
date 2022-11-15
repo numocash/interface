@@ -6,7 +6,7 @@ import { Nav } from "./Nav";
 
 export const Header: React.FC = () => {
   return (
-    <div tw="relative flex items-center justify-between py-4 md:mt-4">
+    <div tw="relative flex items-center justify-between pb-4 mt-4">
       <div tw="z-50 flex items-center">
         <div tw="flex items-center gap-2">
           <img src={numoenSmall} alt="nl" tw="h-12" />

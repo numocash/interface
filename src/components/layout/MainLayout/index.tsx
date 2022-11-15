@@ -16,12 +16,28 @@ interface IProps {
 
 export const MainLayout: React.FC<IProps> = ({ children }: IProps) => {
   return (
-    <PageWrapper>
-      <Background />
-      <Header />
-      <PageLayout>{children}</PageLayout>
-      <Toaster />
-    </PageWrapper>
+    <>
+      <div tw=" w-full  border-b-2 border-red-500">
+        <div tw="font-semibold text-lg text-default p-2">
+          Warning: Alpha Version{" "}
+          <span tw="font-normal text-secondary">v0.2.0 </span>
+          <span tw="text-default font-normal text-sm">
+            This program is to be considered experimental. Contracts used have
+            been submitted to{" "}
+            <a tw="underline" href="https://www.certik.com/projects/numoen">
+              audit
+            </a>
+            .
+          </span>
+        </div>
+      </div>
+      <PageWrapper>
+        <Background />
+        <Header />
+        <PageLayout>{children}</PageLayout>
+        <Toaster />
+      </PageWrapper>
+    </>
   );
 };
 
