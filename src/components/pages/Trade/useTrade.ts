@@ -1,5 +1,5 @@
 import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
-import { Fraction } from "@dahlia-labs/token-utils";
+import { Fraction, Percent } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 import { useCallback, useMemo } from "react";
 import invariant from "tiny-invariant";
@@ -171,7 +171,9 @@ export const useTrade = ({
                         market
                       ).raw.toString(),
                       borrowAmount: borrowAmount.raw.toString(),
-                      sharesMin: 0, // TODO: fix
+                      sharesMin: trade.outputAmount
+                        .reduceBy(settings.maxSlippagePercent)
+                        .raw.toString(),
                       recipient: address,
                       deadline:
                         Math.round(Date.now() / 1000) + settings.timeout * 60,
@@ -202,8 +204,10 @@ export const useTrade = ({
                         market,
                         marketInfo
                       )
-                        .scale(new Fraction(102, 100))
-                        .raw.toString(), // TODO: fix
+                        .scale(
+                          Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+                        )
+                        .raw.toString(),
                       shares: trade.inputAmount.raw.toString(),
                       upperBound: market.pair.bound.asFraction
                         .multiply(scale)
@@ -229,11 +233,13 @@ export const useTrade = ({
     market,
     marketInfo,
     price,
+    settings.maxSlippagePercent,
     settings.timeout,
     trade,
   ]);
 
-  // TODO: add error for too large position size
+  // TODO: estimate slippage on uniswap to determine borrow amount
+  // TODO: show price impact
 
   const swapDisabledReason = useMemo(
     () =>
@@ -250,6 +256,13 @@ export const useTrade = ({
           !trade ||
           !price
         ? "Loading"
+        : trade.mint &&
+          speculativeToLiquidity(trade.inputAmount, market).greaterThan(
+            marketInfo.totalLiquidity.subtract(
+              marketInfo.totalLiquidityBorrowed
+            )
+          )
+        ? "Insufficient liquidity"
         : fromAmount.greaterThan(userFromBalance)
         ? "Insufficient tokens"
         : null,
@@ -263,6 +276,7 @@ export const useTrade = ({
       marketInfo,
       trade,
       price,
+      market,
     ]
   );
 

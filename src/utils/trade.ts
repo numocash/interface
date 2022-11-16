@@ -1,6 +1,7 @@
 import type { Price } from "@dahlia-labs/token-utils";
 import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 
+import { borrowRate } from "../components/pages/Earn/PositionCard/Stats";
 import { scale } from "../components/pages/Trade/useTrade";
 import type { IMarket, IMarketInfo, IPairInfo } from "../contexts/environment";
 
@@ -123,11 +124,44 @@ export const convertShareToLiquidity = (
   market: IMarket,
   marketInfo: IMarketInfo
 ): TokenAmount => {
-  // TODO: simulate accrual
-  return new TokenAmount(
-    market.token,
-    share.scale(
-      marketInfo.totalLiquidityBorrowed.divide(marketInfo.totalSupply)
-    ).raw
+  const t = Math.round(Date.now() / 1000);
+  const timeElapsed = t - marketInfo.lastUpdate;
+  const br = borrowRate(marketInfo);
+  const dilutionLPRequested = marketInfo.totalLiquidityBorrowed.scale(
+    br.multiply(timeElapsed).divide(86400 * 365)
   );
+  const dilutionLP = dilutionLPRequested.greaterThan(
+    marketInfo.totalLiquidityBorrowed
+  )
+    ? marketInfo.totalLiquidityBorrowed
+    : dilutionLPRequested;
+  return new TokenAmount(
+    market.pair.lp,
+    marketInfo.totalSupply.greaterThan(0)
+      ? share.scale(
+          marketInfo.totalLiquidityBorrowed
+            .subtract(dilutionLP)
+            .divide(marketInfo.totalSupply)
+        ).raw
+      : share.raw
+  );
+};
+
+export const newRewardPerLiquidity = (
+  market: IMarket,
+  marketInfo: IMarketInfo
+): TokenAmount => {
+  const t = Math.round(Date.now() / 1000);
+  const timeElapsed = t - marketInfo.lastUpdate;
+  const br = borrowRate(marketInfo);
+  const dilutionLPRequested = marketInfo.totalLiquidityBorrowed.scale(
+    br.multiply(timeElapsed).divide(86400 * 365)
+  );
+  const dilutionLP = dilutionLPRequested.greaterThan(
+    marketInfo.totalLiquidityBorrowed
+  )
+    ? marketInfo.totalLiquidityBorrowed
+    : dilutionLPRequested;
+  const dilutionSpeculative = liquidityToSpeculative(dilutionLP, market);
+  return dilutionSpeculative.scale(marketInfo.totalLiquidity.invert());
 };

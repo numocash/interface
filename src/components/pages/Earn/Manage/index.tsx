@@ -71,7 +71,6 @@ const useManageInternal = ({
       if (!price || !pairInfo) return;
       input === Input.Base ? setBaseAmount(val) : setSpeculativeAmount(val);
 
-      // TODO: change the input Token
       if (pairInfo.totalLPSupply.equalTo(0)) {
         input === Input.Base
           ? setSpeculativeAmount(

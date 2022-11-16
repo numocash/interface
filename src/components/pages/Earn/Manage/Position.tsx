@@ -8,9 +8,16 @@ import {
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import tw, { css, styled } from "twin.macro";
+import { useAccount } from "wagmi";
 
-import { useUserLendgine } from "../../../../hooks/useLendgine";
+import { useLiquidityManager } from "../../../../hooks/useContract";
+import {
+  useClaimableTokens,
+  useUserLendgine,
+} from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
+import { useBeet } from "../../../../utils/beet";
+import { AsyncButton } from "../../../common/AsyncButton";
 import { Module } from "../../../common/Module";
 import { TokenIcon } from "../../../common/TokenIcon";
 import { pairInfoToPrice } from "../PositionCard/Stats";
@@ -18,8 +25,12 @@ import { useManage } from ".";
 
 export const Position: React.FC = () => {
   const { market, tokenID } = useManage();
+  const { address } = useAccount();
+  const Beet = useBeet();
+  const liquidityManagerContract = useLiquidityManager(true);
   invariant(tokenID, "tokenID missing");
   const userLendgineInfo = useUserLendgine(tokenID, market);
+  const claimableTokens = useClaimableTokens(tokenID, market);
 
   const pairInfo = usePair(market.pair);
 
@@ -96,9 +107,41 @@ export const Position: React.FC = () => {
       <hr tw="border-[#AEAEB2] rounded " />
       <div tw="flex justify-between pt-4">
         <p tw="text-default">Collectable Interest</p>
-        <p tw="text-default font-bold">
-          0.00 {market.pair.speculativeToken.symbol}
-        </p>
+        <div tw="flex gap-2 items-center">
+          <p tw="text-default font-bold">
+            {claimableTokens?.toFixed(2, { groupSeparator: "," } ?? "--")}{" "}
+            {market.pair.speculativeToken.symbol}
+          </p>
+          <AsyncButton
+            tw="px-2 py-1"
+            disabled={!claimableTokens || !claimableTokens.greaterThan(0)}
+            variant="primary"
+            onClick={async () => {
+              invariant(liquidityManagerContract && address && claimableTokens);
+              await Beet("Collect Interest", [
+                {
+                  stageTitle: "Collect Interest",
+                  parallelTransactions: [
+                    {
+                      title: "Collect Interest",
+                      description: `Collect ${claimableTokens.toFixed(2, {
+                        groupSeparator: ",",
+                      })} ${market.pair.speculativeToken.symbol}`,
+                      txEnvelope: () =>
+                        liquidityManagerContract.collect({
+                          tokenID,
+                          recipient: address,
+                          amountRequested: claimableTokens.raw.toString(),
+                        }),
+                    },
+                  ],
+                },
+              ]);
+            }}
+          >
+            Collect
+          </AsyncButton>
+        </div>
       </div>
     </Module>
   );

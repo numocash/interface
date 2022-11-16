@@ -1,7 +1,9 @@
-import { Price, TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, Price, TokenAmount } from "@dahlia-labs/token-utils";
 import type { Call } from "@dahlia-labs/use-ethers";
 import type { BigNumber } from "@ethersproject/bignumber";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { max } from "lodash";
+import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
 import { pairInfoToPrice } from "../components/pages/Earn/PositionCard/Stats";
@@ -13,6 +15,7 @@ import type {
 } from "../contexts/environment";
 import { GENESIS, LIQUIDITYMANAGER } from "../contexts/environment";
 import { parseFunctionReturn } from "../utils/parseFunctionReturn";
+import { newRewardPerLiquidity } from "../utils/trade";
 import { blockHistory, useBlockQuery } from "./useBlockQuery";
 import { lendgineInterface, useLiquidityManager } from "./useContract";
 import { lendgineAddress } from "./useLendgineAddress";
@@ -74,6 +77,8 @@ export const useUserLendgines = (
 
   interface LendgineRet {
     liquidity: BigNumber;
+    rewardPerLiquidityPaid: BigNumber;
+    tokensOwed: BigNumber;
     base: BigNumber;
     speculative: BigNumber;
     baseScaleFactor: BigNumber;
@@ -105,8 +110,48 @@ export const useUserLendgines = (
       tokenID: t,
       market,
       liquidity: new TokenAmount(market.pair.lp, ret.liquidity.toString()),
+      rewardPerLiquidityPaid: new TokenAmount(
+        market.pair.speculativeToken,
+        ret.rewardPerLiquidityPaid.toString()
+      ),
+      tokensOwed: new TokenAmount(
+        market.pair.speculativeToken,
+        ret.rewardPerLiquidityPaid.toString()
+      ),
     };
   });
+};
+
+export const useNextTokenID = (): number | null => {
+  const liquidityManagerContract = useLiquidityManager(false);
+  invariant(liquidityManagerContract);
+
+  const mintFilter = liquidityManagerContract.filters.Mint();
+  const { blocknumber } = useBlock();
+  const queryClient = useQueryClient();
+
+  const filteredEvents = useQuery(
+    ["mint events", blocknumber ?? 0],
+    async () =>
+      await liquidityManagerContract.queryFilter(
+        mintFilter,
+        GENESIS,
+        blocknumber ?? undefined
+      ),
+    {
+      staleTime: Infinity,
+      placeholderData: blocknumber
+        ? [...Array(blockHistory).keys()]
+            .map((i) => blocknumber - i - 1)
+            .reduce((acc, cur: number) => {
+              return acc ? acc : queryClient.getQueryData(["mint events", cur]);
+            }, undefined) ?? queryClient.getQueryData(["mint events", 0])
+        : undefined,
+    }
+  );
+
+  const tokenIDs = filteredEvents?.data?.map((d) => +d.args[1].toString());
+  return tokenIDs ? max(tokenIDs) ?? null : null;
 };
 
 export const useUserLendgine = (
@@ -129,6 +174,8 @@ export const useUserLendgine = (
 
   interface LendgineRet {
     liquidity: BigNumber;
+    rewardPerLiquidityPaid: BigNumber;
+    tokensOwed: BigNumber;
   }
 
   const ret = parseFunctionReturn(
@@ -141,6 +188,14 @@ export const useUserLendgine = (
     tokenID,
     market,
     liquidity: new TokenAmount(market.pair.lp, ret.liquidity.toString()),
+    rewardPerLiquidityPaid: new TokenAmount(
+      market.pair.speculativeToken,
+      ret.rewardPerLiquidityPaid.toString()
+    ),
+    tokensOwed: new TokenAmount(
+      market.pair.speculativeToken,
+      ret.rewardPerLiquidityPaid.toString()
+    ),
   };
 };
 
@@ -223,11 +278,12 @@ export const usePrice = (market: IMarket | null): Price | null => {
     return pairInfoToPrice(pairInfo, market.pair);
   } else {
     invariant(uniInfo);
+    const s = new Fraction(1, 10 ** 9);
     return new Price(
       market.pair.speculativeToken,
       market.pair.baseToken,
-      uniInfo[1].raw,
-      uniInfo[0].raw
+      uniInfo[1].scale(s).raw,
+      uniInfo[0].scale(s).raw
     );
   }
 };
@@ -243,4 +299,30 @@ export const useRefPrice = (market: IMarket | null): Price | null => {
     uniInfo[1].raw,
     uniInfo[0].raw
   );
+};
+
+export const useClaimableTokens = (
+  tokenID: number | null,
+  market: IMarket
+): TokenAmount | null => {
+  const marketInfo = useLendgine(market);
+  const newRPL = useMemo(
+    () => (marketInfo ? newRewardPerLiquidity(market, marketInfo) : null),
+    [market, marketInfo]
+  );
+  const userPositionInfo = useUserLendgine(tokenID, market);
+
+  return useMemo(() => {
+    const rpl =
+      newRPL && userPositionInfo && marketInfo
+        ? newRPL
+            .add(marketInfo.rewardPerLiquidityStored)
+            .subtract(userPositionInfo.rewardPerLiquidityPaid)
+        : null;
+    const tokensOwed =
+      rpl && userPositionInfo ? rpl.scale(userPositionInfo.liquidity) : null;
+    return tokensOwed && userPositionInfo
+      ? tokensOwed.add(userPositionInfo.tokensOwed)
+      : null;
+  }, [marketInfo, newRPL, userPositionInfo]);
 };

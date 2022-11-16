@@ -54,8 +54,7 @@ export const Earn: React.FC = () => {
           Your positions
         </p>
       )}
-      {/* TODO: show all when wallet disconnected */}
-      {userMarketInfo === null ? (
+      {userMarketInfo === null && address !== undefined ? (
         <LoadingPage />
       ) : (
         <div tw="grid md:grid-cols-2  gap-6">

@@ -71,7 +71,7 @@ const kink = new Percent(8, 10);
 const multiplier = new Percent(1375, 100000);
 const jumpMultiplier = new Percent(89, 200);
 
-const borrowRate = (marketInfo: IMarketInfo): Percent => {
+export const borrowRate = (marketInfo: IMarketInfo): Percent => {
   if (marketInfo.totalLiquidity.equalTo(0)) return new Percent(0);
   const utilization = Percent.fromFraction(
     marketInfo.totalLiquidityBorrowed.divide(marketInfo.totalLiquidity)
@@ -93,16 +93,12 @@ export const supplyRate = (marketInfo: IMarketInfo): Percent => {
   );
 
   const borrow = borrowRate(marketInfo);
-  return utilization.multiply(borrow);
+  return utilization.multiply(borrow).multiply(100);
 };
 
 export const Stats: React.FC<Props> = ({ market, userInfo }: Props) => {
   const marketInfo = useLendgine(market);
   const pairInfo = usePair(market.pair);
-  const price = useMemo(
-    () => (pairInfo ? pricePerLP(pairInfo, market.pair) : null),
-    [market.pair, pairInfo]
-  );
 
   const tvl = useMemo(
     () =>
@@ -117,10 +113,9 @@ export const Stats: React.FC<Props> = ({ market, userInfo }: Props) => {
           <RowBetween tw="">
             <p tw="text-default">Your deposit</p>
             <p tw="text-default font-semibold">
-              {/* Use proportion of total */}
-              {price
-                ? userInfo.liquidity
-                    .multiply(price)
+              {tvl && marketInfo
+                ? tvl
+                    .scale(userInfo.liquidity.divide(marketInfo.totalLiquidity))
                     .toFixed(2, { groupSeparator: "," })
                 : "--"}{" "}
               {market.pair.baseToken.symbol}

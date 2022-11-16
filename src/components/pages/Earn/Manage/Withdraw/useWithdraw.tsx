@@ -1,5 +1,6 @@
-import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, Percent, TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
@@ -18,9 +19,11 @@ export const useWithdraw = (
 ): { onSend: () => Promise<void>; disableReason: string | null } => {
   const liquidityManagerContract = useLiquidityManager(true);
   const Beet = useBeet();
+  const navigate = useNavigate();
   const { address } = useAccount();
   const pairInfo = usePair(market.pair);
   const userLendgineInfo = useUserLendgine(tokenID, market);
+  const w = new Percent(withdrawPercent, 100);
 
   const { userBaseAmount, userSpeculativeAmount } = useMemo(() => {
     if (pairInfo && pairInfo.totalLPSupply.equalTo(0))
@@ -59,6 +62,9 @@ export const useWithdraw = (
           !userBaseAmount ||
           !userSpeculativeAmount
         ? "Loading..."
+        : pairInfo.baseAmount.lessThan(userBaseAmount.scale(w)) ||
+          pairInfo.speculativeAmount.lessThan(userSpeculativeAmount.scale(w))
+        ? "Insufficient liquidity"
         : null,
     [
       tokenID,
@@ -67,6 +73,7 @@ export const useWithdraw = (
       userLendgineInfo,
       userBaseAmount,
       userSpeculativeAmount,
+      w,
     ]
   );
 
@@ -80,7 +87,6 @@ export const useWithdraw = (
     );
 
     invariant(address);
-    // TODO: check amounts
 
     await Beet("Remove liquidity", [
       {
@@ -96,6 +102,14 @@ export const useWithdraw = (
                   .scale(new Fraction(withdrawPercent, 100))
                   .raw.toString(),
                 recipient: address,
+                amount0Min: userBaseAmount
+                  .scale(w)
+                  .reduceBy(settings.maxSlippagePercent)
+                  .raw.toString(),
+                amount1Min: userSpeculativeAmount
+                  .scale(w)
+                  .reduceBy(settings.maxSlippagePercent)
+                  .raw.toString(),
                 deadline: Math.round(Date.now() / 1000) + settings.timeout * 60,
               }),
           },
@@ -103,8 +117,9 @@ export const useWithdraw = (
       },
     ]);
 
-    // !tokenID && navigate(`/earn/`);
-    // TODO: if withdrawing all
+    if (withdrawPercent === 100) {
+      navigate("/earn");
+    }
   };
   return { onSend, disableReason };
 };

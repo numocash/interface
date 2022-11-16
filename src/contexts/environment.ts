@@ -25,6 +25,8 @@ export interface IMarketUserInfo {
   tokenID: number;
   liquidity: TokenAmount;
   market: IMarket;
+  rewardPerLiquidityPaid: TokenAmount;
+  tokensOwed: TokenAmount;
 }
 
 export interface IPair {
@@ -112,7 +114,7 @@ const Mobi: IMarket = {
 };
 
 export const FACTORY = "0x60ba0a7dcd2caa3eb171f0a8692a37d34900e247";
-export const LIQUIDITYMANAGER = "0x52acf4b93ef14072bd3d8b47b432e6ac0901aa83";
+export const LIQUIDITYMANAGER = "0x63f54ec45559e185d8bce0164189bdafa273596f";
 export const LENDGINEROUTER = "0xb004e43ba5a34d95dfbce8834b359b523cbf358c";
 export const GENESIS = 15948000;
 

@@ -1,5 +1,6 @@
 import { TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
@@ -8,7 +9,7 @@ import { LIQUIDITYMANAGER } from "../../../../../contexts/environment";
 import type { ISettings } from "../../../../../contexts/settings";
 import { useApproval, useApprove } from "../../../../../hooks/useApproval";
 import { useLiquidityManager } from "../../../../../hooks/useContract";
-import { usePrice } from "../../../../../hooks/useLendgine";
+import { useNextTokenID, usePrice } from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
 import { useTokenBalances } from "../../../../../hooks/useTokenBalance";
 import type { BeetStage, BeetTx } from "../../../../../utils/beet";
@@ -27,6 +28,8 @@ export const useDeposit = (
   const { address } = useAccount();
   const pairInfo = usePair(market.pair);
   const price = usePrice(market);
+  const nextID = useNextTokenID();
+  const navigate = useNavigate();
 
   const liquidity = useMemo(() => {
     if (!pairInfo || !price || !baseTokenAmount || !speculativeTokenAmount)
@@ -78,7 +81,8 @@ export const useDeposit = (
           approvalS === null ||
           approvalB === null ||
           !price ||
-          !liquidity
+          !liquidity ||
+          !nextID
         ? "Loading..."
         : (balances[1] && speculativeTokenAmount.greaterThan(balances[1])) ||
           (balances[0] && baseTokenAmount.greaterThan(balances[0]))
@@ -92,6 +96,7 @@ export const useDeposit = (
       approvalB,
       price,
       liquidity,
+      nextID,
     ]
   );
 
@@ -102,7 +107,6 @@ export const useDeposit = (
         baseTokenAmount &&
         liquidity
     );
-    // TODO add amount to description
     const approveStage: BeetStage[] =
       approvalS || approvalB
         ? [
@@ -112,14 +116,21 @@ export const useDeposit = (
                 approvalS
                   ? {
                       title: `Approve ${speculativeTokenAmount.token.symbol}`,
-                      description: `Approve ${speculativeTokenAmount.token.symbol}`,
+                      description: `Approve ${speculativeTokenAmount.toFixed(
+                        2,
+                        {
+                          groupSeparator: ",",
+                        }
+                      )} ${speculativeTokenAmount.token.symbol}`,
                       txEnvelope: approveS,
                     }
                   : null,
                 approvalB
                   ? {
                       title: `Approve ${baseTokenAmount.token.symbol}`,
-                      description: `Approve ${baseTokenAmount.token.symbol}`,
+                      description: `Approve ${baseTokenAmount.toFixed(2, {
+                        groupSeparator: ",",
+                      })} ${baseTokenAmount.token.symbol}`,
                       txEnvelope: approveB,
                     }
                   : null,
@@ -128,7 +139,18 @@ export const useDeposit = (
           ]
         : [];
 
-    invariant(address);
+    invariant(address && pairInfo && nextID);
+    console.log(
+      {
+        amount0Min: baseTokenAmount
+          .reduceBy(settings.maxSlippagePercent)
+          .raw.toString(),
+        amount1Min: speculativeTokenAmount
+          .reduceBy(settings.maxSlippagePercent)
+          .raw.toString(),
+      },
+      liquidity.toFixed()
+    );
 
     !tokenID
       ? await Beet(
@@ -148,9 +170,13 @@ export const useDeposit = (
                     upperBound: market.pair.bound.asFraction
                       .multiply(scale)
                       .quotient.toString(),
-                    amount0Min: baseTokenAmount.raw.toString(),
-                    amount1Min: speculativeTokenAmount.raw.toString(),
-                    liquidity: liquidity.quotient.toString(),
+                    amount0Min: baseTokenAmount
+                      .reduceBy(settings.maxSlippagePercent)
+                      .raw.toString(),
+                    amount1Min: speculativeTokenAmount
+                      .reduceBy(settings.maxSlippagePercent)
+                      .raw.toString(),
+                    liquidity: liquidity.raw.toString(),
                     recipient: address,
                     deadline:
                       Math.round(Date.now() / 1000) + settings.timeout * 60,
@@ -170,8 +196,12 @@ export const useDeposit = (
                 txEnvelope: () =>
                   liquidityManagerContract.increaseLiquidity({
                     tokenID,
-                    amount0Min: baseTokenAmount.raw.toString(),
-                    amount1Min: speculativeTokenAmount.raw.toString(),
+                    amount0Min: baseTokenAmount
+                      .reduceBy(settings.maxSlippagePercent)
+                      .raw.toString(),
+                    amount1Min: speculativeTokenAmount
+                      .reduceBy(settings.maxSlippagePercent)
+                      .raw.toString(),
                     liquidity: liquidity.raw.toString(),
                     deadline:
                       Math.round(Date.now() / 1000) + settings.timeout * 60,
@@ -181,8 +211,12 @@ export const useDeposit = (
           })
         );
 
-    // !tokenID && navigate(`/earn/`);
-    // TODO: determine next tokenID
+    if (!tokenID) {
+      navigate(`/earn/${market.address}/${nextID + 1}/`);
+    }
+
+    // TODO: only navigate if no error
+    // TODO: clear out the forms
   };
 
   return {

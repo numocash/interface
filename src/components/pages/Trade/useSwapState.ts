@@ -86,7 +86,6 @@ const useSwapStateInternal = (): UseSwapStateValues => {
   const tokenB =
     useAddressToToken(parsedQs.outputToken as string) ?? marketStart.token;
 
-  // TODO: consider make form state seralizable (store only token addr)
   const [fieldState, setFieldState] = useState<SwapFieldState>({
     typedValue: "",
     [Field.Input]: {
