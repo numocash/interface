@@ -21,6 +21,7 @@ import { useBeet } from "../../../utils/beet";
 import {
   convertShareToLiquidity,
   determineBorrowAmount,
+  determineSlippage,
   outputAmount,
   speculativeToLiquidity,
 } from "../../../utils/trade";
@@ -70,10 +71,33 @@ export const useTrade = ({
   const borrowAmount = useMemo(
     () =>
       fromAmount && price
-        ? determineBorrowAmount(fromAmount, market, price, 100)
+        ? determineBorrowAmount(
+            fromAmount,
+            market,
+            price,
+            settings.maxSlippagePercent
+          )
         : null,
-    [fromAmount, price, market]
+    [fromAmount, price, market, settings]
   );
+
+  const priceImpact = useMemo(() => {
+    const liquidity = fromAmount
+      ? speculativeToLiquidity(fromAmount, market)
+      : null;
+    const baseAmount =
+      pairInfo && liquidity
+        ? pairInfo.baseAmount.scale(liquidity.divide(pairInfo.totalLPSupply))
+        : null;
+    return fromAmount && pairInfo && baseAmount
+      ? determineSlippage(
+          baseAmount, // input amount should be in base tokens
+          pairInfo.baseAmount,
+          pairInfo.speculativeAmount
+        )
+      : null;
+  }, [fromAmount, market, pairInfo]);
+
   const approval = useApproval(fromAmount, address, LENDGINEROUTER);
   const approve = useApprove(fromAmount, LENDGINEROUTER);
 
@@ -97,7 +121,8 @@ export const useTrade = ({
               pairInfo,
               fromAmount,
               price,
-              uniswapInfo
+              uniswapInfo,
+              settings
             ),
           }
         : null,
@@ -109,6 +134,7 @@ export const useTrade = ({
       mint,
       pairInfo,
       price,
+      settings,
       toToken,
       uniswapInfo,
     ]
@@ -238,9 +264,6 @@ export const useTrade = ({
     trade,
   ]);
 
-  // TODO: estimate slippage on uniswap to determine borrow amount
-  // TODO: show price impact
-
   const swapDisabledReason = useMemo(
     () =>
       !fromToken
@@ -254,7 +277,8 @@ export const useTrade = ({
           !borrowAmount ||
           !marketInfo ||
           !trade ||
-          !price
+          !price ||
+          !priceImpact
         ? "Loading"
         : trade.mint &&
           speculativeToLiquidity(trade.inputAmount, market).greaterThan(
@@ -263,6 +287,8 @@ export const useTrade = ({
             )
           )
         ? "Insufficient liquidity"
+        : trade.mint && priceImpact.greaterThan(settings.maxSlippagePercent)
+        ? "Slippage too large"
         : fromAmount.greaterThan(userFromBalance)
         ? "Insufficient tokens"
         : null,
@@ -276,7 +302,9 @@ export const useTrade = ({
       marketInfo,
       trade,
       price,
+      priceImpact,
       market,
+      settings.maxSlippagePercent,
     ]
   );
 

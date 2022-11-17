@@ -1,9 +1,10 @@
 import type { Price } from "@dahlia-labs/token-utils";
-import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, Percent, TokenAmount } from "@dahlia-labs/token-utils";
 
 import { borrowRate } from "../components/pages/Earn/PositionCard/Stats";
 import { scale } from "../components/pages/Trade/useTrade";
 import type { IMarket, IMarketInfo, IPairInfo } from "../contexts/environment";
+import type { ISettings } from "../contexts/settings";
 
 export const outputAmount = (
   market: IMarket,
@@ -11,10 +12,16 @@ export const outputAmount = (
   pairInfo: IPairInfo,
   inputAmount: TokenAmount,
   price: Price,
-  referenceMarket: [TokenAmount, TokenAmount]
+  referenceMarket: [TokenAmount, TokenAmount],
+  settings: ISettings
 ): TokenAmount => {
   if (inputAmount.token === market.pair.speculativeToken) {
-    const borrowAmount = determineBorrowAmount(inputAmount, market, price, 100);
+    const borrowAmount = determineBorrowAmount(
+      inputAmount,
+      market,
+      price,
+      settings.maxSlippagePercent
+    );
     // MINT
     const lpAmount = speculativeToLiquidity(
       inputAmount.add(borrowAmount),
@@ -63,29 +70,44 @@ export const determineBorrowAmount = (
   inputAmount: TokenAmount,
   market: IMarket,
   price: Price,
-  slippageBps: number
+  slippageBps: Percent
 ) => {
   const x0 = price.asFraction.multiply(price);
   const x1 = market.pair.bound.subtract(price).multiply(2);
 
   const numerator = inputAmount
     .scale(x1)
-    .add(
-      inputAmount
-        .scale(x0.divide(price))
-        .scale(new Fraction(10000 - slippageBps, 10000))
-    );
+    .add(inputAmount.scale(x0.divide(price)).reduceBy(slippageBps));
 
   const denominator = market.pair.bound.asFraction
     .multiply(2)
-    .subtract(
-      x0.divide(price).multiply(new Fraction(10000 - slippageBps, 10000))
-    )
+    .subtract(x0.divide(price).multiply(slippageBps))
     .subtract(x1);
 
   const s = new Fraction(10 ** 9);
 
   return numerator.scale(denominator.invert()).scale(s.invert()).scale(s);
+};
+
+export const determineSlippage = (
+  inputAmount: TokenAmount,
+  u0: TokenAmount,
+  u1: TokenAmount
+): Percent => {
+  if (inputAmount.equalTo(0)) return new Percent(0);
+  // always going from base to speculative
+  const prePrice = new Fraction(u1.raw, u0.raw);
+
+  const amountInWithFee = inputAmount.multiply(new Fraction(997));
+  const numerator = amountInWithFee.multiply(u1);
+  const denominator = amountInWithFee.asFraction.add(
+    u0.multiply(new Fraction(1000))
+  );
+  const amountOut = numerator.divide(denominator);
+
+  const postPrice = amountOut.divide(inputAmount);
+
+  return Percent.fromFraction(prePrice.subtract(postPrice).divide(prePrice));
 };
 
 const determineRepayAmount = (
