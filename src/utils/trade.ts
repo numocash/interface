@@ -185,5 +185,9 @@ export const newRewardPerLiquidity = (
     ? marketInfo.totalLiquidityBorrowed
     : dilutionLPRequested;
   const dilutionSpeculative = liquidityToSpeculative(dilutionLP, market);
+
+  if (marketInfo.totalLiquidity.equalTo(0))
+    return new TokenAmount(market.pair.speculativeToken, 0);
+
   return dilutionSpeculative.scale(marketInfo.totalLiquidity.invert());
 };

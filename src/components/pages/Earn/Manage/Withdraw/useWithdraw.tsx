@@ -23,6 +23,7 @@ export const useWithdraw = (
   const { address } = useAccount();
   const pairInfo = usePair(market.pair);
   const userLendgineInfo = useUserLendgine(tokenID, market);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const w = new Percent(withdrawPercent, 100);
 
   const { userBaseAmount, userSpeculativeAmount } = useMemo(() => {

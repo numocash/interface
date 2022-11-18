@@ -1,4 +1,4 @@
-import { TokenAmount } from "@dahlia-labs/token-utils";
+import { Percent, TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -82,7 +82,7 @@ export const useDeposit = (
           approvalB === null ||
           !price ||
           !liquidity ||
-          !nextID
+          nextID === null
         ? "Loading..."
         : (balances[1] && speculativeTokenAmount.greaterThan(balances[1])) ||
           (balances[0] && baseTokenAmount.greaterThan(balances[0]))
@@ -139,18 +139,7 @@ export const useDeposit = (
           ]
         : [];
 
-    invariant(address && pairInfo && nextID);
-    console.log(
-      {
-        amount0Min: baseTokenAmount
-          .reduceBy(settings.maxSlippagePercent)
-          .raw.toString(),
-        amount1Min: speculativeTokenAmount
-          .reduceBy(settings.maxSlippagePercent)
-          .raw.toString(),
-      },
-      liquidity.toFixed()
-    );
+    invariant(address && pairInfo && nextID !== null);
 
     !tokenID
       ? await Beet(
@@ -171,10 +160,18 @@ export const useDeposit = (
                       .multiply(scale)
                       .quotient.toString(),
                     amount0Min: baseTokenAmount
-                      .reduceBy(settings.maxSlippagePercent)
+                      .reduceBy(
+                        pairInfo.totalLPSupply.equalTo(0)
+                          ? new Percent(0)
+                          : settings.maxSlippagePercent
+                      )
                       .raw.toString(),
                     amount1Min: speculativeTokenAmount
-                      .reduceBy(settings.maxSlippagePercent)
+                      .reduceBy(
+                        pairInfo.totalLPSupply.equalTo(0)
+                          ? new Percent(0)
+                          : settings.maxSlippagePercent
+                      )
                       .raw.toString(),
                     liquidity: liquidity.raw.toString(),
                     recipient: address,

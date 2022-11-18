@@ -151,6 +151,7 @@ export const useNextTokenID = (): number | null => {
   );
 
   const tokenIDs = filteredEvents?.data?.map((d) => +d.args[1].toString());
+  if (tokenIDs && tokenIDs.length === 0) return 0;
   return tokenIDs ? max(tokenIDs) ?? null : null;
 };
 
@@ -269,7 +270,7 @@ export const useLendgine = (market: IMarket): IMarketInfo | null => {
   };
 };
 
-export const usePrice = (market: IMarket | null): Price | null => {
+export const usePrice = (market: IMarket | null): Fraction | null => {
   const pairInfo = usePair(market?.pair ?? null);
   const uniInfo = useUniswapPair(market ?? null);
 
@@ -277,14 +278,16 @@ export const usePrice = (market: IMarket | null): Price | null => {
   if (pairInfo && pairInfo.totalLPSupply.greaterThan(0)) {
     return pairInfoToPrice(pairInfo, market.pair);
   } else {
-    invariant(uniInfo);
-    const s = new Fraction(1, 10 ** 9);
-    return new Price(
+    if (!uniInfo) return null;
+    const s = new Fraction(10 ** 9);
+    const price = new Price(
       market.pair.speculativeToken,
       market.pair.baseToken,
-      uniInfo[1].scale(s).raw,
-      uniInfo[0].scale(s).raw
+      uniInfo[1].raw,
+      uniInfo[0].raw
     );
+
+    return new Fraction(price.asFraction.multiply(s).quotient, 10 ** 9);
   }
 };
 

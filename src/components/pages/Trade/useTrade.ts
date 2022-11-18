@@ -82,6 +82,7 @@ export const useTrade = ({
   );
 
   const priceImpact = useMemo(() => {
+    if (pairInfo && pairInfo.totalLPSupply.equalTo(0)) return new Percent(0);
     const liquidity = fromAmount
       ? speculativeToLiquidity(fromAmount, market)
       : null;

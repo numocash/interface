@@ -49,7 +49,7 @@ export const TokenItem: React.FC<Props> = ({
                 <TokenIcon size={24} token={market.pair.speculativeToken} />
                 <div tw=" space-y-1">
                   <div tw="text-lg font-semibold leading-none">
-                    {market.pair.speculativeToken.symbol}²
+                    {market.pair.speculativeToken.symbol}+
                   </div>
                   {/* <img tw="h-[50px] w-[65px]" src={power} alt={`power`} /> */}
                 </div>
