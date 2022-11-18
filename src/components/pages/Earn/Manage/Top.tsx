@@ -25,7 +25,7 @@ export const Top: React.FC = () => {
       <div tw="p-6 pb-3 rounded-lg bg-action border border-[#AEAEB2] ">
         <div tw="flex justify-between align-top">
           <div tw="flex items-center gap-3">
-            <div tw="flex items-center space-x--2">
+            <div tw="flex items-center space-x-[-0.5rem]">
               <TokenIcon token={market.pair.speculativeToken} size={24} />
               <TokenIcon token={market.pair.baseToken} size={24} />
             </div>

@@ -121,7 +121,7 @@
     "babel-plugin-emotion": "^11.0.0",
     "babel-plugin-import": "^1.13.5",
     "babel-plugin-macros": "^3.1.0",
-    "babel-plugin-twin": "^1.0.2",
+    "babel-plugin-twin": "^1.1.0",
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
     "eslint": "^8.27.0",

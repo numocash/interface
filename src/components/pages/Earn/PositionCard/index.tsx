@@ -63,7 +63,7 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
         <div tw="flex justify-between align-top  ">
           <div tw="flex flex-col">
             <div tw="flex items-center gap-3">
-              <div tw="flex items-center space-x--2">
+              <div tw="flex items-center space-x-[-0.5rem]">
                 <TokenIcon token={speculativeToken} size={24} />
                 <TokenIcon token={baseToken} size={24} />
               </div>
