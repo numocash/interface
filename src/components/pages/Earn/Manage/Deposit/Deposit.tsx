@@ -28,7 +28,7 @@ export const Deposit: React.FC = () => {
 
   return (
     <div tw="flex flex-col rounded-lg bg-gray-100">
-      <div tw=" pb-0 gap-2 flex flex-col p-6 bg-white">
+      <div tw="gap-2 flex flex-col p-6 bg-white">
         <AssetSelection
           label={<span>Input</span>}
           selectedValue={market.pair.speculativeToken}

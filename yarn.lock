@@ -2838,9 +2838,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rainbow-me/rainbowkit@npm:^0.7.4":
-  version: 0.7.4
-  resolution: "@rainbow-me/rainbowkit@npm:0.7.4"
+"@rainbow-me/rainbowkit@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "@rainbow-me/rainbowkit@npm:0.8.0"
   dependencies:
     "@vanilla-extract/css": 1.9.1
     "@vanilla-extract/dynamic": 2.0.2
@@ -2852,8 +2852,8 @@ __metadata:
     ethers: ">=5.5.1"
     react: ">=17"
     react-dom: ">=17"
-    wagmi: 0.5.x || 0.6.x || 0.7.x
-  checksum: 969bbef8729eecc7ad26c4a90c5438feac1e0a7d37cd809075487bf95efb4a7dcaab0ae6720d60fff6c82caa23f7235a8756bbedeeaee47c54f0dec579311d9d
+    wagmi: 0.8.x
+  checksum: 0c9f0605fc9c1a7924597ef602d4c41df42bcb2ed0341e6b08878fd754c01b509c3a8cf499f3db31d21ef3f72e94f14f6b8c7e0e8ac62f7c8701039ea12a84c1
   languageName: node
   linkType: hard
 
@@ -8094,9 +8094,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.27.0, eslint@npm:^8.3.0":
-  version: 8.27.0
-  resolution: "eslint@npm:8.27.0"
+"eslint@npm:^8.28.0, eslint@npm:^8.3.0":
+  version: 8.28.0
+  resolution: "eslint@npm:8.28.0"
   dependencies:
     "@eslint/eslintrc": ^1.3.3
     "@humanwhocodes/config-array": ^0.11.6
@@ -8139,7 +8139,7 @@ __metadata:
     text-table: ^0.2.0
   bin:
     eslint: bin/eslint.js
-  checksum: 153b022d309e1b647a73b1bb0fa98912add699b06e279084155f23c6f2b5fc5abd05411fc1ba81608a24bbfaf044ca079544c16fffa6fc987b8f676c9960a2c4
+  checksum: 1b793486b2ec80f0602d75fff7116f7c39a3286f523608a999eead9bec4154a06841785d2b4fb87f8292a94cf85778c1dbfaec727772a09c4d604fdb9ff0809a
   languageName: node
   linkType: hard
 
@@ -14490,7 +14490,7 @@ __metadata:
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
     "@popperjs/core": ^2.11.6
-    "@rainbow-me/rainbowkit": ^0.7.4
+    "@rainbow-me/rainbowkit": ^0.8.0
     "@reach/dialog": ^0.18.0
     "@reach/slider": ^0.18.0
     "@react-spring/web": ^9.5.5
@@ -14532,7 +14532,7 @@ __metadata:
     buffer: ^6.0.3
     copy-to-clipboard: ^3.3.3
     deepmerge: ^4.2.2
-    eslint: ^8.27.0
+    eslint: ^8.28.0
     eslint-import-resolver-node: ^0.3.6
     eslint-plugin-import: ^2.26.0
     eslint-plugin-jsx-a11y: ^6.6.1
@@ -14566,12 +14566,12 @@ __metadata:
     tailwindcss: ^3.2.4
     tiny-invariant: ^1.3.1
     tslib: ^2.4.1
-    twin.macro: ^3.0.0
+    twin.macro: ^3.0.1
     typechain: ^8.1.1
     typescript: 4.8.4
     unstated-next: ^1.1.0
     use-debounce: ^8.0.4
-    wagmi: ^0.8.4
+    wagmi: ^0.8.5
     webpack: ^5.75.0
     webpack-bundle-analyzer: ^4.7.0
   languageName: unknown
@@ -16104,9 +16104,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"twin.macro@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "twin.macro@npm:3.0.0"
+"twin.macro@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "twin.macro@npm:3.0.1"
   dependencies:
     "@babel/template": ^7.18.10
     babel-plugin-macros: ^3.1.0
@@ -16115,8 +16115,8 @@ __metadata:
     lodash.merge: ^4.6.2
     postcss-selector-parser: ^6.0.10
   peerDependencies:
-    tailwindcss: ">=3.2.2"
-  checksum: f0bd92e7789756c303e4c79a68bc2fb18ea533bd0fb134dabdb2976d1f3b697e1a65b7ee0de295f763a4be05962d3b00c6b18e6d3a95c31498ae9d46b01cc8eb
+    tailwindcss: ^3.2.4
+  checksum: 0afb10a675d25695959d9bcaddb7d62b2a6701fba572450a55d0e5a489921889abcb9e3fd590ae9cd28baebf8e2a834543bd5b29d031436915b4d257b16862bb
   languageName: node
   linkType: hard
 
@@ -16541,9 +16541,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wagmi@npm:^0.8.4":
-  version: 0.8.4
-  resolution: "wagmi@npm:0.8.4"
+"wagmi@npm:^0.8.5":
+  version: 0.8.5
+  resolution: "wagmi@npm:0.8.5"
   dependencies:
     "@coinbase/wallet-sdk": ^3.5.3
     "@tanstack/query-sync-storage-persister": ^4.14.5
@@ -16556,7 +16556,7 @@ __metadata:
   peerDependencies:
     ethers: ">=5.5.1"
     react: ">=17.0.0"
-  checksum: 038ad744bd5156052887d743ec3223b5f191fba4ce2a393b83fedc0c45b827e86cc937763e680404a69f4f659f2e525e2c92a4d27bd5c544b972cf75eefc6620
+  checksum: a42a04bdf13e1c30642262e1a01772bd27528c0832fa420855a70fb745b5b4b636aaa87925d8aaeb467cde0ff71825975bf4260a561dca4fb1b93b2e14ac9921
   languageName: node
   linkType: hard
 

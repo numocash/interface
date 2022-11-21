@@ -1,4 +1,4 @@
-import { Percent, TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, Price, TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -21,6 +21,7 @@ export const useDeposit = (
   tokenID: number | null,
   baseTokenAmount: TokenAmount | null,
   speculativeTokenAmount: TokenAmount | null,
+  liquidity: TokenAmount | null,
   settings: ISettings
 ): { onSend: () => Promise<void>; disableReason: string | null } => {
   const liquidityManagerContract = useLiquidityManager(true);
@@ -30,31 +31,6 @@ export const useDeposit = (
   const price = usePrice(market);
   const nextID = useNextTokenID();
   const navigate = useNavigate();
-
-  const liquidity = useMemo(() => {
-    if (!pairInfo || !price || !baseTokenAmount || !speculativeTokenAmount)
-      return null;
-
-    if (pairInfo.totalLPSupply.equalTo(0)) {
-      return new TokenAmount(
-        market.pair.lp,
-        baseTokenAmount.scale(price.asFraction.multiply(price).invert()).raw
-      );
-    }
-
-    return new TokenAmount(
-      market.pair.lp,
-      pairInfo.totalLPSupply.scale(
-        baseTokenAmount.divide(pairInfo.baseAmount)
-      ).raw
-    );
-  }, [
-    baseTokenAmount,
-    market.pair.lp,
-    pairInfo,
-    price,
-    speculativeTokenAmount,
-  ]);
 
   const balances = useTokenBalances(
     [market?.pair.baseToken ?? null, market?.pair.speculativeToken ?? null],
@@ -107,6 +83,7 @@ export const useDeposit = (
         baseTokenAmount &&
         liquidity
     );
+
     const approveStage: BeetStage[] =
       approvalS || approvalB
         ? [
@@ -139,74 +116,81 @@ export const useDeposit = (
           ]
         : [];
 
-    invariant(address && pairInfo && nextID !== null);
+    invariant(address && pairInfo && nextID !== null && price);
 
-    !tokenID
-      ? await Beet(
-          "Add liquidity to pool",
-          approveStage.concat({
-            stageTitle: "Add liquidity to pool",
-            parallelTransactions: [
-              {
-                title: "Add liquidity to pool",
-                description: "Add liquidity to pool",
-                txEnvelope: () =>
-                  liquidityManagerContract.mint({
-                    base: market.pair.baseToken.address,
-                    speculative: market.pair.speculativeToken.address,
-                    baseScaleFactor: market.pair.baseScaleFactor,
-                    speculativeScaleFactor: market.pair.speculativeScaleFactor,
-                    upperBound: market.pair.bound.asFraction
-                      .multiply(scale)
-                      .quotient.toString(),
-                    amount0Min: baseTokenAmount
-                      .reduceBy(
-                        pairInfo.totalLPSupply.equalTo(0)
-                          ? new Percent(0)
-                          : settings.maxSlippagePercent
-                      )
-                      .raw.toString(),
-                    amount1Min: speculativeTokenAmount
-                      .reduceBy(
-                        pairInfo.totalLPSupply.equalTo(0)
-                          ? new Percent(0)
-                          : settings.maxSlippagePercent
-                      )
-                      .raw.toString(),
-                    liquidity: liquidity.raw.toString(),
-                    recipient: address,
-                    deadline:
-                      Math.round(Date.now() / 1000) + settings.timeout * 60,
-                  }),
-              },
-            ],
-          })
-        )
-      : await Beet(
-          "Add liquidity to pool",
-          approveStage.concat({
-            stageTitle: "Add liquidity to pool",
-            parallelTransactions: [
-              {
-                title: "Add liquidity to pool",
-                description: "Add liquidity to pool",
-                txEnvelope: () =>
-                  liquidityManagerContract.increaseLiquidity({
-                    tokenID,
-                    amount0Min: baseTokenAmount
-                      .reduceBy(settings.maxSlippagePercent)
-                      .raw.toString(),
-                    amount1Min: speculativeTokenAmount
-                      .reduceBy(settings.maxSlippagePercent)
-                      .raw.toString(),
-                    liquidity: liquidity.raw.toString(),
-                    deadline:
-                      Math.round(Date.now() / 1000) + settings.timeout * 60,
-                  }),
-              },
-            ],
-          })
-        );
+    if (!tokenID) {
+      await Beet(
+        "Add liquidity to pool",
+        approveStage.concat({
+          stageTitle: "Add liquidity to pool",
+          parallelTransactions: [
+            {
+              title: "Add liquidity to pool",
+              description: "Add liquidity to pool",
+              txEnvelope: () =>
+                liquidityManagerContract.mint({
+                  base: market.pair.baseToken.address,
+                  speculative: market.pair.speculativeToken.address,
+                  baseScaleFactor: market.pair.baseScaleFactor,
+                  speculativeScaleFactor: market.pair.speculativeScaleFactor,
+                  upperBound: market.pair.bound.asFraction
+                    .multiply(scale)
+                    .quotient.toString(),
+                  amount0Min: pairInfo.totalLPSupply.equalTo(0)
+                    ? baseTokenAmount.raw.toString()
+                    : baseTokenAmount
+                        .reduceBy(settings.maxSlippagePercent)
+                        .raw.toString(),
+                  amount1Min: pairInfo.totalLPSupply.equalTo(0)
+                    ? speculativeTokenAmount.raw.toString()
+                    : speculativeTokenAmount
+                        .reduceBy(settings.maxSlippagePercent)
+                        .raw.toString(),
+                  liquidity: liquidity.raw.toString(),
+                  recipient: address,
+                  deadline:
+                    Math.round(Date.now() / 1000) + settings.timeout * 60,
+                }),
+            },
+          ],
+        })
+      );
+    } else {
+      const sc = new Fraction(10 ** 9);
+      const liquidityPrec = liquidity.scale(sc.invert()).scale(sc);
+
+      const basePrec = pairInfo.baseAmount.scale(
+        liquidityPrec.divide(pairInfo.totalLPSupply)
+      );
+      const specPrec = pairInfo.speculativeAmount.scale(
+        liquidityPrec.divide(pairInfo.totalLPSupply)
+      );
+      await Beet(
+        "Add liquidity to pool",
+        approveStage.concat({
+          stageTitle: "Add liquidity to pool",
+          parallelTransactions: [
+            {
+              title: "Add liquidity to pool",
+              description: "Add liquidity to pool",
+              txEnvelope: () =>
+                liquidityManagerContract.increaseLiquidity({
+                  tokenID,
+                  amount0Min: basePrec
+                    .reduceBy(settings.maxSlippagePercent)
+                    .raw.toString(),
+                  amount1Min: specPrec
+                    .reduceBy(settings.maxSlippagePercent)
+                    .raw.toString(),
+                  liquidity: liquidityPrec.raw.toString(),
+                  deadline:
+                    Math.round(Date.now() / 1000) + settings.timeout * 60,
+                }),
+            },
+          ],
+        })
+      );
+    }
 
     if (!tokenID) {
       navigate(`/earn/${market.address}/${nextID + 1}/`);

@@ -1,4 +1,4 @@
-import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, Price, TokenAmount } from "@dahlia-labs/token-utils";
 import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -9,6 +9,14 @@ import { useAddressToMarket } from "../../../../contexts/environment";
 import { useSettings } from "../../../../contexts/settings";
 import { usePrice } from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
+import {
+  baseToLiquidity,
+  checkInvariant,
+  liquidityToBase,
+  liquidityToSpec,
+  roundLiquidity,
+  specToLiquidity,
+} from "../../../../utils/trade";
 import { Page } from "../../../common/Page";
 import { Action } from "./Action";
 import { Button } from "./Button";
@@ -40,6 +48,7 @@ interface IManage {
 
   baseAmount: TokenAmount | null;
   speculativeAmount: TokenAmount | null;
+  liquidity: TokenAmount | null;
   setDepositAmount: (input: Input, val: TokenAmount) => void;
 
   onSend: () => Promise<void> | void;
@@ -64,6 +73,8 @@ const useManageInternal = ({
   const [speculativeAmount, setSpeculativeAmount] =
     useState<TokenAmount | null>(null);
 
+  const [liquidity, setLiquidity] = useState<TokenAmount | null>(null);
+
   const price = usePrice(market);
 
   const setDepositAmount = useCallback(
@@ -72,28 +83,42 @@ const useManageInternal = ({
       input === Input.Base ? setBaseAmount(val) : setSpeculativeAmount(val);
 
       if (pairInfo.totalLPSupply.equalTo(0)) {
-        input === Input.Base
-          ? setSpeculativeAmount(
-              new TokenAmount(
-                market.pair.speculativeToken,
-                val.scale(
-                  market.pair.bound
-                    .subtract(price)
-                    .multiply(2)
-                    .divide(price.asFraction.multiply(price))
-                ).raw
-              )
-            )
-          : setBaseAmount(
-              new TokenAmount(
-                market.pair.baseToken,
-                val.scale(
-                  price.asFraction
-                    .multiply(price)
-                    .divide(market.pair.bound.subtract(price).multiply(2))
-                ).raw
-              )
-            );
+        if (input === Input.Base) {
+          const liquidity = baseToLiquidity(val, price, market);
+          const liquidityPrec = roundLiquidity(liquidity);
+          const speculativeAmount = liquidityToSpec(
+            liquidityPrec,
+            price,
+            market
+          );
+          const baseAmount = liquidityToBase(liquidityPrec, price, market);
+
+          setBaseAmount(baseAmount);
+          setSpeculativeAmount(speculativeAmount);
+          setLiquidity(liquidityPrec);
+          console.log(
+            "here",
+            checkInvariant(baseAmount, speculativeAmount, liquidityPrec, market)
+          );
+        } else {
+          const liquidity = specToLiquidity(val, price, market);
+          const liquidityPrec = roundLiquidity(liquidity);
+          const speculativeAmount = liquidityToSpec(
+            liquidityPrec,
+            price,
+            market
+          );
+          const baseAmount = liquidityToBase(liquidityPrec, price, market);
+
+          setBaseAmount(baseAmount);
+          setSpeculativeAmount(speculativeAmount);
+          setLiquidity(liquidityPrec);
+
+          console.log(
+            "here",
+            checkInvariant(baseAmount, speculativeAmount, liquidityPrec, market)
+          );
+        }
       } else {
         const proportion =
           input === Input.Base
@@ -130,6 +155,7 @@ const useManageInternal = ({
       tokenID ?? null,
       baseAmount,
       speculativeAmount,
+      liquidity,
       settings
     );
 
@@ -148,6 +174,7 @@ const useManageInternal = ({
 
     baseAmount,
     speculativeAmount,
+    liquidity,
     setDepositAmount,
 
     onSend: async () => {
