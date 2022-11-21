@@ -1,4 +1,4 @@
-import { Fraction, Price, TokenAmount } from "@dahlia-labs/token-utils";
+import type { TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -156,15 +156,6 @@ export const useDeposit = (
         })
       );
     } else {
-      const sc = new Fraction(10 ** 9);
-      const liquidityPrec = liquidity.scale(sc.invert()).scale(sc);
-
-      const basePrec = pairInfo.baseAmount.scale(
-        liquidityPrec.divide(pairInfo.totalLPSupply)
-      );
-      const specPrec = pairInfo.speculativeAmount.scale(
-        liquidityPrec.divide(pairInfo.totalLPSupply)
-      );
       await Beet(
         "Add liquidity to pool",
         approveStage.concat({
@@ -176,13 +167,13 @@ export const useDeposit = (
               txEnvelope: () =>
                 liquidityManagerContract.increaseLiquidity({
                   tokenID,
-                  amount0Min: basePrec
+                  amount0Min: baseTokenAmount
                     .reduceBy(settings.maxSlippagePercent)
                     .raw.toString(),
-                  amount1Min: specPrec
+                  amount1Min: speculativeTokenAmount
                     .reduceBy(settings.maxSlippagePercent)
                     .raw.toString(),
-                  liquidity: liquidityPrec.raw.toString(),
+                  liquidity: liquidity.raw.toString(),
                   deadline:
                     Math.round(Date.now() / 1000) + settings.timeout * 60,
                 }),

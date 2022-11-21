@@ -1,4 +1,4 @@
-import { Fraction, Price, TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -97,7 +97,7 @@ const useManageInternal = ({
           setSpeculativeAmount(speculativeAmount);
           setLiquidity(liquidityPrec);
           console.log(
-            "here",
+            "add",
             checkInvariant(baseAmount, speculativeAmount, liquidityPrec, market)
           );
         } else {
@@ -120,32 +120,37 @@ const useManageInternal = ({
           );
         }
       } else {
-        const proportion =
+        const proportion = new Fraction(
+          val.raw,
           input === Input.Base
-            ? new Fraction(val.raw, pairInfo.baseAmount.raw)
-            : new Fraction(val.raw, pairInfo.speculativeAmount.raw);
-        input === Input.Base
-          ? setSpeculativeAmount(
-              new TokenAmount(
-                market.pair.speculativeToken,
-                pairInfo.speculativeAmount.scale(proportion).raw
-              )
-            )
-          : setBaseAmount(
-              new TokenAmount(
-                market.pair.baseToken,
-                pairInfo.baseAmount.scale(proportion).raw
-              )
-            );
+            ? pairInfo.baseAmount.raw
+            : pairInfo.speculativeAmount.raw
+        );
+        const liquidity = pairInfo.totalLPSupply.scale(proportion);
+        const liquidityPrec = roundLiquidity(liquidity);
+        const baseAmount = pairInfo.baseAmount
+          .scale(liquidityPrec)
+          .scale(pairInfo.totalLPSupply.invert());
+        const speculativeAmount = pairInfo.speculativeAmount
+          .scale(liquidityPrec)
+          .scale(pairInfo.totalLPSupply.invert());
+
+        setBaseAmount(baseAmount);
+        setSpeculativeAmount(speculativeAmount);
+        setLiquidity(liquidityPrec);
+
+        console.log(
+          "increase",
+          checkInvariant(
+            baseAmount.add(pairInfo.baseAmount),
+            speculativeAmount.add(pairInfo.speculativeAmount),
+            liquidityPrec.add(pairInfo.totalLPSupply),
+            market
+          )
+        );
       }
     },
-    [
-      market.pair.baseToken,
-      market.pair.bound,
-      market.pair.speculativeToken,
-      pairInfo,
-      price,
-    ]
+    [market, pairInfo, price]
   );
 
   const settings = useSettings();
