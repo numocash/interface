@@ -23,6 +23,7 @@ import {
   determineBorrowAmount,
   determineSlippage,
   outputAmount,
+  roundLiquidity,
   speculativeToLiquidity,
 } from "../../../utils/trade";
 import type { Trade } from "./useSwapState";
@@ -83,21 +84,22 @@ export const useTrade = ({
 
   const priceImpact = useMemo(() => {
     if (pairInfo && pairInfo.totalLPSupply.equalTo(0)) return new Percent(0);
-    const liquidity = fromAmount
-      ? speculativeToLiquidity(fromAmount, market)
-      : null;
+    const liquidity =
+      fromAmount && borrowAmount
+        ? speculativeToLiquidity(fromAmount.add(borrowAmount), market)
+        : null;
     const baseAmount =
       pairInfo && liquidity
         ? pairInfo.baseAmount.scale(liquidity.divide(pairInfo.totalLPSupply))
         : null;
-    return fromAmount && pairInfo && baseAmount
+    return fromAmount && baseAmount && uniswapInfo
       ? determineSlippage(
           baseAmount, // input amount should be in base tokens
-          pairInfo.baseAmount,
-          pairInfo.speculativeAmount
+          uniswapInfo[0],
+          uniswapInfo[1]
         )
       : null;
-  }, [fromAmount, market, pairInfo]);
+  }, [borrowAmount, fromAmount, market, pairInfo, uniswapInfo]);
 
   const approval = useApproval(fromAmount, address, LENDGINEROUTER);
   const approve = useApprove(fromAmount, LENDGINEROUTER);
@@ -173,6 +175,8 @@ export const useTrade = ({
         ]
       : [];
 
+    console.log(borrowAmount.toFixed());
+
     trade.mint
       ? await beet(
           "Buy option",
@@ -193,9 +197,8 @@ export const useTrade = ({
                       upperBound: market.pair.bound.asFraction
                         .multiply(scale)
                         .quotient.toString(),
-                      liquidity: speculativeToLiquidity(
-                        trade.inputAmount,
-                        market
+                      liquidity: roundLiquidity(
+                        speculativeToLiquidity(trade.inputAmount, market)
                       ).raw.toString(),
                       borrowAmount: borrowAmount.raw.toString(),
                       sharesMin: trade.outputAmount
@@ -277,16 +280,16 @@ export const useTrade = ({
           approval === null ||
           !borrowAmount ||
           !marketInfo ||
+          !pairInfo ||
           !trade ||
           !price ||
           !priceImpact
         ? "Loading"
         : trade.mint &&
-          speculativeToLiquidity(trade.inputAmount, market).greaterThan(
-            marketInfo.totalLiquidity.subtract(
-              marketInfo.totalLiquidityBorrowed
-            )
-          )
+          speculativeToLiquidity(
+            trade.inputAmount.add(borrowAmount),
+            market
+          ).greaterThan(pairInfo?.totalLPSupply)
         ? "Insufficient liquidity"
         : trade.mint && priceImpact.greaterThan(settings.maxSlippagePercent)
         ? "Slippage too large"
@@ -301,6 +304,7 @@ export const useTrade = ({
       approval,
       borrowAmount,
       marketInfo,
+      pairInfo,
       trade,
       price,
       priceImpact,

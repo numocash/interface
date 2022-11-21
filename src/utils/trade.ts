@@ -22,7 +22,6 @@ export const outputAmount = (
       price,
       settings.maxSlippagePercent
     );
-    console.log(2);
     // MINT
     const lpAmount = speculativeToLiquidity(
       inputAmount.add(borrowAmount),
