@@ -1,55 +1,27 @@
-import { TokenAmount } from "@dahlia-labs/token-utils";
-import type { Call } from "@dahlia-labs/use-ethers";
-import { AddressZero } from "@ethersproject/constants";
-
 import type { IPair, IPairInfo } from "../contexts/environment";
-import { parseFunctionReturn } from "../utils/parseFunctionReturn";
-import { useBlockQuery } from "./useBlockQuery";
-import { pairInterface } from "./useContract";
+import {
+  reserve0Multicall,
+  reserve1Multicall,
+  totalSupplyMulticall,
+} from "../utils/pairMulticall";
+import { useBlockMulticall } from "./useBlockQuery";
 
 export const usePair = (pair: IPair | null): IPairInfo | null => {
-  const calls: readonly Call[] = [
-    {
-      target: pair?.address ?? AddressZero,
-      callData: pairInterface.encodeFunctionData("reserve0"),
-    },
-    {
-      target: pair?.address ?? AddressZero,
-      callData: pairInterface.encodeFunctionData("reserve1"),
-    },
-    {
-      target: pair?.address ?? AddressZero,
-      callData: pairInterface.encodeFunctionData("totalSupply"),
-    },
-  ];
+  const data = useBlockMulticall(
+    pair
+      ? [
+          reserve0Multicall(pair),
+          reserve1Multicall(pair),
+          totalSupplyMulticall(pair),
+        ]
+      : null
+  );
 
-  const data = useBlockQuery("pair", calls, [pair?.address], !!pair);
-  if (!data || !pair) return null;
+  if (!data) return null;
 
   return {
-    baseAmount: new TokenAmount(
-      pair.baseToken,
-      parseFunctionReturn(
-        pairInterface,
-        "reserve0",
-        data.returnData[0]
-      ).toString()
-    ),
-    speculativeAmount: new TokenAmount(
-      pair.speculativeToken,
-      parseFunctionReturn(
-        pairInterface,
-        "reserve1",
-        data.returnData[1]
-      ).toString()
-    ),
-    totalLPSupply: new TokenAmount(
-      pair.lp,
-      parseFunctionReturn(
-        pairInterface,
-        "totalSupply",
-        data.returnData[2]
-      ).toString()
-    ),
+    baseAmount: data[0],
+    speculativeAmount: data[1],
+    totalLPSupply: data[2],
   };
 };

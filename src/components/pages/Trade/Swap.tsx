@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useAccount } from "wagmi";
 
-import { useTokenBalances } from "../../../hooks/useTokenBalance";
+import { useTokenBalance } from "../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { Module } from "../../common/Module";
@@ -25,15 +25,8 @@ export const Swap: React.FC = () => {
     handleTrade,
   } = useSwapState();
 
-  const tokenAccounts = useMemo(
-    () => [
-      selectedFrom ?? null,
-      selectedTo ?? null,
-      trade?.market.pair.baseToken ?? null,
-    ],
-    [selectedFrom, selectedTo, trade?.market.pair.baseToken]
-  );
-  const balances = useTokenBalances(tokenAccounts, address);
+  const fromBalance = useTokenBalance(selectedFrom, address);
+  const toBalance = useTokenBalance(selectedTo, address);
 
   return (
     <>
@@ -53,7 +46,7 @@ export const Swap: React.FC = () => {
               inputValue={typedValue}
               inputOnChange={(value) => onFieldInput(Field.Input, value)}
               currentAmount={{
-                amount: balances && balances[0] ? balances[0] : undefined,
+                amount: fromBalance ?? undefined,
                 allowSelect: true,
               }}
             />
@@ -71,7 +64,7 @@ export const Swap: React.FC = () => {
               inputValue={trade?.outputAmount.toSignificant(6)}
               inputOnChange={(value) => onFieldInput(Field.Output, value)}
               currentAmount={{
-                amount: balances && balances[1] ? balances[1] : undefined,
+                amount: toBalance ?? undefined,
                 allowSelect: false,
               }}
             />

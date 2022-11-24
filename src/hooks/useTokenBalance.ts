@@ -1,68 +1,26 @@
-import type { Token } from "@dahlia-labs/token-utils";
-import { TokenAmount } from "@dahlia-labs/token-utils";
-import type { Call } from "@dahlia-labs/use-ethers";
-import { tokenInterface } from "@dahlia-labs/use-ethers";
-import { AddressZero } from "@ethersproject/constants";
+import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
+import { balanceOfMulticall } from "@dahlia-labs/use-ethers";
 
-import { parseFunctionReturn } from "../utils/parseFunctionReturn";
-import { useBlockQuery } from "./useBlockQuery";
+import { useBlockMulticall } from "./useBlockQuery";
 
 export const useTokenBalance = (
-  token: Token | null,
-  address: string | null
+  token: Token | null | undefined,
+  address: string | null | undefined
 ): TokenAmount | null => {
-  const call: Call = {
-    target: token?.address ?? AddressZero,
-    callData: tokenInterface.encodeFunctionData("balanceOf", [
-      address ?? AddressZero,
-    ]),
-  };
-
-  const data = useBlockQuery(
-    "balance",
-    [call],
-    [token?.address, address],
-    !!address && !!token
+  const data = useBlockMulticall(
+    token && address ? [balanceOfMulticall(token, address)] : null
   );
-  if (!data || !token) return null;
-  return new TokenAmount(
-    token,
-    parseFunctionReturn(
-      tokenInterface,
-      "balanceOf",
-      data?.returnData[0]
-    ).toString()
-  );
+  if (!data) return null;
+  return data[0];
 };
 
 export const useTokenBalances = (
-  tokens: (Token | null)[],
-  address?: string | null
-): (TokenAmount | null)[] | null => {
-  const calls: Call[] = tokens.map((t) => ({
-    target: t?.address ?? AddressZero,
-    callData: tokenInterface.encodeFunctionData("balanceOf", [
-      address ?? AddressZero,
-    ]),
-  }));
-
-  const data = useBlockQuery(
-    "balance",
-    calls,
-    [address].concat(tokens.map((t) => t?.address)),
-    !!address
+  tokens: Token[] | null | undefined,
+  address?: string | null | undefined
+): Readonly<TokenAmount[]> | null => {
+  const data = useBlockMulticall(
+    tokens && address ? tokens.map((t) => balanceOfMulticall(t, address)) : []
   );
-  if (!data || !address) return null;
-  return tokens.map((t, i) =>
-    t
-      ? new TokenAmount(
-          t,
-          parseFunctionReturn(
-            tokenInterface,
-            "balanceOf",
-            data?.returnData[i]
-          ).toString()
-        )
-      : null
-  );
+  if (!data) return null;
+  return data;
 };

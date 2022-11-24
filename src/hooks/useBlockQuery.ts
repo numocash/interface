@@ -1,6 +1,8 @@
-import type { Call, Multicall2 } from "@dahlia-labs/use-ethers";
+import type { Call, Multicall, Multicall2 } from "@dahlia-labs/use-ethers";
+import { fetchMulticalls } from "@dahlia-labs/use-ethers";
 import type { QueryKey } from "@tanstack/react-query";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import invariant from "tiny-invariant";
 
 import { useBlock } from "../contexts/block";
 import { useMulticall } from "./useContract";
@@ -46,3 +48,37 @@ export const useBlockQuery = (
 
   return query.data;
 };
+
+export function useBlockMulticall<T extends unknown[]>(
+  multicalls: readonly [...{ [I in keyof T]: Multicall<T[I]> }] | null,
+  deps: Readonly<QueryKey> | null = null,
+  block = true
+): Readonly<T> | undefined {
+  const { blocknumber } = useBlock();
+  const queryClient = useQueryClient();
+  const multicall = useMulticall();
+
+  const hash = deps !== null ? deps : multicalls ?? [];
+
+  const query = useQuery(
+    [...hash, block ? blocknumber ?? 0 : null],
+    async () => {
+      invariant(multicalls, "block mulitcall");
+      return (await fetchMulticalls(multicalls, multicall)) as T;
+    },
+    {
+      staleTime: Infinity,
+      placeholderData:
+        block && blocknumber
+          ? [...Array(blockHistory).keys()]
+              .map((i) => blocknumber - i - 1)
+              .reduce((acc, cur: number) => {
+                return acc ? acc : queryClient.getQueryData([...hash, cur]);
+              }, undefined) ?? queryClient.getQueryData([...hash, 0])
+          : undefined,
+      enabled: !!multicalls,
+    }
+  );
+
+  return query.data;
+}

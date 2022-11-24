@@ -14,10 +14,21 @@ import type {
   IMarketUserInfo,
 } from "../contexts/environment";
 import { GENESIS, LIQUIDITYMANAGER } from "../contexts/environment";
+import {
+  lastUpdateMulticall,
+  rewardPerLiquidityStoredMulticall,
+  totalLiquidityBorrowedMulticall,
+  totalLiquidityMulticall,
+  totalSupplyMulticall,
+} from "../utils/lendgineMulticall";
 import { parseFunctionReturn } from "../utils/parseFunctionReturn";
 import { newRewardPerLiquidity } from "../utils/trade";
-import { blockHistory, useBlockQuery } from "./useBlockQuery";
-import { lendgineInterface, useLiquidityManager } from "./useContract";
+import {
+  blockHistory,
+  useBlockMulticall,
+  useBlockQuery,
+} from "./useBlockQuery";
+import { useLiquidityManager } from "./useContract";
 import { lendgineAddress } from "./useLendgineAddress";
 import { usePair } from "./usePair";
 import { useUniswapPair } from "./useUniswapPair";
@@ -200,73 +211,27 @@ export const useUserLendgine = (
   };
 };
 
-export const useLendgine = (market: IMarket): IMarketInfo | null => {
-  const calls: Call[] = [
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("totalLiquidity"),
-    },
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("totalLiquidityBorrowed"),
-    },
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData(
-        "rewardPerLiquidityStored"
-      ),
-    },
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("totalSupply"),
-    },
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("lastUpdate"),
-    },
-  ];
+export const useLendgine = (market: IMarket | null): IMarketInfo | null => {
+  const data = useBlockMulticall(
+    market
+      ? [
+          totalLiquidityMulticall(market),
+          totalLiquidityBorrowedMulticall(market),
+          rewardPerLiquidityStoredMulticall(market),
+          totalSupplyMulticall(market),
+          lastUpdateMulticall(market),
+        ]
+      : null
+  );
 
-  const data = useBlockQuery("lendgine", calls, [market.address]);
   if (!data) return null;
 
   return {
-    totalLiquidity: new TokenAmount(
-      market.pair.lp,
-      parseFunctionReturn(
-        lendgineInterface,
-        "totalLiquidity",
-        data.returnData[0]
-      ).toString()
-    ),
-    totalLiquidityBorrowed: new TokenAmount(
-      market.pair.lp,
-      parseFunctionReturn(
-        lendgineInterface,
-        "totalLiquidityBorrowed",
-        data.returnData[1]
-      ).toString()
-    ),
-    rewardPerLiquidityStored: new TokenAmount(
-      market.pair.speculativeToken,
-      parseFunctionReturn(
-        lendgineInterface,
-        "rewardPerLiquidityStored",
-        data.returnData[2]
-      ).toString()
-    ),
-    totalSupply: new TokenAmount(
-      market.token,
-      parseFunctionReturn(
-        lendgineInterface,
-        "totalSupply",
-        data.returnData[3]
-      ).toString()
-    ),
-    lastUpdate: +parseFunctionReturn(
-      lendgineInterface,
-      "lastUpdate",
-      data.returnData[4]
-    ).toString(),
+    totalLiquidity: data[0],
+    totalLiquidityBorrowed: data[1],
+    rewardPerLiquidityStored: data[2],
+    totalSupply: data[3],
+    lastUpdate: data[4],
   };
 };
 

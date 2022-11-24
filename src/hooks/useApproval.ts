@@ -1,14 +1,11 @@
-import type { Token } from "@dahlia-labs/token-utils";
-import { TokenAmount } from "@dahlia-labs/token-utils";
-import type { Call } from "@dahlia-labs/use-ethers";
-import { tokenInterface } from "@dahlia-labs/use-ethers";
+import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
+import { allowanceMulticall } from "@dahlia-labs/use-ethers";
 import { AddressZero, MaxUint256 } from "@ethersproject/constants";
 import { useCallback, useMemo } from "react";
 import invariant from "tiny-invariant";
 
 import { useSettings } from "../contexts/settings";
-import { parseFunctionReturn } from "../utils/parseFunctionReturn";
-import { useBlockQuery } from "./useBlockQuery";
+import { useBlockMulticall } from "./useBlockQuery";
 import { useTokenContractFromAddress } from "./useContract";
 
 export const useTokenAllowance = (
@@ -16,30 +13,14 @@ export const useTokenAllowance = (
   address: string | null | undefined,
   spender: string | null | undefined
 ): TokenAmount | null => {
-  const call: Call = {
-    target: token?.address ?? AddressZero,
-    callData: tokenInterface.encodeFunctionData("allowance", [
-      address ?? AddressZero,
-      spender ?? AddressZero,
-    ]),
-  };
-
-  const data = useBlockQuery(
-    "allowance",
-    [call],
-    [token?.address, address, spender],
-    token && address && spender ? true : false
+  const data = useBlockMulticall(
+    token && address && spender
+      ? [allowanceMulticall(token, address, spender)]
+      : null
   );
-  if (!data || !data.returnData || !address || !spender || !token) return null;
+  if (!data) return null;
 
-  const allowance = parseFunctionReturn(
-    tokenInterface,
-    "allowance",
-    data?.returnData[0]
-  );
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  return new TokenAmount(token, allowance[0]);
+  return data[0];
 };
 
 // returns true if the token needs approval
@@ -58,37 +39,22 @@ export const useApproval = (
 };
 
 export const useTokenAllowances = (
-  tokens: (Token | null | undefined)[],
+  tokens: Token[] | null | undefined,
   address: string | null | undefined,
   spender: string | null | undefined
-): (TokenAmount | null)[] | null => {
-  const calls: Call[] = tokens.map((t) => ({
-    target: t?.address ?? AddressZero,
-    callData: tokenInterface.encodeFunctionData("allowance", [
-      address ?? AddressZero,
-      spender ?? AddressZero,
-    ]),
-  }));
-
-  const data = useBlockQuery("allowance", calls);
+): Readonly<TokenAmount[]> | null => {
+  const data = useBlockMulticall(
+    tokens && address && spender
+      ? tokens.map((t) => allowanceMulticall(t, address, spender))
+      : []
+  );
   if (!data) return null;
 
-  return tokens.map((t, i) =>
-    t
-      ? new TokenAmount(
-          t,
-          parseFunctionReturn(
-            tokenInterface,
-            "allowance",
-            data?.returnData[i]
-          ).toString()
-        )
-      : null
-  );
+  return data;
 };
 
 export function useApprove(
-  amount: TokenAmount | undefined | null,
+  amount: TokenAmount | null | undefined,
   spender: string | null | undefined
 ) {
   const { infiniteApprove } = useSettings();
