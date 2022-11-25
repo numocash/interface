@@ -1,16 +1,14 @@
 import type { IMarket, IMarketInfo } from "@dahlia-labs/numoen-utils";
 import {
+  getPositionMulticall,
   lastUpdateMulticall,
-  LIQUIDITYMANAGER,
   rewardPerLiquidityStoredMulticall,
   totalLiquidityBorrowedMulticall,
   totalLiquidityMulticall,
 } from "@dahlia-labs/numoen-utils";
-import { Fraction, Price, TokenAmount } from "@dahlia-labs/token-utils";
-import type { Call } from "@dahlia-labs/use-ethers";
+import type { TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, Price } from "@dahlia-labs/token-utils";
 import { totalSupplyMulticall } from "@dahlia-labs/use-ethers";
-import type { BigNumber } from "@ethersproject/bignumber";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { max } from "lodash";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
@@ -19,116 +17,38 @@ import { pairInfoToPrice } from "../components/pages/Earn/PositionCard/Stats";
 import { useBlock } from "../contexts/block";
 import type { IMarketUserInfo } from "../contexts/environment";
 import { GENESIS } from "../contexts/environment";
-import { parseFunctionReturn } from "../utils/parseFunctionReturn";
+import { getPositionMulticall2 } from "../utils/lendgineUtils";
 import { newRewardPerLiquidity } from "../utils/trade";
-import {
-  blockHistory,
-  useBlockMulticall,
-  useBlockQuery,
-} from "./useBlockQuery";
+import { useBlockMulticall, useBlockQuery } from "./useBlockQuery";
 import { useLiquidityManager } from "./useContract";
-import { lendgineAddress } from "./useLendgineAddress";
 import { usePair } from "./usePair";
 import { useUniswapPair } from "./useUniswapPair";
 
 export const useUserLendgines = (
   address: string | undefined,
   markets: readonly IMarket[] | null
-): IMarketUserInfo[] | null => {
+): readonly IMarketUserInfo[] | null => {
   const liquidityManagerContract = useLiquidityManager(false);
   invariant(liquidityManagerContract);
 
   const mintFilter = liquidityManagerContract.filters.Mint(address);
-  const { blocknumber } = useBlock();
-  const queryClient = useQueryClient();
 
-  const filteredEvents = useQuery(
-    ["mint events", blocknumber ?? 0],
-    async () =>
-      await liquidityManagerContract.queryFilter(
-        mintFilter,
-        GENESIS,
-        blocknumber ?? undefined
-      ),
-    {
-      staleTime: Infinity,
-      placeholderData: blocknumber
-        ? [...Array(blockHistory).keys()]
-            .map((i) => blocknumber - i - 1)
-            .reduce((acc, cur: number) => {
-              return acc ? acc : queryClient.getQueryData(["mint events", cur]);
-            }, undefined) ?? queryClient.getQueryData(["mint events", 0])
-        : undefined,
-    }
+  const filteredEvents = useBlockQuery(
+    ["mint events", address],
+    async () => await liquidityManagerContract.queryFilter(mintFilter, GENESIS),
+    !!address && !!markets
   );
 
   const tokenIDs = filteredEvents?.data?.map((d) => +d.args[1].toString());
 
-  const calls: Call[] = tokenIDs
-    ? tokenIDs.map((t) => ({
-        target: LIQUIDITYMANAGER,
-        callData: liquidityManagerContract.interface.encodeFunctionData(
-          "getPosition",
-          [t]
-        ),
-      }))
-    : [];
+  const data = useBlockMulticall(
+    markets && tokenIDs
+      ? tokenIDs.map((t) => getPositionMulticall2(t, markets))
+      : null
+  );
+  if (!data) return null;
 
-  const data = useBlockQuery("user lp positions", calls);
-  if (
-    !address ||
-    !data ||
-    !markets ||
-    !tokenIDs ||
-    data.returnData.length !== tokenIDs.length
-  )
-    return null;
-
-  interface LendgineRet {
-    liquidity: BigNumber;
-    rewardPerLiquidityPaid: BigNumber;
-    tokensOwed: BigNumber;
-    base: BigNumber;
-    speculative: BigNumber;
-    baseScaleFactor: BigNumber;
-    speculativeScaleFactor: BigNumber;
-    upperBound: BigNumber;
-  }
-
-  return tokenIDs.map((t, i) => {
-    const ret = parseFunctionReturn(
-      liquidityManagerContract.interface,
-      "getPosition",
-      data.returnData[i]
-    ) as unknown as LendgineRet;
-
-    const market = lendgineAddress(
-      {
-        base: ret.base.toString(),
-        speculative: ret.speculative.toString(),
-        baseScaleFactor: +ret.baseScaleFactor.toString(),
-        speculativeScaleFactor: +ret.speculativeScaleFactor.toString(),
-        upperBound: ret.upperBound.toString(),
-      },
-      markets
-    );
-
-    invariant(market, "unable to find market");
-
-    return {
-      tokenID: t,
-      market,
-      liquidity: new TokenAmount(market.pair.lp, ret.liquidity.toString()),
-      rewardPerLiquidityPaid: new TokenAmount(
-        market.pair.speculativeToken,
-        ret.rewardPerLiquidityPaid.toString()
-      ),
-      tokensOwed: new TokenAmount(
-        market.pair.speculativeToken,
-        ret.rewardPerLiquidityPaid.toString()
-      ),
-    };
-  });
+  return data;
 };
 
 export const useNextTokenID = (): number | null => {
@@ -137,26 +57,16 @@ export const useNextTokenID = (): number | null => {
 
   const mintFilter = liquidityManagerContract.filters.Mint();
   const { blocknumber } = useBlock();
-  const queryClient = useQueryClient();
 
-  const filteredEvents = useQuery(
-    ["mint events", blocknumber ?? 0],
+  const filteredEvents = useBlockQuery(
+    ["next token id"],
     async () =>
       await liquidityManagerContract.queryFilter(
         mintFilter,
         GENESIS,
         blocknumber ?? undefined
       ),
-    {
-      staleTime: Infinity,
-      placeholderData: blocknumber
-        ? [...Array(blockHistory).keys()]
-            .map((i) => blocknumber - i - 1)
-            .reduce((acc, cur: number) => {
-              return acc ? acc : queryClient.getQueryData(["mint events", cur]);
-            }, undefined) ?? queryClient.getQueryData(["mint events", 0])
-        : undefined,
-    }
+    true
   );
 
   const tokenIDs = filteredEvents?.data?.map((d) => +d.args[1].toString());
@@ -168,45 +78,12 @@ export const useUserLendgine = (
   tokenID: number | null,
   market: IMarket | null
 ): IMarketUserInfo | null => {
-  const liquidityManagerContract = useLiquidityManager(false);
-  invariant(liquidityManagerContract);
+  const data = useBlockMulticall(
+    tokenID && market ? [getPositionMulticall(tokenID, market)] : null
+  );
 
-  const call: Call = {
-    target: LIQUIDITYMANAGER,
-    callData: liquidityManagerContract.interface.encodeFunctionData(
-      "getPosition",
-      [tokenID ?? 0]
-    ),
-  };
-  const data = useBlockQuery("tokenID position", [call]);
-
-  if (!tokenID || !data || !market) return null;
-
-  interface LendgineRet {
-    liquidity: BigNumber;
-    rewardPerLiquidityPaid: BigNumber;
-    tokensOwed: BigNumber;
-  }
-
-  const ret = parseFunctionReturn(
-    liquidityManagerContract.interface,
-    "getPosition",
-    data.returnData[0]
-  ) as unknown as LendgineRet;
-
-  return {
-    tokenID,
-    market,
-    liquidity: new TokenAmount(market.pair.lp, ret.liquidity.toString()),
-    rewardPerLiquidityPaid: new TokenAmount(
-      market.pair.speculativeToken,
-      ret.rewardPerLiquidityPaid.toString()
-    ),
-    tokensOwed: new TokenAmount(
-      market.pair.speculativeToken,
-      ret.rewardPerLiquidityPaid.toString()
-    ),
-  };
+  if (!data) return null;
+  return data[0];
 };
 
 export const useLendgine = (market: IMarket | null): IMarketInfo | null => {
