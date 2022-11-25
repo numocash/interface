@@ -1,3 +1,4 @@
+import type { IMarket } from "@dahlia-labs/numoen-utils";
 import type { Token } from "@dahlia-labs/token-utils";
 import { TokenAmount } from "@dahlia-labs/token-utils";
 import type { ParsedQs } from "qs";
@@ -7,7 +8,6 @@ import { useLocation } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
-import type { IMarket } from "../../../contexts/environment";
 import {
   useEnvironment,
   useGetAddressToMarket,

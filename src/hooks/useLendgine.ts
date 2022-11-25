@@ -1,5 +1,14 @@
+import type { IMarket, IMarketInfo } from "@dahlia-labs/numoen-utils";
+import {
+  lastUpdateMulticall,
+  LIQUIDITYMANAGER,
+  rewardPerLiquidityStoredMulticall,
+  totalLiquidityBorrowedMulticall,
+  totalLiquidityMulticall,
+} from "@dahlia-labs/numoen-utils";
 import { Fraction, Price, TokenAmount } from "@dahlia-labs/token-utils";
 import type { Call } from "@dahlia-labs/use-ethers";
+import { totalSupplyMulticall } from "@dahlia-labs/use-ethers";
 import type { BigNumber } from "@ethersproject/bignumber";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { max } from "lodash";
@@ -8,19 +17,8 @@ import invariant from "tiny-invariant";
 
 import { pairInfoToPrice } from "../components/pages/Earn/PositionCard/Stats";
 import { useBlock } from "../contexts/block";
-import type {
-  IMarket,
-  IMarketInfo,
-  IMarketUserInfo,
-} from "../contexts/environment";
-import { GENESIS, LIQUIDITYMANAGER } from "../contexts/environment";
-import {
-  lastUpdateMulticall,
-  rewardPerLiquidityStoredMulticall,
-  totalLiquidityBorrowedMulticall,
-  totalLiquidityMulticall,
-  totalSupplyMulticall,
-} from "../utils/lendgineMulticall";
+import type { IMarketUserInfo } from "../contexts/environment";
+import { GENESIS } from "../contexts/environment";
 import { parseFunctionReturn } from "../utils/parseFunctionReturn";
 import { newRewardPerLiquidity } from "../utils/trade";
 import {
@@ -218,7 +216,7 @@ export const useLendgine = (market: IMarket | null): IMarketInfo | null => {
           totalLiquidityMulticall(market),
           totalLiquidityBorrowedMulticall(market),
           rewardPerLiquidityStoredMulticall(market),
-          totalSupplyMulticall(market),
+          totalSupplyMulticall(market.token),
           lastUpdateMulticall(market),
         ]
       : null

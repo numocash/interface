@@ -1,14 +1,14 @@
+import type {
+  IMarket,
+  IMarketInfo,
+  IPair,
+  IPairInfo,
+} from "@dahlia-labs/numoen-utils";
 import type { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 import { Percent, Price } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 
-import type {
-  IMarket,
-  IMarketInfo,
-  IMarketUserInfo,
-  IPair,
-  IPairInfo,
-} from "../../../../contexts/environment";
+import type { IMarketUserInfo } from "../../../../contexts/environment";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
 import { RowBetween } from "../../../common/RowBetween";

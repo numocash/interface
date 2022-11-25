@@ -1,7 +1,8 @@
+import type { IMarket } from "@dahlia-labs/numoen-utils";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
 
-import type { IMarket, IMarketUserInfo } from "../../../contexts/environment";
+import type { IMarketUserInfo } from "../../../contexts/environment";
 import { useEnvironment } from "../../../contexts/environment";
 import { useUserLendgines } from "../../../hooks/useLendgine";
 import { LoadingPage } from "../../common/LoadingPage";

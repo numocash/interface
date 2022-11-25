@@ -1,11 +1,11 @@
+import type { IMarket } from "@dahlia-labs/numoen-utils";
+import { LIQUIDITYMANAGER } from "@dahlia-labs/numoen-utils";
 import type { TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import type { IMarket } from "../../../../../contexts/environment";
-import { LIQUIDITYMANAGER } from "../../../../../contexts/environment";
 import type { ISettings } from "../../../../../contexts/settings";
 import { useApproval, useApprove } from "../../../../../hooks/useApproval";
 import { useLiquidityManager } from "../../../../../hooks/useContract";

@@ -1,9 +1,10 @@
-import type { IPair, IPairInfo } from "../contexts/environment";
+import type { IPair, IPairInfo } from "@dahlia-labs/numoen-utils";
 import {
   reserve0Multicall,
   reserve1Multicall,
-  totalSupplyMulticall,
-} from "../utils/pairMulticall";
+} from "@dahlia-labs/numoen-utils";
+import { totalSupplyMulticall } from "@dahlia-labs/use-ethers";
+
 import { useBlockMulticall } from "./useBlockQuery";
 
 export const usePair = (pair: IPair | null): IPairInfo | null => {
@@ -12,7 +13,7 @@ export const usePair = (pair: IPair | null): IPairInfo | null => {
       ? [
           reserve0Multicall(pair),
           reserve1Multicall(pair),
-          totalSupplyMulticall(pair),
+          totalSupplyMulticall(pair.lp),
         ]
       : null
   );

@@ -1,9 +1,13 @@
+import type {
+  IMarket,
+  IMarketInfo,
+  IPairInfo,
+} from "@dahlia-labs/numoen-utils";
 import type { Price } from "@dahlia-labs/token-utils";
 import { Fraction, Percent, TokenAmount } from "@dahlia-labs/token-utils";
 
 import { borrowRate } from "../components/pages/Earn/PositionCard/Stats";
 import { scale } from "../components/pages/Trade/useTrade";
-import type { IMarket, IMarketInfo, IPairInfo } from "../contexts/environment";
 import type { ISettings } from "../contexts/settings";
 
 export const outputAmount = (

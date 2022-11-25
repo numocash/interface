@@ -1,10 +1,10 @@
+import type { IMarket } from "@dahlia-labs/numoen-utils";
 import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
-import type { IMarket } from "../../../../contexts/environment";
 import { useAddressToMarket } from "../../../../contexts/environment";
 import { useSettings } from "../../../../contexts/settings";
 import { usePrice } from "../../../../hooks/useLendgine";

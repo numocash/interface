@@ -1,4 +1,5 @@
 import { ChainId } from "@dahlia-labs/celo-contrib";
+import { LENDGINEROUTER, LIQUIDITYMANAGER } from "@dahlia-labs/numoen-utils";
 import type { Token } from "@dahlia-labs/token-utils";
 import { getContract, getMulticall } from "@dahlia-labs/use-ethers";
 import { Interface } from "@ethersproject/abi";
@@ -12,7 +13,6 @@ import LENDGINE_ABI from "../abis/Lendgine.json";
 import LR_ABI from "../abis/LendgineRouter.json";
 import LM_ABI from "../abis/LiquidityManager.json";
 import PAIR_ABI from "../abis/Pair.json";
-import { LENDGINEROUTER, LIQUIDITYMANAGER } from "../contexts/environment";
 import type {
   Erc20,
   Lendgine,

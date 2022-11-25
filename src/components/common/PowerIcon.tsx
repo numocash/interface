@@ -1,4 +1,5 @@
-import type { IMarket } from "../../contexts/environment";
+import type { IMarket } from "@dahlia-labs/numoen-utils";
+
 import { ChartIcons } from "./ChartIcons";
 import power from "./images/power.png";
 import { TokenIcon } from "./TokenIcon";

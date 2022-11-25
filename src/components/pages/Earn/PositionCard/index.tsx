@@ -1,10 +1,8 @@
+import type { IMarket } from "@dahlia-labs/numoen-utils";
 import React, { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 
-import type {
-  IMarket,
-  IMarketUserInfo,
-} from "../../../../contexts/environment";
+import type { IMarketUserInfo } from "../../../../contexts/environment";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { ChartIcons } from "../../../common/ChartIcons";
 import { Module } from "../../../common/Module";

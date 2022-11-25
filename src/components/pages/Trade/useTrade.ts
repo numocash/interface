@@ -1,3 +1,4 @@
+import { LENDGINEROUTER } from "@dahlia-labs/numoen-utils";
 import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
 import { Fraction, Percent } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
@@ -5,10 +6,7 @@ import { useCallback, useMemo } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import {
-  LENDGINEROUTER,
-  useAddressToMarket,
-} from "../../../contexts/environment";
+import { useAddressToMarket } from "../../../contexts/environment";
 import { useSettings } from "../../../contexts/settings";
 import { useApproval, useApprove } from "../../../hooks/useApproval";
 import { useLendgineRouter } from "../../../hooks/useContract";
