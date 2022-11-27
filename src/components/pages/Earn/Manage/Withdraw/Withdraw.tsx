@@ -40,7 +40,7 @@ export const Withdraw: React.FC = () => {
 
   return (
     <div tw="flex flex-col rounded-lg bg-gray-100">
-      <div tw=" pb-0 gap-2 flex flex-col p-6 bg-white">
+      <div tw=" pb-3 gap-2 flex flex-col p-6 bg-white">
         <PercentageSlider
           disabled={false}
           input={withdrawPercent}

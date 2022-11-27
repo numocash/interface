@@ -79,6 +79,7 @@ const useManageInternal = ({
 
   const setDepositAmount = useCallback(
     (input: Input, val: TokenAmount) => {
+      console.log(price, pairInfo);
       if (!price || !pairInfo) return;
       input === Input.Base ? setBaseAmount(val) : setSpeculativeAmount(val);
 

@@ -175,7 +175,7 @@ export const useTrade = ({
         ]
       : [];
 
-    console.log(borrowAmount.toFixed());
+    console.log(trade.inputAmount.raw.toString());
 
     trade.mint
       ? await beet(
@@ -229,16 +229,16 @@ export const useTrade = ({
                       baseScaleFactor: market.pair.baseScaleFactor,
                       speculativeScaleFactor:
                         market.pair.speculativeScaleFactor,
-                      liquidityMax: convertShareToLiquidity(
-                        trade.inputAmount,
-                        market,
-                        marketInfo
-                      )
-                        .scale(
-                          Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+                      liquidity: roundLiquidity(
+                        convertShareToLiquidity(
+                          trade.inputAmount,
+                          market,
+                          marketInfo
                         )
+                      )
+                        .reduceBy(settings.maxSlippagePercent)
                         .raw.toString(),
-                      shares: trade.inputAmount.raw.toString(),
+                      sharesMax: trade.inputAmount.raw.toString(),
                       upperBound: market.pair.bound.asFraction
                         .multiply(scale)
                         .quotient.toString(),
