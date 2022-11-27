@@ -8,6 +8,7 @@ import { useAccount } from "wagmi";
 
 import type { ISettings } from "../../../../../contexts/settings";
 import { useApproval, useApprove } from "../../../../../hooks/useApproval";
+import { useChain } from "../../../../../hooks/useChain";
 import { useLiquidityManager } from "../../../../../hooks/useContract";
 import { useNextTokenID, usePrice } from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
@@ -31,6 +32,7 @@ export const useDeposit = (
   const price = usePrice(market);
   const nextID = useNextTokenID();
   const navigate = useNavigate();
+  const chain = useChain();
 
   const balances = useTokenBalances(
     [market?.pair.baseToken ?? null, market?.pair.speculativeToken ?? null],
@@ -40,12 +42,16 @@ export const useDeposit = (
   const approvalS = useApproval(
     speculativeTokenAmount,
     address,
-    LIQUIDITYMANAGER
+    LIQUIDITYMANAGER[chain]
   );
-  const approvalB = useApproval(baseTokenAmount, address, LIQUIDITYMANAGER);
-  const approveS = useApprove(speculativeTokenAmount, LIQUIDITYMANAGER);
+  const approvalB = useApproval(
+    baseTokenAmount,
+    address,
+    LIQUIDITYMANAGER[chain]
+  );
+  const approveS = useApprove(speculativeTokenAmount, LIQUIDITYMANAGER[chain]);
 
-  const approveB = useApprove(baseTokenAmount, LIQUIDITYMANAGER);
+  const approveB = useApprove(baseTokenAmount, LIQUIDITYMANAGER[chain]);
 
   const disableReason = useMemo(
     () =>

@@ -8,7 +8,7 @@ import { useDebounce } from "use-debounce";
 import { useAccount } from "wagmi";
 
 import { useTokenBalances } from "../../../../hooks/useTokenBalance";
-import { useAllTokens, useFeaturedTokens } from "../../../../hooks/useTokens";
+import { useAllTokens } from "../../../../hooks/useTokens";
 import { SearchInput } from "./SearchInput";
 import { TokenResults } from "./TokenResults";
 
@@ -36,7 +36,6 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const { address } = useAccount();
 
-  const featuredTokens = useFeaturedTokens();
   const allTokens = useAllTokens();
 
   const [searchQueryDebounced] = useDebounce(searchQuery, 200, {
@@ -76,20 +75,6 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
               } else if (a.hasBalance && b.hasBalance) {
                 return a.balance.greaterThan(b.balance) ? -1 : 1;
               } else {
-                if (
-                  featuredTokens[a.token.address] &&
-                  featuredTokens[b.token.address]
-                ) {
-                  return a.token.symbol.toLowerCase() >
-                    a.token.symbol.toLowerCase()
-                    ? 1
-                    : -1;
-                } else if (featuredTokens[a.token.address]) {
-                  return -1;
-                } else if (featuredTokens[b.token.address]) {
-                  return 1;
-                }
-
                 if (a.token.symbol > b.token.symbol) {
                   return 1;
                 } else {
@@ -104,7 +89,7 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
             hasBalance: false,
           }))
         : [],
-    [userTokenBalances, allTokensUnfiltered, address, featuredTokens]
+    [userTokenBalances, allTokensUnfiltered, address]
   );
 
   const fuse = useMemo(

@@ -9,6 +9,7 @@ import { useAccount } from "wagmi";
 import { useAddressToMarket } from "../../../contexts/environment";
 import { useSettings } from "../../../contexts/settings";
 import { useApproval, useApprove } from "../../../hooks/useApproval";
+import { useChain } from "../../../hooks/useChain";
 import { useLendgineRouter } from "../../../hooks/useContract";
 import { useLendgine, useRefPrice } from "../../../hooks/useLendgine";
 import { usePair } from "../../../hooks/usePair";
@@ -52,6 +53,7 @@ export const useTrade = ({
   const { address } = useAccount();
   const beet = useBeet();
   const settings = useSettings();
+  const chain = useChain();
 
   const lengineRouterContract = useLendgineRouter(true);
 
@@ -99,8 +101,8 @@ export const useTrade = ({
       : null;
   }, [borrowAmount, fromAmount, market, pairInfo, uniswapInfo]);
 
-  const approval = useApproval(fromAmount, address, LENDGINEROUTER);
-  const approve = useApprove(fromAmount, LENDGINEROUTER);
+  const approval = useApproval(fromAmount, address, LENDGINEROUTER[chain]);
+  const approve = useApprove(fromAmount, LENDGINEROUTER[chain]);
 
   const trade = useMemo(
     () =>

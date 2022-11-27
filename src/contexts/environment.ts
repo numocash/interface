@@ -16,8 +16,6 @@ interface Environment {
   markets: readonly IMarket[];
 }
 
-export const GENESIS = 15948000;
-
 export const useAddressToMarket = (
   address: string | null | undefined
 ): IMarket | null => {
@@ -56,7 +54,7 @@ export const useIsMarket = (address: string | null): boolean => {
 
 const useEnvironmentInternal = (): Environment => {
   return {
-    markets: markets,
+    markets: markets.goerli,
   };
 };
 

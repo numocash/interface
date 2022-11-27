@@ -1,4 +1,3 @@
-import { ChainId } from "@dahlia-labs/celo-contrib";
 import type {
   LendgineRouter,
   LiquidityManager,
@@ -21,6 +20,8 @@ import {
 import type { Contract } from "@ethersproject/contracts";
 import { useMemo } from "react";
 import { useProvider, useSigner } from "wagmi";
+
+import { useChain } from "./useChain";
 
 export function useTokenContractFromAddress(
   tokenAddress: string | null | undefined,
@@ -50,19 +51,28 @@ export function useTokenContract(
 export function useLiquidityManager(
   withSignerIfPossible: boolean
 ): LiquidityManager | null {
-  return useContract(getLiquidityManagerContract, withSignerIfPossible);
+  const chain = useChain();
+  return useContract(
+    (provider: ProviderOrSigner) =>
+      getLiquidityManagerContract(provider, chain),
+    withSignerIfPossible
+  );
 }
 
 export function useLendgineRouter(
   withSignerIfPossible: boolean
 ): LendgineRouter | null {
-  return useContract(getLendgineRouterContract, withSignerIfPossible);
+  const chain = useChain();
+  return useContract(
+    (provider: ProviderOrSigner) => getLendgineRouterContract(provider, chain),
+    withSignerIfPossible
+  );
 }
 
 export function useMulticall(): Multicall2 {
   const provider = useProvider();
-  const chainID = ChainId.Mainnet;
-  return getMulticall(chainID, provider);
+  const chain = useChain();
+  return getMulticall(provider, chain);
 }
 
 function useContract<T extends Contract>(

@@ -1,4 +1,8 @@
-import type { IMarket, IMarketUserInfo } from "@dahlia-labs/numoen-utils";
+import type {
+  ChainsV1,
+  IMarket,
+  IMarketUserInfo,
+} from "@dahlia-labs/numoen-utils";
 import {
   LIQUIDITYMANAGER,
   liquidityManagerInterface,
@@ -12,10 +16,11 @@ import { scale } from "../components/pages/Trade/useTrade";
 
 export const getPositionMulticall2 = (
   tokenID: number,
-  markets: readonly IMarket[]
+  markets: readonly IMarket[],
+  chainID: ChainsV1
 ): Multicall<IMarketUserInfo> => ({
   call: {
-    target: LIQUIDITYMANAGER,
+    target: LIQUIDITYMANAGER[chainID],
     callData: liquidityManagerInterface.encodeFunctionData("getPosition", [
       tokenID,
     ]),

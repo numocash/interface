@@ -14,12 +14,13 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
 import { pairInfoToPrice } from "../components/pages/Earn/PositionCard/Stats";
+import { liquidityManagerGenesis } from "../constants";
 import { useBlock } from "../contexts/block";
 import type { IMarketUserInfo } from "../contexts/environment";
-import { GENESIS } from "../contexts/environment";
 import { getPositionMulticall2 } from "../utils/lendgineUtils";
 import { newRewardPerLiquidity } from "../utils/trade";
 import { useBlockMulticall, useBlockQuery } from "./useBlockQuery";
+import { useChain } from "./useChain";
 import { useLiquidityManager } from "./useContract";
 import { usePair } from "./usePair";
 import { useUniswapPair } from "./useUniswapPair";
@@ -29,13 +30,19 @@ export const useUserLendgines = (
   markets: readonly IMarket[] | null
 ): readonly IMarketUserInfo[] | null => {
   const liquidityManagerContract = useLiquidityManager(false);
+  const chain = useChain();
+
   invariant(liquidityManagerContract);
 
   const mintFilter = liquidityManagerContract.filters.Mint(address);
 
   const filteredEvents = useBlockQuery(
     ["mint events", address],
-    async () => await liquidityManagerContract.queryFilter(mintFilter, GENESIS),
+    async () =>
+      await liquidityManagerContract.queryFilter(
+        mintFilter,
+        liquidityManagerGenesis[chain]
+      ),
     !!address && !!markets
   );
 
@@ -43,7 +50,7 @@ export const useUserLendgines = (
 
   const data = useBlockMulticall(
     markets && tokenIDs
-      ? tokenIDs.map((t) => getPositionMulticall2(t, markets))
+      ? tokenIDs.map((t) => getPositionMulticall2(t, markets, chain))
       : null
   );
   if (!data) return null;
@@ -57,13 +64,14 @@ export const useNextTokenID = (): number | null => {
 
   const mintFilter = liquidityManagerContract.filters.Mint();
   const { blocknumber } = useBlock();
+  const chain = useChain();
 
   const filteredEvents = useBlockQuery(
     ["next token id"],
     async () =>
       await liquidityManagerContract.queryFilter(
         mintFilter,
-        GENESIS,
+        liquidityManagerGenesis[chain],
         blocknumber ?? undefined
       ),
     true
@@ -78,8 +86,10 @@ export const useUserLendgine = (
   tokenID: number | null,
   market: IMarket | null
 ): IMarketUserInfo | null => {
+  const chain = useChain();
+
   const data = useBlockMulticall(
-    tokenID && market ? [getPositionMulticall(tokenID, market)] : null
+    tokenID && market ? [getPositionMulticall(tokenID, market, chain)] : null
   );
 
   if (!data) return null;
