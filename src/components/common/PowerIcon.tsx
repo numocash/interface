@@ -16,7 +16,7 @@ export const PowerIcon: React.FC<Props> = ({ market }: Props) => {
           <TokenIcon size={24} token={market.pair.speculativeToken} />
           <div tw=" space-y-1">
             <div tw="text-lg font-semibold leading-none">
-              {market.pair.speculativeToken.symbol}+
+              {market.token.symbol}
             </div>
           </div>
           <img tw="h-[50px] w-[65px]" src={power} alt={`power`} />

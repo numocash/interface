@@ -12,7 +12,7 @@ import { useChain } from "../../../../../hooks/useChain";
 import { useLiquidityManager } from "../../../../../hooks/useContract";
 import { useNextTokenID, usePrice } from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
-import { useTokenBalances } from "../../../../../hooks/useTokenBalance";
+import { useWrappedTokenBalance } from "../../../../../hooks/useTokenBalance";
 import type { BeetStage, BeetTx } from "../../../../../utils/beet";
 import { useBeet } from "../../../../../utils/beet";
 import { scale } from "../../../Trade/useTrade";
@@ -34,9 +34,9 @@ export const useDeposit = (
   const navigate = useNavigate();
   const chain = useChain();
 
-  const balances = useTokenBalances(
-    [market?.pair.baseToken ?? null, market?.pair.speculativeToken ?? null],
-    address
+  const balanceBase = useWrappedTokenBalance(market.pair.baseToken);
+  const balanceSpeculative = useWrappedTokenBalance(
+    market.pair.speculativeToken
   );
 
   const approvalS = useApproval(
@@ -59,21 +59,24 @@ export const useDeposit = (
         ? "Enter an amount"
         : baseTokenAmount.equalTo(0) && speculativeTokenAmount.equalTo(0)
         ? "Enter an amount"
-        : !balances ||
+        : !balanceBase ||
+          !balanceSpeculative ||
           approvalS === null ||
           approvalB === null ||
           !price ||
           !liquidity ||
           nextID === null
         ? "Loading..."
-        : (balances[1] && speculativeTokenAmount.greaterThan(balances[1])) ||
-          (balances[0] && baseTokenAmount.greaterThan(balances[0]))
+        : (balanceSpeculative &&
+            speculativeTokenAmount.greaterThan(balanceSpeculative)) ||
+          (balanceBase && baseTokenAmount.greaterThan(balanceBase))
         ? "Insufficient funds"
         : null,
     [
       baseTokenAmount,
       speculativeTokenAmount,
-      balances,
+      balanceBase,
+      balanceSpeculative,
       approvalS,
       approvalB,
       price,

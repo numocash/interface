@@ -1,8 +1,7 @@
 import { TokenAmount } from "@dahlia-labs/token-utils";
-import { useMemo, useState } from "react";
-import { useAccount } from "wagmi";
+import { useState } from "react";
 
-import { useTokenBalances } from "../../../../../hooks/useTokenBalance";
+import { useWrappedTokenBalance } from "../../../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../../../common/AssetSelection";
 import { Input, useManage } from "..";
 
@@ -13,17 +12,13 @@ export const Deposit: React.FC = () => {
     speculativeAmount: depositSpeculativeAmount,
     baseAmount: depositBaseAmount,
   } = useManage();
-  const { address } = useAccount();
 
   const [input, setInput] = useState("");
   const [selected, setSelected] = useState<Input | null>(null);
 
-  const balances = useTokenBalances(
-    useMemo(
-      () => [market.pair.speculativeToken, market.pair.baseToken],
-      [market.pair.baseToken, market.pair.speculativeToken]
-    ),
-    address
+  const balanceBase = useWrappedTokenBalance(market.pair.baseToken);
+  const balanceSpeculative = useWrappedTokenBalance(
+    market.pair.speculativeToken
   );
 
   return (
@@ -46,7 +41,7 @@ export const Deposit: React.FC = () => {
             );
           }}
           currentAmount={{
-            amount: balances && balances[0] ? balances[0] : undefined,
+            amount: balanceSpeculative ?? undefined,
             allowSelect: true,
           }}
         />
@@ -74,7 +69,7 @@ export const Deposit: React.FC = () => {
             );
           }}
           currentAmount={{
-            amount: balances && balances[1] ? balances[1] : undefined,
+            amount: balanceBase ?? undefined,
             allowSelect: true,
           }}
         />

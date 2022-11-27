@@ -7,6 +7,7 @@ import invariant from "tiny-invariant";
 import { useSettings } from "../contexts/settings";
 import { useBlockMulticall } from "./useBlockQuery";
 import { useTokenContractFromAddress } from "./useContract";
+import { useIsWrappedNative } from "./useTokens";
 
 export const useTokenAllowance = (
   token: Token | null | undefined,
@@ -30,12 +31,14 @@ export const useApproval = (
   spender: string | null | undefined
 ): boolean | null => {
   const allowance = useTokenAllowance(tokenAmount?.token, address, spender);
+  const isWrapped = useIsWrappedNative(tokenAmount?.token ?? null);
 
-  return useMemo(
-    () =>
-      !allowance || !tokenAmount ? null : tokenAmount.greaterThan(allowance),
-    [allowance, tokenAmount]
-  );
+  return useMemo(() => {
+    if (isWrapped) return false;
+    return !allowance || !tokenAmount
+      ? null
+      : tokenAmount.greaterThan(allowance);
+  }, [allowance, isWrapped, tokenAmount]);
 };
 
 export const useTokenAllowances = (

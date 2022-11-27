@@ -13,7 +13,8 @@ import { useChain } from "../../../hooks/useChain";
 import { useLendgineRouter } from "../../../hooks/useContract";
 import { useLendgine, useRefPrice } from "../../../hooks/useLendgine";
 import { usePair } from "../../../hooks/usePair";
-import { useTokenBalance } from "../../../hooks/useTokenBalance";
+import { useWrappedTokenBalance } from "../../../hooks/useTokenBalance";
+import { useGetIsWrappedNative } from "../../../hooks/useTokens";
 import { useUniswapPair } from "../../../hooks/useUniswapPair";
 import type { BeetStage, BeetTx } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
@@ -54,10 +55,11 @@ export const useTrade = ({
   const beet = useBeet();
   const settings = useSettings();
   const chain = useChain();
+  const isNative = useGetIsWrappedNative();
 
   const lengineRouterContract = useLendgineRouter(true);
 
-  const userFromBalance = useTokenBalance(fromToken ?? null, address ?? null);
+  const userFromBalance = useWrappedTokenBalance(fromToken ?? null);
 
   const market0 = useAddressToMarket(fromToken?.address);
   const market1 = useAddressToMarket(toToken?.address);
@@ -186,26 +188,33 @@ export const useTrade = ({
                   title: "Buy option",
                   description: `Buy ${trade.market.pair.speculativeToken.symbol} squared option`,
                   txEnvelope: () =>
-                    lengineRouterContract.mint({
-                      base: market.pair.baseToken.address,
-                      speculative: market.pair.speculativeToken.address,
-                      baseScaleFactor: market.pair.baseScaleFactor,
-                      speculativeScaleFactor:
-                        market.pair.speculativeScaleFactor,
-                      upperBound: market.pair.bound.asFraction
-                        .multiply(scale)
-                        .quotient.toString(),
-                      liquidity: roundLiquidity(
-                        speculativeToLiquidity(trade.inputAmount, market)
-                      ).raw.toString(),
-                      borrowAmount: borrowAmount.raw.toString(),
-                      sharesMin: trade.outputAmount
-                        .reduceBy(settings.maxSlippagePercent)
-                        .raw.toString(),
-                      recipient: address,
-                      deadline:
-                        Math.round(Date.now() / 1000) + settings.timeout * 60,
-                    }),
+                    lengineRouterContract.mint(
+                      {
+                        base: market.pair.baseToken.address,
+                        speculative: market.pair.speculativeToken.address,
+                        baseScaleFactor: market.pair.baseScaleFactor,
+                        speculativeScaleFactor:
+                          market.pair.speculativeScaleFactor,
+                        upperBound: market.pair.bound.asFraction
+                          .multiply(scale)
+                          .quotient.toString(),
+                        liquidity: roundLiquidity(
+                          speculativeToLiquidity(trade.inputAmount, market)
+                        ).raw.toString(),
+                        borrowAmount: borrowAmount.raw.toString(),
+                        sharesMin: trade.outputAmount
+                          .reduceBy(settings.maxSlippagePercent)
+                          .raw.toString(),
+                        recipient: address,
+                        deadline:
+                          Math.round(Date.now() / 1000) + settings.timeout * 60,
+                      },
+                      {
+                        value: isNative(trade.inputAmount.token)
+                          ? trade.inputAmount.raw.toString()
+                          : 0,
+                      }
+                    ),
                 },
               ],
             },
@@ -257,6 +266,7 @@ export const useTrade = ({
     borrowAmount,
     fromAmount,
     fromToken?.symbol,
+    isNative,
     lengineRouterContract,
     market,
     marketInfo,

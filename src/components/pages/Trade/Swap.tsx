@@ -1,7 +1,6 @@
 import React from "react";
-import { useAccount } from "wagmi";
 
-import { useTokenBalance } from "../../../hooks/useTokenBalance";
+import { useWrappedTokenBalance } from "../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { Module } from "../../common/Module";
@@ -9,8 +8,6 @@ import { Settings } from "../../common/Settings";
 import { Field, useSwapState } from "./useSwapState";
 
 export const Swap: React.FC = () => {
-  const { address } = useAccount();
-
   const {
     selectedFrom,
     selectedTo,
@@ -25,8 +22,8 @@ export const Swap: React.FC = () => {
     handleTrade,
   } = useSwapState();
 
-  const fromBalance = useTokenBalance(selectedFrom, address);
-  const toBalance = useTokenBalance(selectedTo, address);
+  const fromBalance = useWrappedTokenBalance(selectedFrom);
+  const toBalance = useWrappedTokenBalance(selectedTo);
 
   return (
     <>

@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import tw, { css, styled } from "twin.macro";
 
 import { useAddressToMarket } from "../../contexts/environment";
+import { useDisplayToken } from "../../hooks/useTokens";
 import useWindowDimensions from "../../utils/useWindowDimensions";
 import SelectTokenDialog from "../pages/Trade/SelectTokenDialog";
 import { BigNumericInput } from "./inputs/BigNumericInput";
@@ -74,7 +75,7 @@ export const AssetSelection: React.FC<Props> = ({
   const uiDecimals =
     width < 600 ? 4 : selectedValue?.decimals ?? DEFAULT_TOKEN_DECIMALS;
 
-  const token = selectedValue;
+  const token = useDisplayToken(selectedValue);
 
   const market = useAddressToMarket(token?.address ?? null);
 
