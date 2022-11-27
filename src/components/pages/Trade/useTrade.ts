@@ -175,8 +175,6 @@ export const useTrade = ({
         ]
       : [];
 
-    console.log(trade.inputAmount.raw.toString());
-
     trade.mint
       ? await beet(
           "Buy option",
