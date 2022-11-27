@@ -1,3 +1,4 @@
+import { liquidityManagerInterface } from "@dahlia-labs/numoen-utils";
 import { Percent, TokenAmount } from "@dahlia-labs/token-utils";
 import {
   SliderHandle,
@@ -16,6 +17,7 @@ import {
   useUserLendgine,
 } from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
+import { useGetIsWrappedNative } from "../../../../hooks/useTokens";
 import { useBeet } from "../../../../utils/beet";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { Module } from "../../../common/Module";
@@ -28,6 +30,7 @@ export const Position: React.FC = () => {
   const { address } = useAccount();
   const Beet = useBeet();
   const liquidityManagerContract = useLiquidityManager(true);
+  const isNative = useGetIsWrappedNative();
   invariant(tokenID, "tokenID missing");
   const userLendgineInfo = useUserLendgine(tokenID, market);
   const claimableTokens = useClaimableTokens(tokenID, market);
@@ -128,11 +131,29 @@ export const Position: React.FC = () => {
                         groupSeparator: ",",
                       })} ${market.pair.speculativeToken.symbol}`,
                       txEnvelope: () =>
-                        liquidityManagerContract.collect({
-                          tokenID,
-                          recipient: address,
-                          amountRequested: claimableTokens.raw.toString(),
-                        }),
+                        isNative(market.pair.speculativeToken)
+                          ? liquidityManagerContract.multicall([
+                              liquidityManagerInterface.encodeFunctionData(
+                                "collect",
+                                [
+                                  {
+                                    tokenID,
+                                    recipient: liquidityManagerContract.address,
+                                    amountRequested:
+                                      claimableTokens.raw.toString(),
+                                  },
+                                ]
+                              ),
+                              liquidityManagerInterface.encodeFunctionData(
+                                "unwrapWETH9",
+                                [0, address]
+                              ),
+                            ])
+                          : liquidityManagerContract.collect({
+                              tokenID,
+                              recipient: address,
+                              amountRequested: claimableTokens.raw.toString(),
+                            }),
                     },
                   ],
                 },

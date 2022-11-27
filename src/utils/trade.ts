@@ -205,8 +205,6 @@ export const checkInvariant = (
   const scale0 = baseAmount.scale(liquidity.invert());
   const scale1 = speculativeAmount.scale(liquidity.invert());
 
-  console.log(scale0.toFixed(), scale1.toFixed());
-
   const b = scale1.asFraction.multiply(market.pair.bound);
   const c = scale1.asFraction.multiply(scale1).divide(4);
   const d = market.pair.bound.asFraction.multiply(market.pair.bound);

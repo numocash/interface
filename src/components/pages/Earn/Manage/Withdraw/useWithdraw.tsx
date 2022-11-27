@@ -1,4 +1,5 @@
 import type { IMarket } from "@dahlia-labs/numoen-utils";
+import { liquidityManagerInterface } from "@dahlia-labs/numoen-utils";
 import { Fraction, Percent, TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +10,7 @@ import type { ISettings } from "../../../../../contexts/settings";
 import { useLiquidityManager } from "../../../../../hooks/useContract";
 import { useUserLendgine } from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
+import { useGetIsWrappedNative } from "../../../../../hooks/useTokens";
 import { useBeet } from "../../../../../utils/beet";
 
 export const useWithdraw = (
@@ -23,6 +25,8 @@ export const useWithdraw = (
   const { address } = useAccount();
   const pairInfo = usePair(market.pair);
   const userLendgineInfo = useUserLendgine(tokenID, market);
+  const isNative = useGetIsWrappedNative();
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const w = new Percent(withdrawPercent, 100);
 
@@ -97,22 +101,61 @@ export const useWithdraw = (
             title: "Remove liquidity",
             description: "Remove liquidity",
             txEnvelope: () =>
-              liquidityManagerContract.decreaseLiquidity({
-                tokenID,
-                liquidity: userLendgineInfo.liquidity
-                  .scale(new Fraction(withdrawPercent, 100))
-                  .raw.toString(),
-                recipient: address,
-                amount0Min: userBaseAmount
-                  .scale(w)
-                  .reduceBy(settings.maxSlippagePercent)
-                  .raw.toString(),
-                amount1Min: userSpeculativeAmount
-                  .scale(w)
-                  .reduceBy(settings.maxSlippagePercent)
-                  .raw.toString(),
-                deadline: Math.round(Date.now() / 1000) + settings.timeout * 60,
-              }),
+              isNative(market.pair.speculativeToken) ||
+              isNative(market.pair.baseToken)
+                ? liquidityManagerContract.multicall([
+                    liquidityManagerInterface.encodeFunctionData(
+                      "decreaseLiquidity",
+                      [
+                        {
+                          tokenID,
+                          liquidity: userLendgineInfo.liquidity
+                            .scale(new Fraction(withdrawPercent, 100))
+                            .raw.toString(),
+                          recipient: liquidityManagerContract.address,
+                          amount0Min: userBaseAmount
+                            .scale(w)
+                            .reduceBy(settings.maxSlippagePercent)
+                            .raw.toString(),
+                          amount1Min: userSpeculativeAmount
+                            .scale(w)
+                            .reduceBy(settings.maxSlippagePercent)
+                            .raw.toString(),
+                          deadline:
+                            Math.round(Date.now() / 1000) +
+                            settings.timeout * 60,
+                        },
+                      ]
+                    ),
+                    liquidityManagerInterface.encodeFunctionData(
+                      "unwrapWETH9",
+                      [0, address]
+                    ),
+                    liquidityManagerInterface.encodeFunctionData("sweepToken", [
+                      !isNative(market.pair.baseToken)
+                        ? market.pair.baseToken.address
+                        : market.pair.speculativeToken.address,
+                      0,
+                      address,
+                    ]),
+                  ])
+                : liquidityManagerContract.decreaseLiquidity({
+                    tokenID,
+                    liquidity: userLendgineInfo.liquidity
+                      .scale(new Fraction(withdrawPercent, 100))
+                      .raw.toString(),
+                    recipient: address,
+                    amount0Min: userBaseAmount
+                      .scale(w)
+                      .reduceBy(settings.maxSlippagePercent)
+                      .raw.toString(),
+                    amount1Min: userSpeculativeAmount
+                      .scale(w)
+                      .reduceBy(settings.maxSlippagePercent)
+                      .raw.toString(),
+                    deadline:
+                      Math.round(Date.now() / 1000) + settings.timeout * 60,
+                  }),
           },
         ],
       },

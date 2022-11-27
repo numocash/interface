@@ -230,29 +230,67 @@ export const useTrade = ({
                   title: "Sell option",
                   description: `Sell ${trade.market.pair.speculativeToken.symbol} squared option`,
                   txEnvelope: () =>
-                    lengineRouterContract.burn({
-                      base: market.pair.baseToken.address,
-                      speculative: market.pair.speculativeToken.address,
-                      baseScaleFactor: market.pair.baseScaleFactor,
-                      speculativeScaleFactor:
-                        market.pair.speculativeScaleFactor,
-                      liquidity: roundLiquidity(
-                        convertShareToLiquidity(
-                          trade.inputAmount,
-                          market,
-                          marketInfo
-                        )
-                      )
-                        .reduceBy(settings.maxSlippagePercent)
-                        .raw.toString(),
-                      sharesMax: trade.inputAmount.raw.toString(),
-                      upperBound: market.pair.bound.asFraction
-                        .multiply(scale)
-                        .quotient.toString(),
-                      recipient: address,
-                      deadline:
-                        Math.round(Date.now() / 1000) + settings.timeout * 60,
-                    }),
+                    isNative(market.pair.speculativeToken)
+                      ? lengineRouterContract.multicall([
+                          lengineRouterContract.interface.encodeFunctionData(
+                            "burn",
+                            [
+                              {
+                                base: market.pair.baseToken.address,
+                                speculative:
+                                  market.pair.speculativeToken.address,
+                                baseScaleFactor: market.pair.baseScaleFactor,
+                                speculativeScaleFactor:
+                                  market.pair.speculativeScaleFactor,
+                                liquidity: roundLiquidity(
+                                  convertShareToLiquidity(
+                                    trade.inputAmount,
+                                    market,
+                                    marketInfo
+                                  )
+                                )
+                                  .reduceBy(settings.maxSlippagePercent)
+                                  .raw.toString(),
+                                sharesMax: trade.inputAmount.raw.toString(),
+                                upperBound: market.pair.bound.asFraction
+                                  .multiply(scale)
+                                  .quotient.toString(),
+                                recipient: lengineRouterContract.address,
+                                deadline:
+                                  Math.round(Date.now() / 1000) +
+                                  settings.timeout * 60,
+                              },
+                            ]
+                          ),
+                          lengineRouterContract.interface.encodeFunctionData(
+                            "unwrapWETH9",
+                            [0, address] // TODO: fix this
+                          ),
+                        ])
+                      : lengineRouterContract.burn({
+                          base: market.pair.baseToken.address,
+                          speculative: market.pair.speculativeToken.address,
+                          baseScaleFactor: market.pair.baseScaleFactor,
+                          speculativeScaleFactor:
+                            market.pair.speculativeScaleFactor,
+                          liquidity: roundLiquidity(
+                            convertShareToLiquidity(
+                              trade.inputAmount,
+                              market,
+                              marketInfo
+                            )
+                          )
+                            .reduceBy(settings.maxSlippagePercent)
+                            .raw.toString(),
+                          sharesMax: trade.inputAmount.raw.toString(),
+                          upperBound: market.pair.bound.asFraction
+                            .multiply(scale)
+                            .quotient.toString(),
+                          recipient: address,
+                          deadline:
+                            Math.round(Date.now() / 1000) +
+                            settings.timeout * 60,
+                        }),
                 },
               ],
             },
