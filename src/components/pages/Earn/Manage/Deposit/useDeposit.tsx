@@ -1,5 +1,8 @@
 import type { IMarket } from "@dahlia-labs/numoen-utils";
-import { LIQUIDITYMANAGER } from "@dahlia-labs/numoen-utils";
+import {
+  LIQUIDITYMANAGER,
+  liquidityManagerInterface,
+} from "@dahlia-labs/numoen-utils";
 import type { TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -164,8 +167,7 @@ export const useDeposit = (
               txEnvelope: () =>
                 isNative(market.pair.baseToken) ||
                 isNative(market.pair.speculativeToken)
-                  ? liquidityManagerContract.mint(mintParams)
-                  : liquidityManagerContract.multicall(
+                  ? liquidityManagerContract.multicall(
                       [
                         liquidityManagerContract.interface.encodeFunctionData(
                           "mint",
@@ -182,7 +184,8 @@ export const useDeposit = (
                           ? speculativeTokenAmount.raw.toString()
                           : 0,
                       }
-                    ),
+                    )
+                  : liquidityManagerContract.mint(mintParams),
             },
           ],
         })
@@ -212,11 +215,11 @@ export const useDeposit = (
                 isNative(market.pair.speculativeToken)
                   ? liquidityManagerContract.multicall(
                       [
-                        liquidityManagerContract.interface.encodeFunctionData(
+                        liquidityManagerInterface.encodeFunctionData(
                           "increaseLiquidity",
                           [increaseParams]
                         ),
-                        liquidityManagerContract.interface.encodeFunctionData(
+                        liquidityManagerInterface.encodeFunctionData(
                           "refundETH"
                         ),
                       ],
