@@ -18,15 +18,14 @@ export const MainLayout: React.FC<IProps> = ({ children }: IProps) => {
   return (
     <>
       <div tw="font-semibold text-lg text-default p-1 bg-red">
-        Warning: Alpha Version{" "}
-        <span tw="font-normal text-secondary">v0.2.0 </span>
+        Warning: Beta Version{" "}
+        <span tw="font-normal text-secondary">v0.3.0 </span>
         <span tw="text-default font-normal text-sm">
-          This program is to be considered experimental. Contracts used have
-          been submitted to{" "}
+          Please use caution. Core contracts have been{" "}
           <a tw="underline" href="https://www.certik.com/projects/numoen">
-            audit
-          </a>
-          .
+            audited
+          </a>{" "}
+          but should still be used at your own risk.
         </span>
       </div>
       <PageWrapper>
