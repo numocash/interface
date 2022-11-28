@@ -60,7 +60,7 @@ export const Settings: React.FC = () => {
             <div tw="flex justify-start">Allowed Slippage</div>
             <div tw="flex items-center gap-1">
               <BigNumericInput
-                tw="text-right text-lg"
+                tw="text-right text-lg text-default"
                 placeholder={settings.maxSlippagePercent.toFixed(0)}
                 inputMode="numeric"
                 autoComplete="off"

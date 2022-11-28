@@ -126,6 +126,17 @@ export const usePrice = (market: IMarket | null): Fraction | null => {
 
   if ((!pairInfo && !uniInfo) || !market) return null;
   if (pairInfo && pairInfo.totalLPSupply.greaterThan(0)) {
+    uniInfo &&
+      console.log(
+        pairInfoToPrice(pairInfo, market.pair).toFixed(6),
+        new Price(
+          market.pair.speculativeToken,
+          market.pair.baseToken,
+          uniInfo[1].raw,
+          uniInfo[0].raw
+        ).toFixed(6)
+      );
+
     return pairInfoToPrice(pairInfo, market.pair);
   } else {
     if (!uniInfo) return null;
