@@ -70,17 +70,14 @@ export const determineBorrowAmount = (
   price: Price,
   slippageBps: Percent
 ) => {
-  const x0 = price.asFraction.multiply(price);
-  const x1 = market.pair.bound.subtract(price).multiply(2);
+  const a = market.pair.bound.asFraction.multiply(2);
+  const b = price.asFraction.multiply(
+    Percent.ONE_HUNDRED.subtract(slippageBps)
+  );
+  const c = market.pair.bound.subtract(price).multiply(2);
 
-  const numerator = inputAmount
-    .scale(x1)
-    .add(inputAmount.scale(x0.divide(price)).reduceBy(slippageBps));
-
-  const denominator = market.pair.bound.asFraction
-    .multiply(2)
-    .subtract(x0.divide(price).multiply(slippageBps))
-    .subtract(x1);
+  const numerator = inputAmount.scale(b.add(c));
+  const denominator = a.subtract(b).subtract(c);
 
   const s = new Fraction(10 ** 9);
 
