@@ -69,6 +69,7 @@ export const AssetSelection: React.FC<Props> = ({
   inputOnChange,
   label,
   currentAmount,
+  tokens,
 }: Props) => {
   const { width } = useWindowDimensions();
 
@@ -138,6 +139,7 @@ export const AssetSelection: React.FC<Props> = ({
               onSelect?.(token);
               setShow?.(false);
             }}
+            tokens={tokens}
           />
           <div tw={"flex relative py-0 rounded-xl"}>
             <div>

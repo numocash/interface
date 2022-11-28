@@ -7,7 +7,6 @@ import type { Price } from "@dahlia-labs/token-utils";
 import { Fraction, Percent, TokenAmount } from "@dahlia-labs/token-utils";
 
 import { borrowRate } from "../components/pages/Earn/PositionCard/Stats";
-import { scale } from "../components/pages/Trade/useTrade";
 import type { ISettings } from "../contexts/settings";
 
 export const outputAmount = (
@@ -46,11 +45,11 @@ export const outputAmount = (
       return new TokenAmount(market.pair.speculativeToken, 0);
     const lpAmount = convertShareToLiquidity(inputAmount, market, marketInfo);
     const speculativeAmount = liquidityToSpeculative(lpAmount, market);
-    const r0 = lpAmount.scale(
-      pairInfo.baseAmount.divide(pairInfo.totalLPSupply)
+    const r0 = pairInfo.baseAmount.scale(
+      lpAmount.divide(pairInfo.totalLPSupply)
     );
-    const r1 = lpAmount.scale(
-      pairInfo.speculativeAmount.divide(pairInfo.totalLPSupply)
+    const r1 = pairInfo.speculativeAmount.scale(
+      lpAmount.divide(pairInfo.totalLPSupply)
     );
     const repayAmount = determineRepayAmount(
       r0,
@@ -61,12 +60,7 @@ export const outputAmount = (
     return new TokenAmount(
       market.pair.speculativeToken,
       speculativeAmount.raw
-    ).subtract(
-      new TokenAmount(
-        market.pair.speculativeToken,
-        repayAmount.multiply(scale).quotient.toString()
-      )
-    );
+    ).subtract(repayAmount);
   }
 };
 
@@ -76,17 +70,14 @@ export const determineBorrowAmount = (
   price: Price,
   slippageBps: Percent
 ) => {
-  const x0 = price.asFraction.multiply(price);
-  const x1 = market.pair.bound.subtract(price).multiply(2);
+  const a = market.pair.bound.asFraction.multiply(2);
+  const b = price.asFraction.multiply(
+    Percent.ONE_HUNDRED.subtract(slippageBps)
+  );
+  const c = market.pair.bound.subtract(price).multiply(2);
 
-  const numerator = inputAmount
-    .scale(x1)
-    .add(inputAmount.scale(x0.divide(price)).reduceBy(slippageBps));
-
-  const denominator = market.pair.bound.asFraction
-    .multiply(2)
-    .subtract(x0.divide(price).multiply(slippageBps))
-    .subtract(x1);
+  const numerator = inputAmount.scale(b.add(c));
+  const denominator = a.subtract(b).subtract(c);
 
   const s = new Fraction(10 ** 9);
 
@@ -120,9 +111,16 @@ const determineRepayAmount = (
   u0: TokenAmount,
   u1: TokenAmount
 ) => {
-  const numerator = u0.multiply(r1).add(u1.multiply(r0)).add(r0.multiply(r1));
-  const denominator = u0.asFraction.subtract(r0);
-  return numerator.multiply(1000).divide(denominator.multiply(997));
+  const a = u1.scale(u0).scale(new Fraction(1000));
+  const b = u0.subtract(r0);
+  const c = r1.scale(new Fraction(1000));
+  const d = u1.scale(new Fraction(1000));
+
+  return a
+    .scale(b.invert())
+    .add(c)
+    .subtract(d)
+    .scale(new Fraction(997).invert());
 };
 
 export const speculativeToLiquidity = (
@@ -270,3 +268,8 @@ export const liquidityToBase = (
 
   return new TokenAmount(market.pair.baseToken, liquidity.scale(num).raw);
 };
+
+// before 215112497747824584
+// fee 0
+// fee 1
+// after
