@@ -1,261 +1,181 @@
-import { TokenAmount } from "@dahlia-labs/token-utils";
-import type { Call } from "@dahlia-labs/use-ethers";
-import type { BigNumber } from "@ethersproject/bignumber";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { IMarket, IMarketInfo } from "@dahlia-labs/numoen-utils";
+import {
+  getPositionMulticall,
+  lastUpdateMulticall,
+  rewardPerLiquidityStoredMulticall,
+  totalLiquidityBorrowedMulticall,
+  totalLiquidityMulticall,
+} from "@dahlia-labs/numoen-utils";
+import type { TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, Price } from "@dahlia-labs/token-utils";
+import { totalSupplyMulticall } from "@dahlia-labs/use-ethers";
+import { max } from "lodash";
+import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
+import { pairInfoToPrice } from "../components/pages/Earn/PositionCard/Stats";
+import { liquidityManagerGenesis } from "../constants";
 import { useBlock } from "../contexts/block";
-import type {
-  IMarket,
-  IMarketInfo,
-  IMarketUserInfo,
-  ITickInfo,
-} from "../contexts/environment";
-import { GENESIS, LIQUIDITYMANAGER } from "../contexts/environment";
-import { parseFunctionReturn } from "../utils/parseFunctionReturn";
-import { blockHistory, useBlockQuery } from "./useBlockQuery";
-import {
-  lendgineInterface,
-  useLendgineContract,
-  useLiquidityManager,
-} from "./useContract";
+import type { IMarketUserInfo } from "../contexts/environment";
+import { getPositionMulticall2 } from "../utils/lendgineUtils";
+import { newRewardPerLiquidity } from "../utils/trade";
+import { useBlockMulticall, useBlockQuery } from "./useBlockQuery";
+import { useChain } from "./useChain";
+import { useLiquidityManager } from "./useContract";
+import { usePair } from "./usePair";
+import { useUniswapPair } from "./useUniswapPair";
 
-export const useUserLendgine = (
+export const useUserLendgines = (
   address: string | undefined,
-  market: IMarket | null
-): IMarketUserInfo[] | null => {
+  markets: readonly IMarket[] | null
+): readonly IMarketUserInfo[] | null => {
   const liquidityManagerContract = useLiquidityManager(false);
-  invariant(liquidityManagerContract);
-  const mintFilter = liquidityManagerContract.filters.Mint(address);
-  const { blocknumber } = useBlock();
-  const queryClient = useQueryClient();
+  const chain = useChain();
 
-  const filteredEvents = useQuery(
-    ["mint events", blocknumber ?? 0],
+  invariant(liquidityManagerContract);
+
+  const mintFilter = liquidityManagerContract.filters.Mint(address);
+
+  const filteredEvents = useBlockQuery(
+    ["mint events", address],
     async () =>
       await liquidityManagerContract.queryFilter(
         mintFilter,
-        GENESIS,
-        blocknumber ?? undefined
+        liquidityManagerGenesis[chain]
       ),
-    {
-      staleTime: Infinity,
-      placeholderData: blocknumber
-        ? [...Array(blockHistory).keys()]
-            .map((i) => blocknumber - i - 1)
-            .reduce((acc, cur: number) => {
-              return acc ? acc : queryClient.getQueryData(["mint events", cur]);
-            }, undefined) ?? queryClient.getQueryData(["mint events", 0])
-        : undefined,
-    }
+    !!address && !!markets
   );
 
   const tokenIDs = filteredEvents?.data?.map((d) => +d.args[1].toString());
 
-  const calls: Call[] = tokenIDs
-    ? tokenIDs.map((t) => ({
-        target: LIQUIDITYMANAGER,
-        callData: liquidityManagerContract.interface.encodeFunctionData(
-          "getPosition",
-          [t]
-        ),
-      }))
-    : [];
+  const data = useBlockMulticall(
+    markets && tokenIDs
+      ? tokenIDs.map((t) => getPositionMulticall2(t, markets, chain))
+      : null
+  );
+  if (!data) return null;
 
-  const data = useBlockQuery("user lp positions", calls);
-  if (!address) return [];
-  if (
-    !data ||
-    !market ||
-    !tokenIDs ||
-    data.returnData.length !== tokenIDs.length
-  )
-    return null;
-
-  interface LendgineRet {
-    liquidity: BigNumber;
-    tick: BigNumber;
-  }
-
-  return tokenIDs.map((t, i) => {
-    const ret = parseFunctionReturn(
-      liquidityManagerContract.interface,
-      "getPosition",
-      data.returnData[i]
-    ) as unknown as LendgineRet;
-
-    return {
-      tick: +ret.tick.toString(),
-      tokenID: t,
-      liquidity: new TokenAmount(market.pair.lp, ret.liquidity.toString()),
-    };
-  });
+  return data;
 };
 
-export const useLendgine = (market: IMarket): IMarketInfo | null => {
-  const calls: Call[] = [
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("currentTick"),
-    },
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("currentLiquidity"),
-    },
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("interestNumerator"),
-    },
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("totalLiquidityBorrowed"),
-    },
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("totalSupply"),
-    },
-  ];
+export const useNextTokenID = (): number | null => {
+  const liquidityManagerContract = useLiquidityManager(false);
+  invariant(liquidityManagerContract);
 
-  const data = useBlockQuery("lendgine", calls, [market.address]);
+  const mintFilter = liquidityManagerContract.filters.Mint();
+  const { blocknumber } = useBlock();
+  const chain = useChain();
+
+  const filteredEvents = useBlockQuery(
+    ["next token id"],
+    async () =>
+      await liquidityManagerContract.queryFilter(
+        mintFilter,
+        liquidityManagerGenesis[chain],
+        blocknumber ?? undefined
+      ),
+    true
+  );
+
+  const tokenIDs = filteredEvents?.data?.map((d) => +d.args[1].toString());
+  if (tokenIDs && tokenIDs.length === 0) return 0;
+  return tokenIDs ? max(tokenIDs) ?? null : null;
+};
+
+export const useUserLendgine = (
+  tokenID: number | null,
+  market: IMarket | null
+): IMarketUserInfo | null => {
+  const chain = useChain();
+
+  const data = useBlockMulticall(
+    tokenID && market ? [getPositionMulticall(tokenID, market, chain)] : null
+  );
+
+  if (!data) return null;
+  return data[0];
+};
+
+export const useLendgine = (market: IMarket | null): IMarketInfo | null => {
+  const data = useBlockMulticall(
+    market
+      ? [
+          totalLiquidityMulticall(market),
+          totalLiquidityBorrowedMulticall(market),
+          rewardPerLiquidityStoredMulticall(market),
+          totalSupplyMulticall(market.token),
+          lastUpdateMulticall(market),
+        ]
+      : null
+  );
+
   if (!data) return null;
 
   return {
-    currentTick: +parseFunctionReturn(
-      lendgineInterface,
-      "currentTick",
-      data.returnData[0]
-    ).toString(),
-    currentLiquidity: new TokenAmount(
-      market.pair.lp,
-      parseFunctionReturn(
-        lendgineInterface,
-        "currentLiquidity",
-        data.returnData[1]
-      ).toString()
-    ),
-    interestNumerator: new TokenAmount(
-      market.pair.lp,
-      parseFunctionReturn(
-        lendgineInterface,
-        "interestNumerator",
-        data.returnData[2]
-      ).toString()
-    ),
-    totalLiquidityBorrowed: new TokenAmount(
-      market.pair.lp,
-      parseFunctionReturn(
-        lendgineInterface,
-        "totalLiquidityBorrowed",
-        data.returnData[3]
-      ).toString()
-    ),
-    totalSupply: new TokenAmount(
-      market.token,
-      parseFunctionReturn(
-        lendgineInterface,
-        "totalSupply",
-        data.returnData[4]
-      ).toString()
-    ),
+    totalLiquidity: data[0],
+    totalLiquidityBorrowed: data[1],
+    rewardPerLiquidityStored: data[2],
+    totalSupply: data[3],
+    lastUpdate: data[4],
   };
 };
 
-export const useTick = (
-  market: IMarket,
-  tick: number | null
-): ITickInfo | null => {
-  const calls: Call[] = [
-    {
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("ticks", [tick ?? 0]),
-    },
-  ];
+export const usePrice = (market: IMarket | null): Fraction | null => {
+  const pairInfo = usePair(market?.pair ?? null);
+  const uniInfo = useUniswapPair(market ?? null);
 
-  const data = useBlockQuery("tick", calls);
-  if (!data || !tick) return null;
+  if ((!pairInfo && !uniInfo) || !market) return null;
+  if (pairInfo && pairInfo.totalLPSupply.greaterThan(0)) {
+    return pairInfoToPrice(pairInfo, market.pair);
+  } else {
+    if (!uniInfo) return null;
+    const s = new Fraction(10 ** 4);
+    const price = new Price(
+      market.pair.speculativeToken,
+      market.pair.baseToken,
+      uniInfo[1].raw,
+      uniInfo[0].raw
+    );
 
-  interface TicksRet {
-    liquidity: BigNumber;
+    return new Fraction(price.asFraction.multiply(s).quotient, 10 ** 4);
   }
-
-  const tickData = parseFunctionReturn(
-    lendgineInterface,
-    "ticks",
-    data.returnData[0]
-  ) as unknown as TicksRet;
-
-  return {
-    tick,
-    liquidity: new TokenAmount(market.pair.lp, tickData.liquidity.toString()),
-  };
 };
 
-export const useTicks = (market: IMarket): ITickInfo[] | null => {
-  const lendgineContract = useLendgineContract(market.address, false);
-  invariant(lendgineContract);
+export const useRefPrice = (market: IMarket | null): Price | null => {
+  const uniInfo = useUniswapPair(market ?? null);
 
-  const mintFilter = lendgineContract.filters.MintMaker();
-  const { blocknumber } = useBlock();
-  const queryClient = useQueryClient();
+  if (!uniInfo || !market) return null;
 
-  const filteredEvents = useQuery(
-    ["mintmaker", blocknumber ?? 0],
-    async () =>
-      await lendgineContract.queryFilter(
-        mintFilter,
-        GENESIS,
-        blocknumber ?? undefined
-      ),
-    {
-      staleTime: Infinity,
-      placeholderData: blocknumber
-        ? [...Array(blockHistory).keys()]
-            .map((i) => blocknumber - i - 1)
-            .reduce((acc, cur: number) => {
-              return acc ? acc : queryClient.getQueryData(["mintmaker", cur]);
-            }, undefined) ?? queryClient.getQueryData(["mintmaker", 0])
-        : undefined,
-    }
+  return new Price(
+    market.pair.speculativeToken,
+    market.pair.baseToken,
+    uniInfo[1].raw,
+    uniInfo[0].raw
   );
+};
 
-  const allTicks = filteredEvents.data?.map((d) => d.args.tick);
-
-  const seen = new Set<number>();
-  const dedupedTicks = allTicks?.filter((t) => {
-    if (seen.has(t)) {
-      return false;
-    } else {
-      seen.add(t);
-      return true;
-    }
-  });
-
-  const sortedTicks = dedupedTicks?.sort((a: number, b: number) =>
-    a > b ? 1 : -1
+export const useClaimableTokens = (
+  tokenID: number | null,
+  market: IMarket
+): TokenAmount | null => {
+  const marketInfo = useLendgine(market);
+  const newRPL = useMemo(
+    () => (marketInfo ? newRewardPerLiquidity(market, marketInfo) : null),
+    [market, marketInfo]
   );
+  const userPositionInfo = useUserLendgine(tokenID, market);
 
-  const calls: Call[] =
-    sortedTicks?.map((t) => ({
-      target: market.address,
-      callData: lendgineInterface.encodeFunctionData("ticks", [t]),
-    })) ?? [];
-
-  const data = useBlockQuery("all ticks", calls, [market.address, sortedTicks]);
-  if (!data || !sortedTicks) return null;
-  interface TicksRet {
-    liquidity: BigNumber;
-  }
-
-  return sortedTicks.map((t, i) => {
-    const tickData = parseFunctionReturn(
-      lendgineInterface,
-      "ticks",
-      data.returnData[i]
-    ) as unknown as TicksRet;
-
-    return {
-      tick: t,
-      liquidity: new TokenAmount(market.pair.lp, tickData.liquidity.toString()),
-    };
-  });
+  return useMemo(() => {
+    const rpl =
+      newRPL && userPositionInfo && marketInfo
+        ? newRPL
+            .add(marketInfo.rewardPerLiquidityStored)
+            .subtract(userPositionInfo.rewardPerLiquidityPaid)
+        : null;
+    const tokensOwed =
+      rpl && userPositionInfo ? rpl.scale(userPositionInfo.liquidity) : null;
+    return tokensOwed && userPositionInfo
+      ? tokensOwed.add(userPositionInfo.tokensOwed)
+      : null;
+  }, [marketInfo, newRPL, userPositionInfo]);
 };

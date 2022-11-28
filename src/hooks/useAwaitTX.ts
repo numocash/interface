@@ -7,13 +7,7 @@ export const useAwaitTX = () => {
   const provider = useProvider();
 
   return useCallback(
-    async (hash: string) =>
-      new Promise((resolve: (e: ContractReceipt) => void) =>
-        provider.once(hash, (e: ContractReceipt) => {
-          resolve(e);
-          return e;
-        })
-      ),
+    async (hash: string) => awaitTX(provider, hash),
     [provider]
   );
 };

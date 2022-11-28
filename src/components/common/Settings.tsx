@@ -36,46 +36,42 @@ export const Settings: React.FC = () => {
         target={targetRef}
         placement="auto"
       >
-        <div tw="bg-container flex rounded-xl text-default  p-3 flex-col gap-1">
+        <div tw="p-3 rounded-lg border border-gray-400 bg-white  w-full">
           <div tw="flex justify-between items-center">
             <div tw="font-semibold text-lg">Settings</div>
             <ToastExitButton onClick={onDismiss}>×</ToastExitButton>
           </div>
-          <div tw="flex flex-col bg-action  rounded-xl p-2 gap-1">
+          <div tw="flex flex-col bg-white  rounded-xl p-2 gap-1">
             <div tw="flex justify-start">Transaction Deadline</div>
             <div tw="flex items-center gap-1">
-              <div tw="flex rounded-xl p-1 bg-container ">
-                <BigNumericInput
-                  tw="text-right text-lg"
-                  placeholder={settings.timeout.toString()}
-                  inputMode="numeric"
-                  autoComplete="off"
-                  disabled={false}
-                  value={inputDeadline}
-                  onChange={(val: string) => setInputDeadline(val)}
-                />
-              </div>
+              <BigNumericInput
+                tw="text-right text-lg"
+                placeholder={settings.timeout.toString()}
+                inputMode="numeric"
+                autoComplete="off"
+                disabled={false}
+                value={inputDeadline}
+                onChange={(val: string) => setInputDeadline(val)}
+              />
               <div tw="text-secondary text-sm">Minutes</div>
             </div>
           </div>
-          <div tw="flex flex-col bg-action rounded-xl p-2 gap-1">
+          <div tw="flex flex-col  p-2 gap-1">
             <div tw="flex justify-start">Allowed Slippage</div>
             <div tw="flex items-center gap-1">
-              <div tw="flex rounded-xl p-1 bg-container ">
-                <BigNumericInput
-                  tw="text-right text-lg"
-                  placeholder={settings.maxSlippagePercent.toFixed(0)}
-                  inputMode="numeric"
-                  autoComplete="off"
-                  disabled={false}
-                  value={inputSlippage}
-                  onChange={(val: string) => setInputSlippage(val)}
-                />
-              </div>
+              <BigNumericInput
+                tw="text-right text-lg"
+                placeholder={settings.maxSlippagePercent.toFixed(0)}
+                inputMode="numeric"
+                autoComplete="off"
+                disabled={false}
+                value={inputSlippage}
+                onChange={(val: string) => setInputSlippage(val)}
+              />
               <div tw="text-secondary text-sm">%</div>
             </div>
           </div>
-          <div tw="flex bg-action rounded-xl p-2 gap-1 justify-between items-center">
+          <div tw="flex  p-2 gap-1 justify-between items-center">
             <div tw="">Infinite Approval</div>
             <div tw="">
               <Switch
@@ -86,7 +82,7 @@ export const Settings: React.FC = () => {
           </div>
         </div>
       </Drop>
-      <div tw="text-default  flex items-center text-lg" ref={setTargetRef}>
+      <div tw="text-default flex items-center text-lg" ref={setTargetRef}>
         <FontAwesomeIcon
           tw="cursor-pointer"
           icon={faGear}

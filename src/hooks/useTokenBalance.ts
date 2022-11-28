@@ -1,68 +1,52 @@
 import type { Token } from "@dahlia-labs/token-utils";
 import { TokenAmount } from "@dahlia-labs/token-utils";
-import type { Call } from "@dahlia-labs/use-ethers";
-import { tokenInterface } from "@dahlia-labs/use-ethers";
-import { AddressZero } from "@ethersproject/constants";
+import { balanceOfMulticall } from "@dahlia-labs/use-ethers";
+import { useMemo } from "react";
+import { useAccount, useBalance } from "wagmi";
 
-import { parseFunctionReturn } from "../utils/parseFunctionReturn";
-import { useBlockQuery } from "./useBlockQuery";
+import { useBlockMulticall } from "./useBlockQuery";
+import { useIsWrappedNative, useNative } from "./useTokens";
 
 export const useTokenBalance = (
-  token: Token | null,
-  address: string | null
+  token: Token | null | undefined,
+  address: string | null | undefined
 ): TokenAmount | null => {
-  const call: Call = {
-    target: token?.address ?? AddressZero,
-    callData: tokenInterface.encodeFunctionData("balanceOf", [
-      address ?? AddressZero,
-    ]),
-  };
-
-  const data = useBlockQuery(
-    "balance",
-    [call],
-    [token?.address, address],
-    !!address && !!token
+  const data = useBlockMulticall(
+    token && address ? [balanceOfMulticall(token, address)] : null
   );
-  if (!data || !token) return null;
-  return new TokenAmount(
-    token,
-    parseFunctionReturn(
-      tokenInterface,
-      "balanceOf",
-      data?.returnData[0]
-    ).toString()
-  );
+  if (!data) return null;
+  return data[0];
 };
 
 export const useTokenBalances = (
-  tokens: (Token | null)[],
-  address?: string | null
-): (TokenAmount | null)[] | null => {
-  const calls: Call[] = tokens.map((t) => ({
-    target: t?.address ?? AddressZero,
-    callData: tokenInterface.encodeFunctionData("balanceOf", [
-      address ?? AddressZero,
-    ]),
-  }));
-
-  const data = useBlockQuery(
-    "balance",
-    calls,
-    [address].concat(tokens.map((t) => t?.address)),
-    !!address
+  tokens: Token[] | null | undefined,
+  address: string | null | undefined
+): Readonly<TokenAmount[]> | null => {
+  const data = useBlockMulticall(
+    tokens && address ? tokens.map((t) => balanceOfMulticall(t, address)) : []
   );
   if (!data) return null;
-  return tokens.map((t, i) =>
-    t
-      ? new TokenAmount(
-          t,
-          parseFunctionReturn(
-            tokenInterface,
-            "balanceOf",
-            data?.returnData[i]
-          ).toString()
-        )
-      : null
+  return data;
+};
+
+export const useNativeTokenBalance = (): TokenAmount | null => {
+  const { address } = useAccount();
+  const native = useNative();
+  const balance = useBalance({ address: address ?? undefined, watch: true });
+  if (!balance.data) return null;
+
+  return new TokenAmount(native, balance.data.value.toString());
+};
+
+export const useWrappedTokenBalance = (
+  token: Token | null
+): TokenAmount | null => {
+  const { address } = useAccount();
+  const nativeBalance = useNativeTokenBalance();
+  const balance = useTokenBalance(token, address);
+  const isWrapped = useIsWrappedNative(token);
+  return useMemo(
+    () => (isWrapped ? nativeBalance : balance),
+    [balance, isWrapped, nativeBalance]
   );
 };

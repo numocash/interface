@@ -1,4 +1,7 @@
 const fs = require("fs");
+const appInfo = require("./src/app.json");
+const deepMerge = require("deepmerge");
+
 const path = require("path");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const webpack = require("webpack");
@@ -57,6 +60,29 @@ module.exports = {
         test: /\.m?js/,
         resolve: {
           fullySpecified: false,
+        },
+      });
+
+      htmlWebpackPlugin.userOptions = deepMerge(htmlWebpackPlugin.userOptions, {
+        title: appInfo.title ?? appInfo.name,
+        meta: {
+          viewport: "width=device-width, initial-scale=1",
+          description: appInfo.description,
+
+          "og:title": appInfo.name,
+          "og:site_name": appInfo.name,
+          "og:url": appInfo.url,
+          "og:description": appInfo.description,
+          "og:type": "website",
+          "og:image": appInfo.image,
+
+          "twitter:card": "summary_large_image",
+          "twitter:site": `@${appInfo.socials.twitter}`,
+          "twitter:url": appInfo.url,
+          "twitter:title": appInfo.name,
+          "twitter:description": appInfo.description,
+          "twitter:image": appInfo.image,
+          "twitter:image:alt": appInfo.imageAlt,
         },
       });
 
