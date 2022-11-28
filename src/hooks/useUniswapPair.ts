@@ -29,6 +29,7 @@ export const reservesMulticall = (
     },
   } as const);
 
+// Returns data in base, speculative
 export const useUniswapPair = (
   market: IMarket | null
 ): [TokenAmount, TokenAmount] | null => {

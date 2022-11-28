@@ -24,7 +24,7 @@ interface UseSwapStateValues {
 
   swapDisabledReason?: string;
   handleTrade: () => Promise<void> | void;
-  trade: Trade;
+  trade: Trade | null;
 }
 
 // for deposits, token amounts must be proportional to the existing liquidity
