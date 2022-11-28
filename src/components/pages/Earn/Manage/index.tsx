@@ -129,12 +129,12 @@ const useManageInternal = ({
         );
         const liquidity = pairInfo.totalLPSupply.scale(proportion);
         const liquidityPrec = roundLiquidity(liquidity);
-        const baseAmount = pairInfo.baseAmount
-          .scale(liquidityPrec)
-          .scale(pairInfo.totalLPSupply.invert());
-        const speculativeAmount = pairInfo.speculativeAmount
-          .scale(liquidityPrec)
-          .scale(pairInfo.totalLPSupply.invert());
+        const baseAmount = pairInfo.baseAmount.scale(
+          liquidityPrec.divide(pairInfo.totalLPSupply)
+        );
+        const speculativeAmount = pairInfo.speculativeAmount.scale(
+          liquidityPrec.divide(pairInfo.totalLPSupply)
+        );
 
         setBaseAmount(baseAmount);
         setSpeculativeAmount(speculativeAmount);

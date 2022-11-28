@@ -132,6 +132,12 @@ export const useDeposit = (
 
     invariant(address && pairInfo && nextID !== null && price);
 
+    console.log(
+      baseTokenAmount.raw.toString(),
+      speculativeTokenAmount.raw.toString(),
+      liquidity.raw.toString()
+    );
+
     if (!tokenID) {
       const mintParams = {
         base: market.pair.baseToken.address,

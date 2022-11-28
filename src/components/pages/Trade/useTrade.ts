@@ -1,4 +1,7 @@
-import { LENDGINEROUTER } from "@dahlia-labs/numoen-utils";
+import {
+  LENDGINEROUTER,
+  lendgineRouterInterface,
+} from "@dahlia-labs/numoen-utils";
 import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
 import { Fraction, Percent } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
@@ -188,33 +191,67 @@ export const useTrade = ({
                   title: "Buy option",
                   description: `Buy ${trade.market.pair.speculativeToken.symbol} squared option`,
                   txEnvelope: () =>
-                    lengineRouterContract.mint(
-                      {
-                        base: market.pair.baseToken.address,
-                        speculative: market.pair.speculativeToken.address,
-                        baseScaleFactor: market.pair.baseScaleFactor,
-                        speculativeScaleFactor:
-                          market.pair.speculativeScaleFactor,
-                        upperBound: market.pair.bound.asFraction
-                          .multiply(scale)
-                          .quotient.toString(),
-                        liquidity: roundLiquidity(
-                          speculativeToLiquidity(trade.inputAmount, market)
-                        ).raw.toString(),
-                        borrowAmount: borrowAmount.raw.toString(),
-                        sharesMin: trade.outputAmount
-                          .reduceBy(settings.maxSlippagePercent)
-                          .raw.toString(),
-                        recipient: address,
-                        deadline:
-                          Math.round(Date.now() / 1000) + settings.timeout * 60,
-                      },
-                      {
-                        value: isNative(trade.inputAmount.token)
-                          ? trade.inputAmount.raw.toString()
-                          : 0,
-                      }
-                    ),
+                    isNative(trade.inputAmount.token)
+                      ? lengineRouterContract.multicall(
+                          [
+                            lendgineRouterInterface.encodeFunctionData("mint", [
+                              {
+                                base: market.pair.baseToken.address,
+                                speculative:
+                                  market.pair.speculativeToken.address,
+                                baseScaleFactor: market.pair.baseScaleFactor,
+                                speculativeScaleFactor:
+                                  market.pair.speculativeScaleFactor,
+                                upperBound: market.pair.bound.asFraction
+                                  .multiply(scale)
+                                  .quotient.toString(),
+                                liquidity: roundLiquidity(
+                                  speculativeToLiquidity(
+                                    trade.inputAmount,
+                                    market
+                                  )
+                                ).raw.toString(),
+                                borrowAmount: borrowAmount.raw.toString(),
+                                sharesMin: trade.outputAmount
+                                  .reduceBy(settings.maxSlippagePercent)
+                                  .raw.toString(),
+                                recipient: address,
+                                deadline:
+                                  Math.round(Date.now() / 1000) +
+                                  settings.timeout * 60,
+                              },
+                            ]),
+                            lendgineRouterInterface.encodeFunctionData(
+                              "refundETH"
+                            ),
+                          ],
+                          {
+                            value: isNative(trade.inputAmount.token)
+                              ? trade.inputAmount.raw.toString()
+                              : 0,
+                          }
+                        )
+                      : lengineRouterContract.mint({
+                          base: market.pair.baseToken.address,
+                          speculative: market.pair.speculativeToken.address,
+                          baseScaleFactor: market.pair.baseScaleFactor,
+                          speculativeScaleFactor:
+                            market.pair.speculativeScaleFactor,
+                          upperBound: market.pair.bound.asFraction
+                            .multiply(scale)
+                            .quotient.toString(),
+                          liquidity: roundLiquidity(
+                            speculativeToLiquidity(trade.inputAmount, market)
+                          ).raw.toString(),
+                          borrowAmount: borrowAmount.raw.toString(),
+                          sharesMin: trade.outputAmount
+                            .reduceBy(settings.maxSlippagePercent)
+                            .raw.toString(),
+                          recipient: address,
+                          deadline:
+                            Math.round(Date.now() / 1000) +
+                            settings.timeout * 60,
+                        }),
                 },
               ],
             },
@@ -232,37 +269,33 @@ export const useTrade = ({
                   txEnvelope: () =>
                     isNative(market.pair.speculativeToken)
                       ? lengineRouterContract.multicall([
-                          lengineRouterContract.interface.encodeFunctionData(
-                            "burn",
-                            [
-                              {
-                                base: market.pair.baseToken.address,
-                                speculative:
-                                  market.pair.speculativeToken.address,
-                                baseScaleFactor: market.pair.baseScaleFactor,
-                                speculativeScaleFactor:
-                                  market.pair.speculativeScaleFactor,
-                                liquidity: roundLiquidity(
-                                  convertShareToLiquidity(
-                                    trade.inputAmount,
-                                    market,
-                                    marketInfo
-                                  )
+                          lendgineRouterInterface.encodeFunctionData("burn", [
+                            {
+                              base: market.pair.baseToken.address,
+                              speculative: market.pair.speculativeToken.address,
+                              baseScaleFactor: market.pair.baseScaleFactor,
+                              speculativeScaleFactor:
+                                market.pair.speculativeScaleFactor,
+                              liquidity: roundLiquidity(
+                                convertShareToLiquidity(
+                                  trade.inputAmount,
+                                  market,
+                                  marketInfo
                                 )
-                                  .reduceBy(settings.maxSlippagePercent)
-                                  .raw.toString(),
-                                sharesMax: trade.inputAmount.raw.toString(),
-                                upperBound: market.pair.bound.asFraction
-                                  .multiply(scale)
-                                  .quotient.toString(),
-                                recipient: lengineRouterContract.address,
-                                deadline:
-                                  Math.round(Date.now() / 1000) +
-                                  settings.timeout * 60,
-                              },
-                            ]
-                          ),
-                          lengineRouterContract.interface.encodeFunctionData(
+                              )
+                                .reduceBy(settings.maxSlippagePercent)
+                                .raw.toString(),
+                              sharesMax: trade.inputAmount.raw.toString(),
+                              upperBound: market.pair.bound.asFraction
+                                .multiply(scale)
+                                .quotient.toString(),
+                              recipient: lengineRouterContract.address,
+                              deadline:
+                                Math.round(Date.now() / 1000) +
+                                settings.timeout * 60,
+                            },
+                          ]),
+                          lendgineRouterInterface.encodeFunctionData(
                             "unwrapWETH9",
                             [0, address] // TODO: fix this
                           ),

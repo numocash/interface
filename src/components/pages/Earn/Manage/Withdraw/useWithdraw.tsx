@@ -1,6 +1,6 @@
 import type { IMarket } from "@dahlia-labs/numoen-utils";
 import { liquidityManagerInterface } from "@dahlia-labs/numoen-utils";
-import { Fraction, Percent, TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -12,6 +12,7 @@ import { useUserLendgine } from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
 import { useGetIsWrappedNative } from "../../../../../hooks/useTokens";
 import { useBeet } from "../../../../../utils/beet";
+import { roundLiquidity } from "../../../../../utils/trade";
 
 export const useWithdraw = (
   market: IMarket,
@@ -27,33 +28,38 @@ export const useWithdraw = (
   const userLendgineInfo = useUserLendgine(tokenID, market);
   const isNative = useGetIsWrappedNative();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const w = new Percent(withdrawPercent, 100);
-
-  const { userBaseAmount, userSpeculativeAmount } = useMemo(() => {
+  const { userBaseAmount, userSpeculativeAmount, liquidity } = useMemo(() => {
     if (pairInfo && pairInfo.totalLPSupply.equalTo(0))
       return {
         userBaseAmount: new TokenAmount(market.pair.baseToken, 0),
         userSpeculativeAmount: new TokenAmount(market.pair.speculativeToken, 0),
       };
+
+    const w = new Fraction(100 - withdrawPercent, 100);
+
     const userBaseAmount =
       userLendgineInfo && pairInfo
-        ? pairInfo.baseAmount.scale(
-            userLendgineInfo.liquidity.divide(pairInfo.totalLPSupply)
-          )
+        ? pairInfo.baseAmount
+            .scale(userLendgineInfo.liquidity.divide(pairInfo.totalLPSupply))
+            .scale(w)
         : null;
     const userSpeculativeAmount =
       userLendgineInfo && pairInfo
-        ? pairInfo.speculativeAmount.scale(
-            userLendgineInfo.liquidity.divide(pairInfo.totalLPSupply)
-          )
+        ? pairInfo.speculativeAmount
+            .scale(userLendgineInfo.liquidity.divide(pairInfo.totalLPSupply))
+            .scale(w)
         : null;
-    return { userBaseAmount, userSpeculativeAmount };
+
+    const liquidity = userLendgineInfo
+      ? roundLiquidity(userLendgineInfo.liquidity.scale(w))
+      : null;
+    return { userBaseAmount, userSpeculativeAmount, liquidity };
   }, [
     market.pair.baseToken,
     market.pair.speculativeToken,
     pairInfo,
     userLendgineInfo,
+    withdrawPercent,
   ]);
 
   const disableReason = useMemo(
@@ -67,8 +73,8 @@ export const useWithdraw = (
           !userBaseAmount ||
           !userSpeculativeAmount
         ? "Loading..."
-        : pairInfo.baseAmount.lessThan(userBaseAmount.scale(w)) ||
-          pairInfo.speculativeAmount.lessThan(userSpeculativeAmount.scale(w))
+        : pairInfo.baseAmount.lessThan(userBaseAmount) ||
+          pairInfo.speculativeAmount.lessThan(userSpeculativeAmount)
         ? "Insufficient liquidity"
         : null,
     [
@@ -78,7 +84,6 @@ export const useWithdraw = (
       userLendgineInfo,
       userBaseAmount,
       userSpeculativeAmount,
-      w,
     ]
   );
 
@@ -88,7 +93,8 @@ export const useWithdraw = (
         tokenID &&
         userBaseAmount &&
         userSpeculativeAmount &&
-        userLendgineInfo
+        userLendgineInfo &&
+        liquidity
     );
 
     invariant(address);
@@ -109,16 +115,12 @@ export const useWithdraw = (
                       [
                         {
                           tokenID,
-                          liquidity: userLendgineInfo.liquidity
-                            .scale(new Fraction(withdrawPercent, 100))
-                            .raw.toString(),
+                          liquidity: liquidity.raw.toString(),
                           recipient: liquidityManagerContract.address,
                           amount0Min: userBaseAmount
-                            .scale(w)
                             .reduceBy(settings.maxSlippagePercent)
                             .raw.toString(),
                           amount1Min: userSpeculativeAmount
-                            .scale(w)
                             .reduceBy(settings.maxSlippagePercent)
                             .raw.toString(),
                           deadline:
@@ -141,16 +143,12 @@ export const useWithdraw = (
                   ])
                 : liquidityManagerContract.decreaseLiquidity({
                     tokenID,
-                    liquidity: userLendgineInfo.liquidity
-                      .scale(new Fraction(withdrawPercent, 100))
-                      .raw.toString(),
+                    liquidity: liquidity.raw.toString(),
                     recipient: address,
                     amount0Min: userBaseAmount
-                      .scale(w)
                       .reduceBy(settings.maxSlippagePercent)
                       .raw.toString(),
                     amount1Min: userSpeculativeAmount
-                      .scale(w)
                       .reduceBy(settings.maxSlippagePercent)
                       .raw.toString(),
                     deadline:
