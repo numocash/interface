@@ -2,7 +2,7 @@ import { Percent } from "@dahlia-labs/token-utils";
 import { useState } from "react";
 import { createContainer } from "unstated-next";
 
-interface ISettings {
+export interface ISettings {
   /**
    * Maximum amount of tolerated slippage, in [0, 1].
    */
@@ -20,30 +20,69 @@ interface ISettings {
    */
   infiniteApprove: boolean;
   setInfiniteApprove: (choice: boolean) => void;
+}
 
-  /**
-   * Whether to use remote path computation or client-side
-   */
-  minimaApi: boolean;
-  setMinimaApi: (choice: boolean) => void;
+interface SettingsStore {
+  maxSlippagePercent: number;
+  timeout: number;
+  infiniteApprove: boolean;
 }
 
 const useSettingsInternal = (): ISettings => {
+  const store = localStorage.getItem("NumoenSettings");
+  const storedSlip = store ? (JSON.parse(store) as SettingsStore) : null;
   const [maxSlippagePercent, setMaxSlippagePercent] = useState<Percent>(
-    new Percent(200, 10_000)
+    storedSlip
+      ? new Percent(storedSlip.maxSlippagePercent, 10000)
+      : new Percent(200, 10_000)
   );
-  const [timeout, setTimeout] = useState<number>(30);
-  const [infiniteApprove, setInfiniteApprove] = useState(false);
-  const [minimaApi, setMinimaApi] = useState(true);
+  const [timeout, setTimeout] = useState<number>(
+    storedSlip ? storedSlip.timeout : 30
+  );
+  const [infiniteApprove, setInfiniteApprove] = useState(
+    storedSlip ? storedSlip.infiniteApprove : false
+  );
   return {
     maxSlippagePercent,
-    setMaxSlippagePercent,
+    setMaxSlippagePercent: (val: Percent) => {
+      setMaxSlippagePercent(val);
+      localStorage.setItem(
+        "NumoenSettings",
+        JSON.stringify({
+          maxSlippagePercent: +val.asFraction.multiply(10_000).toFixed(0),
+          timeout,
+          infiniteApprove,
+        })
+      );
+    },
     timeout,
-    setTimeout,
+    setTimeout: (val: number) => {
+      setTimeout(val);
+      localStorage.setItem(
+        "NumoenSettings",
+        JSON.stringify({
+          maxSlippagePercent: +maxSlippagePercent.asFraction
+            .multiply(10_000)
+            .toFixed(0),
+          timeout: val,
+          infiniteApprove,
+        })
+      );
+    },
     infiniteApprove,
-    setInfiniteApprove,
-    minimaApi,
-    setMinimaApi,
+    setInfiniteApprove: (val: boolean) => {
+      setInfiniteApprove(val);
+      localStorage.setItem(
+        "NumoenSettings",
+        JSON.stringify({
+          maxSlippagePercent: +maxSlippagePercent.asFraction
+            .multiply(10_000)
+            .toFixed(0),
+          timeout,
+          infiniteApprove: val,
+        })
+      );
+    },
   };
 };
 

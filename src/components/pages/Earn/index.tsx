@@ -1,35 +1,72 @@
-import { NavLink } from "react-router-dom";
-import invariant from "tiny-invariant";
+import type { IMarket } from "@dahlia-labs/numoen-utils";
+import { useMemo } from "react";
 import { useAccount } from "wagmi";
 
+import type { IMarketUserInfo } from "../../../contexts/environment";
 import { useEnvironment } from "../../../contexts/environment";
-import { useUserLendgine } from "../../../hooks/useLendgine";
-import { Button } from "../../common/Button";
+import { useUserLendgines } from "../../../hooks/useLendgine";
 import { LoadingPage } from "../../common/LoadingPage";
+import { Learn } from "./Learn";
 import { PositionCard } from "./PositionCard";
 
 export const Earn: React.FC = () => {
   const { markets } = useEnvironment();
   const { address } = useAccount();
 
-  const market = markets[0];
-  invariant(market);
-  const userMarketInfo = useUserLendgine(address, market);
+  const userMarketInfo = useUserLendgines(address, markets);
+
+  type display = {
+    market: IMarket;
+    userInfo: IMarketUserInfo | null;
+  };
+
+  const { displayMarkets, hasDeposit } = useMemo(() => {
+    const userMarkets: display[] =
+      userMarketInfo?.map((m) => ({
+        market: m.market,
+        userInfo: m,
+      })) ?? [];
+
+    const hold = userMarkets.map((m) => m.market);
+
+    const nonUserMarkets: display[] = markets
+      .filter((m) => !hold.includes(m))
+      .map((m) => ({ market: m, userInfo: null }));
+    return {
+      displayMarkets: userMarkets.concat(nonUserMarkets),
+      hasDeposit: userMarkets.length > 0,
+    };
+  }, [markets, userMarketInfo]);
 
   return (
-    <div tw="w-full max-w-3xl flex flex-col gap-2">
-      <div tw="flex justify-between w-full">
-        <p tw=" font-semibold text-2xl text-default">Your Positions</p>
-        <NavLink to="/earn/create-position">
-          <Button variant="primary">New Position</Button>
-        </NavLink>
-      </div>
-      {userMarketInfo === null ? (
+    <div tw="grid w-full max-w-3xl flex-col gap-4">
+      <p tw="font-bold text-2xl text-default">Earn on your assets</p>
+
+      <p tw=" text-default">
+        Provide liquidity to Numoen pools and lend your position to options
+        buyers to earn yield.
+      </p>
+      <p tw="text-xs text-default">
+        Displaying <span tw="font-semibold">{markets.length} markets</span>
+      </p>
+      <Learn />
+      {hasDeposit && (
+        <p tw="text-xs text-amber-300 font-semibold mb-[-0.5rem]">
+          Your positions
+        </p>
+      )}
+      {userMarketInfo === null && address !== undefined ? (
         <LoadingPage />
       ) : (
-        userMarketInfo.map((m) => (
-          <PositionCard key={m.tokenID} userInfo={m} market={market} />
-        ))
+        <div tw="grid md:grid-cols-2  gap-6">
+          {displayMarkets.map((d) => (
+            <PositionCard
+              key={d.market.address}
+              userInfo={d.userInfo}
+              market={d.market}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

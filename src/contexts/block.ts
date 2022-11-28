@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { createContainer } from "unstated-next";
 
 const webSocketProvider = new WebSocketProvider(
-  "wss://chaotic-tiniest-asphalt.celo-mainnet.discover.quiknode.pro/2fc0e56df28958791722e76f556e061b611c57f4/"
+  "wss://goerli.infura.io/ws/v3/6f9c9bc239054e9fb755198cc1e4973a"
 );
 
 export const useAwaitTX = () =>

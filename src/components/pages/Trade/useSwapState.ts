@@ -1,3 +1,4 @@
+import type { IMarket } from "@dahlia-labs/numoen-utils";
 import type { Token } from "@dahlia-labs/token-utils";
 import { TokenAmount } from "@dahlia-labs/token-utils";
 import type { ParsedQs } from "qs";
@@ -7,12 +8,12 @@ import { useLocation } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
-import type { IMarket } from "../../../contexts/environment";
 import {
-  useAddressToToken,
-  useCelo,
-  useMarketTokens,
-} from "../../../hooks/useTokens";
+  useEnvironment,
+  useGetAddressToMarket,
+  useGetSpeculativeToMarket,
+} from "../../../contexts/environment";
+import { useAddressToToken, useMarketTokens } from "../../../hooks/useTokens";
 import { useTrade } from "./useTrade";
 
 export enum Field {
@@ -25,7 +26,6 @@ export type Trade = {
   market: IMarket;
   inputAmount: TokenAmount;
   outputAmount: TokenAmount;
-  baseAmount: TokenAmount;
 };
 
 interface UseSwapStateValues {
@@ -34,11 +34,10 @@ interface UseSwapStateValues {
   selectedFrom: Token | null;
   selectedTo: Token | null;
 
-  invertSwap: () => void;
   typedValue: string;
 
   swapDisabledReason?: string;
-  handleTrade: () => Promise<void>;
+  handleTrade: () => Promise<void> | void;
   trade: Trade | null;
 }
 
@@ -71,17 +70,22 @@ export const useParsedQueryString = (): ParsedQs => {
 // for swaps, one of the fields is dependent of the other field
 const useSwapStateInternal = (): UseSwapStateValues => {
   const parsedQs = useParsedQueryString();
-  const celo = useCelo();
   const marketTokens = useMarketTokens();
-  const marketToken = useMemo(() => marketTokens[0], [marketTokens]);
-  invariant(marketToken);
 
-  const tokenA = useAddressToToken(parsedQs.inputToken as string) ?? celo;
+  const { markets } = useEnvironment();
+  const marketStart = markets[0];
+  invariant(marketStart);
+
+  const getAddressToMarket = useGetAddressToMarket();
+  const getSpeculativeToMarket = useGetSpeculativeToMarket();
+
+  const tokenA =
+    useAddressToToken(parsedQs.inputToken as string) ??
+    marketStart.pair.speculativeToken;
 
   const tokenB =
-    useAddressToToken(parsedQs.outputToken as string) ?? marketToken;
+    useAddressToToken(parsedQs.outputToken as string) ?? marketStart.token;
 
-  // TODO: consider make form state seralizable (store only token addr)
   const [fieldState, setFieldState] = useState<SwapFieldState>({
     typedValue: "",
     [Field.Input]: {
@@ -112,7 +116,7 @@ const useSwapStateInternal = (): UseSwapStateValues => {
     (field: Field, value: string) => {
       if (field === Field.Input) {
         setFieldState((prevState) => {
-          // TODO: support exactOut
+          // estimate output
           return { ...prevState, independentField: field, typedValue: value };
         });
       }
@@ -120,7 +124,6 @@ const useSwapStateInternal = (): UseSwapStateValues => {
     [setFieldState]
   );
 
-  // changing the token doesn't affect if
   const onFieldSelect = useCallback(
     (field: Field, token: Token) => {
       const otherField = field === Field.Input ? Field.Output : Field.Input;
@@ -133,28 +136,32 @@ const useSwapStateInternal = (): UseSwapStateValues => {
             [otherField]: { token: prevState[field].token },
           };
         });
+      } else if (marketTokens.includes(token)) {
+        const market = getAddressToMarket(token.address);
+        invariant(market);
+        const speculative = market.pair.speculativeToken;
+        setFieldState((prevState) => ({
+          ...prevState,
+          [field]: { token },
+          [otherField]: { token: speculative },
+        }));
       } else {
-        setFieldState((prevState) => ({ ...prevState, [field]: { token } }));
+        const market = getSpeculativeToMarket(token);
+        invariant(market);
+        setFieldState((prevState) => ({
+          ...prevState,
+          [field]: { token },
+          [otherField]: { token: market.token },
+        }));
       }
     },
-    [setFieldState, fieldState]
+    [fieldState, getAddressToMarket, getSpeculativeToMarket, marketTokens]
   );
-
-  const invertSwap = useCallback(() => {
-    setFieldState((prevState) => {
-      return {
-        ...prevState,
-        [Field.Input]: { token: prevState[Field.Output].token },
-        [Field.Output]: { token: prevState[Field.Input].token },
-      };
-    });
-  }, [setFieldState]);
 
   return {
     selectedFrom,
     selectedTo,
 
-    invertSwap,
     onFieldInput,
     onFieldSelect,
 

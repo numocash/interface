@@ -25,7 +25,7 @@ export const PageLayout: React.FC<IProps> = ({ children }: IProps) => {
 };
 
 const ErrorMessage = styled.p`
-  ${tw`text-red-500`}
+  ${tw`text-red`}
 `;
 
 const PageContainer = styled.div`

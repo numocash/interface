@@ -1,60 +1,57 @@
-import { ChainId } from "@dahlia-labs/celo-contrib";
-import { CELO, CUSD } from "@dahlia-labs/celo-tokens";
-import { Token } from "@dahlia-labs/token-utils";
+import type { Token } from "@dahlia-labs/token-utils";
 import { getAddress } from "@ethersproject/address";
 import { useCallback } from "react";
 
-import powerCELO from "../components/common/images/PowerCelo.svg";
-import type { IMarket } from "../contexts/environment";
+import { NativeTokens } from "../constants";
 import { useEnvironment } from "../contexts/environment";
-
-export const useCelo = () => CELO[ChainId.Mainnet];
-
-export const useCusd = () => CUSD[ChainId.Mainnet];
+import { useChain } from "./useChain";
 
 export const useAddressToToken = (address: string | null): Token | null => {
-  const tokens = [CELO[ChainId.Mainnet], CUSD[ChainId.Mainnet]] as const;
+  const tokens = useAllTokens();
   if (!address) return null;
   return (
     tokens.find((t) => getAddress(t.address) === getAddress(address)) ?? null
   );
 };
 
-export const useFeaturedTokens = (): { [address: string]: Token } => {
-  const celo = useCelo();
-  return { [celo.address]: celo };
+export const useMarketTokens = (): readonly Token[] => {
+  return useEnvironment().markets.map((m) => m.token);
 };
 
-export const useMarketTokens = (): readonly Token[] => {
-  return useEnvironment().markets.map(
-    (m) =>
-      new Token({
-        chainId: ChainId.Mainnet,
-        decimals: 36,
-        name: `Squared ${m.pair.speculativeToken.symbol} / ${m.pair.baseToken.symbol}`,
-        symbol: `${m.pair.speculativeToken.symbol}²`,
-        address: m.address,
-        logoURI: powerCELO,
-      })
-  );
+export const useSpeculativeTokens = (): readonly Token[] => {
+  return useEnvironment().markets.map((m) => m.pair.speculativeToken);
 };
 
 export const useAllTokens = (): readonly Token[] => {
   const marketTokens = useMarketTokens();
-  return [CELO[ChainId.Mainnet], ...marketTokens] as const;
+  const speculativeTokens = useSpeculativeTokens();
+  return [...speculativeTokens, ...marketTokens] as const;
 };
 
-export const getTokensPerMarket = (market: IMarket): [Token, Token] => {
-  return [market.pair.speculativeToken, market.pair.baseToken];
+export const useIsWrappedNative = (token: Token | null) => {
+  const chain = useChain();
+  const native = NativeTokens[chain][0];
+  return token === native;
 };
 
-export const useMarketsPerToken = (token: Token) => {
-  const environments = useEnvironment();
+export const useGetIsWrappedNative = () => {
+  const chain = useChain();
   return useCallback(
-    () =>
-      environments.markets.filter(
-        (m) => m.pair.baseToken === token || m.pair.speculativeToken === token
-      ),
-    [environments.markets, token]
+    (token: Token | null) => {
+      const native = NativeTokens[chain][0];
+      return token === native;
+    },
+    [chain]
   );
+};
+
+export const useNative = () => {
+  const chain = useChain();
+  return NativeTokens[chain][1];
+};
+
+export const useDisplayToken = (token: Token | null) => {
+  const isNative = useIsWrappedNative(token);
+  const native = useNative();
+  return isNative ? native : token;
 };

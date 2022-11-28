@@ -328,9 +328,9 @@ export class DefaultToasterWrapper {
         <div tw="flex text-secondary">
           {hash ? (
             <div>
-              View Transaction:{" "}
+              View Transaction: {/* TODO: update the explorer based on chain */}
               <a
-                href={`https://celoscan.io/tx/${hash}`}
+                href={`https://goerli.etherscan.io/tx/${hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

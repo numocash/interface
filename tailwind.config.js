@@ -15,26 +15,18 @@ const brandColors = {
 };
 
 const grays = {
-  ...colors.gray,
-  100: "#F4F3F5",
-  200: "#DDDDDD",
-  300: "#CED3DD",
-  350: "#A8A8A8",
-  400: "#888D9B",
-  500: "#6c687d",
-  600: "#303236",
-  700: "#2B2B2B",
-  750: "#1E1E23",
-  800: "#121218",
-  900: "#111214",
+  100: "#F2F2F7",
+  200: "#E5E5EA",
+  300: "#D1D1D6",
+  350: "#C7C7CC",
+  400: "#AEAEB2",
+  500: "#8E8E93",
 };
 
 const custom = {
-  container: "#EDEEEF", // white
   action: "#FFFFFF",
-  container: {
-    DEFAULT: "#EDEEEF",
-  }, // black
+  red: "#FF4941",
+  blue: "#0e76fd",
 };
 
 const textColor = {
@@ -53,14 +45,9 @@ module.exports = {
       lg: "976px",
       xl: "1220px",
     },
-    fontFamily: {
-      sans: ["Inter", "sans-serif"],
-    },
     extend: {
       fontSize: {
         xs: "0.8125rem",
-        xxs: ".6rem",
-        "3xl": "1.75rem",
       },
       colors: {
         ...colors,
@@ -74,36 +61,11 @@ module.exports = {
         98: ".98",
         102: "1.02",
       },
-      typography: {
-        DEFAULT: {
-          css: {
-            p: {
-              fontSize: "0.875rem",
-              fontWeight: "400",
-              lineHeight: "1.0625rem",
-              color: textColor.secondary,
-            },
-            h1: {
-              fontSize: "1.25rem",
-              fontWeight: "600",
-            },
-            h2: {
-              fontSize: "1.25rem",
-              fontWeight: "600",
-            },
-            h3: {
-              fontSize: "0.8125rem",
-              fontWeight: "400",
-              color: textColor.secondary,
-            },
-          },
-        },
-      },
     },
   },
   plugins: [
     require("@tailwindcss/aspect-ratio"),
     require("@tailwindcss/forms"),
-    // require("@tailwindcss/typography"),
+    require("@tailwindcss/typography"),
   ],
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { css, styled } from "twin.macro";
+import tw, { styled } from "twin.macro";
 
 import { breakpoints } from "../../../theme/breakpoints";
 
@@ -53,7 +53,11 @@ export const BigNumericInput: React.FC<IProps> = ({
   />
 );
 
-const StyledInput = styled.input<{ hasBackground?: boolean }>`
+const StyledInput = styled.input<{
+  hasBackground?: boolean;
+  disabled?: boolean;
+}>`
+  ${tw`border border-gray-300`}
   color: ${({ theme }) => theme.colors.text.bold};
   font-weight: 400;
   font-size: 24px;
@@ -66,18 +70,10 @@ const StyledInput = styled.input<{ hasBackground?: boolean }>`
   padding-right: 8px;
   padding-left: 2px;
   border-radius: 8px;
-  border: none;
+
+  ${(props) => !!props.disabled && tw`bg-gray-100 border-0`}
 
   ${breakpoints.mobile} {
     font-size: 20px;
   }
-
-  background: transparent;
-  // outline: none;
-  ${(props) =>
-    props.hasBackground &&
-    css`
-      padding: 0 24px;
-      border-radius: 8px;
-    `}
 `;

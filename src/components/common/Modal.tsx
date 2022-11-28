@@ -104,7 +104,7 @@ const ModalWrapper = styled(animated(DialogContent), {
   pinToTop?: boolean;
   topMargin?: number;
 }>(({ pinToTop = true, topMargin }) => [
-  tw`w-full max-w-sm rounded-lg bg-container p-0 overflow-hidden max-h-[608px]`,
+  tw`w-full max-w-sm rounded-lg bg-gray-100 p-0 overflow-hidden max-h-[608px]`,
   css`
     &[data-reach-dialog-content] {
       ${tw`flex p-0 m-4 rounded-xl md:m-auto`}

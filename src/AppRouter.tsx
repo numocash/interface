@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { Earn } from "./components/pages/Earn";
-import { CreatePosition } from "./components/pages/Earn/CreatePosition";
+import { Manage } from "./components/pages/Earn/Manage";
 import { Trade } from "./components/pages/Trade";
 
 export const AppRouter: React.FC = () => {
@@ -11,7 +11,8 @@ export const AppRouter: React.FC = () => {
       <Route path="/trade" element={<Trade />} />
 
       <Route path="/earn" element={<Earn />} />
-      <Route path="/earn/create-position" element={<CreatePosition />} />
+      <Route path="/earn/:lendgineAddress" element={<Manage />} />
+      <Route path="/earn/:lendgineAddress/:tokenID" element={<Manage />} />
 
       <Route path="" element={<Navigate to="trade" replace />} />
     </Routes>
