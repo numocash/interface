@@ -12,7 +12,7 @@ import { useUserLendgine } from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
 import { useGetIsWrappedNative } from "../../../../../hooks/useTokens";
 import { useBeet } from "../../../../../utils/beet";
-import { roundLiquidity } from "../../../../../utils/trade";
+import { roundLiquidity } from "../../../../../utils/Numoen/invariantMath";
 
 export const useWithdraw = (
   market: IMarket,

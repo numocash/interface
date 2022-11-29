@@ -9,10 +9,12 @@ import { useBlockMulticall } from "./useBlockQuery";
 import { useTokenContractFromAddress } from "./useContract";
 import { useIsWrappedNative } from "./useTokens";
 
+export type HookArg<T> = T | null | undefined;
+
 export const useTokenAllowance = (
-  token: Token | null | undefined,
-  address: string | null | undefined,
-  spender: string | null | undefined
+  token: HookArg<Token>,
+  address: HookArg<string>,
+  spender: HookArg<string>
 ): TokenAmount | null => {
   const data = useBlockMulticall(
     token && address && spender
@@ -26,9 +28,9 @@ export const useTokenAllowance = (
 
 // returns true if the token needs approval
 export const useApproval = (
-  tokenAmount: TokenAmount | null | undefined,
-  address: string | null | undefined,
-  spender: string | null | undefined
+  tokenAmount: HookArg<TokenAmount>,
+  address: HookArg<string>,
+  spender: HookArg<string>
 ): boolean | null => {
   const allowance = useTokenAllowance(tokenAmount?.token, address, spender);
   const isWrapped = useIsWrappedNative(tokenAmount?.token ?? null);
@@ -42,9 +44,9 @@ export const useApproval = (
 };
 
 export const useTokenAllowances = (
-  tokens: Token[] | null | undefined,
-  address: string | null | undefined,
-  spender: string | null | undefined
+  tokens: HookArg<readonly Token[]>,
+  address: HookArg<string>,
+  spender: HookArg<string>
 ): Readonly<TokenAmount[]> | null => {
   const data = useBlockMulticall(
     tokens && address && spender
@@ -57,8 +59,8 @@ export const useTokenAllowances = (
 };
 
 export function useApprove(
-  amount: TokenAmount | null | undefined,
-  spender: string | null | undefined
+  amount: HookArg<TokenAmount>,
+  spender: HookArg<string>
 ) {
   const { infiniteApprove } = useSettings();
   const tokenContract = useTokenContractFromAddress(

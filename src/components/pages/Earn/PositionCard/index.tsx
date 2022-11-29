@@ -1,12 +1,12 @@
-import type { IMarket } from "@dahlia-labs/numoen-utils";
+import type { IMarket, IMarketUserInfo } from "@dahlia-labs/numoen-utils";
 import React, { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 
-import type { IMarketUserInfo } from "../../../../contexts/environment";
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { supplyRate } from "../../../../utils/Numoen/jumprate";
 import { Module } from "../../../common/Module";
 import { TokenIcon } from "../../../common/TokenIcon";
-import { Stats, supplyRate } from "./Stats";
+import { Stats } from "./Stats";
 
 interface Props {
   userInfo: IMarketUserInfo | null;

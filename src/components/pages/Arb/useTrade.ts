@@ -1,10 +1,11 @@
 import type { IMarket } from "@dahlia-labs/numoen-utils";
-import type { Price, Token } from "@dahlia-labs/token-utils";
-import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
+import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
 import { useCallback, useMemo } from "react";
 
 import { usePair } from "../../../hooks/usePair";
 import { useUniswapPair } from "../../../hooks/useUniswapPair";
+import { getBaseIn, getBaseOut } from "../../../utils/Numoen/pairMath";
+import { getAmountIn } from "../../../utils/Numoen/uniPairMath";
 import type { Trade } from "./useArbState";
 
 export interface UseTradeParams {
@@ -117,71 +118,4 @@ const useArb1 = (
 
     return amountInUniswap ? fromAmount.subtract(amountInUniswap) : null;
   }, [fromAmount, market, pairInfo, uniInfo]);
-};
-
-const getBaseOut = (
-  amountSIn: TokenAmount,
-  r1: TokenAmount,
-  liquidity: TokenAmount,
-  upperBound: Price,
-  market: IMarket
-): TokenAmount => {
-  const scaleIn = amountSIn.scale(liquidity.invert());
-  const scale1 = r1.scale(liquidity.invert());
-
-  const a = scaleIn.scale(upperBound.asFraction);
-  const b = scaleIn.scale(scaleIn).scale(new Fraction(4).invert());
-  const c = scaleIn.scale(scale1).scale(new Fraction(2).invert());
-
-  return new TokenAmount(
-    market.pair.baseToken,
-    a.subtract(b).subtract(c).scale(liquidity).raw
-  );
-};
-
-const getBaseIn = (
-  amountSOut: TokenAmount,
-  r1: TokenAmount,
-  liquidity: TokenAmount,
-  upperBound: Price,
-  market: IMarket
-): TokenAmount => {
-  const scaleOut = amountSOut.scale(liquidity.invert());
-  const scale1 = r1.scale(liquidity.invert());
-
-  const a = scaleOut.scale(upperBound.asFraction);
-  const b = scaleOut.scale(scaleOut).scale(new Fraction(4).invert());
-  const c = scaleOut.scale(scale1).scale(new Fraction(2).invert());
-
-  return new TokenAmount(
-    market.pair.baseToken,
-    a.add(b).subtract(c).scale(liquidity).raw
-  );
-};
-
-const getAmountOut = (
-  amountIn: TokenAmount,
-  reserveIn: TokenAmount,
-  reserveOut: TokenAmount
-): TokenAmount => {
-  const amountInWithFee = amountIn.scale(new Fraction(997));
-  const numerator = amountInWithFee.scale(reserveOut);
-  const denominator = reserveIn.scale(new Fraction(1000)).add(amountInWithFee);
-  return new TokenAmount(
-    reserveOut.token,
-    numerator.scale(denominator.invert()).raw
-  );
-};
-
-const getAmountIn = (
-  amountOut: TokenAmount,
-  reserveIn: TokenAmount,
-  reserveOut: TokenAmount
-): TokenAmount => {
-  const numerator = reserveIn.scale(amountOut).scale(new Fraction(1000));
-  const denominator = reserveOut.subtract(amountOut).scale(new Fraction(997));
-  return new TokenAmount(
-    reserveIn.token,
-    numerator.scale(denominator.invert()).raw
-  );
 };

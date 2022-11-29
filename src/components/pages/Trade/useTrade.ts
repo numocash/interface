@@ -21,14 +21,16 @@ import { useGetIsWrappedNative } from "../../../hooks/useTokens";
 import { useUniswapPair } from "../../../hooks/useUniswapPair";
 import type { BeetStage, BeetTx } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
+import { roundLiquidity } from "../../../utils/Numoen/invariantMath";
 import {
   convertShareToLiquidity,
+  speculativeToLiquidity,
+} from "../../../utils/Numoen/lendgineMath";
+import {
   determineBorrowAmount,
   determineSlippage,
   outputAmount,
-  roundLiquidity,
-  speculativeToLiquidity,
-} from "../../../utils/trade";
+} from "../../../utils/Numoen/trade";
 import type { Trade } from "./useSwapState";
 
 export interface UseTradeParams {

@@ -1,4 +1,8 @@
-import type { IMarket, IMarketInfo } from "@dahlia-labs/numoen-utils";
+import type {
+  IMarket,
+  IMarketInfo,
+  IMarketUserInfo,
+} from "@dahlia-labs/numoen-utils";
 import {
   getPositionMulticall,
   lastUpdateMulticall,
@@ -13,12 +17,12 @@ import { max } from "lodash";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import { pairInfoToPrice } from "../components/pages/Earn/PositionCard/Stats";
 import { liquidityManagerGenesis } from "../constants";
 import { useBlock } from "../contexts/block";
-import type { IMarketUserInfo } from "../contexts/environment";
-import { getPositionMulticall2 } from "../utils/lendgineUtils";
-import { newRewardPerLiquidity } from "../utils/trade";
+import { newRewardPerLiquidity } from "../utils/Numoen/lendgineMath";
+import { getPositionMulticall2 } from "../utils/Numoen/lendgineMulticall";
+import { pairInfoToPrice } from "../utils/Numoen/priceMath";
+import type { HookArg } from "./useApproval";
 import { useBlockMulticall, useBlockQuery } from "./useBlockQuery";
 import { useChain } from "./useChain";
 import { useLiquidityManager } from "./useContract";
@@ -26,8 +30,8 @@ import { usePair } from "./usePair";
 import { useUniswapPair } from "./useUniswapPair";
 
 export const useUserLendgines = (
-  address: string | undefined,
-  markets: readonly IMarket[] | null
+  address: HookArg<string>,
+  markets: HookArg<readonly IMarket[]>
 ): readonly IMarketUserInfo[] | null => {
   const liquidityManagerContract = useLiquidityManager(false);
   const chain = useChain();
@@ -83,8 +87,8 @@ export const useNextTokenID = (): number | null => {
 };
 
 export const useUserLendgine = (
-  tokenID: number | null,
-  market: IMarket | null
+  tokenID: HookArg<number>,
+  market: HookArg<IMarket>
 ): IMarketUserInfo | null => {
   const chain = useChain();
 
@@ -96,7 +100,7 @@ export const useUserLendgine = (
   return data[0];
 };
 
-export const useLendgine = (market: IMarket | null): IMarketInfo | null => {
+export const useLendgine = (market: HookArg<IMarket>): IMarketInfo | null => {
   const data = useBlockMulticall(
     market
       ? [
@@ -120,7 +124,7 @@ export const useLendgine = (market: IMarket | null): IMarketInfo | null => {
   };
 };
 
-export const usePrice = (market: IMarket | null): Fraction | null => {
+export const usePrice = (market: HookArg<IMarket>): Fraction | null => {
   const pairInfo = usePair(market?.pair ?? null);
   const uniInfo = useUniswapPair(market ?? null);
 
@@ -141,7 +145,7 @@ export const usePrice = (market: IMarket | null): Fraction | null => {
   }
 };
 
-export const useRefPrice = (market: IMarket | null): Price | null => {
+export const useRefPrice = (market: HookArg<IMarket>): Price | null => {
   const uniInfo = useUniswapPair(market ?? null);
 
   if (!uniInfo || !market) return null;
@@ -155,12 +159,13 @@ export const useRefPrice = (market: IMarket | null): Price | null => {
 };
 
 export const useClaimableTokens = (
-  tokenID: number | null,
-  market: IMarket
+  tokenID: HookArg<number>,
+  market: HookArg<IMarket>
 ): TokenAmount | null => {
   const marketInfo = useLendgine(market);
   const newRPL = useMemo(
-    () => (marketInfo ? newRewardPerLiquidity(market, marketInfo) : null),
+    () =>
+      marketInfo && market ? newRewardPerLiquidity(market, marketInfo) : null,
     [market, marketInfo]
   );
   const userPositionInfo = useUserLendgine(tokenID, market);

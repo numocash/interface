@@ -16,7 +16,7 @@ import {
   liquidityToSpec,
   roundLiquidity,
   specToLiquidity,
-} from "../../../../utils/trade";
+} from "../../../../utils/Numoen/invariantMath";
 import { Page } from "../../../common/Page";
 import { Action } from "./Action";
 import { Button } from "./Button";

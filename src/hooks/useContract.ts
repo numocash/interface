@@ -21,10 +21,11 @@ import type { Contract } from "@ethersproject/contracts";
 import { useMemo } from "react";
 import { useProvider, useSigner } from "wagmi";
 
+import type { HookArg } from "./useApproval";
 import { useChain } from "./useChain";
 
 export function useTokenContractFromAddress(
-  tokenAddress: string | null | undefined,
+  tokenAddress: HookArg<string>,
   withSignerIfPossible: boolean
 ): Erc20 | null {
   return useContract(
@@ -37,7 +38,7 @@ export function useTokenContractFromAddress(
 }
 
 export function useTokenContract(
-  token: Token | null | undefined,
+  token: HookArg<Token>,
   withSignerIfPossible: boolean
 ): Erc20 | null {
   return useContract(
