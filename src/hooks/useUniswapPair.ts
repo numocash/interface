@@ -1,37 +1,14 @@
 import type { IMarket } from "@dahlia-labs/numoen-utils";
-import { TokenAmount } from "@dahlia-labs/token-utils";
-import type { IUniswapV2Pair } from "@dahlia-labs/uniswapv2-utils";
-import { pairInterface } from "@dahlia-labs/uniswapv2-utils";
-import type { Multicall } from "@dahlia-labs/use-ethers";
-import type { BigNumber } from "ethers";
+import type { TokenAmount } from "@dahlia-labs/token-utils";
+import { reservesMulticall } from "@dahlia-labs/uniswapv2-utils";
 import invariant from "tiny-invariant";
 
+import type { HookArg } from "./useApproval";
 import { useBlockMulticall } from "./useBlockQuery";
-
-// TODO: fix this in the library
-export const reservesMulticall = (
-  pair: IUniswapV2Pair
-): Multicall<Readonly<[TokenAmount, TokenAmount]>> =>
-  ({
-    call: {
-      target: pair.address,
-      callData: pairInterface.encodeFunctionData("getReserves"),
-    },
-    parseReturn: (returnData: string) => {
-      const data = pairInterface.decodeFunctionResult(
-        "getReserves",
-        returnData
-      ) as [BigNumber, BigNumber];
-      return [
-        new TokenAmount(pair.tokens[0], data[0].toString()),
-        new TokenAmount(pair.tokens[1], data[1].toString()),
-      ] as const;
-    },
-  } as const);
 
 // Returns data in base, speculative
 export const useUniswapPair = (
-  market: IMarket | null
+  market: HookArg<IMarket>
 ): [TokenAmount, TokenAmount] | null => {
   const data = useBlockMulticall(
     market ? [reservesMulticall(market.referenceMarket)] : null

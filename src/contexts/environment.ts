@@ -1,16 +1,8 @@
 import { markets } from "@dahlia-labs/numoen-config";
 import type { IMarket } from "@dahlia-labs/numoen-utils";
-import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
+import type { Token } from "@dahlia-labs/token-utils";
 import { useCallback } from "react";
 import { createContainer } from "unstated-next";
-
-export interface IMarketUserInfo {
-  tokenID: number;
-  liquidity: TokenAmount;
-  market: IMarket;
-  rewardPerLiquidityPaid: TokenAmount;
-  tokensOwed: TokenAmount;
-}
 
 interface Environment {
   markets: readonly IMarket[];

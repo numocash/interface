@@ -4,12 +4,13 @@ import { balanceOfMulticall } from "@dahlia-labs/use-ethers";
 import { useMemo } from "react";
 import { useAccount, useBalance } from "wagmi";
 
+import type { HookArg } from "./useApproval";
 import { useBlockMulticall } from "./useBlockQuery";
 import { useIsWrappedNative, useNative } from "./useTokens";
 
 export const useTokenBalance = (
-  token: Token | null | undefined,
-  address: string | null | undefined
+  token: HookArg<Token>,
+  address: HookArg<string>
 ): TokenAmount | null => {
   const data = useBlockMulticall(
     token && address ? [balanceOfMulticall(token, address)] : null
@@ -19,8 +20,8 @@ export const useTokenBalance = (
 };
 
 export const useTokenBalances = (
-  tokens: Token[] | null | undefined,
-  address: string | null | undefined
+  tokens: HookArg<readonly Token[]>,
+  address: HookArg<string>
 ): Readonly<TokenAmount[]> | null => {
   const data = useBlockMulticall(
     tokens && address ? tokens.map((t) => balanceOfMulticall(t, address)) : []
@@ -39,7 +40,7 @@ export const useNativeTokenBalance = (): TokenAmount | null => {
 };
 
 export const useWrappedTokenBalance = (
-  token: Token | null
+  token: HookArg<Token>
 ): TokenAmount | null => {
   const { address } = useAccount();
   const nativeBalance = useNativeTokenBalance();

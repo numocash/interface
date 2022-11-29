@@ -1,100 +1,15 @@
-import type {
-  IMarket,
-  IMarketInfo,
-  IPair,
-  IPairInfo,
-} from "@dahlia-labs/numoen-utils";
-import type { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
-import { Percent, Price } from "@dahlia-labs/token-utils";
+import type { IMarket, IMarketUserInfo } from "@dahlia-labs/numoen-utils";
 import { useMemo } from "react";
 
-import type { IMarketUserInfo } from "../../../../contexts/environment";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
+import { totalValue } from "../../../../utils/Numoen/priceMath";
 import { RowBetween } from "../../../common/RowBetween";
 
 interface Props {
   market: IMarket;
   userInfo: IMarketUserInfo | null;
 }
-
-export const pairInfoToPrice = (pairInfo: IPairInfo, pair: IPair): Price => {
-  if (pairInfo.totalLPSupply.equalTo(0))
-    return new Price(pair.speculativeToken, pair.baseToken, 1, 0);
-
-  const scale1 = pairInfo.speculativeAmount.divide(pairInfo.totalLPSupply);
-  const priceFraction = pair.bound.subtract(scale1.divide(2));
-  return new Price(
-    pair.speculativeToken,
-    pair.baseToken,
-    priceFraction.denominator,
-    priceFraction.numerator
-  );
-};
-
-export const priceToPairReserves = (
-  price: Price,
-  liquidity: TokenAmount,
-  market: IMarket
-): [Fraction, Fraction] => {
-  const scale0 = price.asFraction.multiply(price);
-  const scale1 = market.pair.bound.subtract(price).multiply(2);
-
-  return [liquidity.multiply(scale0), liquidity.multiply(scale1)];
-};
-
-export const pricePerLP = (pairInfo: IPairInfo, pair: IPair): Price => {
-  const price = pairInfoToPrice(pairInfo, pair);
-  if (price.equalTo(0)) return new Price(pair.lp, pair.baseToken, 1, 0);
-  const scale0 = pairInfo.baseAmount.divide(pairInfo.totalLPSupply);
-  const scale1 = pairInfo.speculativeAmount.divide(pairInfo.totalLPSupply);
-  const priceFraction = scale0.add(scale1.multiply(price));
-
-  return new Price(
-    pair.lp,
-    pair.baseToken,
-    priceFraction.denominator,
-    priceFraction.numerator
-  );
-};
-
-const totalValue = (
-  marketInfo: IMarketInfo,
-  pairInfo: IPairInfo,
-  market: IMarket
-): TokenAmount => {
-  const price = pricePerLP(pairInfo, market.pair);
-  return price.quote(marketInfo.totalLiquidity);
-};
-
-const kink = new Percent(8, 10);
-const multiplier = new Percent(1375, 100000);
-const jumpMultiplier = new Percent(89, 200);
-
-export const borrowRate = (marketInfo: IMarketInfo): Percent => {
-  if (marketInfo.totalLiquidity.equalTo(0)) return new Percent(0);
-  const utilization = Percent.fromFraction(
-    marketInfo.totalLiquidityBorrowed.divide(marketInfo.totalLiquidity)
-  );
-
-  if (utilization.greaterThan(kink)) {
-    const normalRate = kink.multiply(multiplier);
-    const excessUtil = utilization.subtract(kink);
-    return excessUtil.multiply(jumpMultiplier).add(normalRate);
-  } else {
-    return utilization.multiply(multiplier);
-  }
-};
-
-export const supplyRate = (marketInfo: IMarketInfo): Percent => {
-  if (marketInfo.totalLiquidity.equalTo(0)) return new Percent(0);
-  const utilization = Percent.fromFraction(
-    marketInfo.totalLiquidityBorrowed.divide(marketInfo.totalLiquidity)
-  );
-
-  const borrow = borrowRate(marketInfo);
-  return utilization.multiply(borrow).multiply(100);
-};
 
 export const Stats: React.FC<Props> = ({ market, userInfo }: Props) => {
   const marketInfo = useLendgine(market);

@@ -3,9 +3,10 @@ import { FaChevronLeft } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { supplyRate } from "../../../../utils/Numoen/jumprate";
 import { ChartIcons } from "../../../common/ChartIcons";
 import { TokenIcon } from "../../../common/TokenIcon";
-import { Stats, supplyRate } from "../PositionCard/Stats";
+import { Stats } from "../PositionCard/Stats";
 import { useManage } from ".";
 
 export const Top: React.FC = () => {

@@ -19,10 +19,10 @@ import {
 import { usePair } from "../../../../hooks/usePair";
 import { useGetIsWrappedNative } from "../../../../hooks/useTokens";
 import { useBeet } from "../../../../utils/beet";
+import { pairInfoToPrice } from "../../../../utils/Numoen/priceMath";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { Module } from "../../../common/Module";
 import { TokenIcon } from "../../../common/TokenIcon";
-import { pairInfoToPrice } from "../PositionCard/Stats";
 import { useManage } from ".";
 
 export const Position: React.FC = () => {

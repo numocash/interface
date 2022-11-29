@@ -4,9 +4,10 @@ import { useCallback } from "react";
 
 import { NativeTokens } from "../constants";
 import { useEnvironment } from "../contexts/environment";
+import type { HookArg } from "./useApproval";
 import { useChain } from "./useChain";
 
-export const useAddressToToken = (address: string | null): Token | null => {
+export const useAddressToToken = (address: HookArg<string>): Token | null => {
   const tokens = useAllTokens();
   if (!address) return null;
   return (
@@ -28,7 +29,7 @@ export const useAllTokens = (): readonly Token[] => {
   return [...speculativeTokens, ...marketTokens] as const;
 };
 
-export const useIsWrappedNative = (token: Token | null) => {
+export const useIsWrappedNative = (token: HookArg<Token>) => {
   const chain = useChain();
   const native = NativeTokens[chain][0];
   return token === native;
@@ -50,7 +51,7 @@ export const useNative = () => {
   return NativeTokens[chain][1];
 };
 
-export const useDisplayToken = (token: Token | null) => {
+export const useDisplayToken = (token: HookArg<Token>) => {
   const isNative = useIsWrappedNative(token);
   const native = useNative();
   return isNative ? native : token;
