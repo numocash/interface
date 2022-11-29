@@ -4,7 +4,6 @@ import { NavLink } from "react-router-dom";
 
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { supplyRate } from "../../../../utils/Numoen/jumprate";
-
 import { TokenIcon } from "../../../common/TokenIcon";
 import { Stats } from "../PositionCard/Stats";
 import { useManage } from ".";
