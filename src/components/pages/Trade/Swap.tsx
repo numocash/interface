@@ -4,7 +4,9 @@ import { useWrappedTokenBalance } from "../../../hooks/useTokenBalance";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { Module } from "../../common/Module";
+import { RowBetween } from "../../common/RowBetween";
 import { Settings } from "../../common/Settings";
+import { SubModule } from "../../common/SubModule";
 import { Field, useSwapState } from "./useSwapState";
 
 export const Swap: React.FC = () => {
@@ -34,7 +36,7 @@ export const Swap: React.FC = () => {
           </p>
           <Settings />
         </div>
-        <div tw="flex flex-col max-w-lg bg-gray-100 rounded-lg">
+        <div tw="flex flex-col max-w-lg bg-gray-100">
           <div tw="  gap-2 flex flex-col p-6 bg-white">
             <AssetSelection
               label={<span>From</span>}
@@ -67,6 +69,18 @@ export const Swap: React.FC = () => {
             />
           </div>
         </div>
+        <SubModule tw="">
+          <RowBetween tw="flex justify-between">
+            <p>Funding rate</p>
+            <p tw="font-bold">10%</p>
+          </RowBetween>
+          <hr tw="border-[#AEAEB2] rounded " />
+
+          <RowBetween tw="flex justify-between">
+            <p>Upper Bound</p>
+            <p tw="font-bold">5 ETH / UNI</p>
+          </RowBetween>
+        </SubModule>
       </Module>
       <AsyncButton
         variant="primary"
