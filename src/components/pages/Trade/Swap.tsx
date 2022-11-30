@@ -1,13 +1,22 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { useAccount } from "wagmi";
 
-import { useWrappedTokenBalance } from "../../../hooks/useTokenBalance";
+import { useLendgine } from "../../../hooks/useLendgine";
+import {
+  useTokenBalance,
+  useWrappedTokenBalance,
+} from "../../../hooks/useTokenBalance";
+import { borrowRate } from "../../../utils/Numoen/jumprate";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { Module } from "../../common/Module";
+import { RowBetween } from "../../common/RowBetween";
 import { Settings } from "../../common/Settings";
+import { SubModule } from "../../common/SubModule";
 import { Field, useSwapState } from "./useSwapState";
 
 export const Swap: React.FC = () => {
+  const { address } = useAccount();
   const {
     selectedFrom,
     selectedTo,
@@ -25,6 +34,20 @@ export const Swap: React.FC = () => {
   const fromBalance = useWrappedTokenBalance(selectedFrom);
   const toBalance = useWrappedTokenBalance(selectedTo);
 
+  const marketInfo = useLendgine(trade?.market);
+  const rate = useMemo(
+    () => (marketInfo ? borrowRate(marketInfo) : null),
+    [marketInfo]
+  );
+
+  const userPosition = useTokenBalance(trade?.market.token, address);
+  const showStats = useMemo(
+    () =>
+      (trade && trade.inputAmount.greaterThan(0)) ||
+      (userPosition && userPosition.greaterThan(0)),
+    [trade, userPosition]
+  );
+
   return (
     <>
       <Module tw="p-0">
@@ -34,7 +57,7 @@ export const Swap: React.FC = () => {
           </p>
           <Settings />
         </div>
-        <div tw="flex flex-col max-w-lg bg-gray-100 rounded-lg">
+        <div tw="flex flex-col max-w-lg bg-gray-100">
           <div tw="  gap-2 flex flex-col p-6 bg-white">
             <AssetSelection
               label={<span>From</span>}
@@ -67,6 +90,25 @@ export const Swap: React.FC = () => {
             />
           </div>
         </div>
+        {showStats && (
+          <SubModule tw="">
+            <RowBetween tw="flex justify-between">
+              <p>Funding rate</p>
+              <p tw="font-bold">{rate ? rate.toFixed(1) : "--"}%</p>
+            </RowBetween>
+
+            <RowBetween tw="pt-0 flex justify-between">
+              <p>Upper bound</p>
+              <p tw="font-bold">
+                {trade?.market.pair.bound.toFixed(0, { groupSeparator: "," })}{" "}
+                <span tw="font-normal">
+                  {trade?.market.pair.baseToken.symbol} /{" "}
+                  {trade?.market.pair.speculativeToken.symbol}
+                </span>
+              </p>
+            </RowBetween>
+          </SubModule>
+        )}
       </Module>
       <AsyncButton
         variant="primary"
