@@ -24,10 +24,10 @@ export const Arbitrum: React.FC = () => {
       <div tw="flex items-start gap-2">
         <img src={arbLogo} alt="arbitrum" height={36} width={36} />
         <div tw="flex flex-col">
-          <p tw="font-bold text-2xl">Numoen is live on Arbitrum</p>
+          <p tw="font-bold text-2xl">Numoen is live on Arbitrum!</p>
           <p>
-            Numoen is bringing permissionless options to Arbitrum. Check out our
-            launch calendar to see what is next.
+            Numoen options contain leverage but are constantly adjusted so they
+            are not liquidated.
           </p>
         </div>
       </div>

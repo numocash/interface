@@ -42,7 +42,9 @@ export const Swap: React.FC = () => {
 
   const userPosition = useTokenBalance(trade?.market.token, address);
   const showStats = useMemo(
-    () => !!trade || (userPosition && userPosition.greaterThan(0)),
+    () =>
+      (trade && trade.inputAmount.greaterThan(0)) ||
+      (userPosition && userPosition.greaterThan(0)),
     [trade, userPosition]
   );
 
