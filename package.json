@@ -4,13 +4,13 @@
   "license": "UNLICENSED",
   "author": "Kyle Scott <kyle@numoen.com>",
   "dependencies": {
-    "@dahlia-labs/celo-contrib": "^0.9.11",
-    "@dahlia-labs/celo-tokens": "^0.9.11",
+    "@dahlia-labs/celo-contrib": "^0.9.12",
+    "@dahlia-labs/celo-tokens": "^0.9.12",
     "@dahlia-labs/numoen-config": "^0.1.4",
-    "@dahlia-labs/numoen-utils": "^0.9.11",
-    "@dahlia-labs/token-utils": "^0.9.11",
-    "@dahlia-labs/uniswapv2-utils": "^0.9.11",
-    "@dahlia-labs/use-ethers": "^0.9.11",
+    "@dahlia-labs/numoen-utils": "^0.9.12",
+    "@dahlia-labs/token-utils": "^0.9.12",
+    "@dahlia-labs/uniswapv2-utils": "^0.9.12",
+    "@dahlia-labs/use-ethers": "^0.9.12",
     "@emotion/core": "^11.0.0",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
@@ -60,7 +60,7 @@
     "tslib": "^2.4.1",
     "unstated-next": "^1.1.0",
     "use-debounce": "^8.0.4",
-    "wagmi": "^0.8.6"
+    "wagmi": "^0.8.8"
   },
   "scripts": {
     "start": "craco start",

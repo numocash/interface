@@ -16,7 +16,7 @@ export const borrowRate = (marketInfo: IMarketInfo): Percent => {
     const excessUtil = utilization.subtract(kink);
     return excessUtil.multiply(jumpMultiplier).add(normalRate);
   } else {
-    return utilization.multiply(multiplier);
+    return utilization.multiply(multiplier).multiply(100);
   }
 };
 
@@ -27,5 +27,6 @@ export const supplyRate = (marketInfo: IMarketInfo): Percent => {
   );
 
   const borrow = borrowRate(marketInfo);
-  return utilization.multiply(borrow).multiply(100);
+
+  return utilization.multiply(borrow);
 };
