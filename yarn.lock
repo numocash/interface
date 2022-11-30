@@ -1642,30 +1642,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dahlia-labs/celo-contrib@npm:^0.9.11":
-  version: 0.9.11
-  resolution: "@dahlia-labs/celo-contrib@npm:0.9.11"
+"@dahlia-labs/celo-contrib@npm:^0.9.12, @dahlia-labs/celo-contrib@npm:^0.9.8":
+  version: 0.9.12
+  resolution: "@dahlia-labs/celo-contrib@npm:0.9.12"
   dependencies:
     tslib: ^2.4.1
-  checksum: 7fc09e1b0982db97a47282c08f6f2a6f730b6e4b6cf914fb944c03e54e7bb8a1b24593cc4acc61709f3613874950b453e4a363fb8101a50b42190309b6999788
+  checksum: c646283b5d44d660dacae81c10a94598de660b3c975908e6ac65b4c081a6fb3c1aba43f07acb30f89b693f19f4c83ae6ce5773cf9c665346995d607d22b528fd
   languageName: node
   linkType: hard
 
-"@dahlia-labs/celo-contrib@npm:^0.9.8":
-  version: 0.9.8
-  resolution: "@dahlia-labs/celo-contrib@npm:0.9.8"
+"@dahlia-labs/celo-tokens@npm:^0.9.12, @dahlia-labs/celo-tokens@npm:^0.9.8":
+  version: 0.9.12
+  resolution: "@dahlia-labs/celo-tokens@npm:0.9.12"
   dependencies:
-    tslib: ^2.4.1
-  checksum: 2baa8d8345b64b36d9b9fb30ce2a8f7a0d5edd53422057f1cc8dfdf80c157487aea01017a0efe16919785c02f46319b57b1614144b89992035620b7ddda6d821
-  languageName: node
-  linkType: hard
-
-"@dahlia-labs/celo-tokens@npm:^0.9.11":
-  version: 0.9.11
-  resolution: "@dahlia-labs/celo-tokens@npm:0.9.11"
-  dependencies:
-    "@dahlia-labs/celo-contrib": ^0.9.11
-    "@dahlia-labs/token-utils": ^0.9.11
+    "@dahlia-labs/celo-contrib": ^0.9.12
+    "@dahlia-labs/token-utils": ^0.9.12
     "@ubeswap/token-math": ^5.2.1
     lodash.mapvalues: ^4.6.0
     tiny-invariant: ^1.3.1
@@ -1673,24 +1664,7 @@ __metadata:
   peerDependencies:
     bn.js: ^4 || ^5
     jsbi: ^3 || ^4
-  checksum: c504ec774d17d5211658c69f8cf9bc45073bcc3ceb05312836bace0c910d25e0721fb96aa3b3702a4b0afd294780d052288185719258dcbe4871f58fce730a48
-  languageName: node
-  linkType: hard
-
-"@dahlia-labs/celo-tokens@npm:^0.9.8":
-  version: 0.9.8
-  resolution: "@dahlia-labs/celo-tokens@npm:0.9.8"
-  dependencies:
-    "@dahlia-labs/celo-contrib": ^0.9.8
-    "@dahlia-labs/token-utils": ^0.9.8
-    "@ubeswap/token-math": ^5.2.1
-    lodash.mapvalues: ^4.6.0
-    tiny-invariant: ^1.3.1
-    tslib: ^2.4.1
-  peerDependencies:
-    bn.js: ^4 || ^5
-    jsbi: ^3 || ^4
-  checksum: c45234d7c62bd09db8f70d15d4f1dddbce571742bb3984dcf2d97f2e6f2c2eda7bcb75d6a8466831f91ad1238b9eacf88eabe2f90d9f34238644de5408a6e7ea
+  checksum: 3a6a4958ed79a6d23fde3725813ce25563a0e1ecb8c909259e42c35cf58f460f1c15a98721a41bb825919ff2fa3f8317ec525323590ab95e6bcf11fdfaca961e
   languageName: node
   linkType: hard
 
@@ -1718,13 +1692,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dahlia-labs/numoen-utils@npm:^0.9.11":
-  version: 0.9.11
-  resolution: "@dahlia-labs/numoen-utils@npm:0.9.11"
+"@dahlia-labs/numoen-utils@npm:^0.9.12, @dahlia-labs/numoen-utils@npm:^0.9.8":
+  version: 0.9.12
+  resolution: "@dahlia-labs/numoen-utils@npm:0.9.12"
   dependencies:
-    "@dahlia-labs/token-utils": ^0.9.11
-    "@dahlia-labs/uniswapv2-utils": ^0.9.11
-    "@dahlia-labs/use-ethers": ^0.9.11
+    "@dahlia-labs/token-utils": ^0.9.12
+    "@dahlia-labs/uniswapv2-utils": ^0.9.12
+    "@dahlia-labs/use-ethers": ^0.9.12
     "@ethersproject/abi": ^5.7.0
     "@ethersproject/abstract-signer": ^5.7.0
     "@ethersproject/address": ^5.7.0
@@ -1738,17 +1712,31 @@ __metadata:
   peerDependencies:
     bn.js: ^4 || ^5
     jsbi: ^3 || ^4
-  checksum: 275f18d9fff3424cdf8ff51f8b48e1fc743123076e165ae02a6af40e0959155f744a4516a1cc7641e97be0fd2a36ef24d763f57a3012a8e36bc5883e3b08c6fa
+  checksum: 744a8f77540bd253b4b9799cc781cba8190f77fdbe1d390800347ec3f8f1e31025fc2035d562b5aae557da01e5484538c4a577f6b3e44db42a5c9f5ab3a5d7f3
   languageName: node
   linkType: hard
 
-"@dahlia-labs/numoen-utils@npm:^0.9.8":
-  version: 0.9.8
-  resolution: "@dahlia-labs/numoen-utils@npm:0.9.8"
+"@dahlia-labs/token-utils@npm:^0.9.12, @dahlia-labs/token-utils@npm:^0.9.8":
+  version: 0.9.12
+  resolution: "@dahlia-labs/token-utils@npm:0.9.12"
   dependencies:
-    "@dahlia-labs/token-utils": ^0.9.8
-    "@dahlia-labs/uniswapv2-utils": ^0.9.8
-    "@dahlia-labs/use-ethers": ^0.9.8
+    "@dahlia-labs/celo-contrib": ^0.9.12
+    "@ubeswap/token-math": ^5.2.1
+    tiny-invariant: ^1.3.1
+    tslib: ^2.4.1
+  peerDependencies:
+    bn.js: ^4 || ^5
+    jsbi: ^3 || ^4
+  checksum: dfc7546e6b5ed5fd0dfea4f22eb9c4ae14087c222820eecb7101e37ed7d6a1e20118e69e5c18a6e82dfefd70f09dfd72f46dd62a9fe88b5101e2ebe5ca243f8f
+  languageName: node
+  linkType: hard
+
+"@dahlia-labs/uniswapv2-utils@npm:^0.9.12, @dahlia-labs/uniswapv2-utils@npm:^0.9.8":
+  version: 0.9.12
+  resolution: "@dahlia-labs/uniswapv2-utils@npm:0.9.12"
+  dependencies:
+    "@dahlia-labs/token-utils": ^0.9.12
+    "@dahlia-labs/use-ethers": ^0.9.12
     "@ethersproject/abi": ^5.7.0
     "@ethersproject/abstract-signer": ^5.7.0
     "@ethersproject/address": ^5.7.0
@@ -1762,46 +1750,15 @@ __metadata:
   peerDependencies:
     bn.js: ^4 || ^5
     jsbi: ^3 || ^4
-  checksum: c2d73e0b06bfb16320ba379659cda0cef4f0376873c0b2018774638afbbeba3c30c907cdaa30168583d000b836bfa1529cf7cb57ac68e82342d1c21a67aaffad
+  checksum: ac8893ef1d932d5b27394fc1b510a0b8fc27fb89bc9fcccf9c41a79cd8f3318683159be8a6b08da8c7ee997c838ec9ce7a6bd33a4484c1a21ff67cfe8a46e2da
   languageName: node
   linkType: hard
 
-"@dahlia-labs/token-utils@npm:^0.9.11":
-  version: 0.9.11
-  resolution: "@dahlia-labs/token-utils@npm:0.9.11"
+"@dahlia-labs/use-ethers@npm:^0.9.12, @dahlia-labs/use-ethers@npm:^0.9.8":
+  version: 0.9.12
+  resolution: "@dahlia-labs/use-ethers@npm:0.9.12"
   dependencies:
-    "@dahlia-labs/celo-contrib": ^0.9.11
-    "@ubeswap/token-math": ^5.2.1
-    tiny-invariant: ^1.3.1
-    tslib: ^2.4.1
-  peerDependencies:
-    bn.js: ^4 || ^5
-    jsbi: ^3 || ^4
-  checksum: 5500d7193b50704ef0a04d68469d6e2a5b643e3c8ce1820757976bfac01ccb9eca557010377eb05d5fa993b27981ce8b7eb809c5c25b077d9e078f22f7f5db31
-  languageName: node
-  linkType: hard
-
-"@dahlia-labs/token-utils@npm:^0.9.8":
-  version: 0.9.8
-  resolution: "@dahlia-labs/token-utils@npm:0.9.8"
-  dependencies:
-    "@dahlia-labs/celo-contrib": ^0.9.8
-    "@ubeswap/token-math": ^5.2.1
-    tiny-invariant: ^1.3.1
-    tslib: ^2.4.1
-  peerDependencies:
-    bn.js: ^4 || ^5
-    jsbi: ^3 || ^4
-  checksum: bdc6f1823a05c9e806be907af162860458d9a1dfbab9c1745a453435b215054ef330fbf29a2a95e0e976561e50f917c983e506519fb2422ae6157475758dc4e9
-  languageName: node
-  linkType: hard
-
-"@dahlia-labs/uniswapv2-utils@npm:^0.9.11":
-  version: 0.9.11
-  resolution: "@dahlia-labs/uniswapv2-utils@npm:0.9.11"
-  dependencies:
-    "@dahlia-labs/token-utils": ^0.9.11
-    "@dahlia-labs/use-ethers": ^0.9.11
+    "@dahlia-labs/token-utils": ^0.9.12
     "@ethersproject/abi": ^5.7.0
     "@ethersproject/abstract-signer": ^5.7.0
     "@ethersproject/address": ^5.7.0
@@ -1815,74 +1772,7 @@ __metadata:
   peerDependencies:
     bn.js: ^4 || ^5
     jsbi: ^3 || ^4
-  checksum: 89022c5db6462f16fda21525bdd1666a261c291de6d873665b122f44d856c6c90791998ba4bbf69bc80e903613f54bb28df8419a35608883990cd14f401ad474
-  languageName: node
-  linkType: hard
-
-"@dahlia-labs/uniswapv2-utils@npm:^0.9.8":
-  version: 0.9.8
-  resolution: "@dahlia-labs/uniswapv2-utils@npm:0.9.8"
-  dependencies:
-    "@dahlia-labs/token-utils": ^0.9.8
-    "@dahlia-labs/use-ethers": ^0.9.8
-    "@ethersproject/abi": ^5.7.0
-    "@ethersproject/abstract-signer": ^5.7.0
-    "@ethersproject/address": ^5.7.0
-    "@ethersproject/constants": ^5.7.0
-    "@ethersproject/contracts": ^5.7.0
-    "@ethersproject/providers": ^5.7.2
-    "@ubeswap/token-math": ^5.2.1
-    lodash: ^4.17.21
-    tiny-invariant: ^1.3.1
-    tslib: ^2.4.1
-  peerDependencies:
-    bn.js: ^4 || ^5
-    jsbi: ^3 || ^4
-  checksum: 11d056e85c13b581ffe6bc8535255ca81a33129e1443e6f3a139f9c5913934a54eff130c30e9d9084856859add1bc7dbbb494630bb95bbb62f5f19a9365f70fc
-  languageName: node
-  linkType: hard
-
-"@dahlia-labs/use-ethers@npm:^0.9.11":
-  version: 0.9.11
-  resolution: "@dahlia-labs/use-ethers@npm:0.9.11"
-  dependencies:
-    "@dahlia-labs/token-utils": ^0.9.11
-    "@ethersproject/abi": ^5.7.0
-    "@ethersproject/abstract-signer": ^5.7.0
-    "@ethersproject/address": ^5.7.0
-    "@ethersproject/constants": ^5.7.0
-    "@ethersproject/contracts": ^5.7.0
-    "@ethersproject/providers": ^5.7.2
-    "@ubeswap/token-math": ^5.2.1
-    lodash: ^4.17.21
-    tiny-invariant: ^1.3.1
-    tslib: ^2.4.1
-  peerDependencies:
-    bn.js: ^4 || ^5
-    jsbi: ^3 || ^4
-  checksum: cf2d5172c2a3ced2620d7a25cb6c4124be60f5aabaa8f7ebcc1819eb12a85803284c60422e72f2f0847388db4b708c24b37ffbf248310401d980a1e2935ec5d6
-  languageName: node
-  linkType: hard
-
-"@dahlia-labs/use-ethers@npm:^0.9.8":
-  version: 0.9.8
-  resolution: "@dahlia-labs/use-ethers@npm:0.9.8"
-  dependencies:
-    "@dahlia-labs/token-utils": ^0.9.8
-    "@ethersproject/abi": ^5.7.0
-    "@ethersproject/abstract-signer": ^5.7.0
-    "@ethersproject/address": ^5.7.0
-    "@ethersproject/constants": ^5.7.0
-    "@ethersproject/contracts": ^5.7.0
-    "@ethersproject/providers": ^5.7.2
-    "@ubeswap/token-math": ^5.2.1
-    lodash: ^4.17.21
-    tiny-invariant: ^1.3.1
-    tslib: ^2.4.1
-  peerDependencies:
-    bn.js: ^4 || ^5
-    jsbi: ^3 || ^4
-  checksum: d2db1d4b35dbb68e39bb4fde84d30609a7a2a9543c83671e2e2ed3f906929f95c0a5ed2adc84b7a74383e3ed397ba89aeb5aa7a016c165a1fc273242a51ee13a
+  checksum: 5e83a37c56f87ea23ec8dc19a63c8d05cf88aeda10ca0e95421daeeb339ba7014b2c335c5443b0fdaaf7fc8aa80afdf685b4b871ad64527709cdd95f4658b78b
   languageName: node
   linkType: hard
 
@@ -3569,13 +3459,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:4.15.1":
-  version: 4.15.1
-  resolution: "@tanstack/query-core@npm:4.15.1"
-  checksum: ee98e75a3770fd35a6a10b9e7b3c417ea9da2b072481b5191d759182b29fd7bc4e8e340f83e2961b46fe4e1adac356087df04d4661c9459d09ff4d0574f683eb
-  languageName: node
-  linkType: hard
-
 "@tanstack/query-core@npm:4.18.0, @tanstack/query-core@npm:^4.18.0":
   version: 4.18.0
   resolution: "@tanstack/query-core@npm:4.18.0"
@@ -3627,26 +3510,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:^4.14.5":
-  version: 4.16.1
-  resolution: "@tanstack/react-query@npm:4.16.1"
-  dependencies:
-    "@tanstack/query-core": 4.15.1
-    use-sync-external-store: ^1.2.0
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-native: "*"
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-    react-native:
-      optional: true
-  checksum: 2c2d4c5c8bab2cd978ddd42153d33f844bd24a17ebe42f269cc64ee2a031f60f980b441640172885d9fd156fe9abc74ffc800fb68c6b6f6ef4fe48ffadafff79
-  languageName: node
-  linkType: hard
-
-"@tanstack/react-query@npm:^4.18.0":
+"@tanstack/react-query@npm:^4.14.5, @tanstack/react-query@npm:^4.18.0":
   version: 4.18.0
   resolution: "@tanstack/react-query@npm:4.18.0"
   dependencies:
@@ -4025,14 +3889,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:*":
-  version: 4.14.189
-  resolution: "@types/lodash@npm:4.14.189"
-  checksum: 096d1e0954794fb76bd6a0ea443067f02004b53e3c59ac6e3fed88817a1468fc2e6614abdf44341f5e0fdff5f9a3c94a934cc9ff7126e07efbcd94355a21fe45
-  languageName: node
-  linkType: hard
-
-"@types/lodash@npm:^4.14.190":
+"@types/lodash@npm:*, @types/lodash@npm:^4.14.190":
   version: 4.14.190
   resolution: "@types/lodash@npm:4.14.190"
   checksum: 353a55a1222a57224ead8bd3379fabb2e3e3f6685f599c48b1b66f099d8e9e015e6c6352c6e2275954004c3bb510377804c63117233c6f187700b6ab78adfa02
@@ -4538,9 +4395,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wagmi/core@npm:0.7.5":
-  version: 0.7.5
-  resolution: "@wagmi/core@npm:0.7.5"
+"@wagmi/core@npm:0.7.7":
+  version: 0.7.7
+  resolution: "@wagmi/core@npm:0.7.7"
   dependencies:
     abitype: ^0.1.8
     eventemitter3: ^4.0.7
@@ -4554,7 +4411,7 @@ __metadata:
       optional: true
     "@walletconnect/ethereum-provider":
       optional: true
-  checksum: 8797ff6d59703075b5a2184b609083698c28c7d5676095faa0daa520f7327c9525cc3b8c9ad1799fbb3bb1436e7f580f2bc92a613028639e9c855d48641ca8ac
+  checksum: 21521c84ea925ad762c2d5fefae8feb6b4f7f75f11af7dfca8d83f63ba7bd6cf4da3e42b5bbfdb1174c813f3e406f7987793f50a0154aed6c2a46cd47845135d
   languageName: node
   linkType: hard
 
@@ -4607,17 +4464,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@walletconnect/encoding@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@walletconnect/encoding@npm:1.0.1"
-  dependencies:
-    is-typedarray: 1.0.0
-    typedarray-to-buffer: 3.1.5
-  checksum: 964a9e0884a22604284da60b88212d6c9466bff5d4ed8a29064e6602d138ee30989973f016c314731f0fab534a4e24d3b352ef8bff522d9c04d35b0b20916c25
-  languageName: node
-  linkType: hard
-
-"@walletconnect/encoding@npm:^1.0.2":
+"@walletconnect/encoding@npm:^1.0.1, @walletconnect/encoding@npm:^1.0.2":
   version: 1.0.2
   resolution: "@walletconnect/encoding@npm:1.0.2"
   dependencies:
@@ -6662,14 +6509,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"colorette@npm:^2.0.10":
-  version: 2.0.17
-  resolution: "colorette@npm:2.0.17"
-  checksum: 693a56d816846e0e213f92c8061b65eb5025030b28a113f90c539fe34c860abc41132c03599af26bcbc213170a31bac1bf2d4c535ccad5ac7b5cb3248f9d98a8
-  languageName: node
-  linkType: hard
-
-"colorette@npm:^2.0.19":
+"colorette@npm:^2.0.10, colorette@npm:^2.0.19":
   version: 2.0.19
   resolution: "colorette@npm:2.0.19"
   checksum: 888cf5493f781e5fcf54ce4d49e9d7d698f96ea2b2ef67906834bb319a392c667f9ec69f4a10e268d2946d13a9503d2d19b3abaaaf174e3451bfe91fb9d82427
@@ -13624,16 +13464,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.3.1, prettier@npm:^2.7.1":
-  version: 2.7.1
-  resolution: "prettier@npm:2.7.1"
-  bin:
-    prettier: bin-prettier.js
-  checksum: 55a4409182260866ab31284d929b3cb961e5fdb91fe0d2e099dac92eaecec890f36e524b4c19e6ceae839c99c6d7195817579cdffc8e2c80da0cb794463a748b
-  languageName: node
-  linkType: hard
-
-"prettier@npm:^2.8.0":
+"prettier@npm:^2.3.1, prettier@npm:^2.7.1, prettier@npm:^2.8.0":
   version: 2.8.0
   resolution: "prettier@npm:2.8.0"
   bin:
@@ -14702,13 +14533,13 @@ __metadata:
     "@babel/plugin-proposal-private-property-in-object": ^7.18.6
     "@babel/preset-react": ^7.18.6
     "@craco/craco": ^7.0.0
-    "@dahlia-labs/celo-contrib": ^0.9.11
-    "@dahlia-labs/celo-tokens": ^0.9.11
+    "@dahlia-labs/celo-contrib": ^0.9.12
+    "@dahlia-labs/celo-tokens": ^0.9.12
     "@dahlia-labs/numoen-config": ^0.1.4
-    "@dahlia-labs/numoen-utils": ^0.9.11
-    "@dahlia-labs/token-utils": ^0.9.11
-    "@dahlia-labs/uniswapv2-utils": ^0.9.11
-    "@dahlia-labs/use-ethers": ^0.9.11
+    "@dahlia-labs/numoen-utils": ^0.9.12
+    "@dahlia-labs/token-utils": ^0.9.12
+    "@dahlia-labs/uniswapv2-utils": ^0.9.12
+    "@dahlia-labs/use-ethers": ^0.9.12
     "@emotion/babel-plugin": ^11.10.5
     "@emotion/babel-preset-css-prop": ^11.10.0
     "@emotion/core": ^11.0.0
@@ -14808,7 +14639,7 @@ __metadata:
     typescript: 4.8.4
     unstated-next: ^1.1.0
     use-debounce: ^8.0.4
-    wagmi: ^0.8.6
+    wagmi: ^0.8.8
     webpack: ^5.75.0
     webpack-bundle-analyzer: ^4.7.0
   languageName: unknown
@@ -16778,22 +16609,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wagmi@npm:^0.8.6":
-  version: 0.8.6
-  resolution: "wagmi@npm:0.8.6"
+"wagmi@npm:^0.8.8":
+  version: 0.8.8
+  resolution: "wagmi@npm:0.8.8"
   dependencies:
     "@coinbase/wallet-sdk": ^3.5.3
     "@tanstack/query-sync-storage-persister": ^4.14.5
     "@tanstack/react-query": ^4.14.5
     "@tanstack/react-query-persist-client": ^4.14.5
-    "@wagmi/core": 0.7.5
+    "@wagmi/core": 0.7.7
     "@walletconnect/ethereum-provider": ^1.8.0
     abitype: ^0.1.7
     use-sync-external-store: ^1.2.0
   peerDependencies:
     ethers: ">=5.5.1"
     react: ">=17.0.0"
-  checksum: c338adbd70a59fba2688b96375928adc0763c114f7950fa55dcd4a396afdb8df91cfbdab81e0d337f0aaef3259df64a997e9be71d21d4023c2da0dcf1327d249
+  checksum: b6968f176016a870fbeb1454a270d133f74a7764d690ef6c681e8c152047dd63f048429a5aa6f6e9d91dc29e1c0bd3b228f8aa93ab45ac6a75e06097e23405f4
   languageName: node
   linkType: hard
 
