@@ -26,8 +26,8 @@ export const Arbitrum: React.FC = () => {
         <div tw="flex flex-col">
           <p tw="font-bold text-2xl">Numoen is live on Arbitrum!</p>
           <p>
-            Numoen options contain leverage but are constantly adjusted so they
-            are not liquidated.
+            Numoen options have embedded leverage which means their value is
+            constantly adjusted.
           </p>
         </div>
       </div>
