@@ -6,7 +6,7 @@ import { Module } from "../../common/Module";
 export const Arbitrum: React.FC = () => {
   return (
     <Module
-      tw=" border-2 max-w-lg"
+      tw="  max-w-lg"
       css={css`
         background: radial-gradient(
             285% 8200% at 30% 50%,

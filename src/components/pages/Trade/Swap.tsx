@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { useAccount } from "wagmi";
 
-import { useWrappedTokenBalance } from "../../../hooks/useTokenBalance";
+import { useLendgine } from "../../../hooks/useLendgine";
+import {
+  useTokenBalance,
+  useWrappedTokenBalance,
+} from "../../../hooks/useTokenBalance";
+import { borrowRate } from "../../../utils/Numoen/jumprate";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { Module } from "../../common/Module";
@@ -10,6 +16,7 @@ import { SubModule } from "../../common/SubModule";
 import { Field, useSwapState } from "./useSwapState";
 
 export const Swap: React.FC = () => {
+  const { address } = useAccount();
   const {
     selectedFrom,
     selectedTo,
@@ -26,6 +33,18 @@ export const Swap: React.FC = () => {
 
   const fromBalance = useWrappedTokenBalance(selectedFrom);
   const toBalance = useWrappedTokenBalance(selectedTo);
+
+  const marketInfo = useLendgine(trade?.market);
+  const rate = useMemo(
+    () => (marketInfo ? borrowRate(marketInfo) : null),
+    [marketInfo]
+  );
+
+  const userPosition = useTokenBalance(trade?.market.token, address);
+  const showStats = useMemo(
+    () => !!trade || (userPosition && userPosition.greaterThan(0)),
+    [trade, userPosition]
+  );
 
   return (
     <>
@@ -69,18 +88,25 @@ export const Swap: React.FC = () => {
             />
           </div>
         </div>
-        <SubModule tw="">
-          <RowBetween tw="flex justify-between">
-            <p>Funding rate</p>
-            <p tw="font-bold">10%</p>
-          </RowBetween>
-          <hr tw="border-[#AEAEB2] rounded " />
+        {showStats && (
+          <SubModule tw="">
+            <RowBetween tw="flex justify-between">
+              <p>Funding rate</p>
+              <p tw="font-bold">{rate ? rate.toFixed(1) : "--"}%</p>
+            </RowBetween>
 
-          <RowBetween tw="flex justify-between">
-            <p>Upper Bound</p>
-            <p tw="font-bold">5 ETH / UNI</p>
-          </RowBetween>
-        </SubModule>
+            <RowBetween tw="pt-0 flex justify-between">
+              <p>Upper bound</p>
+              <p tw="font-bold">
+                {trade?.market.pair.bound.toFixed(0, { groupSeparator: "," })}{" "}
+                <span tw="font-normal">
+                  {trade?.market.pair.baseToken.symbol} /{" "}
+                  {trade?.market.pair.speculativeToken.symbol}
+                </span>
+              </p>
+            </RowBetween>
+          </SubModule>
+        )}
       </Module>
       <AsyncButton
         variant="primary"
