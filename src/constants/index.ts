@@ -5,7 +5,7 @@ import { chainID } from "@dahlia-labs/use-ethers";
 import { AddressZero } from "@ethersproject/constants";
 
 export const liquidityManagerGenesis: { [chain in ChainsV1]: number } = {
-  goerli: 8026628,
+  goerli: 8049837,
 };
 
 const ETH = new Token({
