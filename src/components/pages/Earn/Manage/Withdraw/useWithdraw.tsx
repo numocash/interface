@@ -35,7 +35,7 @@ export const useWithdraw = (
         userSpeculativeAmount: new TokenAmount(market.pair.speculativeToken, 0),
       };
 
-    const w = new Fraction(100 - withdrawPercent, 100);
+    const w = new Fraction(withdrawPercent, 100);
 
     const userBaseAmount =
       userLendgineInfo && pairInfo
