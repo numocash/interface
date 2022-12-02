@@ -330,7 +330,7 @@ export class DefaultToasterWrapper {
             <div>
               View Transaction: {/* TODO: update the explorer based on chain */}
               <a
-                href={`https://goerli.etherscan.io/tx/${hash}`}
+                href={`https://arbiscan.io/tx/${hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

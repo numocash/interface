@@ -12,7 +12,6 @@ import { useUserLendgine } from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
 import { useGetIsWrappedNative } from "../../../../../hooks/useTokens";
 import { useBeet } from "../../../../../utils/beet";
-import { roundLiquidity } from "../../../../../utils/Numoen/invariantMath";
 
 export const useWithdraw = (
   market: IMarket,
@@ -50,9 +49,7 @@ export const useWithdraw = (
             .scale(w)
         : null;
 
-    const liquidity = userLendgineInfo
-      ? roundLiquidity(userLendgineInfo.liquidity.scale(w))
-      : null;
+    const liquidity = userLendgineInfo ? userLendgineInfo.liquidity : null;
     return { userBaseAmount, userSpeculativeAmount, liquidity };
   }, [
     market.pair.baseToken,
@@ -73,6 +70,8 @@ export const useWithdraw = (
           !userBaseAmount ||
           !userSpeculativeAmount
         ? "Loading..."
+        : userLendgineInfo.liquidity.equalTo(0)
+        ? "No deposits"
         : pairInfo.baseAmount.lessThan(userBaseAmount) ||
           pairInfo.speculativeAmount.lessThan(userSpeculativeAmount)
         ? "Insufficient liquidity"

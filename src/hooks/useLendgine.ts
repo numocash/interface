@@ -133,7 +133,7 @@ export const usePrice = (market: HookArg<IMarket>): Fraction | null => {
     return pairInfoToPrice(pairInfo, market.pair);
   } else {
     if (!uniInfo) return null;
-    const s = new Fraction(10 ** 4);
+    const s = new Fraction(10 ** 9);
     const price = new Price(
       market.pair.speculativeToken,
       market.pair.baseToken,
@@ -141,7 +141,7 @@ export const usePrice = (market: HookArg<IMarket>): Fraction | null => {
       uniInfo[0].raw
     );
 
-    return new Fraction(price.asFraction.multiply(s).quotient, 10 ** 4);
+    return new Fraction(price.asFraction.multiply(s).quotient, 10 ** 9);
   }
 };
 

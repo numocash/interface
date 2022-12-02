@@ -13,6 +13,7 @@ export const pairInfoToPrice = (pairInfo: IPairInfo, pair: IPair): Price => {
 
   const scale1 = pairInfo.speculativeAmount.divide(pairInfo.totalLPSupply);
   const priceFraction = pair.bound.subtract(scale1.divide(2));
+
   return new Price(
     pair.speculativeToken,
     pair.baseToken,
@@ -35,8 +36,12 @@ export const priceToPairReserves = (
 export const pricePerLP = (pairInfo: IPairInfo, pair: IPair): Price => {
   const price = pairInfoToPrice(pairInfo, pair);
   if (price.equalTo(0)) return new Price(pair.lp, pair.baseToken, 1, 0);
-  const scale0 = pairInfo.baseAmount.divide(pairInfo.totalLPSupply);
-  const scale1 = pairInfo.speculativeAmount.divide(pairInfo.totalLPSupply);
+  const scale0 = pairInfo.baseAmount
+    .multiply(10 ** (18 - pair.baseScaleFactor))
+    .divide(pairInfo.totalLPSupply);
+  const scale1 = pairInfo.speculativeAmount
+    .multiply(10 ** (18 - pair.speculativeScaleFactor))
+    .divide(pairInfo.totalLPSupply);
   const priceFraction = scale0.add(scale1.multiply(price));
 
   return new Price(

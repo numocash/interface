@@ -4,6 +4,8 @@ import type { Token } from "@dahlia-labs/token-utils";
 import { useCallback } from "react";
 import { createContainer } from "unstated-next";
 
+import { useChain } from "../hooks/useChain";
+
 interface Environment {
   markets: readonly IMarket[];
 }
@@ -45,8 +47,9 @@ export const useIsMarket = (address: string | null): boolean => {
 };
 
 const useEnvironmentInternal = (): Environment => {
+  const chain = useChain();
   return {
-    markets: markets.goerli,
+    markets: markets[chain],
   };
 };
 

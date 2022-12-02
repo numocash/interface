@@ -242,8 +242,9 @@ export const useTrade = ({
                           upperBound: market.pair.bound.asFraction
                             .multiply(scale)
                             .quotient.toString(),
-                          liquidity: roundLiquidity(
-                            speculativeToLiquidity(trade.inputAmount, market)
+                          liquidity: speculativeToLiquidity(
+                            trade.inputAmount,
+                            market
                           ).raw.toString(),
                           borrowAmount: borrowAmount.raw.toString(),
                           sharesMin: trade.outputAmount
