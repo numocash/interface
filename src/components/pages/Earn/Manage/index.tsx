@@ -11,12 +11,11 @@ import { useSettings } from "../../../../contexts/settings";
 import { usePrice } from "../../../../hooks/useLendgine";
 import { usePair } from "../../../../hooks/usePair";
 import {
+  add1,
   baseToLiquidity,
-  calcProportion,
   checkInvariant,
   liquidityToBase,
   liquidityToSpec,
-  roundLiquidity,
   specToLiquidity,
 } from "../../../../utils/Numoen/invariantMath";
 import { Page } from "../../../common/Page";
@@ -87,49 +86,37 @@ const useManageInternal = ({
       if (pairInfo.totalLPSupply.equalTo(0)) {
         if (input === Input.Base) {
           const liquidity = baseToLiquidity(val, price, market);
-          const speculativeAmount = liquidityToSpec(liquidity, price, market);
-          const baseAmount = liquidityToBase(liquidity, price, market);
+          const speculativeAmount = add1(
+            liquidityToSpec(liquidity, price, market)
+          );
+          const baseAmount = add1(liquidityToBase(liquidity, price, market));
 
           setBaseAmount(baseAmount);
           setSpeculativeAmount(speculativeAmount);
           setLiquidity(liquidity);
-          console.log(
-            "add",
-            checkInvariant(baseAmount, speculativeAmount, liquidity, market)
-          );
         } else {
           const liquidity = specToLiquidity(val, price, market);
-          // const liquidityPrec = roundLiquidity(liquidity);
-          const speculativeAmount = liquidityToSpec(liquidity, price, market);
-          const baseAmount = liquidityToBase(liquidity, price, market);
+          const speculativeAmount = add1(
+            liquidityToSpec(liquidity, price, market)
+          );
+          const baseAmount = add1(liquidityToBase(liquidity, price, market));
 
           setBaseAmount(baseAmount);
           setSpeculativeAmount(speculativeAmount);
           setLiquidity(liquidity);
-
-          console.log(
-            "here",
-            checkInvariant(baseAmount, speculativeAmount, liquidity, market)
-          );
         }
       } else {
         const scale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18));
-        const prec = JSBI.BigInt(10 ** 12);
 
-        const proportion = JSBI.multiply(
-          JSBI.divide(
-            JSBI.divide(
-              JSBI.multiply(val.raw, scale),
-              input === Input.Base
-                ? pairInfo.baseAmount.raw
-                : pairInfo.speculativeAmount.raw
-            ),
-            prec
-          ),
-          prec
+        // rounds down,
+        const proportion = JSBI.divide(
+          JSBI.multiply(val.raw, scale),
+          input === Input.Base
+            ? pairInfo.baseAmount.raw
+            : pairInfo.speculativeAmount.raw
         );
 
-        console.log("prop:", proportion.toString());
+        // rounds down
         const liquidity = new TokenAmount(
           market.pair.lp,
           JSBI.divide(
@@ -137,31 +124,57 @@ const useManageInternal = ({
             scale
           )
         );
-        const liquidityPrec = roundLiquidity(liquidity);
-        const baseAmount = pairInfo.baseAmount.scale(
-          liquidityPrec.divide(pairInfo.totalLPSupply)
-        );
-        calcProportion(liquidity, pairInfo, market);
-        const speculativeAmount = pairInfo.speculativeAmount.scale(
-          liquidityPrec.divide(pairInfo.totalLPSupply)
+
+        const baseAmount = add1(
+          new TokenAmount(
+            market.pair.baseToken,
+            JSBI.divide(
+              JSBI.multiply(pairInfo.baseAmount.raw, liquidity.raw),
+              pairInfo.totalLPSupply.raw
+            )
+          )
         );
 
-        // setBaseAmount(baseAmount);
-        // setSpeculativeAmount(speculativeAmount);
-        // setLiquidity(liquidityPrec);
+        const speculativeAmount = add1(
+          new TokenAmount(
+            market.pair.speculativeToken,
+            JSBI.divide(
+              JSBI.multiply(pairInfo.speculativeAmount.raw, liquidity.raw),
+              pairInfo.totalLPSupply.raw
+            )
+          )
+        );
 
-        // console.log(
-        //   "increase",
-        //   checkInvariant(
-        //     baseAmount.add(pairInfo.baseAmount),
-        //     speculativeAmount.add(pairInfo.speculativeAmount),
-        //     liquidityPrec.add(pairInfo.totalLPSupply),
-        //     market
-        //   )
-        // );
+        setBaseAmount(baseAmount);
+        setSpeculativeAmount(speculativeAmount);
+        setLiquidity(liquidity);
+
+        console.log(
+          "increase",
+          checkInvariant(
+            baseAmount.add(pairInfo.baseAmount),
+            speculativeAmount.add(pairInfo.speculativeAmount),
+            liquidity.add(pairInfo.totalLPSupply),
+            market
+          )
+        );
       }
+
+      console.log(
+        "invariant check:",
+        baseAmount &&
+          speculativeAmount &&
+          pairInfo &&
+          liquidity &&
+          checkInvariant(
+            baseAmount.add(pairInfo.baseAmount),
+            speculativeAmount.add(pairInfo.speculativeAmount),
+            liquidity.add(pairInfo.totalLPSupply),
+            market
+          )
+      );
     },
-    [market, pairInfo, price]
+    [baseAmount, liquidity, market, pairInfo, price, speculativeAmount]
   );
 
   const settings = useSettings();

@@ -2,26 +2,6 @@ import type { IMarket, IPairInfo } from "@dahlia-labs/numoen-utils";
 import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 
-// TODO: fix this check
-// export const checkInvariant = (
-//   baseAmount: TokenAmount,
-//   speculativeAmount: TokenAmount,
-//   liquidity: TokenAmount,
-//   market: IMarket
-// ): boolean => {
-//   const scale0 = baseAmount
-//     .scale(new Fraction(10 ** (18 - market.pair.baseScaleFactor)))
-//     .scale(liquidity.invert());
-//   const scale1 = speculativeAmount
-//     .scale(new Fraction(10 ** (18 - market.pair.speculativeScaleFactor)))
-//     .scale(liquidity.invert());
-
-//   const b = scale1.asFraction.multiply(market.pair.bound);
-//   const c = scale1.asFraction.multiply(scale1).divide(4);
-//   const d = market.pair.bound.asFraction.multiply(market.pair.bound);
-
-//   return scale0.asFraction.add(b).equalTo(c.add(d));
-// };
 const scale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18));
 const doubleScale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(36));
 
@@ -43,44 +23,20 @@ export const calcProportion = (
   liquidity: TokenAmount,
   pairInfo: IPairInfo,
   market: IMarket
-) => {
-  const scale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18));
-  const doubleScale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(36));
-
-  const prec = JSBI.BigInt(10 ** 0);
-
+): [TokenAmount, TokenAmount] => {
   const p0 = pairInfo.baseAmount.raw;
   const p1 = pairInfo.speculativeAmount.raw;
   const ts = pairInfo.totalLPSupply.raw;
-  const liq = JSBI.multiply(JSBI.divide(liquidity.raw, prec), prec);
-
-  // current reserve values
-  const r0 = JSBI.divide(JSBI.multiply(p0, doubleScale), ts);
-  const r1 = JSBI.divide(JSBI.multiply(p1, doubleScale), ts);
+  const liq = liquidity.raw;
 
   // scaled input values
-  const s0 = JSBI.divide(JSBI.multiply(p0, liq), ts);
-  const s1 = JSBI.divide(JSBI.multiply(p1, liq), ts);
+  const s0 = JSBI.add(JSBI.divide(JSBI.multiply(p0, liq), ts), JSBI.BigInt(1));
+  const s1 = JSBI.add(JSBI.divide(JSBI.multiply(p1, liq), ts), JSBI.BigInt(1));
 
-  // new reserve values
-  const a0 = JSBI.divide(
-    JSBI.multiply(JSBI.add(p0, s0), doubleScale),
-    JSBI.add(liq, ts)
-  );
-  const a1 = JSBI.divide(
-    JSBI.multiply(JSBI.add(p1, s1), doubleScale),
-    JSBI.add(liq, ts)
-  );
-
-  console.log("b", JSBI.equal(r0, a0));
-  console.log("s", JSBI.equal(r1, a1));
-
-  checkInvariantJSBI(
-    JSBI.add(p0, s0),
-    JSBI.add(p1, s1),
-    JSBI.add(liq, ts),
-    market.pair.bound.asFraction.multiply(scale).quotient
-  );
+  return [
+    new TokenAmount(market.pair.baseToken, s0),
+    new TokenAmount(market.pair.speculativeToken, s1),
+  ];
 };
 
 export const checkInvariantJSBI = (
@@ -89,40 +45,21 @@ export const checkInvariantJSBI = (
   liq: JSBI,
   ub: JSBI
 ): boolean => {
-  const prec = JSBI.BigInt(10 ** 0);
-
-  console.log(
-    "remainder 0",
-    JSBI.remainder(JSBI.multiply(r0, doubleScale), liq).toString()
-  );
-  console.log(
-    "remainder 1",
-    JSBI.remainder(JSBI.multiply(r1, doubleScale), liq).toString()
-  );
-
-  const s0 = JSBI.divide(
-    JSBI.multiply(r0, doubleScale),
-    JSBI.multiply(JSBI.divide(liq, prec), prec)
-  );
-
-  const s1 = JSBI.divide(
-    JSBI.multiply(r1, doubleScale),
-    JSBI.multiply(JSBI.divide(liq, prec), prec)
-  );
+  const s0 = JSBI.divide(JSBI.multiply(r0, scale), liq);
+  const s1 = JSBI.divide(JSBI.multiply(r1, scale), liq);
 
   const a = s0;
   const b = JSBI.divide(JSBI.multiply(s1, ub), scale);
   const c = JSBI.divide(
-    JSBI.divide(JSBI.multiply(s1, s1), doubleScale),
+    JSBI.divide(JSBI.multiply(s1, s1), scale),
     JSBI.BigInt(4)
   );
-  const d = JSBI.multiply(ub, ub);
-  console.log(JSBI.add(a, b).toString(), JSBI.add(c, d).toString());
-  console.log("Invariant", JSBI.GE(JSBI.add(a, b), JSBI.add(c, d)));
+  const d = JSBI.divide(JSBI.multiply(ub, ub), scale);
 
   return JSBI.GE(JSBI.add(a, b), JSBI.add(c, d));
 };
 
+// rounds down which might not be the desired behavior
 export const specToLiquidity = (
   speculativeAmount: TokenAmount,
   price: Fraction,
@@ -137,6 +74,7 @@ export const specToLiquidity = (
   return new TokenAmount(market.pair.lp, JSBI.divide(b, a));
 };
 
+// rounds down which might not be the desired behavior
 export const baseToLiquidity = (
   baseAmount: TokenAmount,
   price: Fraction,
@@ -147,12 +85,15 @@ export const baseToLiquidity = (
 
   const a = JSBI.multiply(JSBI.BigInt(2), JSBI.subtract(ub, p));
 
-  const b = JSBI.divide(JSBI.multiply(a, a), JSBI.BigInt(4));
-  const c = JSBI.multiply(ub, ub);
-  const d = JSBI.multiply(a, ub);
+  const b = JSBI.divide(
+    JSBI.divide(JSBI.multiply(a, a), scale),
+    JSBI.BigInt(4)
+  );
+  const c = JSBI.divide(JSBI.multiply(ub, ub), scale);
+  const d = JSBI.divide(JSBI.multiply(a, ub), scale);
 
   const l = JSBI.divide(
-    JSBI.multiply(baseAmount.raw, doubleScale),
+    JSBI.multiply(baseAmount.raw, scale),
     JSBI.subtract(JSBI.add(b, c), d)
   );
 
@@ -162,6 +103,10 @@ export const baseToLiquidity = (
 export const roundLiquidity = (liquidity: TokenAmount): TokenAmount => {
   const sc = new Fraction(10 ** 9);
   return liquidity.scale(sc.invert()).scale(sc);
+};
+
+export const add1 = (amount: TokenAmount): TokenAmount => {
+  return new TokenAmount(amount.token, JSBI.add(amount.raw, JSBI.BigInt(1)));
 };
 
 // export const scaleAmount = (amount: TokenAmount, scaleFactor: number): JSBI => {
@@ -191,6 +136,7 @@ export const roundLiquidity = (liquidity: TokenAmount): TokenAmount => {
 //   );
 // };
 
+// rounds down which might not be the desired behavior
 export const liquidityToSpec = (
   liquidity: TokenAmount,
   price: Fraction,
@@ -200,13 +146,12 @@ export const liquidityToSpec = (
   const p = price.asFraction.multiply(scale).quotient;
 
   const a = JSBI.multiply(JSBI.BigInt(2), JSBI.subtract(ub, p));
-  const b = JSBI.add(
-    JSBI.divide(JSBI.multiply(a, liquidity.raw), scale),
-    JSBI.BigInt(1)
-  );
+  const b = JSBI.divide(JSBI.multiply(a, liquidity.raw), scale);
+
   return new TokenAmount(market.pair.speculativeToken, b);
 };
 
+// rounds down which might not be the desired behavior
 export const liquidityToBase = (
   liquidity: TokenAmount,
   price: Fraction,
@@ -217,16 +162,16 @@ export const liquidityToBase = (
 
   const a = JSBI.multiply(JSBI.BigInt(2), JSBI.subtract(ub, p));
 
-  const b = JSBI.divide(JSBI.multiply(a, a), JSBI.BigInt(4));
-  const c = JSBI.multiply(ub, ub);
-  const d = JSBI.multiply(a, ub);
+  const b = JSBI.divide(
+    JSBI.divide(JSBI.multiply(a, a), scale),
+    JSBI.BigInt(4)
+  );
+  const c = JSBI.divide(JSBI.multiply(ub, ub), scale);
+  const d = JSBI.divide(JSBI.multiply(a, ub), scale);
 
-  const r = JSBI.add(
-    JSBI.divide(
-      JSBI.multiply(JSBI.subtract(JSBI.add(b, c), d), liquidity.raw),
-      doubleScale
-    ),
-    JSBI.BigInt(1)
+  const r = JSBI.divide(
+    JSBI.multiply(JSBI.subtract(JSBI.add(b, c), d), liquidity.raw),
+    scale
   );
 
   return new TokenAmount(market.pair.baseToken, r);
