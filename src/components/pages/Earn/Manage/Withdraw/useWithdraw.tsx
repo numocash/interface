@@ -158,13 +158,28 @@ export const useWithdraw = (
                     ),
                     liquidityManagerInterface.encodeFunctionData(
                       "unwrapWETH9",
-                      [0, address]
+                      [
+                        isNative(market.pair.baseToken)
+                          ? userBaseAmount
+                              .reduceBy(settings.maxSlippagePercent)
+                              .raw.toString()
+                          : userSpeculativeAmount
+                              .reduceBy(settings.maxSlippagePercent)
+                              .raw.toString(),
+                        address,
+                      ]
                     ),
                     liquidityManagerInterface.encodeFunctionData("sweepToken", [
                       !isNative(market.pair.baseToken)
                         ? market.pair.baseToken.address
                         : market.pair.speculativeToken.address,
-                      0,
+                      !isNative(market.pair.baseToken)
+                        ? userBaseAmount
+                            .reduceBy(settings.maxSlippagePercent)
+                            .raw.toString()
+                        : userSpeculativeAmount
+                            .reduceBy(settings.maxSlippagePercent)
+                            .raw.toString(),
                       address,
                     ]),
                   ])

@@ -34,8 +34,9 @@ const useSettingsInternal = (): ISettings => {
   const [maxSlippagePercent, setMaxSlippagePercent] = useState<Percent>(
     storedSlip
       ? new Percent(storedSlip.maxSlippagePercent, 10000)
-      : new Percent(200, 10_000)
+      : new Percent(100, 10_000)
   );
+  // TOOD: allow for lower slippage
   const [timeout, setTimeout] = useState<number>(
     storedSlip ? storedSlip.timeout : 30
   );

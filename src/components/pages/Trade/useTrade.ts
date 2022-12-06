@@ -19,7 +19,7 @@ import { useGetIsWrappedNative } from "../../../hooks/useTokens";
 import { useUniswapPair } from "../../../hooks/useUniswapPair";
 import type { BeetStage, BeetTx } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
-import { add1, checkInvariant } from "../../../utils/Numoen/invariantMath";
+import { add1 } from "../../../utils/Numoen/invariantMath";
 import {
   convertShareToLiquidity,
   liquidityToSpeculative,
@@ -97,35 +97,35 @@ export const useMint = (
         ? "Slippage too large"
         : null;
 
-    console.log(
-      "Invariant check:",
-      pairInfo.totalLPSupply.greaterThan(0) &&
-        checkInvariant(
-          pairInfo.baseAmount.subtract(
-            new TokenAmount(
-              market.pair.baseToken,
-              JSBI.divide(
-                JSBI.multiply(pairInfo.baseAmount.raw, lpAmount.raw),
-                pairInfo.totalLPSupply.raw
-              )
-            )
-          ),
-          pairInfo.speculativeAmount.subtract(
-            new TokenAmount(
-              market.pair.speculativeToken,
-              JSBI.divide(
-                JSBI.multiply(pairInfo.speculativeAmount.raw, lpAmount.raw),
-                pairInfo.totalLPSupply.raw
-              )
-            )
-          ),
-          new TokenAmount(
-            market.pair.lp,
-            JSBI.subtract(pairInfo.totalLPSupply.raw, lpAmount.raw)
-          ),
-          market
-        )
-    );
+    // console.log(
+    //   "Invariant check:",
+    //   pairInfo.totalLPSupply.greaterThan(0) &&
+    //     checkInvariant(
+    //       pairInfo.baseAmount.subtract(
+    //         new TokenAmount(
+    //           market.pair.baseToken,
+    //           JSBI.divide(
+    //             JSBI.multiply(pairInfo.baseAmount.raw, lpAmount.raw),
+    //             pairInfo.totalLPSupply.raw
+    //           )
+    //         )
+    //       ),
+    //       pairInfo.speculativeAmount.subtract(
+    //         new TokenAmount(
+    //           market.pair.speculativeToken,
+    //           JSBI.divide(
+    //             JSBI.multiply(pairInfo.speculativeAmount.raw, lpAmount.raw),
+    //             pairInfo.totalLPSupply.raw
+    //           )
+    //         )
+    //       ),
+    //       new TokenAmount(
+    //         market.pair.lp,
+    //         JSBI.subtract(pairInfo.totalLPSupply.raw, lpAmount.raw)
+    //       ),
+    //       market
+    //     )
+    // );
 
     const approveStage: BeetStage[] = approval
       ? [
@@ -146,7 +146,6 @@ export const useMint = (
         ]
       : [];
 
-    // TODO: add types
     const mintParams: Omit<LendgineRouter.MintParamsStruct, "recipient"> = {
       base: market.pair.baseToken.address,
       speculative: market.pair.speculativeToken.address,
@@ -299,23 +298,27 @@ export const useBurn = (
       baseScaleFactor: market.pair.baseScaleFactor,
       speculativeScaleFactor: market.pair.speculativeScaleFactor,
       shares: input.raw.toString(),
-      amount0Min: 0,
-      amount1Min: 0, // TODO
+      amount0Min: baseAmount
+        .reduceBy(settings.maxSlippagePercent)
+        .raw.toString(),
+      amount1Min: speculativeAmount
+        .reduceBy(settings.maxSlippagePercent)
+        .raw.toString(),
       upperBound: market.pair.bound.asFraction
         .multiply(scale)
         .quotient.toString(),
       deadline: Math.round(Date.now() / 1000) + settings.timeout * 60,
     };
 
-    console.log(
-      "Invariant check burn:",
-      checkInvariant(
-        pairInfo.baseAmount.add(baseAmount),
-        pairInfo.speculativeAmount.add(speculativeAmount),
-        pairInfo.totalLPSupply.add(liquidity),
-        market
-      )
-    );
+    // console.log(
+    //   "Invariant check burn:",
+    //   checkInvariant(
+    //     pairInfo.baseAmount.add(baseAmount),
+    //     pairInfo.speculativeAmount.add(speculativeAmount),
+    //     pairInfo.totalLPSupply.add(liquidity),
+    //     market
+    //   )
+    // );
 
     const approveStage: BeetStage[] = approval
       ? [
@@ -359,7 +362,12 @@ export const useBurn = (
                         ]),
                         lendgineRouterInterface.encodeFunctionData(
                           "unwrapWETH9",
-                          [0, address] // TODO: fix this
+                          [
+                            output
+                              .reduceBy(settings.maxSlippagePercent)
+                              .raw.toString(),
+                            address,
+                          ]
                         ),
                       ])
                     : lengineRouterContract.burn({
@@ -384,6 +392,7 @@ export const useBurn = (
     market,
     marketInfo,
     pairInfo,
+    settings.maxSlippagePercent,
     settings.timeout,
     uniswapInfo,
   ]);

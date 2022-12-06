@@ -13,7 +13,6 @@ import { usePair } from "../../../../hooks/usePair";
 import {
   add1,
   baseToLiquidity,
-  checkInvariant,
   liquidityToBase,
   liquidityToSpec,
   specToLiquidity,
@@ -148,16 +147,6 @@ const useManageInternal = ({
         setBaseAmount(baseAmount);
         setSpeculativeAmount(speculativeAmount);
         setLiquidity(liquidity);
-
-        console.log(
-          "increase",
-          checkInvariant(
-            baseAmount.add(pairInfo.baseAmount),
-            speculativeAmount.add(pairInfo.speculativeAmount),
-            liquidity.add(pairInfo.totalLPSupply),
-            market
-          )
-        );
       }
 
       // console.log(

@@ -11,6 +11,7 @@ export const determineBorrowAmount = (
   price: Price,
   slippageBps: Percent
 ) => {
+  // TODO: use a better slippage perdictor
   const a = market.pair.bound.asFraction.multiply(2);
   const b = price.asFraction.multiply(
     Percent.ONE_HUNDRED.subtract(slippageBps)

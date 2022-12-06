@@ -11,6 +11,7 @@ import invariant from "tiny-invariant";
 import tw, { css, styled } from "twin.macro";
 import { useAccount } from "wagmi";
 
+import { useSettings } from "../../../../contexts/settings";
 import { useLiquidityManager } from "../../../../hooks/useContract";
 import {
   useClaimableTokens,
@@ -34,6 +35,7 @@ export const Position: React.FC = () => {
   invariant(tokenID, "tokenID missing");
   const userLendgineInfo = useUserLendgine(tokenID, market);
   const claimableTokens = useClaimableTokens(tokenID, market);
+  const settings = useSettings();
 
   const pairInfo = usePair(market.pair);
 
@@ -146,7 +148,12 @@ export const Position: React.FC = () => {
                               ),
                               liquidityManagerInterface.encodeFunctionData(
                                 "unwrapWETH9",
-                                [0, address]
+                                [
+                                  claimableTokens
+                                    .reduceBy(settings.maxSlippagePercent)
+                                    .raw.toString(),
+                                  address,
+                                ]
                               ),
                             ])
                           : liquidityManagerContract.collect({
