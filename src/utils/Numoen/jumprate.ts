@@ -12,9 +12,9 @@ export const borrowRate = (marketInfo: IMarketInfo): Percent => {
   );
 
   if (utilization.greaterThan(kink)) {
-    const normalRate = kink.multiply(multiplier);
+    const normalRate = kink.multiply(multiplier).multiply(100);
     const excessUtil = utilization.subtract(kink);
-    return excessUtil.multiply(jumpMultiplier).add(normalRate);
+    return excessUtil.multiply(jumpMultiplier).multiply(100).add(normalRate);
   } else {
     return utilization.multiply(multiplier).multiply(100);
   }
