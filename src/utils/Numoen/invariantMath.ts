@@ -3,7 +3,6 @@ import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 
 const scale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18));
-const doubleScale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(36));
 
 export const checkInvariant = (
   baseAmount: TokenAmount,
@@ -45,6 +44,10 @@ export const checkInvariantJSBI = (
   liq: JSBI,
   ub: JSBI
 ): boolean => {
+  if (JSBI.EQ(liq, JSBI.BigInt(0))) {
+    return JSBI.EQ(r0, JSBI.BigInt(0)) && JSBI.EQ(r1, JSBI.BigInt(0));
+  }
+
   const s0 = JSBI.divide(JSBI.multiply(r0, scale), liq);
   const s1 = JSBI.divide(JSBI.multiply(r1, scale), liq);
 

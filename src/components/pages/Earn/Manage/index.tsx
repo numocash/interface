@@ -160,21 +160,21 @@ const useManageInternal = ({
         );
       }
 
-      console.log(
-        "invariant check:",
-        baseAmount &&
-          speculativeAmount &&
-          pairInfo &&
-          liquidity &&
-          checkInvariant(
-            baseAmount.add(pairInfo.baseAmount),
-            speculativeAmount.add(pairInfo.speculativeAmount),
-            liquidity.add(pairInfo.totalLPSupply),
-            market
-          )
-      );
+      // console.log(
+      //   "invariant check:",
+      //   baseAmount &&
+      //     speculativeAmount &&
+      //     pairInfo &&
+      //     liquidity &&
+      //     checkInvariant(
+      //       baseAmount.add(pairInfo.baseAmount),
+      //       speculativeAmount.add(pairInfo.speculativeAmount),
+      //       liquidity.add(pairInfo.totalLPSupply),
+      //       market
+      //     )
+      // );
     },
-    [baseAmount, liquidity, market, pairInfo, price, speculativeAmount]
+    [market, pairInfo, price]
   );
 
   const settings = useSettings();

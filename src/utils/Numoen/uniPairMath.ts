@@ -1,17 +1,22 @@
-import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
+import { TokenAmount } from "@dahlia-labs/token-utils";
+import JSBI from "jsbi";
 
 export const getAmountOut = (
   amountIn: TokenAmount,
   reserveIn: TokenAmount,
   reserveOut: TokenAmount
 ): TokenAmount => {
-  const amountInWithFee = amountIn.scale(new Fraction(997));
-  const numerator = amountInWithFee.scale(reserveOut);
-  const denominator = reserveIn.scale(new Fraction(1000)).add(amountInWithFee);
-  return new TokenAmount(
-    reserveOut.token,
-    numerator.scale(denominator.invert()).raw
+  const ai = amountIn.raw;
+  const ri = reserveIn.raw;
+  const r0 = reserveOut.raw;
+
+  const amountInWithFee = JSBI.multiply(ai, JSBI.BigInt(997));
+  const numerator = JSBI.multiply(amountInWithFee, r0);
+  const denominator = JSBI.add(
+    JSBI.multiply(ri, JSBI.BigInt(1000)),
+    amountInWithFee
   );
+  return new TokenAmount(reserveOut.token, JSBI.divide(numerator, denominator));
 };
 
 export const getAmountIn = (
@@ -19,10 +24,14 @@ export const getAmountIn = (
   reserveIn: TokenAmount,
   reserveOut: TokenAmount
 ): TokenAmount => {
-  const numerator = reserveIn.scale(amountOut).scale(new Fraction(1000));
-  const denominator = reserveOut.subtract(amountOut).scale(new Fraction(997));
+  const ao = amountOut.raw;
+  const ri = reserveIn.raw;
+  const ro = reserveOut.raw;
+
+  const numerator = JSBI.multiply(JSBI.multiply(ri, ao), JSBI.BigInt(1000));
+  const denominator = JSBI.multiply(JSBI.subtract(ro, ao), JSBI.BigInt(997));
   return new TokenAmount(
     reserveIn.token,
-    numerator.scale(denominator.invert()).raw
+    JSBI.add(JSBI.divide(numerator, denominator), JSBI.BigInt(1))
   );
 };

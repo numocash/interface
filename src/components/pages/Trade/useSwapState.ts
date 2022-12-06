@@ -9,12 +9,13 @@ import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
 import {
+  useAddressToMarket,
   useEnvironment,
   useGetAddressToMarket,
   useGetSpeculativeToMarket,
 } from "../../../contexts/environment";
 import { useAddressToToken, useMarketTokens } from "../../../hooks/useTokens";
-import { useTrade } from "./useTrade";
+import { useBurn, useMint } from "./useTrade";
 
 export enum Field {
   Input = "INPUT",
@@ -26,28 +27,28 @@ export type Trade = {
   market: IMarket;
   inputAmount: TokenAmount;
   outputAmount: TokenAmount;
+  disableReason: string | null;
+  callback: () => Promise<void>;
 };
 
 interface UseSwapStateValues {
   onFieldInput: (field: Field, value: string) => void;
   onFieldSelect: (field: Field, token: Token) => void;
-  selectedFrom: Token | null;
-  selectedTo: Token | null;
+  selectedFrom: Token;
+  selectedTo: Token;
 
   typedValue: string;
 
-  swapDisabledReason?: string;
-  handleTrade: () => Promise<void> | void;
   trade: Trade | null;
 }
 
 interface SwapFieldState {
   readonly typedValue: string;
   readonly [Field.Input]: {
-    readonly token: Token | undefined | null;
+    readonly token: Token;
   };
   readonly [Field.Output]: {
-    readonly token: Token | undefined | null;
+    readonly token: Token;
   };
 }
 
@@ -97,20 +98,48 @@ const useSwapStateInternal = (): UseSwapStateValues => {
   });
 
   const inputToken = fieldState[Field.Input].token;
-
-  const selectedFrom = fieldState[Field.Input].token ?? null;
-  const selectedTo = fieldState[Field.Output].token ?? null;
+  const outputToken = fieldState[Field.Output].token;
 
   const parsedAmount = useMemo(() => {
     const token = inputToken;
-    return token ? TokenAmount.parse(token, fieldState.typedValue) : undefined;
+    return TokenAmount.parse(token, fieldState.typedValue);
   }, [inputToken, fieldState]);
 
-  const { swapDisabledReason, trade, handleTrade } = useTrade({
-    fromAmount: parsedAmount,
-    fromToken: selectedFrom ?? parsedAmount?.token ?? undefined,
-    toToken: selectedTo ?? undefined,
-  });
+  const market0 = useAddressToMarket(inputToken.address);
+  const market1 = useAddressToMarket(outputToken.address);
+
+  const mint = !market0;
+  const market = market0 ?? market1;
+  invariant(market);
+
+  const mintOut = useMint(parsedAmount, market);
+  const burnOut = useBurn(parsedAmount, market);
+
+  const trade = useMemo(
+    () =>
+      mint
+        ? mintOut
+          ? {
+              mint,
+              market,
+              inputAmount: parsedAmount,
+              outputAmount: mintOut.outputAmount,
+              callback: mintOut.callback,
+              disableReason: mintOut.disableReason,
+            }
+          : null
+        : burnOut
+        ? {
+            mint,
+            market,
+            inputAmount: parsedAmount,
+            outputAmount: burnOut.outputAmount,
+            callback: burnOut.callback,
+            disableReason: burnOut.disableReason,
+          }
+        : null,
+    [burnOut, market, mint, mintOut, parsedAmount]
+  );
 
   const onFieldInput = useCallback(
     (field: Field, value: string) => {
@@ -159,17 +188,15 @@ const useSwapStateInternal = (): UseSwapStateValues => {
   );
 
   return {
-    selectedFrom,
-    selectedTo,
+    selectedFrom: inputToken,
+    selectedTo: outputToken,
 
     onFieldInput,
     onFieldSelect,
 
     typedValue: fieldState.typedValue,
 
-    swapDisabledReason: swapDisabledReason ?? undefined,
     trade,
-    handleTrade,
   };
 };
 

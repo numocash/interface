@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useLendgine } from "../../../hooks/useLendgine";
@@ -25,10 +26,7 @@ export const Swap: React.FC = () => {
     onFieldSelect,
 
     typedValue,
-
-    swapDisabledReason,
     trade,
-    handleTrade,
   } = useSwapState();
 
   const fromBalance = useWrappedTokenBalance(selectedFrom);
@@ -46,6 +44,19 @@ export const Swap: React.FC = () => {
       (trade && trade.inputAmount.greaterThan(0)) ||
       (userPosition && userPosition.greaterThan(0)),
     [trade, userPosition]
+  );
+
+  // enter an amount and insufficent tokens
+  const disableReason = useMemo(
+    () =>
+      !trade || !fromBalance
+        ? "Loading..."
+        : trade.inputAmount.equalTo(0)
+        ? "Enter an amount"
+        : trade.inputAmount.greaterThan(fromBalance)
+        ? "Insufficient tokens"
+        : trade.disableReason,
+    [fromBalance, trade]
   );
 
   return (
@@ -113,13 +124,14 @@ export const Swap: React.FC = () => {
       <AsyncButton
         variant="primary"
         tw="flex w-full text-xl h-12 p-0"
-        disabled={!!swapDisabledReason}
+        disabled={!!disableReason}
         onClick={async () => {
-          await handleTrade();
+          invariant(trade);
+          await trade.callback();
           onFieldInput(Field.Input, "");
         }}
       >
-        {swapDisabledReason ?? "Swap"}
+        {disableReason ?? "Trade"}
       </AsyncButton>
     </>
   );
