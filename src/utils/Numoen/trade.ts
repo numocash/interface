@@ -31,7 +31,8 @@ export const determineSlippage = (
 ): Percent => {
   if (inputAmount.equalTo(0)) return new Percent(0);
   // always going from base to speculative
-  const prePrice = new Fraction(u1.raw, u0.raw);
+  const prePrice = new Fraction(u0.raw, u1.raw); // weth / dpx
+  // swap from weth to dpx
   const amountOut = getAmountOut(inputAmount, u1, u0);
   const postPrice = amountOut.divide(inputAmount);
 

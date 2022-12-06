@@ -57,6 +57,6 @@ export function useBlockQuery<T>(
   );
 }
 
-const blockMap = 1;
+const blockMap = 18;
 
 const blockFilter = (blocknumber: number) => Math.floor(blocknumber / blockMap);

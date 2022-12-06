@@ -79,6 +79,7 @@ export const useMint = (
       uniswapInfo[0],
       uniswapInfo[1]
     );
+
     const shares = marketInfo.totalLiquidityBorrowed.equalTo(0)
       ? new TokenAmount(market.token, lpAmount.raw)
       : new TokenAmount(
