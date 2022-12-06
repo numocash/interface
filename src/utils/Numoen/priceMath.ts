@@ -4,8 +4,10 @@ import type {
   IPair,
   IPairInfo,
 } from "@dahlia-labs/numoen-utils";
-import type { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
-import { Price } from "@dahlia-labs/token-utils";
+import type { Fraction } from "@dahlia-labs/token-utils";
+import { Price, TokenAmount } from "@dahlia-labs/token-utils";
+
+import { scaleFactor } from "./invariantMath";
 
 export const pairInfoToPrice = (pairInfo: IPairInfo, pair: IPair): Price => {
   if (pairInfo.totalLPSupply.equalTo(0))
@@ -36,13 +38,9 @@ export const priceToPairReserves = (
 export const pricePerLP = (pairInfo: IPairInfo, pair: IPair): Price => {
   const price = pairInfoToPrice(pairInfo, pair);
   if (price.equalTo(0)) return new Price(pair.lp, pair.baseToken, 1, 0);
-  const scale0 = pairInfo.baseAmount
-    .multiply(10 ** (18 - pair.baseScaleFactor))
-    .divide(pairInfo.totalLPSupply);
-  const scale1 = pairInfo.speculativeAmount
-    .multiply(10 ** (18 - pair.speculativeScaleFactor))
-    .divide(pairInfo.totalLPSupply);
-  const priceFraction = scale0.add(scale1.multiply(price));
+  const scale0 = pairInfo.baseAmount.divide(pairInfo.totalLPSupply);
+  const scale1 = pairInfo.speculativeAmount.divide(pairInfo.totalLPSupply);
+  const priceFraction = scale0.add(scale1.multiply(price.asFraction));
 
   return new Price(
     pair.lp,
@@ -58,5 +56,10 @@ export const totalValue = (
   market: IMarket
 ): TokenAmount => {
   const price = pricePerLP(pairInfo, market.pair);
-  return price.quote(marketInfo.totalLiquidity);
+  return new TokenAmount(
+    market.pair.baseToken,
+    price.asFraction
+      .multiply(marketInfo.totalLiquidity)
+      .multiply(scaleFactor(market.pair.baseScaleFactor)).quotient
+  );
 };

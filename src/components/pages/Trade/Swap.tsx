@@ -111,7 +111,9 @@ export const Swap: React.FC = () => {
             <RowBetween tw="pt-0 flex justify-between">
               <p>Upper bound</p>
               <p tw="font-bold">
-                {trade?.market.pair.bound.toFixed(0, { groupSeparator: "," })}{" "}
+                {trade?.market.pair.bound.asFraction.toSignificant(2, {
+                  groupSeparator: ",",
+                })}{" "}
                 <span tw="font-normal">
                   {trade?.market.pair.baseToken.symbol} /{" "}
                   {trade?.market.pair.speculativeToken.symbol}

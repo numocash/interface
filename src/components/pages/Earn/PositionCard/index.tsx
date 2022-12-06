@@ -24,7 +24,7 @@ const Wrapper: React.FC<WrapperProps> = ({
   children,
 }: WrapperProps) => {
   return hasDeposit ? (
-    <div tw="rounded-lg bg-amber-300 pt-1">
+    <div tw="rounded-lg bg-black pt-1">
       <Module tw="border-t-0 pb-3">{children}</Module>
     </div>
   ) : (
