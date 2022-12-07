@@ -1,23 +1,14 @@
-import { useParams } from "react-router-dom";
-import invariant from "tiny-invariant";
-
-import { useAddressToMarket } from "../../../contexts/environment";
-import { Arbitrage } from "./Arb";
-import { ArbStateProvider } from "./useArbState";
+import { useEnvironment } from "../../../contexts/environment";
+import { ArbCard } from "./ArbCard";
 
 export const Arb: React.FC = () => {
-  const { lendgineAddress } = useParams<{
-    lendgineAddress: string;
-  }>();
-  invariant(lendgineAddress, "pool address missing");
+  const { markets } = useEnvironment();
 
-  const market = useAddressToMarket(lendgineAddress);
-  invariant(market);
   return (
-    <div tw="flex flex-col gap-4">
-      <ArbStateProvider initialState={{ market }}>
-        <Arbitrage />
-      </ArbStateProvider>
+    <div tw="grid md:grid-cols-2  gap-6">
+      {markets.map((m) => (
+        <ArbCard market={m} key={m.address} />
+      ))}
     </div>
   );
 };

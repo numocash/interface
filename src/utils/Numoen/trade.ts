@@ -3,6 +3,7 @@ import type { Price, TokenAmount } from "@dahlia-labs/token-utils";
 import { Fraction, Percent } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 
+import { scale } from "../../components/pages/Trade/useTrade";
 import { getAmountOut } from "./uniPairMath";
 
 export const determineBorrowAmount = (
@@ -11,12 +12,10 @@ export const determineBorrowAmount = (
   price: Price,
   slippageBps: Percent
 ) => {
-  // TODO: use a better slippage perdictor
+  // TODO: use a better slippage predictor
   const a = market.pair.bound.asFraction.multiply(2);
-  const b = price.asFraction.multiply(
-    Percent.ONE_HUNDRED.subtract(slippageBps)
-  );
-  const c = market.pair.bound.subtract(price).multiply(2);
+  const b = price.adjusted.multiply(Percent.ONE_HUNDRED.subtract(slippageBps));
+  const c = market.pair.bound.subtract(price.adjusted).multiply(2);
 
   const numerator = inputAmount.scale(b.add(c));
   const denominator = a.subtract(b).subtract(c);
@@ -30,13 +29,18 @@ export const determineSlippage = (
   u1: TokenAmount
 ): Percent => {
   if (inputAmount.equalTo(0)) return new Percent(0);
-  // always going from base to speculative
-  const prePrice = new Fraction(u0.raw, u1.raw); // weth / dpx
-  // swap from weth to dpx
-  const amountOut = getAmountOut(inputAmount, u1, u0);
-  const postPrice = amountOut.divide(inputAmount);
+  // swap from base to speculative
+  const amountOut = getAmountOut(inputAmount, u0, u1);
 
-  return Percent.fromFraction(prePrice.subtract(postPrice).divide(prePrice));
+  const a = JSBI.multiply(JSBI.multiply(amountOut.raw, u0.raw), scale.quotient);
+  const b = JSBI.multiply(inputAmount.raw, u1.raw);
+
+  return Percent.fromFraction(
+    new Fraction(
+      JSBI.subtract(scale.quotient, JSBI.divide(a, b)),
+      scale.quotient
+    )
+  );
 };
 
 export const determineRepayAmount = (

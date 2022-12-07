@@ -1,5 +1,6 @@
 import type { IMarket, IPairInfo } from "@dahlia-labs/numoen-utils";
-import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
+import type { Fraction } from "@dahlia-labs/token-utils";
+import { TokenAmount } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 
 const scale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18));
@@ -15,7 +16,7 @@ export const checkInvariant = (
   const liq = liquidity.raw;
   const ub = market.pair.bound.asFraction.multiply(scale).quotient;
 
-  return checkInvariantJSBI(r0, r1, liq, ub);
+  return checkInvariantJSBI(r0, r1, liq, ub, market);
 };
 
 export const calcProportion = (
@@ -42,14 +43,21 @@ export const checkInvariantJSBI = (
   r0: JSBI,
   r1: JSBI,
   liq: JSBI,
-  ub: JSBI
+  ub: JSBI,
+  market: IMarket
 ): boolean => {
   if (JSBI.EQ(liq, JSBI.BigInt(0))) {
     return JSBI.EQ(r0, JSBI.BigInt(0)) && JSBI.EQ(r1, JSBI.BigInt(0));
   }
 
-  const s0 = JSBI.divide(JSBI.multiply(r0, scale), liq);
-  const s1 = JSBI.divide(JSBI.multiply(r1, scale), liq);
+  const s0 = JSBI.divide(
+    JSBI.multiply(JSBI.divide(JSBI.multiply(r0, scale), liq), scale),
+    scaleFactor(market.pair.baseScaleFactor)
+  );
+  const s1 = JSBI.divide(
+    JSBI.multiply(JSBI.divide(JSBI.multiply(r1, scale), liq), scale),
+    scaleFactor(market.pair.speculativeScaleFactor)
+  );
 
   const a = s0;
   const b = JSBI.divide(JSBI.multiply(s1, ub), scale);
@@ -71,8 +79,11 @@ export const specToLiquidity = (
   const ub = market.pair.bound.asFraction.multiply(scale).quotient;
   const p = price.asFraction.multiply(scale).quotient;
 
-  const a = JSBI.multiply(JSBI.BigInt(2), JSBI.subtract(ub, p));
-  const b = JSBI.multiply(speculativeAmount.raw, scale);
+  const a = JSBI.multiply(
+    JSBI.multiply(JSBI.BigInt(2), JSBI.subtract(ub, p)),
+    scaleFactor(market.pair.speculativeScaleFactor)
+  );
+  const b = JSBI.multiply(JSBI.multiply(speculativeAmount.raw, scale), scale);
 
   return new TokenAmount(market.pair.lp, JSBI.divide(b, a));
 };
@@ -96,48 +107,26 @@ export const baseToLiquidity = (
   const d = JSBI.divide(JSBI.multiply(a, ub), scale);
 
   const l = JSBI.divide(
-    JSBI.multiply(baseAmount.raw, scale),
-    JSBI.subtract(JSBI.add(b, c), d)
+    JSBI.multiply(JSBI.multiply(baseAmount.raw, scale), scale),
+    JSBI.multiply(
+      JSBI.subtract(JSBI.add(b, c), d),
+      scaleFactor(market.pair.baseScaleFactor)
+    )
   );
 
   return new TokenAmount(market.pair.lp, l);
-};
-
-export const roundLiquidity = (liquidity: TokenAmount): TokenAmount => {
-  const sc = new Fraction(10 ** 9);
-  return liquidity.scale(sc.invert()).scale(sc);
 };
 
 export const add1 = (amount: TokenAmount): TokenAmount => {
   return new TokenAmount(amount.token, JSBI.add(amount.raw, JSBI.BigInt(1)));
 };
 
-// export const scaleAmount = (amount: TokenAmount, scaleFactor: number): JSBI => {
-//   return JSBI.multiply(
-//     amount.raw,
-//     JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18 - scaleFactor))
-//   );
-// };
-
-// export const scaleDownAmount = (amount: TokenAmount): JSBI => {
-//   return JSBI.divide(
-//     amount.raw,
-//     JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18 - amount.token.decimals))
-//   );
-// };
-
-// export const scaleTokenAmount = (
-//   amount: TokenAmount,
-//   scaleFactor: number
-// ): TokenAmount => {
-//   return new TokenAmount(
-//     new Token({ ...amount.token.info, decimals: 18 }),
-//     JSBI.multiply(
-//       amount.raw,
-//       JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18 - scaleFactor))
-//     )
-//   );
-// };
+export const sub1 = (amount: TokenAmount): TokenAmount => {
+  return new TokenAmount(
+    amount.token,
+    JSBI.subtract(amount.raw, JSBI.BigInt(1))
+  );
+};
 
 // rounds down which might not be the desired behavior
 export const liquidityToSpec = (
@@ -149,10 +138,22 @@ export const liquidityToSpec = (
   const p = price.asFraction.multiply(scale).quotient;
 
   const a = JSBI.multiply(JSBI.BigInt(2), JSBI.subtract(ub, p));
-  const b = JSBI.divide(JSBI.multiply(a, liquidity.raw), scale);
+  const b = JSBI.divide(
+    JSBI.divide(
+      JSBI.multiply(
+        JSBI.multiply(a, scaleFactor(market.pair.speculativeScaleFactor)),
+        liquidity.raw
+      ),
+      scale
+    ),
+    scale
+  );
 
   return new TokenAmount(market.pair.speculativeToken, b);
 };
+
+export const scaleFactor = (x: number) =>
+  JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(x));
 
 // rounds down which might not be the desired behavior
 export const liquidityToBase = (
@@ -173,7 +174,13 @@ export const liquidityToBase = (
   const d = JSBI.divide(JSBI.multiply(a, ub), scale);
 
   const r = JSBI.divide(
-    JSBI.multiply(JSBI.subtract(JSBI.add(b, c), d), liquidity.raw),
+    JSBI.divide(
+      JSBI.multiply(
+        scaleFactor(market.pair.baseScaleFactor),
+        JSBI.multiply(JSBI.subtract(JSBI.add(b, c), d), liquidity.raw)
+      ),
+      scale
+    ),
     scale
   );
 

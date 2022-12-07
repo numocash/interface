@@ -50,9 +50,7 @@ export const Earn: React.FC = () => {
       </p>
       <Learn />
       {hasDeposit && (
-        <p tw="text-xs text-amber-300 font-semibold mb-[-0.5rem]">
-          Your positions
-        </p>
+        <p tw="text-xs text-black font-semibold mb-[-0.5rem]">Your positions</p>
       )}
       {userMarketInfo === null && address !== undefined ? (
         <LoadingPage />

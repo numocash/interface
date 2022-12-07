@@ -1759,9 +1759,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dahlia-labs/numoen-config@npm:^0.4.5":
-  version: 0.4.5
-  resolution: "@dahlia-labs/numoen-config@npm:0.4.5"
+"@dahlia-labs/numoen-config@npm:^0.4.6":
+  version: 0.4.6
+  resolution: "@dahlia-labs/numoen-config@npm:0.4.6"
   dependencies:
     "@dahlia-labs/numoen-utils": ^0.10.3
     "@dahlia-labs/token-utils": ^0.10.3
@@ -1777,7 +1777,7 @@ __metadata:
     jsbi: ^4.3.0
     lodash: ^4.17.21
     tiny-invariant: ^1.3.1
-  checksum: b23fd6bfd765c218e79f1bb8911c07a19782a830a454525a85fda0e8a31a24a81926390e65b3040f8098688482837d8eae5eba357028345a8ef349eff7597fb1
+  checksum: 8d0a55cfb8bde10edbdc4de603fb434d1bb9dd1b3a5a99e67ea6cba20b49697faf0b3d05b6df9761f91a2d307c9d84b98f301db99dc0fe35d4100201858d951d
   languageName: node
   linkType: hard
 
@@ -14807,7 +14807,7 @@ __metadata:
     "@craco/craco": ^7.0.0
     "@dahlia-labs/celo-contrib": ^0.10.3
     "@dahlia-labs/celo-tokens": ^0.10.3
-    "@dahlia-labs/numoen-config": ^0.4.5
+    "@dahlia-labs/numoen-config": ^0.4.6
     "@dahlia-labs/numoen-utils": ^0.10.3
     "@dahlia-labs/token-utils": ^0.10.3
     "@dahlia-labs/uniswapv2-utils": ^0.10.3
