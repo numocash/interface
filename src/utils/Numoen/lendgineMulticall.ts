@@ -10,7 +10,6 @@ import {
 import { TokenAmount } from "@dahlia-labs/token-utils";
 import type { Multicall } from "@dahlia-labs/use-ethers";
 import type { BigNumber } from "@ethersproject/bignumber";
-import invariant from "tiny-invariant";
 
 import { lendgineAddress } from "./lendgineAddress";
 
@@ -18,7 +17,7 @@ export const getPositionMulticall2 = (
   tokenID: number,
   markets: readonly IMarket[],
   chainID: ChainsV1
-): Multicall<IMarketUserInfo> => ({
+): Multicall<IMarketUserInfo | null> => ({
   call: {
     target: LIQUIDITYMANAGER[chainID],
     callData: liquidityManagerInterface.encodeFunctionData("getPosition", [
@@ -51,7 +50,7 @@ export const getPositionMulticall2 = (
       markets
     );
 
-    invariant(market, "Market not found");
+    if (!market) return null;
 
     return {
       tokenID,

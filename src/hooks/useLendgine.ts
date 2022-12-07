@@ -59,7 +59,7 @@ export const useUserLendgines = (
   );
   if (!data) return null;
 
-  return data;
+  return data.filter((m) => m !== null) as IMarketUserInfo[];
 };
 
 export const useNextTokenID = (): number | null => {
