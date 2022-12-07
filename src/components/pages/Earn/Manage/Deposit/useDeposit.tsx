@@ -4,7 +4,7 @@ import {
   liquidityManagerInterface,
 } from "@dahlia-labs/numoen-utils";
 import type { TokenAmount } from "@dahlia-labs/token-utils";
-import { Fraction, Percent } from "@dahlia-labs/token-utils";
+import { Percent } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -95,7 +95,7 @@ export const useDeposit = (
         ? "Loading..."
         : liquidity
             .add(marketInfo.totalLiquidity)
-            .greaterThan(new Fraction(100))
+            .greaterThan(market.maxLiquidity)
         ? "Capacity reached"
         : (balanceSpeculative &&
             speculativeTokenAmount.greaterThan(balanceSpeculative)) ||
@@ -113,6 +113,7 @@ export const useDeposit = (
       liquidity,
       nextID,
       marketInfo,
+      market.maxLiquidity,
     ]
   );
 

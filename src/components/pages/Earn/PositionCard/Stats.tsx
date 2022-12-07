@@ -5,7 +5,6 @@ import {
   SliderRange,
   SliderTrack,
 } from "@reach/slider";
-import { Fraction } from "@ubeswap/token-math";
 import { useMemo } from "react";
 import tw, { css, styled } from "twin.macro";
 
@@ -25,8 +24,10 @@ export const Stats: React.FC<Props> = ({ market, userInfo }: Props) => {
 
   const capacity = useMemo(
     () =>
-      marketInfo ? marketInfo.totalLiquidity.divideBy(new Fraction(100)) : null,
-    [marketInfo]
+      marketInfo
+        ? marketInfo.totalLiquidity.divideBy(market.maxLiquidity)
+        : null,
+    [market.maxLiquidity, marketInfo]
   );
 
   const tvl = useMemo(
