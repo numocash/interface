@@ -6,7 +6,8 @@ const multiplier = new Percent(1375, 100000);
 const jumpMultiplier = new Percent(89, 200);
 
 export const borrowRate = (marketInfo: IMarketInfo): Percent => {
-  if (marketInfo.totalLiquidity.equalTo(0)) return new Percent(0);
+  if (!marketInfo || marketInfo.totalLiquidity.equalTo(0))
+    return new Percent(0);
   const utilization = Percent.fromFraction(
     marketInfo.totalLiquidityBorrowed.divide(marketInfo.totalLiquidity)
   );
