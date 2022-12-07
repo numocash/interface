@@ -74,8 +74,8 @@ const useSwapStateInternal = (): UseSwapStateValues => {
   const marketTokens = useMarketTokens();
 
   const { markets } = useEnvironment();
-  const marketStart = markets[0];
-  invariant(marketStart);
+  const marketStart = markets[markets.length - 1];
+  invariant(marketStart, "start market");
 
   const getAddressToMarket = useGetAddressToMarket();
   const getSpeculativeToMarket = useGetSpeculativeToMarket();

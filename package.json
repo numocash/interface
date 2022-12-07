@@ -66,7 +66,7 @@
     "start": "craco start",
     "build": "craco build",
     "typechain": "typechain --target=ethers-v5 'src/**/abis/**/*.json' --out-dir src/generated/",
-    "build:production": "npm run build && npm run delete-sourcemaps",
+    "build:production": "npm run typechain && npm run build && npm run delete-sourcemaps",
     "build:analyze": "ANALYZE=1 craco build",
     "delete-sourcemaps": "find ./build -name \"*.map\" -delete",
     "test": "craco test",
