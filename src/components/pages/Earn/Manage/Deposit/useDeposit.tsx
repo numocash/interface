@@ -4,6 +4,7 @@ import {
   liquidityManagerInterface,
 } from "@dahlia-labs/numoen-utils";
 import type { TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -13,7 +14,11 @@ import type { ISettings } from "../../../../../contexts/settings";
 import { useApproval, useApprove } from "../../../../../hooks/useApproval";
 import { useChain } from "../../../../../hooks/useChain";
 import { useLiquidityManager } from "../../../../../hooks/useContract";
-import { useNextTokenID, usePrice } from "../../../../../hooks/useLendgine";
+import {
+  useLendgine,
+  useNextTokenID,
+  usePrice,
+} from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
 import { useWrappedTokenBalance } from "../../../../../hooks/useTokenBalance";
 import { useGetIsWrappedNative } from "../../../../../hooks/useTokens";
@@ -33,6 +38,7 @@ export const useDeposit = (
   const Beet = useBeet();
   const { address } = useAccount();
   const pairInfo = usePair(market.pair);
+  const marketInfo = useLendgine(market);
   const price = usePrice(market);
   const nextID = useNextTokenID();
   const navigate = useNavigate();
@@ -70,8 +76,13 @@ export const useDeposit = (
           approvalB === null ||
           !price ||
           !liquidity ||
-          nextID === null
+          nextID === null ||
+          !marketInfo
         ? "Loading..."
+        : liquidity
+            .add(marketInfo.totalLiquidity)
+            .greaterThan(new Fraction(100))
+        ? "Capacity reached"
         : (balanceSpeculative &&
             speculativeTokenAmount.greaterThan(balanceSpeculative)) ||
           (balanceBase && baseTokenAmount.greaterThan(balanceBase))
@@ -87,6 +98,7 @@ export const useDeposit = (
       price,
       liquidity,
       nextID,
+      marketInfo,
     ]
   );
 
