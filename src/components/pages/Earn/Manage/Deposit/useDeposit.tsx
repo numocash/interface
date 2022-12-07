@@ -4,7 +4,7 @@ import {
   liquidityManagerInterface,
 } from "@dahlia-labs/numoen-utils";
 import type { TokenAmount } from "@dahlia-labs/token-utils";
-import { Fraction } from "@dahlia-labs/token-utils";
+import { Fraction, Percent } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -51,18 +51,32 @@ export const useDeposit = (
   );
 
   const approvalS = useApproval(
-    speculativeTokenAmount,
+    speculativeTokenAmount?.scale(
+      Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+    ),
     address,
     LIQUIDITYMANAGER[chain]
   );
   const approvalB = useApproval(
-    baseTokenAmount,
+    baseTokenAmount?.scale(
+      Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+    ),
     address,
     LIQUIDITYMANAGER[chain]
   );
-  const approveS = useApprove(speculativeTokenAmount, LIQUIDITYMANAGER[chain]);
+  const approveS = useApprove(
+    speculativeTokenAmount?.scale(
+      Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+    ),
+    LIQUIDITYMANAGER[chain]
+  );
 
-  const approveB = useApprove(baseTokenAmount, LIQUIDITYMANAGER[chain]);
+  const approveB = useApprove(
+    baseTokenAmount?.scale(
+      Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+    ),
+    LIQUIDITYMANAGER[chain]
+  );
 
   const disableReason = useMemo(
     () =>
@@ -190,6 +204,7 @@ export const useDeposit = (
                         ),
                       ],
                       {
+                        // TODO: send more eth than is necessary for slippage
                         value: isNative(market.pair.baseToken)
                           ? baseTokenAmount.raw.toString()
                           : isNative(market.pair.speculativeToken)
