@@ -121,6 +121,13 @@ export const add1 = (amount: TokenAmount): TokenAmount => {
   return new TokenAmount(amount.token, JSBI.add(amount.raw, JSBI.BigInt(1)));
 };
 
+export const sub1 = (amount: TokenAmount): TokenAmount => {
+  return new TokenAmount(
+    amount.token,
+    JSBI.subtract(amount.raw, JSBI.BigInt(1))
+  );
+};
+
 // rounds down which might not be the desired behavior
 export const liquidityToSpec = (
   liquidity: TokenAmount,

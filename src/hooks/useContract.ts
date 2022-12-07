@@ -13,6 +13,7 @@ import type {
   ProviderOrSigner,
 } from "@dahlia-labs/use-ethers";
 import {
+  getContract,
   getMulticall,
   getTokenContract,
   getTokenContractFromAddress,
@@ -21,6 +22,9 @@ import type { Contract } from "@ethersproject/contracts";
 import { useMemo } from "react";
 import { useProvider, useSigner } from "wagmi";
 
+import ARB_ABI from "../abis/Arbitrage.json";
+import { ArbitrageAddress } from "../constants";
+import type { Arbitrage } from "../generated/Arbitrage";
 import type { HookArg } from "./useApproval";
 import { useChain } from "./useChain";
 
@@ -45,6 +49,17 @@ export function useTokenContract(
     token
       ? (provider: ProviderOrSigner) => getTokenContract(token, provider)
       : null,
+    withSignerIfPossible
+  );
+}
+
+export function useArbitrageContract(
+  withSignerIfPossible: boolean
+): Arbitrage | null {
+  const chain = useChain();
+  return useContract(
+    (provider: ProviderOrSigner) =>
+      getContract(ArbitrageAddress[chain], ARB_ABI.abi, provider) as Arbitrage,
     withSignerIfPossible
   );
 }

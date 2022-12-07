@@ -9,6 +9,11 @@ export const liquidityManagerGenesis: { [chain in ChainsV1]: number } = {
   arbitrum: 42997088,
 };
 
+export const ArbitrageAddress: { [chain in ChainsV1]: string } = {
+  goerli: "0x29874Aa4cc27D7294929Ed01d11C3749f5eca8E0",
+  arbitrum: "0x29874Aa4cc27D7294929Ed01d11C3749f5eca8E0",
+};
+
 export const NativeTokens: { [chain in ChainsV1]: [Token, Token] } = {
   goerli: [
     weth.goerli,
