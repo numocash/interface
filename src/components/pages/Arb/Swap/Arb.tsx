@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
 
-import { AssetSelection } from "../../common/AssetSelection";
-import { AsyncButton } from "../../common/AsyncButton";
-import { Module } from "../../common/Module";
+import { AssetSelection } from "../../../common/AssetSelection";
+import { AsyncButton } from "../../../common/AsyncButton";
+import { Module } from "../../../common/Module";
 import { useArbState } from "./useArbState";
 
 export const Arbitrage: React.FC = () => {
