@@ -114,7 +114,7 @@ export const Position: React.FC = () => {
         <p tw="text-default">Collectable Interest</p>
         <div tw="flex gap-2 items-center">
           <p tw="text-default font-bold">
-            {claimableTokens?.toFixed(3, { groupSeparator: "," } ?? "--")}{" "}
+            {claimableTokens?.toSignificant(3, { groupSeparator: "," } ?? "--")}{" "}
             {market.pair.speculativeToken.symbol}
           </p>
           <AsyncButton
