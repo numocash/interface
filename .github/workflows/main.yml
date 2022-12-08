@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/yarn
+      - run: yarn typechain
       - run: yarn typecheck
 
   lint:
@@ -19,6 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/yarn
+      - run: yarn typechain
       - run: yarn lint:ci
 
   build:
@@ -26,4 +28,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/yarn
+      - run: yarn typechain
       - run: yarn build

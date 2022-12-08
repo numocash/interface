@@ -11,6 +11,7 @@ import invariant from "tiny-invariant";
 import tw, { css, styled } from "twin.macro";
 import { useAccount } from "wagmi";
 
+import { useSettings } from "../../../../contexts/settings";
 import { useLiquidityManager } from "../../../../hooks/useContract";
 import {
   useClaimableTokens,
@@ -34,6 +35,7 @@ export const Position: React.FC = () => {
   invariant(tokenID, "tokenID missing");
   const userLendgineInfo = useUserLendgine(tokenID, market);
   const claimableTokens = useClaimableTokens(tokenID, market);
+  const settings = useSettings();
 
   const pairInfo = usePair(market.pair);
 
@@ -94,14 +96,14 @@ export const Position: React.FC = () => {
       <div tw="flex justify-between text-default font-bold text-lg py-4">
         <span tw="flex items-center gap-1">
           {userBaseAmount
-            ? userBaseAmount.toFixed(2, { groupSeparator: "," })
+            ? userBaseAmount.toSignificant(3, { groupSeparator: "," })
             : "--"}{" "}
           <TokenIcon tw="ml-1" token={market.pair.baseToken} size={20} />
           {market.pair.baseToken.symbol.toString()}
         </span>
         <span tw="flex items-center gap-1">
           {userSpeculativeAmount
-            ? userSpeculativeAmount.toFixed(2, { groupSeparator: "," })
+            ? userSpeculativeAmount.toSignificant(3, { groupSeparator: "," })
             : "--"}{" "}
           <TokenIcon tw="ml-1" token={market.pair.speculativeToken} size={20} />
           {market.pair.speculativeToken.symbol.toString()}
@@ -112,7 +114,7 @@ export const Position: React.FC = () => {
         <p tw="text-default">Collectable Interest</p>
         <div tw="flex gap-2 items-center">
           <p tw="text-default font-bold">
-            {claimableTokens?.toFixed(2, { groupSeparator: "," } ?? "--")}{" "}
+            {claimableTokens?.toSignificant(3, { groupSeparator: "," } ?? "--")}{" "}
             {market.pair.speculativeToken.symbol}
           </p>
           <AsyncButton
@@ -146,7 +148,12 @@ export const Position: React.FC = () => {
                               ),
                               liquidityManagerInterface.encodeFunctionData(
                                 "unwrapWETH9",
-                                [0, address]
+                                [
+                                  claimableTokens
+                                    .reduceBy(settings.maxSlippagePercent)
+                                    .raw.toString(),
+                                  address,
+                                ]
                               ),
                             ])
                           : liquidityManagerContract.collect({

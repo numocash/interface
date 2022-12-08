@@ -1,165 +1,132 @@
+import type { IMarket, LendgineRouter } from "@dahlia-labs/numoen-utils";
 import {
   LENDGINEROUTER,
   lendgineRouterInterface,
 } from "@dahlia-labs/numoen-utils";
-import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
-import { Fraction, Percent } from "@dahlia-labs/token-utils";
+import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { useAddressToMarket } from "../../../contexts/environment";
 import { useSettings } from "../../../contexts/settings";
 import { useApproval, useApprove } from "../../../hooks/useApproval";
 import { useChain } from "../../../hooks/useChain";
 import { useLendgineRouter } from "../../../hooks/useContract";
 import { useLendgine, useRefPrice } from "../../../hooks/useLendgine";
 import { usePair } from "../../../hooks/usePair";
-import { useWrappedTokenBalance } from "../../../hooks/useTokenBalance";
 import { useGetIsWrappedNative } from "../../../hooks/useTokens";
 import { useUniswapPair } from "../../../hooks/useUniswapPair";
 import type { BeetStage, BeetTx } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
-import { roundLiquidity } from "../../../utils/Numoen/invariantMath";
+import { add1 } from "../../../utils/Numoen/invariantMath";
 import {
   convertShareToLiquidity,
+  liquidityToSpeculative,
   speculativeToLiquidity,
 } from "../../../utils/Numoen/lendgineMath";
 import {
   determineBorrowAmount,
+  determineRepayAmount,
   determineSlippage,
-  outputAmount,
 } from "../../../utils/Numoen/trade";
-import type { Trade } from "./useSwapState";
 
-export interface UseTradeParams {
-  fromAmount?: TokenAmount;
-  fromToken?: Token;
-  toToken?: Token;
-}
 export const scale = new Fraction(
   JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18))
 );
 
-export type ITradeCallback = () => Promise<void> | void;
-
-/**
- * Allows performing a trade
- */
-export const useTrade = ({
-  fromAmount,
-  fromToken,
-  toToken,
-}: UseTradeParams): {
-  swapDisabledReason: string | null;
-  handleTrade: ITradeCallback;
-  trade: Trade | null;
-} => {
-  const { address } = useAccount();
-  const beet = useBeet();
-  const settings = useSettings();
-  const chain = useChain();
-  const isNative = useGetIsWrappedNative();
-
-  const lengineRouterContract = useLendgineRouter(true);
-
-  const userFromBalance = useWrappedTokenBalance(fromToken ?? null);
-
-  const market0 = useAddressToMarket(fromToken?.address);
-  const market1 = useAddressToMarket(toToken?.address);
-
-  const mint = !market0;
-  const market = market0 ?? market1;
-  invariant(market);
+export const useMint = (
+  input: TokenAmount,
+  market: IMarket
+): {
+  outputAmount: TokenAmount;
+  disableReason: string | null;
+  callback: () => Promise<void>;
+} | null => {
   const marketInfo = useLendgine(market);
   const pairInfo = usePair(market.pair);
   const uniswapInfo = useUniswapPair(market);
   const price = useRefPrice(market);
-  const borrowAmount = useMemo(
-    () =>
-      fromAmount && price
-        ? determineBorrowAmount(
-            fromAmount,
-            market,
-            price,
-            settings.maxSlippagePercent
-          )
-        : null,
-    [fromAmount, price, market, settings]
-  );
+  const settings = useSettings();
+  const beet = useBeet();
 
-  const priceImpact = useMemo(() => {
-    if (pairInfo && pairInfo.totalLPSupply.equalTo(0)) return new Percent(0);
-    const liquidity =
-      fromAmount && borrowAmount
-        ? speculativeToLiquidity(fromAmount.add(borrowAmount), market)
-        : null;
-    const baseAmount =
-      pairInfo && liquidity
-        ? pairInfo.baseAmount.scale(liquidity.divide(pairInfo.totalLPSupply))
-        : null;
-    return fromAmount && baseAmount && uniswapInfo
-      ? determineSlippage(
-          baseAmount, // input amount should be in base tokens
-          uniswapInfo[0],
-          uniswapInfo[1]
-        )
-      : null;
-  }, [borrowAmount, fromAmount, market, pairInfo, uniswapInfo]);
+  const { address } = useAccount();
+  const chain = useChain();
 
-  const approval = useApproval(fromAmount, address, LENDGINEROUTER[chain]);
-  const approve = useApprove(fromAmount, LENDGINEROUTER[chain]);
+  const isNative = useGetIsWrappedNative();
 
-  const trade = useMemo(
-    () =>
-      fromAmount &&
-      toToken &&
-      fromToken &&
-      market &&
-      marketInfo &&
-      price &&
-      uniswapInfo &&
-      pairInfo
-        ? {
-            market,
-            mint,
-            inputAmount: fromAmount,
-            outputAmount: outputAmount(
-              market,
-              marketInfo,
-              pairInfo,
-              fromAmount,
-              price,
-              uniswapInfo,
-              settings
-            ),
-          }
-        : null,
-    [
-      fromAmount,
-      fromToken,
+  const approval = useApproval(input, address, LENDGINEROUTER[chain]);
+  const approve = useApprove(input, LENDGINEROUTER[chain]);
+  const lengineRouterContract = useLendgineRouter(true);
+
+  const ret = useMemo(() => {
+    if (!price || !marketInfo || !pairInfo || !uniswapInfo) return null;
+    const borrowAmount = determineBorrowAmount(
+      input,
       market,
-      marketInfo,
-      mint,
-      pairInfo,
       price,
-      settings,
-      toToken,
-      uniswapInfo,
-    ]
-  );
-
-  const handleTrade = useCallback(async () => {
-    invariant(
-      lengineRouterContract &&
-        address &&
-        trade &&
-        price &&
-        borrowAmount &&
-        fromAmount &&
-        marketInfo
+      settings.maxSlippagePercent
     );
+
+    const lpAmount = speculativeToLiquidity(input.add(borrowAmount), market);
+
+    // how much base tokens you will withdraw
+    const baseAmount = pairInfo.totalLPSupply.equalTo(0)
+      ? new TokenAmount(market.pair.baseToken, 0)
+      : pairInfo.baseAmount.scale(lpAmount.divide(pairInfo.totalLPSupply));
+    const priceImpact = determineSlippage(
+      baseAmount, // input amount should be in base tokens
+      uniswapInfo[0],
+      uniswapInfo[1]
+    );
+
+    const shares = marketInfo.totalLiquidityBorrowed.equalTo(0)
+      ? new TokenAmount(market.token, lpAmount.raw)
+      : new TokenAmount(
+          market.token,
+          lpAmount.scale(
+            marketInfo.totalSupply.divide(marketInfo.totalLiquidityBorrowed)
+          ).raw
+        );
+
+    const disableReason =
+      approval === null
+        ? "Loading"
+        : lpAmount.greaterThan(pairInfo.totalLPSupply)
+        ? "Insufficient liquidity"
+        : priceImpact.greaterThan(settings.maxSlippagePercent)
+        ? "Slippage too large"
+        : null;
+
+    // console.log(
+    //   "Invariant check:",
+    //   pairInfo.totalLPSupply.greaterThan(0) &&
+    //     checkInvariant(
+    //       pairInfo.baseAmount.subtract(
+    //         new TokenAmount(
+    //           market.pair.baseToken,
+    //           JSBI.divide(
+    //             JSBI.multiply(pairInfo.baseAmount.raw, lpAmount.raw),
+    //             pairInfo.totalLPSupply.raw
+    //           )
+    //         )
+    //       ),
+    //       pairInfo.speculativeAmount.subtract(
+    //         new TokenAmount(
+    //           market.pair.speculativeToken,
+    //           JSBI.divide(
+    //             JSBI.multiply(pairInfo.speculativeAmount.raw, lpAmount.raw),
+    //             pairInfo.totalLPSupply.raw
+    //           )
+    //         )
+    //       ),
+    //       new TokenAmount(
+    //         market.pair.lp,
+    //         JSBI.subtract(pairInfo.totalLPSupply.raw, lpAmount.raw)
+    //       ),
+    //       market
+    //     )
+    // );
 
     const approveStage: BeetStage[] = approval
       ? [
@@ -169,11 +136,9 @@ export const useTrade = ({
               approval
                 ? {
                     title: "Approve",
-                    description: `Approve ${
-                      fromAmount?.toFixed(2, {
-                        groupSeparator: ",",
-                      }) ?? ""
-                    } ${fromToken?.symbol ?? ""}`,
+                    description: `Approve ${input.toFixed(2, {
+                      groupSeparator: ",",
+                    })} ${input.token.symbol}`,
                     txEnvelope: approve,
                   }
                 : null,
@@ -182,221 +147,263 @@ export const useTrade = ({
         ]
       : [];
 
-    trade.mint
-      ? await beet(
-          "Buy option",
-          approveStage.concat([
-            {
-              stageTitle: "Buy option",
-              parallelTransactions: [
-                {
-                  title: "Buy option",
-                  description: `Buy ${trade.market.pair.speculativeToken.symbol} squared option`,
-                  txEnvelope: () =>
-                    isNative(trade.inputAmount.token)
-                      ? lengineRouterContract.multicall(
-                          [
-                            lendgineRouterInterface.encodeFunctionData("mint", [
-                              {
-                                base: market.pair.baseToken.address,
-                                speculative:
-                                  market.pair.speculativeToken.address,
-                                baseScaleFactor: market.pair.baseScaleFactor,
-                                speculativeScaleFactor:
-                                  market.pair.speculativeScaleFactor,
-                                upperBound: market.pair.bound.asFraction
-                                  .multiply(scale)
-                                  .quotient.toString(),
-                                liquidity: roundLiquidity(
-                                  speculativeToLiquidity(
-                                    trade.inputAmount,
-                                    market
-                                  )
-                                ).raw.toString(),
-                                borrowAmount: borrowAmount.raw.toString(),
-                                sharesMin: trade.outputAmount
-                                  .reduceBy(settings.maxSlippagePercent)
-                                  .raw.toString(),
-                                recipient: address,
-                                deadline:
-                                  Math.round(Date.now() / 1000) +
-                                  settings.timeout * 60,
-                              },
-                            ]),
-                            lendgineRouterInterface.encodeFunctionData(
-                              "refundETH"
-                            ),
-                          ],
-                          {
-                            value: isNative(trade.inputAmount.token)
-                              ? trade.inputAmount.raw.toString()
-                              : 0,
-                          }
-                        )
-                      : lengineRouterContract.mint({
-                          base: market.pair.baseToken.address,
-                          speculative: market.pair.speculativeToken.address,
-                          baseScaleFactor: market.pair.baseScaleFactor,
-                          speculativeScaleFactor:
-                            market.pair.speculativeScaleFactor,
-                          upperBound: market.pair.bound.asFraction
-                            .multiply(scale)
-                            .quotient.toString(),
-                          liquidity: roundLiquidity(
-                            speculativeToLiquidity(trade.inputAmount, market)
-                          ).raw.toString(),
-                          borrowAmount: borrowAmount.raw.toString(),
-                          sharesMin: trade.outputAmount
-                            .reduceBy(settings.maxSlippagePercent)
-                            .raw.toString(),
-                          recipient: address,
-                          deadline:
-                            Math.round(Date.now() / 1000) +
-                            settings.timeout * 60,
-                        }),
-                },
-              ],
-            },
-          ])
-        )
-      : await beet(
-          "Burn",
-          approveStage.concat([
-            {
-              stageTitle: "Sell option",
-              parallelTransactions: [
-                {
-                  title: "Sell option",
-                  description: `Sell ${trade.market.pair.speculativeToken.symbol} squared option`,
-                  txEnvelope: () =>
-                    isNative(market.pair.speculativeToken)
-                      ? lengineRouterContract.multicall([
-                          lendgineRouterInterface.encodeFunctionData("burn", [
-                            {
-                              base: market.pair.baseToken.address,
-                              speculative: market.pair.speculativeToken.address,
-                              baseScaleFactor: market.pair.baseScaleFactor,
-                              speculativeScaleFactor:
-                                market.pair.speculativeScaleFactor,
-                              liquidity: roundLiquidity(
-                                convertShareToLiquidity(
-                                  trade.inputAmount,
-                                  market,
-                                  marketInfo
-                                )
-                              )
-                                .reduceBy(settings.maxSlippagePercent)
-                                .raw.toString(),
-                              sharesMax: trade.inputAmount.raw.toString(),
-                              upperBound: market.pair.bound.asFraction
-                                .multiply(scale)
-                                .quotient.toString(),
-                              recipient: lengineRouterContract.address,
-                              deadline:
-                                Math.round(Date.now() / 1000) +
-                                settings.timeout * 60,
-                            },
+    const mintParams: Omit<LendgineRouter.MintParamsStruct, "recipient"> = {
+      base: market.pair.baseToken.address,
+      speculative: market.pair.speculativeToken.address,
+      baseScaleFactor: market.pair.baseScaleFactor,
+      speculativeScaleFactor: market.pair.speculativeScaleFactor,
+      upperBound: market.pair.bound.asFraction
+        .multiply(scale)
+        .quotient.toString(),
+      liquidity: speculativeToLiquidity(input, market).raw.toString(),
+      borrowAmount: borrowAmount.raw.toString(),
+      sharesMin: shares.reduceBy(settings.maxSlippagePercent).raw.toString(),
+      deadline: Math.round(Date.now() / 1000) + settings.timeout * 60,
+    };
+
+    const callback = async () => {
+      invariant(lengineRouterContract && address);
+
+      await beet(
+        "Buy option",
+        approveStage.concat([
+          {
+            stageTitle: "Buy option",
+            parallelTransactions: [
+              {
+                title: "Buy option",
+                description: `Buy ${market.pair.speculativeToken.symbol} squared option`,
+                txEnvelope: () =>
+                  isNative(input.token)
+                    ? lengineRouterContract.multicall(
+                        [
+                          lendgineRouterInterface.encodeFunctionData("mint", [
+                            { ...mintParams, recipient: address },
                           ]),
                           lendgineRouterInterface.encodeFunctionData(
-                            "unwrapWETH9",
-                            [0, address] // TODO: fix this
+                            "refundETH"
                           ),
-                        ])
-                      : lengineRouterContract.burn({
-                          base: market.pair.baseToken.address,
-                          speculative: market.pair.speculativeToken.address,
-                          baseScaleFactor: market.pair.baseScaleFactor,
-                          speculativeScaleFactor:
-                            market.pair.speculativeScaleFactor,
-                          liquidity: roundLiquidity(
-                            convertShareToLiquidity(
-                              trade.inputAmount,
-                              market,
-                              marketInfo
-                            )
-                          )
-                            .reduceBy(settings.maxSlippagePercent)
-                            .raw.toString(),
-                          sharesMax: trade.inputAmount.raw.toString(),
-                          upperBound: market.pair.bound.asFraction
-                            .multiply(scale)
-                            .quotient.toString(),
-                          recipient: address,
-                          deadline:
-                            Math.round(Date.now() / 1000) +
-                            settings.timeout * 60,
-                        }),
-                },
-              ],
-            },
-          ])
-        );
+                        ],
+                        {
+                          value: isNative(input.token)
+                            ? input.raw.toString()
+                            : 0,
+                        }
+                      )
+                    : lengineRouterContract.mint({
+                        ...mintParams,
+                        recipient: address,
+                      }),
+              },
+            ],
+          },
+        ])
+      );
+    };
+
+    return { outputAmount: shares, disableReason, callback };
   }, [
     address,
     approval,
     approve,
     beet,
-    borrowAmount,
-    fromAmount,
-    fromToken?.symbol,
+    input,
     isNative,
     lengineRouterContract,
     market,
     marketInfo,
+    pairInfo,
     price,
     settings.maxSlippagePercent,
     settings.timeout,
-    trade,
+    uniswapInfo,
   ]);
 
-  const swapDisabledReason = useMemo(
-    () =>
-      !fromToken
-        ? "Select input token"
-        : !toToken
-        ? "Select output token"
-        : !fromAmount || fromAmount.equalTo(0)
-        ? "Enter an amount"
-        : !userFromBalance ||
-          approval === null ||
-          !borrowAmount ||
-          !marketInfo ||
-          !pairInfo ||
-          !trade ||
-          !price ||
-          !priceImpact
-        ? "Loading"
-        : trade.mint &&
-          speculativeToLiquidity(
-            trade.inputAmount.add(borrowAmount),
-            market
-          ).greaterThan(pairInfo?.totalLPSupply)
-        ? "Insufficient liquidity"
-        : trade.mint && priceImpact.greaterThan(settings.maxSlippagePercent)
-        ? "Slippage too large"
-        : fromAmount.greaterThan(userFromBalance)
-        ? "Insufficient tokens"
-        : null,
-    [
-      fromToken,
-      toToken,
-      fromAmount,
-      userFromBalance,
-      approval,
-      borrowAmount,
-      marketInfo,
-      pairInfo,
-      trade,
-      price,
-      priceImpact,
-      market,
-      settings.maxSlippagePercent,
-    ]
+  return ret
+    ? {
+        outputAmount: ret.outputAmount,
+        disableReason: ret.disableReason,
+        callback: ret.callback,
+      }
+    : null;
+};
+
+export const useBurn = (
+  input: TokenAmount,
+  market: IMarket
+): {
+  outputAmount: TokenAmount;
+  disableReason: string | null;
+  callback: () => Promise<void>;
+} | null => {
+  const marketInfo = useLendgine(market);
+  const pairInfo = usePair(market.pair);
+  const uniswapInfo = useUniswapPair(market);
+  const settings = useSettings();
+  const beet = useBeet();
+
+  const { address } = useAccount();
+  const chain = useChain();
+
+  const isNative = useGetIsWrappedNative();
+
+  const approval = useApproval(input, address, LENDGINEROUTER[chain]);
+  const approve = useApprove(input, LENDGINEROUTER[chain]);
+  const lengineRouterContract = useLendgineRouter(true);
+
+  const ret = useMemo(() => {
+    if (!marketInfo || !pairInfo || !uniswapInfo) return null;
+
+    const liquidity = convertShareToLiquidity(input, market, marketInfo);
+    const speculativeAmountOut = liquidityToSpeculative(liquidity, market);
+    const baseAmount = pairInfo.totalLPSupply.greaterThan(0)
+      ? add1(
+          new TokenAmount(
+            market.pair.baseToken,
+            JSBI.divide(
+              JSBI.multiply(pairInfo.baseAmount.raw, liquidity.raw),
+              pairInfo.totalLPSupply.raw
+            )
+          )
+        )
+      : new TokenAmount(market.pair.baseToken, 0);
+
+    const speculativeAmount = pairInfo.totalLPSupply.greaterThan(0)
+      ? add1(
+          new TokenAmount(
+            market.pair.speculativeToken,
+            JSBI.divide(
+              JSBI.multiply(pairInfo.speculativeAmount.raw, liquidity.raw),
+              pairInfo.totalLPSupply.raw
+            )
+          )
+        )
+      : new TokenAmount(market.pair.speculativeToken, 0);
+
+    // speculative tokens
+    const repayAmount = determineRepayAmount(
+      baseAmount.raw,
+      speculativeAmount.raw,
+      uniswapInfo[0].raw,
+      uniswapInfo[1].raw
+    );
+
+    const output = new TokenAmount(
+      market.pair.speculativeToken,
+      JSBI.subtract(speculativeAmountOut.raw, repayAmount)
+    );
+
+    const burnParams: Omit<LendgineRouter.BurnParamsStruct, "recipient"> = {
+      base: market.pair.baseToken.address,
+      speculative: market.pair.speculativeToken.address,
+      baseScaleFactor: market.pair.baseScaleFactor,
+      speculativeScaleFactor: market.pair.speculativeScaleFactor,
+      shares: input.raw.toString(),
+      amount0Min: baseAmount
+        .reduceBy(settings.maxSlippagePercent)
+        .raw.toString(),
+      amount1Min: speculativeAmount
+        .reduceBy(settings.maxSlippagePercent)
+        .raw.toString(),
+      upperBound: market.pair.bound.asFraction
+        .multiply(scale)
+        .quotient.toString(),
+      deadline: Math.round(Date.now() / 1000) + settings.timeout * 60,
+    };
+
+    // console.log(
+    //   "Invariant check burn:",
+    //   checkInvariant(
+    //     pairInfo.baseAmount.add(baseAmount),
+    //     pairInfo.speculativeAmount.add(speculativeAmount),
+    //     pairInfo.totalLPSupply.add(liquidity),
+    //     market
+    //   )
+    // );
+
+    const approveStage: BeetStage[] = approval
+      ? [
+          {
+            stageTitle: "Approve tokens",
+            parallelTransactions: [
+              approval
+                ? {
+                    title: "Approve",
+                    description: `Approve ${input.toFixed(2, {
+                      groupSeparator: ",",
+                    })} ${input.token.symbol}`,
+                    txEnvelope: approve,
+                  }
+                : null,
+            ].filter((t) => t !== null) as BeetTx[],
+          },
+        ]
+      : [];
+
+    const callback = async () => {
+      invariant(lengineRouterContract && address);
+
+      await beet(
+        "Burn",
+        approveStage.concat([
+          {
+            stageTitle: "Sell option",
+            parallelTransactions: [
+              {
+                title: "Sell option",
+                description: `Sell ${market.pair.speculativeToken.symbol} squared option`,
+                txEnvelope: () =>
+                  isNative(market.pair.speculativeToken)
+                    ? lengineRouterContract.multicall([
+                        lendgineRouterInterface.encodeFunctionData("burn", [
+                          {
+                            ...burnParams,
+                            recipient: lengineRouterContract.address,
+                          },
+                        ]),
+                        lendgineRouterInterface.encodeFunctionData(
+                          "unwrapWETH9",
+                          [
+                            output
+                              .reduceBy(settings.maxSlippagePercent)
+                              .raw.toString(),
+                            address,
+                          ]
+                        ),
+                      ])
+                    : lengineRouterContract.burn({
+                        ...burnParams,
+                        recipient: address,
+                      }),
+              },
+            ],
+          },
+        ])
+      );
+    };
+    return { output, baseAmount, speculativeAmount, callback };
+  }, [
+    address,
+    approval,
+    approve,
+    beet,
+    input,
+    isNative,
+    lengineRouterContract,
+    market,
+    marketInfo,
+    pairInfo,
+    settings.maxSlippagePercent,
+    settings.timeout,
+    uniswapInfo,
+  ]);
+
+  const disableReason = useMemo(
+    () => (approval === null ? "Loading" : null),
+    [approval]
   );
 
-  return {
-    handleTrade,
-    swapDisabledReason,
-    trade,
-  };
+  return ret
+    ? { outputAmount: ret.output, disableReason, callback: ret.callback }
+    : null;
 };

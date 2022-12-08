@@ -4,6 +4,7 @@ import {
   liquidityManagerInterface,
 } from "@dahlia-labs/numoen-utils";
 import type { TokenAmount } from "@dahlia-labs/token-utils";
+import { Percent } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -13,7 +14,11 @@ import type { ISettings } from "../../../../../contexts/settings";
 import { useApproval, useApprove } from "../../../../../hooks/useApproval";
 import { useChain } from "../../../../../hooks/useChain";
 import { useLiquidityManager } from "../../../../../hooks/useContract";
-import { useNextTokenID, usePrice } from "../../../../../hooks/useLendgine";
+import {
+  useLendgine,
+  useNextTokenID,
+  usePrice,
+} from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
 import { useWrappedTokenBalance } from "../../../../../hooks/useTokenBalance";
 import { useGetIsWrappedNative } from "../../../../../hooks/useTokens";
@@ -33,6 +38,7 @@ export const useDeposit = (
   const Beet = useBeet();
   const { address } = useAccount();
   const pairInfo = usePair(market.pair);
+  const marketInfo = useLendgine(market);
   const price = usePrice(market);
   const nextID = useNextTokenID();
   const navigate = useNavigate();
@@ -45,18 +51,32 @@ export const useDeposit = (
   );
 
   const approvalS = useApproval(
-    speculativeTokenAmount,
+    speculativeTokenAmount?.scale(
+      Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+    ),
     address,
     LIQUIDITYMANAGER[chain]
   );
   const approvalB = useApproval(
-    baseTokenAmount,
+    baseTokenAmount?.scale(
+      Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+    ),
     address,
     LIQUIDITYMANAGER[chain]
   );
-  const approveS = useApprove(speculativeTokenAmount, LIQUIDITYMANAGER[chain]);
+  const approveS = useApprove(
+    speculativeTokenAmount?.scale(
+      Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+    ),
+    LIQUIDITYMANAGER[chain]
+  );
 
-  const approveB = useApprove(baseTokenAmount, LIQUIDITYMANAGER[chain]);
+  const approveB = useApprove(
+    baseTokenAmount?.scale(
+      Percent.ONE_HUNDRED.add(settings.maxSlippagePercent)
+    ),
+    LIQUIDITYMANAGER[chain]
+  );
 
   const disableReason = useMemo(
     () =>
@@ -70,8 +90,13 @@ export const useDeposit = (
           approvalB === null ||
           !price ||
           !liquidity ||
-          nextID === null
+          nextID === null ||
+          !marketInfo
         ? "Loading..."
+        : liquidity
+            .add(marketInfo.totalLiquidity)
+            .greaterThan(market.maxLiquidity)
+        ? "Capacity reached"
         : (balanceSpeculative &&
             speculativeTokenAmount.greaterThan(balanceSpeculative)) ||
           (balanceBase && baseTokenAmount.greaterThan(balanceBase))
@@ -87,6 +112,8 @@ export const useDeposit = (
       price,
       liquidity,
       nextID,
+      marketInfo,
+      market.maxLiquidity,
     ]
   );
 
@@ -178,6 +205,7 @@ export const useDeposit = (
                         ),
                       ],
                       {
+                        // TODO: send more eth than is necessary for slippage
                         value: isNative(market.pair.baseToken)
                           ? baseTokenAmount.raw.toString()
                           : isNative(market.pair.speculativeToken)

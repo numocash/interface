@@ -39,16 +39,24 @@ export function useBlockQuery<T>(
 ) {
   const { blocknumber } = useBlock();
   const queryClient = useQueryClient();
-  return useQuery([...deps, block ? blocknumber ?? 0 : null], queryFn, {
-    staleTime: Infinity,
-    placeholderData:
-      block && blocknumber
-        ? [...Array(blockHistory).keys()]
-            .map((i) => blocknumber - i - 1)
-            .reduce((acc, cur: number) => {
-              return acc ? acc : queryClient.getQueryData([...deps, cur]);
-            }, undefined) ?? queryClient.getQueryData([...deps, 0])
-        : undefined,
-    enabled,
-  });
+  return useQuery(
+    [...deps, block ? blockFilter(blocknumber ?? 0) : null],
+    queryFn,
+    {
+      staleTime: Infinity,
+      placeholderData:
+        block && blocknumber
+          ? [...Array(blockHistory).keys()]
+              .map((i) => blockFilter(blocknumber) - i - 1)
+              .reduce((acc, cur: number) => {
+                return acc ? acc : queryClient.getQueryData([...deps, cur]);
+              }, undefined) ?? queryClient.getQueryData([...deps, 0])
+          : undefined,
+      enabled,
+    }
+  );
 }
+
+const blockMap = 18;
+
+const blockFilter = (blocknumber: number) => Math.floor(blocknumber / blockMap);

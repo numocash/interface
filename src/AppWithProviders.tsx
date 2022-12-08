@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
 import { chain, configureChains, createClient, WagmiConfig } from "wagmi";
-import { infuraProvider } from "wagmi/providers/infura";
+import { alchemyProvider } from "wagmi/providers/alchemy";
 
 import { App } from "./App";
 import { BlockProvider } from "./contexts/block";
@@ -13,16 +13,19 @@ import { SettingsProvider } from "./contexts/settings";
 import { theme } from "./theme";
 
 const { provider, chains } = configureChains(
-  [chain.goerli],
+  [chain.arbitrum],
   [
-    infuraProvider({
-      apiKey: "6f9c9bc239054e9fb755198cc1e4973a",
+    alchemyProvider({
+      apiKey: "UVgzpWCHx6zsVDO7qC8mtcA6jCl0vgV4",
     }),
+    // infuraProvider({
+    //   apiKey: "6f9c9bc239054e9fb755198cc1e4973a",
+    // }),
   ]
 );
 
 const { connectors } = getDefaultWallets({
-  appName: "My RainbowKit App",
+  appName: "Numoen",
   chains,
 });
 
@@ -39,7 +42,7 @@ export const AppWithProviders: React.FC = () => {
     <React.StrictMode>
       <ThemeProvider theme={theme}>
         <WagmiConfig client={wagmiClient}>
-          <RainbowKitProvider coolMode chains={chains} initialChain={42220}>
+          <RainbowKitProvider coolMode chains={chains}>
             <BlockProvider>
               <QueryClientProvider client={queryClient}>
                 <ReactQueryDevtools initialIsOpen={false} />

@@ -1,6 +1,7 @@
 import type { IMarket } from "@dahlia-labs/numoen-utils";
 import { liquidityManagerInterface } from "@dahlia-labs/numoen-utils";
-import { Fraction, TokenAmount } from "@dahlia-labs/token-utils";
+import { TokenAmount } from "@dahlia-labs/token-utils";
+import JSBI from "jsbi";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -12,7 +13,6 @@ import { useUserLendgine } from "../../../../../hooks/useLendgine";
 import { usePair } from "../../../../../hooks/usePair";
 import { useGetIsWrappedNative } from "../../../../../hooks/useTokens";
 import { useBeet } from "../../../../../utils/beet";
-import { roundLiquidity } from "../../../../../utils/Numoen/invariantMath";
 
 export const useWithdraw = (
   market: IMarket,
@@ -35,32 +35,57 @@ export const useWithdraw = (
         userSpeculativeAmount: new TokenAmount(market.pair.speculativeToken, 0),
       };
 
-    const w = new Fraction(100 - withdrawPercent, 100);
+    const liquidity = userLendgineInfo
+      ? new TokenAmount(
+          market.pair.lp,
+          JSBI.divide(
+            JSBI.multiply(
+              userLendgineInfo.liquidity.raw,
+              JSBI.BigInt(withdrawPercent)
+            ),
+            JSBI.BigInt(100)
+          )
+        )
+      : null;
 
     const userBaseAmount =
-      userLendgineInfo && pairInfo
-        ? pairInfo.baseAmount
-            .scale(userLendgineInfo.liquidity.divide(pairInfo.totalLPSupply))
-            .scale(w)
-        : null;
-    const userSpeculativeAmount =
-      userLendgineInfo && pairInfo
-        ? pairInfo.speculativeAmount
-            .scale(userLendgineInfo.liquidity.divide(pairInfo.totalLPSupply))
-            .scale(w)
+      liquidity && pairInfo
+        ? new TokenAmount(
+            market.pair.baseToken,
+            JSBI.divide(
+              JSBI.multiply(pairInfo.baseAmount.raw, liquidity.raw),
+              pairInfo.totalLPSupply.raw
+            )
+          )
         : null;
 
-    const liquidity = userLendgineInfo
-      ? roundLiquidity(userLendgineInfo.liquidity.scale(w))
-      : null;
+    const userSpeculativeAmount =
+      liquidity && pairInfo
+        ? new TokenAmount(
+            market.pair.speculativeToken,
+            JSBI.divide(
+              JSBI.multiply(pairInfo.speculativeAmount.raw, liquidity.raw),
+              pairInfo.totalLPSupply.raw
+            )
+          )
+        : null;
+
+    // console.log(
+    //   "Invariant check:",
+    //   pairInfo &&
+    //     liquidity &&
+    //     userBaseAmount &&
+    //     userSpeculativeAmount &&
+    //     checkInvariant(
+    //       pairInfo.baseAmount.subtract(userBaseAmount),
+    //       pairInfo.speculativeAmount.subtract(userSpeculativeAmount),
+    //       pairInfo.totalLPSupply.subtract(liquidity),
+    //       market
+    //     )
+    // );
+
     return { userBaseAmount, userSpeculativeAmount, liquidity };
-  }, [
-    market.pair.baseToken,
-    market.pair.speculativeToken,
-    pairInfo,
-    userLendgineInfo,
-    withdrawPercent,
-  ]);
+  }, [market, pairInfo, userLendgineInfo, withdrawPercent]);
 
   const disableReason = useMemo(
     () =>
@@ -73,6 +98,8 @@ export const useWithdraw = (
           !userBaseAmount ||
           !userSpeculativeAmount
         ? "Loading..."
+        : userLendgineInfo.liquidity.equalTo(0)
+        ? "No deposits"
         : pairInfo.baseAmount.lessThan(userBaseAmount) ||
           pairInfo.speculativeAmount.lessThan(userSpeculativeAmount)
         ? "Insufficient liquidity"
@@ -131,13 +158,28 @@ export const useWithdraw = (
                     ),
                     liquidityManagerInterface.encodeFunctionData(
                       "unwrapWETH9",
-                      [0, address]
+                      [
+                        isNative(market.pair.baseToken)
+                          ? userBaseAmount
+                              .reduceBy(settings.maxSlippagePercent)
+                              .raw.toString()
+                          : userSpeculativeAmount
+                              .reduceBy(settings.maxSlippagePercent)
+                              .raw.toString(),
+                        address,
+                      ]
                     ),
                     liquidityManagerInterface.encodeFunctionData("sweepToken", [
                       !isNative(market.pair.baseToken)
                         ? market.pair.baseToken.address
                         : market.pair.speculativeToken.address,
-                      0,
+                      !isNative(market.pair.baseToken)
+                        ? userBaseAmount
+                            .reduceBy(settings.maxSlippagePercent)
+                            .raw.toString()
+                        : userSpeculativeAmount
+                            .reduceBy(settings.maxSlippagePercent)
+                            .raw.toString(),
                       address,
                     ]),
                   ])
