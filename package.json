@@ -6,7 +6,7 @@
   "dependencies": {
     "@dahlia-labs/celo-contrib": "^0.10.4",
     "@dahlia-labs/celo-tokens": "^0.10.4",
-    "@dahlia-labs/numoen-config": "^0.4.7",
+    "@dahlia-labs/numoen-config": "^0.4.8",
     "@dahlia-labs/numoen-utils": "^0.10.4",
     "@dahlia-labs/token-utils": "^0.10.4",
     "@dahlia-labs/uniswapv2-utils": "^0.10.4",
