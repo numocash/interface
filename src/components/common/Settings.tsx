@@ -20,8 +20,10 @@ export const Settings: React.FC = () => {
     if (!Number.isNaN(parseInt(inputDeadline))) {
       settings.setTimeout(parseInt(inputDeadline));
     }
-    if (!Number.isNaN(parseInt(inputSlippage))) {
-      settings.setMaxSlippagePercent(new Percent(parseInt(inputSlippage), 100));
+    if (!Number.isNaN(parseFloat(inputSlippage))) {
+      settings.setMaxSlippagePercent(
+        new Percent((parseFloat(inputSlippage) * 100).toFixed(0), 10000)
+      );
     }
     setShow(false);
     setInputDeadline("");
@@ -61,7 +63,7 @@ export const Settings: React.FC = () => {
             <div tw="flex items-center gap-1">
               <BigNumericInput
                 tw="text-right text-lg text-default"
-                placeholder={settings.maxSlippagePercent.toFixed(0)}
+                placeholder={settings.maxSlippagePercent.toFixed(2)}
                 inputMode="numeric"
                 autoComplete="off"
                 disabled={false}
