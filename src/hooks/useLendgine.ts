@@ -21,10 +21,15 @@ import invariant from "tiny-invariant";
 import { scale } from "../components/pages/Trade/useTrade";
 import { liquidityManagerGenesis } from "../constants";
 import { useBlock } from "../contexts/block";
+import { useAddressToMarket } from "../contexts/environment";
 import { scaleFactor } from "../utils/Numoen/invariantMath";
-import { newRewardPerLiquidity } from "../utils/Numoen/lendgineMath";
+import {
+  convertShareToLiquidity,
+  liquidityToSpeculative,
+  newRewardPerLiquidity,
+} from "../utils/Numoen/lendgineMath";
 import { getPositionMulticall2 } from "../utils/Numoen/lendgineMulticall";
-import { pairInfoToPrice } from "../utils/Numoen/priceMath";
+import { pairInfoToPrice, pricePerLP } from "../utils/Numoen/priceMath";
 import type { HookArg } from "./useApproval";
 import { useBlockMulticall, useBlockQuery } from "./useBlockQuery";
 import { useChain } from "./useChain";
@@ -192,4 +197,37 @@ export const useClaimableTokens = (
       ? tokensOwed.add(userPositionInfo.tokensOwed)
       : null;
   }, [marketInfo, newRPL, userPositionInfo]);
+};
+
+export const usePositionValue = (
+  position: HookArg<TokenAmount>
+): TokenAmount | null => {
+  const market = useAddressToMarket(position?.token.address);
+  const marketInfo = useLendgine(market);
+  const pairInfo = usePair(market?.pair);
+  const price = usePrice(market);
+  useMemo(() => {
+    const liquidity =
+      market && marketInfo && position
+        ? convertShareToLiquidity(position, market, marketInfo)
+        : null;
+    const specCollateral =
+      liquidity && market ? liquidityToSpeculative(liquidity, market) : null;
+
+    const collateralValue =
+      specCollateral && price ? specCollateral.multiply(price) : null;
+    const pricePerLiquidity =
+      pairInfo && market ? pricePerLP(pairInfo, market?.pair) : null;
+    const debtValue =
+      liquidity && pricePerLiquidity
+        ? liquidity.multiply(pricePerLiquidity.asFraction)
+        : null;
+
+    const value =
+      collateralValue && debtValue ? collateralValue.subtract(debtValue) : null;
+
+    console.log(value?.toSignificant(6));
+  }, [market, marketInfo, pairInfo, position, price]);
+  if (!market) return null;
+  return null;
 };

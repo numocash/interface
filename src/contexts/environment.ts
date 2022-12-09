@@ -16,7 +16,10 @@ export const useAddressToMarket = (
   const { markets } = useEnvironment();
   if (!address) return null;
 
-  return markets.find((m) => m.address === address) ?? null;
+  return (
+    markets.find((m) => m.address.toLowerCase() === address.toLowerCase()) ??
+    null
+  );
 };
 
 export const useGetAddressToMarket = () => {
@@ -24,7 +27,11 @@ export const useGetAddressToMarket = () => {
   return useCallback(
     (address: string | null | undefined) => {
       if (!address) return null;
-      return markets.find((m) => m.address === address) ?? null;
+      return (
+        markets.find(
+          (m) => m.address.toLowerCase() === address.toLowerCase()
+        ) ?? null
+      );
     },
     [markets]
   );
