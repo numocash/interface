@@ -23,6 +23,7 @@ export const determineBorrowAmount = (
   return numerator.scale(denominator.invert());
 };
 
+// TODO: account for fees
 export const determineSlippage = (
   inputAmount: TokenAmount,
   u0: TokenAmount,
@@ -40,7 +41,7 @@ export const determineSlippage = (
       JSBI.subtract(scale.quotient, JSBI.divide(a, b)),
       scale.quotient
     )
-  );
+  ).subtract(new Fraction(inputAmount.greaterThan(0) ? 30 : 0, 10000));
 };
 
 export const determineRepayAmount = (
