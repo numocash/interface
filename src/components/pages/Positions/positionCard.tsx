@@ -1,5 +1,6 @@
 import type { IMarket } from "@dahlia-labs/numoen-utils";
 import React, { useMemo } from "react";
+import { NavLink } from "react-router-dom";
 import { useAccount } from "wagmi";
 
 import {
@@ -9,6 +10,7 @@ import {
   useMints,
   usePositionValue,
 } from "../../../hooks/usePositions";
+import { Button } from "../../common/Button";
 import { LoadingSpinner } from "../../common/LoadingSpinner";
 import { Module } from "../../common/Module";
 import { RowBetween } from "../../common/RowBetween";
@@ -34,15 +36,14 @@ export const PositionCard: React.FC<Props> = ({ market }: Props) => {
     [burns, market]
   );
 
-  const sumMints = useMemo(
-    () => (marketMints ? sumMarket(marketMints, market) : null),
-    [market, marketMints]
-  );
+  const returns = useMemo(() => {
+    const sumMints = marketMints ? sumMarket(marketMints, market) : null;
+    const sumBurns = marketBurns ? sumMarket(marketBurns, market) : null;
 
-  const sumBurns = useMemo(
-    () => (marketBurns ? sumMarket(marketBurns, market) : null),
-    [market, marketBurns]
-  );
+    return positionValue && sumMints && sumBurns
+      ? positionValue.add(sumBurns.value).subtract(sumMints.value)
+      : null;
+  }, [market, marketBurns, marketMints, positionValue]);
 
   return (
     <Module tw="">
@@ -63,16 +64,33 @@ export const PositionCard: React.FC<Props> = ({ market }: Props) => {
       </RowBetween>
 
       <RowBetween>
-        <p>Cost Basis</p>
-        {sumMints && sumBurns ? (
+        <p>Total returns</p>
+        {returns ? (
           <p>
-            {sumMints.value.subtract(sumBurns.value).toSignificant(6)}{" "}
-            {market.pair.baseToken.symbol}
+            {returns.toSignificant(6)} {market.pair.baseToken.symbol}
           </p>
         ) : (
           <LoadingSpinner />
         )}
       </RowBetween>
+
+      <Button variant="primary">
+        <NavLink
+          tw=""
+          to={`/trade/?inputToken=${market.pair.speculativeToken.address}&outputToken=${market.token.address}`}
+        >
+          Add to position
+        </NavLink>
+      </Button>
+
+      <Button variant="primary">
+        <NavLink
+          tw=""
+          to={`/trade/?inputToken=${market.token.address}&outputToken=${market.pair.speculativeToken.address}`}
+        >
+          Close position
+        </NavLink>
+      </Button>
     </Module>
   );
 };
