@@ -17,7 +17,7 @@ export const Positions: React.FC = () => {
           <p tw="w-36">Value</p>
           <p tw="w-36">Return</p>
         </div>
-        <div tw="px-3 py-2 text-secondary justify-between w-full flex md:hidden">
+        <div tw="px-6 py-2 text-secondary justify-between w-full flex md:hidden">
           <p tw="">Market</p>
           <p tw="">Value</p>
         </div>
