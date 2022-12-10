@@ -48,7 +48,7 @@ export const PositionCard: React.FC<Props> = ({ market }: Props) => {
 
   return !show ? null : (
     <div tw="p-3 hover:bg-gray-100">
-      <div tw="flex p-2 w-full items-center">
+      <div tw="p-2 w-full items-center md:flex hidden">
         <div tw="w-60 min-w-max">
           <PowerIcon market={market} />
         </div>
@@ -100,6 +100,49 @@ export const PositionCard: React.FC<Props> = ({ market }: Props) => {
               Close
             </NavLink>
           </Button>
+        </div>
+      </div>
+      <div tw="p-2 w-full justify-between items-center flex md:hidden h-full">
+        <div tw="">
+          <PowerIcon market={market} />
+        </div>
+        <div tw="flex flex-col items-center h-full justify-between gap-2">
+          <p tw="text-lg font-semibold min-w-max flex items-center gap-1">
+            {positionValue ? (
+              <>
+                {!returns ? null : returns.greaterThan(0) ? (
+                  <p tw="text-green-500 text-sm">
+                    (+{returns.toSignificant(3)})
+                  </p>
+                ) : (
+                  <p tw="text-red text-sm">(-{returns.toSignificant(3)})</p>
+                )}
+                <p>
+                  {positionValue.toSignificant(4)}{" "}
+                  <span tw="font-normal text-sm text-secondary">
+                    {market.pair.baseToken.symbol}
+                  </span>
+                </p>
+              </>
+            ) : (
+              <LoadingSpinner />
+            )}
+          </p>
+
+          <div tw="gap-2 items-center flex ">
+            <NavLink
+              tw="text-green-500 underline"
+              to={`/trade/?inputToken=${market.pair.speculativeToken.address}&outputToken=${market.token.address}`}
+            >
+              Add
+            </NavLink>
+            <NavLink
+              tw="text-red underline"
+              to={`/trade/?inputToken=${market.token.address}&outputToken=${market.pair.speculativeToken.address}`}
+            >
+              Close
+            </NavLink>
+          </div>
         </div>
       </div>
     </div>
