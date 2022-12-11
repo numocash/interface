@@ -46,12 +46,14 @@ export const Portfolio: React.FC = () => {
         your positions.
       </p>
 
-      <div tw="bg-blue bg-opacity-20 border-2 border-blue flex justify-center w-full p-3 rounded-lg">
-        <p tw="text-blue">
-          {totalTrades ? totalTrades : <LoadingSpinner />} total trades
-          performed
-        </p>
-      </div>
+      {address ? (
+        <div tw="bg-blue bg-opacity-20 border-2 border-blue flex justify-center w-full p-3 rounded-lg">
+          <p tw="text-blue">
+            {totalTrades ? totalTrades : <LoadingSpinner />} total trades
+            performed
+          </p>
+        </div>
+      ) : null}
       {/* 168 */}
       <Module tw="p-0">
         <div tw="px-3 py-2 text-secondary justify-start w-full md:flex hidden font-bold">
