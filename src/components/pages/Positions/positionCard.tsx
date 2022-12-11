@@ -47,7 +47,7 @@ export const PositionCard: React.FC<Props> = ({ market }: Props) => {
   }, [market, marketBurns, marketMints, positionValue]);
 
   return !show ? null : (
-    <div tw="p-3 hover:bg-gray-100">
+    <div tw="p-3 hover:bg-white bg-gray-100">
       <div tw="p-2 w-full items-center md:flex hidden">
         <div tw="w-60 min-w-max">
           <PowerIcon market={market} />
@@ -84,7 +84,7 @@ export const PositionCard: React.FC<Props> = ({ market }: Props) => {
           )}
         </p>
         <div tw="gap-2 items-center flex flex-col w-36">
-          <Button tw="w-full" variant="primary">
+          <Button tw="w-full bg-green-500" variant="primary">
             <NavLink
               tw=""
               to={`/trade/?inputToken=${market.pair.speculativeToken.address}&outputToken=${market.token.address}`}
