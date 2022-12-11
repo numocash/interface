@@ -2,8 +2,10 @@ import React, { useMemo } from "react";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment";
+import { useBurns, useMints } from "../../../hooks/usePositions";
 import { useTokenBalances } from "../../../hooks/useTokenBalance";
 import { LoadingPage } from "../../common/LoadingPage";
+import { LoadingSpinner } from "../../common/LoadingSpinner";
 import { Module } from "../../common/Module";
 import { PositionCard } from "./positionCard";
 
@@ -25,6 +27,14 @@ export const Portfolio: React.FC = () => {
     return { loading, empty };
   }, [balances]);
 
+  const mints = useMints();
+  const burns = useBurns();
+
+  const totalTrades = useMemo(
+    () => (mints && burns ? mints.length + burns.length : null),
+    [burns, mints]
+  );
+
   return (
     <div tw="max-w-2xl flex flex-col gap-4 w-full">
       <p tw="font-bold text-2xl text-default">
@@ -35,6 +45,13 @@ export const Portfolio: React.FC = () => {
         See how much your perpetual options are worth in real time or manage
         your positions.
       </p>
+
+      <div tw="bg-blue bg-opacity-20 border-2 border-blue flex justify-center w-full p-3 rounded-lg">
+        <p tw="text-blue">
+          {totalTrades ? totalTrades : <LoadingSpinner />} total trades
+          performed
+        </p>
+      </div>
       {/* 168 */}
       <Module tw="p-0">
         <div tw="px-3 py-2 text-secondary justify-start w-full md:flex hidden font-bold">
