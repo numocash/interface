@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import invariant from "tiny-invariant";
 import { styled } from "twin.macro";
 
-import { useAwaitTX } from "../contexts/block";
+import { useAwaitTX } from "../hooks/useAwaitTX";
 
 export interface BeetTx {
   txEnvelope: () => Promise<ContractTransaction>;

@@ -1,14 +1,15 @@
 import type { ContractReceipt } from "@ethersproject/contracts";
 import type { Provider } from "@ethersproject/providers";
 import { useCallback } from "react";
-import { useProvider } from "wagmi";
+import { useProvider, useWebSocketProvider } from "wagmi";
 
 export const useAwaitTX = () => {
   const provider = useProvider();
+  const webSocketProvider = useWebSocketProvider();
 
   return useCallback(
-    async (hash: string) => awaitTX(provider, hash),
-    [provider]
+    async (hash: string) => awaitTX(webSocketProvider ?? provider, hash),
+    [provider, webSocketProvider]
   );
 };
 
