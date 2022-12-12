@@ -24,6 +24,7 @@ import { useWrappedTokenBalance } from "../../../../../hooks/useTokenBalance";
 import { useGetIsWrappedNative } from "../../../../../hooks/useTokens";
 import type { BeetStage, BeetTx } from "../../../../../utils/beet";
 import { useBeet } from "../../../../../utils/beet";
+import { add1 } from "../../../../../utils/Numoen/invariantMath";
 import { scale } from "../../../Trade/useTrade";
 
 export const useDeposit = (
@@ -253,9 +254,9 @@ export const useDeposit = (
                       ],
                       {
                         value: isNative(market.pair.baseToken)
-                          ? baseTokenAmount.raw.toString()
+                          ? add1(baseTokenAmount).raw.toString()
                           : isNative(market.pair.speculativeToken)
-                          ? speculativeTokenAmount.raw.toString()
+                          ? add1(speculativeTokenAmount).raw.toString()
                           : 0,
                       }
                     )
