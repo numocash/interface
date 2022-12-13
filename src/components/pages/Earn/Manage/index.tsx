@@ -235,6 +235,7 @@ export const Manage: React.FC = () => {
           <Top />
           {!!tokenID && <Position />}
           <KeyStats />
+
           <Action />
           <Button />
         </ManageProvider>

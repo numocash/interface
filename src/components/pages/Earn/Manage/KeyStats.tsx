@@ -21,7 +21,9 @@ export const KeyStats: React.FC = () => {
   const delta = useMemo(
     () =>
       price
-        ? market.pair.bound.asFraction.subtract(price.asFraction).multiply(2)
+        ? market.pair.bound.asFraction
+            .subtract(price.asFraction)
+            .divide(market.pair.bound.asFraction)
         : null,
     [market.pair.bound.asFraction, price]
   );
@@ -29,6 +31,8 @@ export const KeyStats: React.FC = () => {
   const impliedVol = useMemo(() => {
     const pricePerLiquidity =
       pairInfo && market ? pricePerLP(pairInfo, market?.pair) : null;
+
+    console.log(pricePerLiquidity?.asFraction.toFixed(4));
 
     const rate = marketInfo ? supplyRate(marketInfo) : null;
 
@@ -45,17 +49,38 @@ export const KeyStats: React.FC = () => {
 
     return vol;
   }, [market, marketInfo, pairInfo, price]);
+
+  const openInterest = useMemo(() => {
+    const pricePerLiquidity =
+      pairInfo && market ? pricePerLP(pairInfo, market?.pair) : null;
+
+    const openInterest =
+      pricePerLiquidity && marketInfo
+        ? pricePerLiquidity.asFraction.multiply(
+            marketInfo.totalLiquidityBorrowed
+          )
+        : null;
+    return openInterest;
+  }, [market, marketInfo, pairInfo]);
   return (
     <Module tw="text-default">
       <p tw="font-bold text-default text-xl mb-4">Key Statistics</p>
       <RowBetween tw="px-0 py-1">
         <p tw="">Open interest</p>
-        <p tw="font-bold">0.00</p>
+        <p tw="font-bold">
+          {openInterest ? (
+            openInterest.toSignificant(5, { groupSeparator: "," }) +
+            " " +
+            market.pair.baseToken.symbol
+          ) : (
+            <LoadingSpinner />
+          )}
+        </p>
       </RowBetween>
       <RowBetween tw="px-0 py-1">
         <p tw="">Delta</p>
         <p tw="font-bold">
-          {delta ? delta.toSignificant(6) : <LoadingSpinner />}
+          {delta ? delta.toSignificant(3) : <LoadingSpinner />}
         </p>
       </RowBetween>
       <RowBetween tw="px-0 py-1">

@@ -17,15 +17,15 @@ interface IProps {
 export const MainLayout: React.FC<IProps> = ({ children }: IProps) => {
   return (
     <>
-      <div tw="font-semibold  text-default p-1 bg-red">
+      <div tw="font-semibold  text-default p-1 bg-[#FBCC5C]">
         Warning: Beta Version{" "}
         <span tw="font-normal text-secondary">v1.0.0 </span>
         <span tw="text-default font-normal text-sm">
-          Please use caution. Core contracts have been{" "}
+          Core contracts have been{" "}
           <a tw="underline" href="https://www.certik.com/projects/numoen">
             audited
           </a>{" "}
-          but should still be used at your own risk.
+          but should still be used at your own risk. Please use caution.
         </span>
       </div>
       <PageWrapper>
