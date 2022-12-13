@@ -1,11 +1,6 @@
 import { liquidityManagerInterface } from "@dahlia-labs/numoen-utils";
-import { Percent, TokenAmount } from "@dahlia-labs/token-utils";
-import {
-  SliderHandle,
-  SliderInput as ReachSlider,
-  SliderRange,
-  SliderTrack,
-} from "@reach/slider";
+import { TokenAmount } from "@dahlia-labs/token-utils";
+import { SliderInput as ReachSlider } from "@reach/slider";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import tw, { css, styled } from "twin.macro";
@@ -20,7 +15,6 @@ import {
 import { usePair } from "../../../../hooks/usePair";
 import { useGetIsWrappedNative } from "../../../../hooks/useTokens";
 import { useBeet } from "../../../../utils/beet";
-import { pairInfoToPrice } from "../../../../utils/Numoen/priceMath";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { Module } from "../../../common/Module";
 import { TokenIcon } from "../../../common/TokenIcon";
@@ -65,34 +59,9 @@ export const Position: React.FC = () => {
     userLendgineInfo,
   ]);
 
-  const proportion = useMemo(() => {
-    const price = pairInfo ? pairInfoToPrice(pairInfo, market.pair) : null;
-    if (price?.equalTo(0)) return null;
-
-    const speculativeValue =
-      price && pairInfo ? price.quote(pairInfo.speculativeAmount) : null;
-    return pairInfo && speculativeValue
-      ? Percent.fromFraction(
-          pairInfo.baseAmount.divide(pairInfo.baseAmount.add(speculativeValue))
-        )
-      : null;
-  }, [market.pair, pairInfo]);
-
   return (
     <Module tw="">
       <p tw="font-bold text-default text-xl">Your Deposits</p>
-      <div tw="mt-6">
-        <SliderInput
-          value={proportion ? proportion.asNumber : 0.5}
-          min={0}
-          max={1}
-        >
-          <SliderTrack>
-            <SliderRange />
-            <SliderHandle />
-          </SliderTrack>
-        </SliderInput>
-      </div>
       <div tw="flex justify-between text-default font-bold text-lg py-4">
         <span tw="flex items-center gap-1">
           {userBaseAmount
