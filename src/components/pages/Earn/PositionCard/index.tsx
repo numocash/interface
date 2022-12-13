@@ -2,7 +2,7 @@ import type { IMarket, IMarketUserInfo } from "@dahlia-labs/numoen-utils";
 import React, { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 
-import { useLendgine } from "../../../../hooks/useLendgine";
+import { useClaimableTokens, useLendgine } from "../../../../hooks/useLendgine";
 import { supplyRate } from "../../../../utils/Numoen/jumprate";
 import { Module } from "../../../common/Module";
 import { TokenIcon } from "../../../common/TokenIcon";
@@ -48,6 +48,15 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
     </div>
   );
 
+  const claimableTokens = useClaimableTokens(userInfo?.tokenID, market);
+
+  const hasDeposit = useMemo(() => {
+    return (
+      (claimableTokens && claimableTokens.greaterThan(0)) ||
+      (userInfo && userInfo.liquidity.greaterThan(0))
+    );
+  }, [claimableTokens, userInfo]);
+
   return (
     <NavLink
       to={
@@ -56,7 +65,7 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
           : `/earn/${market.address}`
       }
     >
-      <Wrapper hasDeposit={!!userInfo}>
+      <Wrapper hasDeposit={hasDeposit === true}>
         <div tw="flex justify-between align-top pb-3">
           <div tw="flex flex-col">
             <div tw="flex items-center gap-3">
