@@ -22,6 +22,7 @@ import { Action } from "./Action";
 import { Button } from "./Button";
 import { useDeposit } from "./Deposit/useDeposit";
 import { Invalid } from "./Invalid";
+import { KeyStats } from "./KeyStats";
 import { Position } from "./Position";
 import { Top } from "./Top";
 import { useWithdraw } from "./Withdraw/useWithdraw";
@@ -233,6 +234,7 @@ export const Manage: React.FC = () => {
         >
           <Top />
           {!!tokenID && <Position />}
+          <KeyStats />
           <Action />
           <Button />
         </ManageProvider>

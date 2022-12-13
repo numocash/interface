@@ -229,7 +229,7 @@ export const getSpeculativeIn = (
 //     }
 // }
 
-const sqrt = (y: JSBI): JSBI => {
+export const sqrt = (y: JSBI): JSBI => {
   let z = JSBI.BigInt(0);
   if (JSBI.greaterThan(y, JSBI.BigInt(3))) {
     z = y;
