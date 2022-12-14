@@ -14,6 +14,7 @@ import { Module } from "../../common/Module";
 import { RowBetween } from "../../common/RowBetween";
 import { Settings } from "../../common/Settings";
 import { SubModule } from "../../common/SubModule";
+import { TradeStats } from "./TradeStats";
 import { Field, useSwapState } from "./useSwapState";
 
 export const Swap: React.FC = () => {
@@ -63,9 +64,7 @@ export const Swap: React.FC = () => {
     <>
       <Module tw="p-0">
         <div tw="flex justify-between w-full p-6 pb-0 items-center">
-          <p tw=" font-semibold text-xl text-default">
-            Trade perpetual options
-          </p>
+          <p tw=" font-semibold text-xl text-default">Trade leverage tokens</p>
           <Settings />
         </div>
         <div tw="flex flex-col max-w-lg bg-gray-100">
@@ -123,6 +122,7 @@ export const Swap: React.FC = () => {
           </SubModule>
         )}
       </Module>
+      <TradeStats />
       <AsyncButton
         variant="primary"
         tw="flex w-full text-xl h-12 p-0"
