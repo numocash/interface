@@ -38,6 +38,8 @@
     "bn.js": "^5.2.1",
     "copy-to-clipboard": "^3.3.3",
     "fuse.js": "^6.6.2",
+    "graphql": "^16.6.0",
+    "graphql-request": "^5.1.0",
     "jsbi": "^4.3.0",
     "lodash": "^4.17.21",
     "lodash.mapvalues": "^4.6.0",

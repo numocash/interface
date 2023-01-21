@@ -3,6 +3,7 @@ import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { arbitrum } from "@wagmi/chains";
+import { GraphQLClient } from "graphql-request";
 import React from "react";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
@@ -12,6 +13,10 @@ import { BlockProvider } from "./contexts/block";
 import { EnvironmentProvider } from "./contexts/environment";
 import { SettingsProvider } from "./contexts/settings";
 import { theme } from "./theme";
+
+export const graphQLClient = new GraphQLClient(
+  "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3"
+);
 
 const { provider, chains } = configureChains(
   [arbitrum],
