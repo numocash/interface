@@ -17,7 +17,7 @@ interface IProps {
 export const MainLayout: React.FC<IProps> = ({ children }: IProps) => {
   return (
     <>
-      <div tw="font-semibold  text-default p-1 bg-[#FBCC5C]">
+      {/* <div tw="font-semibold  text-default p-1 bg-[#FBCC5C]">
         Warning: Beta Version{" "}
         <span tw="font-normal text-secondary">v1.0.0 </span>
         <span tw="text-default font-normal text-sm">
@@ -27,10 +27,10 @@ export const MainLayout: React.FC<IProps> = ({ children }: IProps) => {
           </a>{" "}
           but should still be used at your own risk. Please use caution.
         </span>
-      </div>
+      </div> */}
+      <Background />
+      <Header />
       <PageWrapper>
-        <Background />
-        <Header />
         <PageLayout>{children}</PageLayout>
         <Toaster />
       </PageWrapper>
@@ -39,5 +39,5 @@ export const MainLayout: React.FC<IProps> = ({ children }: IProps) => {
 };
 
 const PageWrapper = styled.div`
-  ${tw`relative w-11/12 mx-auto mb-32 md:mb-12`}
+  ${tw`relative w-11/12 mx-auto my-32 md:mb-12`}
 `;

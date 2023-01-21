@@ -106,7 +106,7 @@ export const StyledButton = styled.button<AdditionalButtonProps>(
     variant === "primary" && tw`text-white shadow bg-blue`,
     variant === "muted" && tw`text-gray-200 bg-neutral-700 hover:bg-opacity-50`,
 
-    variant === "danger" && tw`font-bold text-blue bg-red`,
+    variant === "danger" && tw`font-bold text-white shadow bg-red`,
     size === "swap" && tw`w-full text-xl font-bold shadow h-14`,
 
     tw`disabled:(border border-[#AEAEB2] bg-white text-secondary cursor-not-allowed)`,
