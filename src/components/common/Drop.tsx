@@ -51,6 +51,14 @@ export const Drop: React.FC<Props> = ({
 
   const { styles, attributes } = usePopper(target, popperElement, {
     placement,
+    modifiers: [
+      {
+        name: "offset",
+        options: {
+          offset: [0, 6],
+        },
+      },
+    ],
   });
 
   // one container for positioning
