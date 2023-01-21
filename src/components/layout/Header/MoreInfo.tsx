@@ -4,8 +4,8 @@ import { FaDiscord } from "react-icons/fa";
 import { ImBook, ImGithub, ImTwitter } from "react-icons/im";
 import tw, { styled } from "twin.macro";
 
-import { Drop } from "../../../common/Drop";
-import { Module } from "../../../common/Module";
+import { Drop } from "../../common/Drop";
+import { Module } from "../../common/Module";
 import { HeaderItem } from "./Nav";
 
 const size = 20;

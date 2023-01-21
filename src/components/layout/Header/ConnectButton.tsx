@@ -1,6 +1,6 @@
 import { ConnectButton as ConnectButtonRainbow } from "@rainbow-me/rainbowkit";
 
-import { Button } from "../../../common/Button";
+import { Button } from "../../common/Button";
 import { HeaderItem } from "./Nav";
 
 export const ConnectButton: React.FC = () => {
