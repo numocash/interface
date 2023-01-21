@@ -1,14 +1,25 @@
-import { Notice } from "./Notice";
-import { Swap } from "./Swap";
-import { SwapStateProvider } from "./useSwapState";
+import { Explain } from "./Explain";
+import { Filter } from "./Filter";
+import { Loading } from "./Loading";
+import { Sort } from "./Sort";
 
 export const Trade: React.FC = () => {
   return (
-    <div tw="flex flex-col gap-4">
-      <Notice />
-      <SwapStateProvider>
+    <div tw="flex flex-col gap-4 w-full">
+      <Explain />
+      <p tw="text-xs text-default">
+        Displaying <span tw="font-semibold">3 markets</span>
+      </p>
+      <div tw="flex gap-4">
+        <Filter />
+        <Sort />
+      </div>
+
+      {/* <SwapStateProvider>
         <Swap />
-      </SwapStateProvider>
+      </SwapStateProvider> */}
+
+      <Loading />
     </div>
   );
 };
