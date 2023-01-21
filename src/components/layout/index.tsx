@@ -14,7 +14,7 @@ interface IProps {
   children: ReactNode | ReactNode[];
 }
 
-export const MainLayout: React.FC<IProps> = ({ children }: IProps) => {
+export const Layout: React.FC<IProps> = ({ children }: IProps) => {
   return (
     <>
       {/* <div tw="font-semibold  text-default p-1 bg-[#FBCC5C]">

@@ -2,8 +2,8 @@ import React from "react";
 import { BrowserRouter } from "react-router-dom";
 
 import { AppRouter } from "./AppRouter";
-import { MainLayout } from "./components/layout/MainLayout";
-import { Background } from "./components/layout/MainLayout/Background";
+import { Layout } from "./components/layout/";
+import { Background } from "./components/layout//Background";
 import { globalStyles } from "./globalStyles";
 
 export const App: React.FC = () => {
@@ -12,9 +12,9 @@ export const App: React.FC = () => {
       <Background />
       {globalStyles}
       <BrowserRouter>
-        <MainLayout>
+        <Layout>
           <AppRouter />
-        </MainLayout>
+        </Layout>
       </BrowserRouter>
     </div>
   );
