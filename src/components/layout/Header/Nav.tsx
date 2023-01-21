@@ -45,12 +45,12 @@ export const HeaderItem: React.FC<HeaderItemProps> = ({
   return active ? (
     <ItemWrapper tw="text-default">
       {item}
-      <p tw="text-sm">{label}</p>
+      <p tw="text-[12px]">{label}</p>
     </ItemWrapper>
   ) : (
     <ItemWrapper>
       {item}
-      <p tw="text-sm">{label}</p>
+      <p tw="text-[12px]">{label}</p>
     </ItemWrapper>
   );
 };

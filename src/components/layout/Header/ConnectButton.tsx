@@ -62,7 +62,7 @@ export const ConnectButton: React.FC = () => {
                             )}
                           </div>
                         }
-                        label="Network"
+                        label="Chain"
                       />
                     )}
                   </button>
