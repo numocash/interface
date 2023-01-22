@@ -7,11 +7,13 @@ import { Earn } from "./components/pages/Earn";
 import { Manage } from "./components/pages/Earn/Manage";
 import { Portfolio } from "./components/pages/Positions";
 import { Trade } from "./components/pages/Trade";
+import { Chart } from "./components/pages/Trade/Chart";
 
 export const AppRouter: React.FC = () => {
   return (
     <Routes>
       <Route path="/trade" element={<Trade />} />
+      <Route path="/chart" element={<Chart />} />
 
       <Route path="/earn" element={<Earn />} />
       <Route path="/earn/:lendgineAddress" element={<Manage />} />
