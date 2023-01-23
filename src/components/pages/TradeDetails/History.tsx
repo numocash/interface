@@ -18,7 +18,7 @@ export const History: React.FC = () => {
             <button
               css={css`
                 ${tw`grid font-semibold rounded justify-items-center text-secondary`}
-                ${tw`hover:(text-default) transform duration-300 `}
+                ${tw`hover:(text-default) transform duration-300 ease-in-out`}
             ${history === s && tw`text-default`}
               `}
               onClick={() => setHistory(s)}

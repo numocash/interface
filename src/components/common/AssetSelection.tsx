@@ -83,7 +83,7 @@ export const AssetSelection: React.FC<Props> = ({
   const [show, setShow] = useState(false);
 
   return (
-    <div tw="flex w-full flex-col rounded border-2 border-blue pt-1 px-2">
+    <div tw="flex w-full flex-col pt-2 px-2">
       <>
         <Section>
           <div tw=" text-secondary text-xs">{label}</div>

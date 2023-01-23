@@ -88,7 +88,7 @@ export const Settings: React.FC = () => {
         <HeaderItem
           item={
             <FiSettings
-              tw="transform hover:rotate-90 duration-300 delay-100"
+              tw="transform hover:rotate-90 duration-300 delay-100 ease-in-out"
               size={24}
             />
           }

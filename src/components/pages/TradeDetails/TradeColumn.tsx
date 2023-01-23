@@ -4,9 +4,11 @@ import tw, { css } from "twin.macro";
 
 import { useSpeculativeTokens } from "../../../hooks/useTokens";
 import { AssetSelection } from "../../common/AssetSelection";
+import { Button } from "../../common/Button";
 import { CenterSwitch } from "../../common/CenterSwitch";
 import { ProvideLiquidity } from "./ProvideLiquidity";
 import { TotalStats } from "./TotalStats";
+import { TradeStats } from "./TradeStats";
 
 enum ActionType {
   Long = "Long",
@@ -28,7 +30,7 @@ export const TradeColumn: React.FC = () => {
             <button
               css={css`
                 ${tw`text-xl font-semibold text-secondary`}
-                ${tw`hover:(text-default)`}
+                ${tw`hover:(text-default) transform duration-300 ease-in-out`}
                 ${action === s && tw`text-default`}
               `}
               onClick={() => setAction(s)}
@@ -43,8 +45,9 @@ export const TradeColumn: React.FC = () => {
   return (
     <div tw="pl-12 py-2 flex flex-col gap-4 w-full">
       {Tabs}
-      <div tw="">
+      <div tw="rounded-lg border-2 border-blue">
         <AssetSelection
+          tw=""
           label={<span>From</span>}
           // onSelect={(value) => onFieldSelect(Field.Input, value)}
           selectedValue={token}
@@ -55,6 +58,7 @@ export const TradeColumn: React.FC = () => {
             allowSelect: true,
           }}
         />
+        <div tw="border-blue border-b-2 w-full" />
         <CenterSwitch icon="arrow" />
         <AssetSelection
           label={<span>To</span>}
@@ -68,7 +72,12 @@ export const TradeColumn: React.FC = () => {
           }}
         />
       </div>
+      <TradeStats />
+      <Button variant="primary" tw="h-12 text-xl font-bold">
+        Trade
+      </Button>
       <ProvideLiquidity />
+      <div tw="w-full border-b-2 border-gray-200" />
       <TotalStats />
     </div>
   );

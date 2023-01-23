@@ -5,7 +5,9 @@ import { useAccount } from "wagmi";
 import { useEnvironment } from "../../../contexts/environment";
 import { useUserLendgines } from "../../../hooks/useLendgine";
 import { LoadingPage } from "../../common/LoadingPage";
-import { Learn } from "./Learn";
+import { Sort } from "../Trade/Sort";
+import { Filter } from "../TradeDetails/Filter";
+import { Explain } from "./Explain";
 import { PositionCard } from "./PositionCard";
 
 export const Earn: React.FC = () => {
@@ -39,16 +41,16 @@ export const Earn: React.FC = () => {
 
   return (
     <div tw="grid w-full max-w-3xl flex-col gap-4">
-      <p tw="font-bold text-2xl text-default">Earn on your assets</p>
-
-      <p tw=" text-default">
-        Provide liquidity to Numoen pools and lend your position to options
-        buyers to earn yield.
-      </p>
+      <Explain />
       <p tw="text-xs text-default">
         Displaying <span tw="font-semibold">{markets.length} markets</span>
       </p>
-      <Learn />
+      <div tw="flex gap-4">
+        <Filter />
+        <Sort />
+      </div>
+
+      {/* <Learn /> */}
       {hasDeposit && (
         <p tw="text-xs text-black font-semibold mb-[-0.5rem]">Your positions</p>
       )}

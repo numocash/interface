@@ -7,7 +7,7 @@ export const TradeDetails: React.FC = () => {
       <Chart tw="" />
       <div tw="flex max-w-sm ">
         {/* TODO: stick to the right side */}
-        <div tw="border-l-2 border-gray-200 sticky h-[50vh] mt-[-1rem]" />
+        <div tw="border-l-2 border-gray-200 sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
         <TradeColumn tw="" />
       </div>
     </div>
