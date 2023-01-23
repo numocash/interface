@@ -1,13 +1,13 @@
 import { Percent } from "@dahlia-labs/token-utils";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useState } from "react";
+import { FiSettings } from "react-icons/fi";
 import { styled } from "twin.macro";
 
-import { useSettings } from "../../contexts/settings";
-import { Drop } from "./Drop";
-import { BigNumericInput } from "./inputs/BigNumericInput";
-import { Switch } from "./inputs/Switch";
+import { useSettings } from "../../../contexts/settings";
+import { Drop } from "../../common/Drop";
+import { BigNumericInput } from "../../common/inputs/BigNumericInput";
+import { Switch } from "../../common/inputs/Switch";
+import { HeaderItem } from "./Nav";
 
 export const Settings: React.FC = () => {
   const settings = useSettings();
@@ -31,7 +31,7 @@ export const Settings: React.FC = () => {
   }, [inputDeadline, inputSlippage, settings]);
 
   return (
-    <div>
+    <>
       <Drop
         onDismiss={onDismiss}
         show={show}
@@ -84,18 +84,18 @@ export const Settings: React.FC = () => {
           </div>
         </div>
       </Drop>
-      <button
-        tw="text-default flex items-center text-lg"
-        ref={setTargetRef}
-        onClick={() => setShow(true)}
-      >
-        <FontAwesomeIcon
-          tw="transform hover:rotate-90 duration-300 delay-100"
-          icon={faGear}
-          fixedWidth
+      <button tw="" ref={setTargetRef} onClick={() => setShow(true)}>
+        <HeaderItem
+          item={
+            <FiSettings
+              tw="transform hover:rotate-90 duration-300 delay-100"
+              size={24}
+            />
+          }
+          label="Settings"
         />
       </button>
-    </div>
+    </>
   );
 };
 

@@ -4,6 +4,7 @@ import { css } from "twin.macro";
 import { ConnectButton } from "./ConnectButton";
 import { MoreInfo } from "./MoreInfo";
 import { Nav } from "./Nav";
+import { Settings } from "./Settings";
 // import { Nav } from "./Nav";
 
 export const Header: React.FC = () => {
@@ -28,6 +29,7 @@ export const Header: React.FC = () => {
       <div tw="flex w-full md:(gap-2 justify-end) items-center justify-between">
         <Nav />
         <MoreInfo />
+        <Settings />
         <ConnectButton />
       </div>
     </div>

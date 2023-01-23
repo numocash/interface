@@ -12,8 +12,8 @@ import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { Module } from "../../common/Module";
 import { RowBetween } from "../../common/RowBetween";
-import { Settings } from "../../common/Settings";
 import { SubModule } from "../../common/SubModule";
+import { Settings } from "../../layout/Header/Settings";
 import { TradeStats } from "./TradeStats";
 import { Field, useSwapState } from "./useSwapState";
 

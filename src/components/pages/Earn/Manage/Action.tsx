@@ -1,7 +1,7 @@
 import tw, { css } from "twin.macro";
 
 import { Module } from "../../../common/Module";
-import { Settings } from "../../../common/Settings";
+import { Settings } from "../../../layout/Header/Settings";
 import { ActionType, useManage } from ".";
 import { Deposit } from "./Deposit/Deposit";
 import { Withdraw } from "./Withdraw/Withdraw";
