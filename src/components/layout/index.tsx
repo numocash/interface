@@ -39,5 +39,5 @@ export const Layout: React.FC<IProps> = ({ children }: IProps) => {
 };
 
 const PageWrapper = styled.div`
-  ${tw`relative w-11/12 mx-auto mt-8 md:(mb-12 mt-32)`}
+  ${tw`relative px-12 mx-auto md:(mb-12 mt-20)`}
 `;

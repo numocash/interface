@@ -1,5 +1,5 @@
+import { Filter } from "../TradeDetails/Filter";
 import { Explain } from "./Explain";
-import { Filter } from "./Filter";
 import { Sort } from "./Sort";
 
 export const Trade: React.FC = () => {

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { Drop } from "../../common/Drop";
 import { Module } from "../../common/Module";
-import { FilterButton, RotateArrow } from "./Filter";
+import { FilterButton, RotateArrow } from "../TradeDetails/Filter";
 
 export const Sort: React.FC = () => {
   const [targetRef, setTargetRef] = useState<HTMLElement | null>(null);

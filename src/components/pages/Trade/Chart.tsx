@@ -9,7 +9,7 @@ import { gql } from "graphql-request";
 import { useMemo } from "react";
 
 import { graphQLClient } from "../../../AppWithProviders";
-import { EmptyChart } from "./EmptyChart";
+import { EmptyChart } from "../TradeDetails/EmptyChart";
 
 // TODO: use Uniswap tools to generate schema
 

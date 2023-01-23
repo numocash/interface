@@ -84,14 +84,17 @@ export const Settings: React.FC = () => {
           </div>
         </div>
       </Drop>
-      <div tw="text-default flex items-center text-lg" ref={setTargetRef}>
+      <button
+        tw="text-default flex items-center text-lg"
+        ref={setTargetRef}
+        onClick={() => setShow(true)}
+      >
         <FontAwesomeIcon
-          tw="cursor-pointer"
+          tw="transform hover:rotate-90 duration-300 delay-100"
           icon={faGear}
           fixedWidth
-          onClick={() => setShow(true)}
         />
-      </div>
+      </button>
     </div>
   );
 };

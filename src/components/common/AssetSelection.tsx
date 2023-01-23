@@ -83,11 +83,11 @@ export const AssetSelection: React.FC<Props> = ({
   const [show, setShow] = useState(false);
 
   return (
-    <div tw="flex w-full flex-col gap-1">
+    <div tw="flex w-full flex-col rounded border-2 border-blue pt-1 px-2">
       <>
         <Section>
-          <div tw=" text-secondary text-sm">{label}</div>
-          <div tw=" text-secondary text-sm flex">
+          <div tw=" text-secondary text-xs">{label}</div>
+          <div tw=" text-secondary text-xs flex">
             {selectedValue &&
               (currentAmount && !hideInput ? (
                 <Balance>
@@ -185,9 +185,9 @@ export const AssetSelection: React.FC<Props> = ({
           </div>
         </div>
         {!hideInput && (
-          <div tw="flex flex-grow flex-1">
+          <div tw="flex grow flex-1">
             <BigNumericInput
-              tw="text-right text-default w-full"
+              tw="text-right text-default w-full py-1"
               disabled={inputDisabled}
               value={inputValue}
               onChange={inputOnChange}

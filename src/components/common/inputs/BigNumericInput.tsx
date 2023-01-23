@@ -57,7 +57,7 @@ const StyledInput = styled.input<{
   hasBackground?: boolean;
   disabled?: boolean;
 }>`
-  ${tw`border border-gray-300`}
+  ${tw`border-none focus:border-none `}
   color: ${({ theme }) => theme.colors.text.bold};
   font-weight: 400;
   font-size: 24px;
@@ -69,9 +69,11 @@ const StyledInput = styled.input<{
   }
   padding-right: 8px;
   padding-left: 2px;
-  border-radius: 8px;
+  &:focus {
+    outline: none;
+  }
 
-  ${(props) => !!props.disabled && tw`bg-gray-100 border-0`}
+  ${(props) => !!props.disabled && tw`bg-gray-100 `}
 
   ${breakpoints.mobile} {
     font-size: 20px;
