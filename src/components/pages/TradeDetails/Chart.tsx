@@ -1,4 +1,6 @@
 import { EmptyChart } from "./EmptyChart";
+import { EmptyPosition } from "./EmptyPosition";
+import { History } from "./History";
 import { TimeSelector } from "./TimeSelector";
 
 export const Chart: React.FC = () => {
@@ -16,6 +18,8 @@ export const Chart: React.FC = () => {
       <EmptyChart />
       <TimeSelector />
       <div tw="border-b-2 border-gray-200" />
+      <History />
+      <EmptyPosition />
     </div>
   );
 };
