@@ -3,7 +3,7 @@ import type { Price, TokenAmount } from "@dahlia-labs/token-utils";
 import { Fraction, Percent } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 
-import { scale } from "../../components/pages/Trade/useTrade";
+import { scale } from "../../components/pages/TradeOld/useTrade";
 import { getAmountOut } from "./uniPairMath";
 
 export const determineBorrowAmount = (

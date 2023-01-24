@@ -11,7 +11,7 @@ import { useUniswapPair } from "../../../../hooks/useUniswapPair";
 import { useBeet } from "../../../../utils/beet";
 import { getBaseIn, getBaseOut } from "../../../../utils/Numoen/pairMath";
 import { getAmountIn } from "../../../../utils/Numoen/uniPairMath";
-import { scale } from "../../Trade/useTrade";
+import { scale } from "../../TradeOld/useTrade";
 import type { Trade } from "./useArbState";
 
 export interface UseTradeParams {

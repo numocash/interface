@@ -9,7 +9,7 @@ import { pricePerLP } from "../../../../utils/Numoen/priceMath";
 import { LoadingSpinner } from "../../../common/LoadingSpinner";
 import { Module } from "../../../common/Module";
 import { RowBetween } from "../../../common/RowBetween";
-import { scale } from "../../Trade/useTrade";
+import { scale } from "../../TradeOld/useTrade";
 import { useManage } from ".";
 
 export const KeyStats: React.FC = () => {

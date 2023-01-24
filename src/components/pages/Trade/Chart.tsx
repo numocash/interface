@@ -8,7 +8,7 @@ import { extent } from "d3-array";
 import { gql } from "graphql-request";
 import { useMemo } from "react";
 
-import { graphQLClient } from "../../../AppWithProviders";
+import { useClient } from "../../../hooks/useClient";
 import { EmptyChart } from "../TradeDetails/EmptyChart";
 
 // TODO: use Uniswap tools to generate schema
@@ -30,9 +30,10 @@ const POOL_SEARCH = gql`
 
 export const Chart: React.FC = () => {
   const address = getAddress("0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640");
+  const client = useClient();
 
   const poolData = useQuery(["get graph"], async () => {
-    return await graphQLClient.request<PoolResFields>(POOL_SEARCH, {
+    return await client.request<PoolResFields>(POOL_SEARCH, {
       id: address.toLowerCase(),
     });
   });

@@ -60,5 +60,8 @@ const useEnvironmentInternal = (): Environment => {
   };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+export const ModelMarket = markets.arbitrum[3]!;
+
 export const { Provider: EnvironmentProvider, useContainer: useEnvironment } =
   createContainer(useEnvironmentInternal);

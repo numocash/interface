@@ -1,7 +1,7 @@
 import { useState } from "react";
 import tw, { css } from "twin.macro";
 
-enum Times {
+export enum Times {
   ONE_DAY = "1d",
   ONE_WEEK = "1w",
   THREE_MONTH = "3m",

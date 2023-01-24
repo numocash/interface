@@ -2,7 +2,7 @@ import type { IMarket } from "@dahlia-labs/numoen-utils";
 import { TokenAmount } from "@dahlia-labs/token-utils";
 import JSBI from "jsbi";
 
-import { scale } from "../../components/pages/Trade/useTrade";
+import { scale } from "../../components/pages/TradeOld/useTrade";
 import { add1, scaleFactor, sub1 } from "./invariantMath";
 
 export const getBaseOut = (

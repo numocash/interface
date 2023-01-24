@@ -18,7 +18,7 @@ import { max } from "lodash";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import { scale } from "../components/pages/Trade/useTrade";
+import { scale } from "../components/pages/TradeOld/useTrade";
 import { liquidityManagerGenesis } from "../constants";
 import { useBlock } from "../contexts/block";
 import { scaleFactor } from "../utils/Numoen/invariantMath";

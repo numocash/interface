@@ -1,6 +1,6 @@
 import type { IMarket } from "@dahlia-labs/numoen-utils";
 
-import { scale } from "../../components/pages/Trade/useTrade";
+import { scale } from "../../components/pages/TradeOld/useTrade";
 
 interface LendgineProps {
   base: string;

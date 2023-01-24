@@ -12,7 +12,7 @@ import { LoadingSpinner } from "../../common/LoadingSpinner";
 import { Module } from "../../common/Module";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenIcon } from "../../common/TokenIcon";
-import { scale } from "../Trade/useTrade";
+import { scale } from "../TradeOld/useTrade";
 
 interface Props {
   market: IMarket;

@@ -8,7 +8,7 @@ import tw, { css, styled } from "twin.macro";
 import { useAddressToMarket } from "../../contexts/environment";
 import { useDisplayToken } from "../../hooks/useTokens";
 import useWindowDimensions from "../../utils/useWindowDimensions";
-import SelectTokenDialog from "../pages/Trade/SelectTokenDialog";
+import SelectTokenDialog from "../pages/TradeOld/SelectTokenDialog";
 import { BigNumericInput } from "./inputs/BigNumericInput";
 import { PowerIcon } from "./PowerIcon";
 import { TokenAmountDisplay } from "./TokenAmountDisplay";

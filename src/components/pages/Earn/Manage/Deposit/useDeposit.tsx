@@ -25,7 +25,7 @@ import { useGetIsWrappedNative } from "../../../../../hooks/useTokens";
 import type { BeetStage, BeetTx } from "../../../../../utils/beet";
 import { useBeet } from "../../../../../utils/beet";
 import { add1 } from "../../../../../utils/Numoen/invariantMath";
-import { scale } from "../../../Trade/useTrade";
+import { scale } from "../../../TradeOld/useTrade";
 
 export const useDeposit = (
   market: IMarket,
