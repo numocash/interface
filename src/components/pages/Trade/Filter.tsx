@@ -50,7 +50,7 @@ export const Filter: React.FC = () => {
                 <TokenIcon token={t} size={32} />
                 <p tw="text-xl font-semibold">{t.symbol}</p>
               </div>
-              {assets.includes(t) && <FiCheck />}
+              <Check show={assets.includes(t)} />
             </FilterItem>
           ))}
         </Module>
@@ -64,9 +64,14 @@ export const Filter: React.FC = () => {
 };
 
 const FilterItem = styled.button<{ selected: boolean }>(({ selected }) => [
-  tw`flex items-center justify-between w-full px-4 py-2 duration-300 transform border-2 border-transparent rounded-lg hover:bg-gray-200`,
+  tw`flex items-center justify-between w-full px-4 py-2 duration-300 ease-in-out transform border-2 border-transparent rounded-lg hover:bg-gray-200`,
   !selected && tw`hover:bg-gray-200`,
   selected && tw`border-gray-200`,
+]);
+
+const Check = styled(FiCheck)<{ show: boolean }>(({ show }) => [
+  tw`duration-300 ease-in-out transform opacity-0`,
+  show && tw`opacity-100`,
 ]);
 
 export const RotateArrow = styled(IoIosArrowDown)<{ open: boolean }>(
