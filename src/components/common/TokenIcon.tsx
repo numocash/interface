@@ -14,6 +14,7 @@ export const TokenIcon: React.FC<Props> = ({
   size = 28,
 }: Props) => {
   const [invalid, setInvalid] = useState<boolean>(false);
+
   return (
     <Wrapper
       tw="flex rounded-[50%] overflow-hidden"

@@ -58,7 +58,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
   ) : (
     <div tw="w-full rounded-xl hover:bg-gray-200 transform ease-in-out duration-300 grid grid-cols-5 px-6 h-14 items-center justify-between">
       <div tw="flex items-center gap-3 col-span-2">
-        <div tw="flex items-center space-x-[-0.5rem]">
+        <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
           <TokenIcon token={tokens.other} size={32} />
           <TokenIcon token={tokens.denom} size={32} />
         </div>

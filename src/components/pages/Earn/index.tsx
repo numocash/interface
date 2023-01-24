@@ -5,8 +5,8 @@ import { useAccount } from "wagmi";
 import { useEnvironment } from "../../../contexts/environment";
 import { useUserLendgines } from "../../../hooks/useLendgine";
 import { LoadingPage } from "../../common/LoadingPage";
+import { Filter } from "../Trade/Filter";
 import { Sort } from "../Trade/Sort";
-import { Filter } from "../TradeDetails/Filter";
 import { Explain } from "./Explain";
 import { PositionCard } from "./PositionCard";
 

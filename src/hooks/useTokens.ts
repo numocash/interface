@@ -23,6 +23,10 @@ export const useSpeculativeTokens = (): readonly Token[] => {
   return useEnvironment().markets.map((m) => m.pair.speculativeToken);
 };
 
+export const useBaseTokens = (): readonly Token[] => {
+  return useEnvironment().markets.map((m) => m.pair.baseToken);
+};
+
 export const useAllTokens = (): readonly Token[] => {
   const marketTokens = useMarketTokens();
   const speculativeTokens = useSpeculativeTokens();
@@ -85,6 +89,19 @@ export const useGetSortDenomTokens = () => {
     },
     [getDenomToken]
   );
+};
+
+export const dedupeTokens = (tokens: readonly Token[]): readonly Token[] => {
+  const seen = new Set<string>();
+  return tokens.filter((token) => {
+    const tokenID = `${token.address}_${token.chainId}`;
+    if (seen.has(tokenID)) {
+      return false;
+    } else {
+      seen.add(tokenID);
+      return true;
+    }
+  });
 };
 
 // https://api.thegraph.com/subgraphs/name/sushiswap/exchange-arbitrum-backup/graphql?query=query+MyQuery+%7B%0A++pair%28id%3A+%220x905dfcd5649217c42684f23958568e533c711aa3%22%29+%7B%0A++++id%0A++++token1Price%0A++++reserve1%0A++%7D%0A%7D
