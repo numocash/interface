@@ -1,6 +1,7 @@
 import type { Token } from "@dahlia-labs/token-utils";
 import { Percent } from "@dahlia-labs/token-utils";
 import { useMemo } from "react";
+import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 
 import {
@@ -29,9 +30,6 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
     invertPriceQuery
   );
 
-  // tokens.other.symbol === "MAGIC" &&
-  //   console.log(priceHistoryQuery.data[2]?.price.asNumber);
-
   const currentPriceQuery = useCurrentPrice(
     referenceMarketQuery.data,
     invertPriceQuery
@@ -56,31 +54,36 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
   return loading ? (
     <div tw="w-full h-14 duration-300 animate-pulse bg-gray-300 rounded-xl" />
   ) : (
-    <div tw="w-full rounded-xl hover:bg-gray-200 transform ease-in-out duration-300 grid grid-cols-5 px-6 h-14 items-center justify-between">
-      <div tw="flex items-center gap-3 col-span-2">
-        <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
-          <TokenIcon token={tokens.other} size={32} />
-          <TokenIcon token={tokens.denom} size={32} />
+    <NavLink
+      tw=""
+      to={`/trade/details/${tokens.denom.address}/${tokens.other.address}`}
+    >
+      <div tw="w-full rounded-xl hover:bg-gray-200 transform ease-in-out duration-300 grid grid-cols-5 px-6 h-14 items-center justify-between">
+        <div tw="flex items-center gap-3 col-span-2">
+          <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
+            <TokenIcon token={tokens.other} size={32} />
+            <TokenIcon token={tokens.denom} size={32} />
+          </div>
+          <div tw="grid gap-0.5">
+            <span tw="font-semibold text-lg text-default leading-tight">
+              {tokens.other.symbol} / {tokens.denom.symbol}
+            </span>
+          </div>
         </div>
-        <div tw="grid gap-0.5">
-          <span tw="font-semibold text-lg text-default leading-tight">
-            {tokens.other.symbol} / {tokens.denom.symbol}
-          </span>
-        </div>
+
+        <MiniChart
+          priceHistoryQuery={priceHistoryQuery}
+          currentPriceQuery={currentPriceQuery}
+        />
+
+        <p tw="text-lg font-semibold justify-self-end">
+          {priceChange.greaterThan(0) ? (
+            <p tw="text-green-500 ">+{priceChange.toFixed(2)}%</p>
+          ) : (
+            <p tw="text-red">{priceChange.toFixed(2)}%</p>
+          )}
+        </p>
       </div>
-
-      <MiniChart
-        priceHistoryQuery={priceHistoryQuery}
-        currentPriceQuery={currentPriceQuery}
-      />
-
-      <p tw="text-lg font-semibold justify-self-end">
-        {priceChange.greaterThan(0) ? (
-          <p tw="text-green-500 ">+{priceChange.toFixed(2)}%</p>
-        ) : (
-          <p tw="text-red">{priceChange.toFixed(2)}%</p>
-        )}
-      </p>
-    </div>
+    </NavLink>
   );
 };

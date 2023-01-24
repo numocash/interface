@@ -71,23 +71,29 @@ export const useMostLiquidMarket = (tokens: {
   // TODO: query uniswapV2 TVL
   const client = useClient();
 
-  return useQuery(["query liquidity", tokens], async () => {
-    const sortedTokens = sortTokens([tokens.denom, tokens.other]);
-    const mostLiquidPool = (
-      await client.request<MostLiquidResV3>(MOST_LIQUID_RES_SEARCH_V3, {
-        token0: sortedTokens[0].address.toLowerCase(),
-        token1: sortedTokens[1].address.toLowerCase(),
-      })
-    ).pools;
+  return useQuery(
+    ["query liquidity", tokens],
+    async () => {
+      const sortedTokens = sortTokens([tokens.denom, tokens.other]);
+      const mostLiquidPool = (
+        await client.request<MostLiquidResV3>(MOST_LIQUID_RES_SEARCH_V3, {
+          token0: sortedTokens[0].address.toLowerCase(),
+          token1: sortedTokens[1].address.toLowerCase(),
+        })
+      ).pools;
 
-    if (mostLiquidPool.length === 0) return null;
-    return {
-      token0: sortedTokens[0],
-      token1: sortedTokens[1],
-      address: getAddress(mostLiquidPool[0].id),
-      feeTier: mostLiquidPool[0].feeTier as UniswapV3Pool["feeTier"],
-    };
-  });
+      if (mostLiquidPool.length === 0) return null;
+      return {
+        token0: sortedTokens[0],
+        token1: sortedTokens[1],
+        address: getAddress(mostLiquidPool[0].id),
+        feeTier: mostLiquidPool[0].feeTier as UniswapV3Pool["feeTier"],
+      };
+    },
+    {
+      staleTime: Infinity,
+    }
+  );
 };
 
 // export const useMostLiquidMarketBatch = (
@@ -147,32 +153,38 @@ export const usePriceHistory = (
   const client = useClient();
 
   // TODO: return type isn't being strictly typechecked
-  return useQuery(["price history", externalExchange, timeframe], async () => {
-    if (!externalExchange) return null;
+  return useQuery(
+    ["price history", externalExchange, timeframe],
+    async () => {
+      if (!externalExchange) return null;
 
-    const priceHistory =
-      timeframe === Times.ONE_DAY || timeframe === Times.ONE_WEEK
-        ? await client.request<PriceHistoryResV3>(PriceHistorySearchV3, {
-            id: externalExchange.address.toLowerCase(),
-            amount: timeframe === Times.ONE_DAY ? 24 : 24 * 7,
-          })
+      const priceHistory =
+        timeframe === Times.ONE_DAY || timeframe === Times.ONE_WEEK
+          ? await client.request<PriceHistoryResV3>(PriceHistorySearchV3, {
+              id: externalExchange.address.toLowerCase(),
+              amount: timeframe === Times.ONE_DAY ? 24 : 24 * 7,
+            })
+          : null;
+
+      return priceHistory
+        ? priceHistory.pool.poolHourData.map((p) => ({
+            timestamp: +p.periodStartUnix,
+            price: invert
+              ? new Fraction(
+                  10 ** 9,
+                  Math.floor(parseFloat(p.token0Price) * 10 ** 9)
+                )
+              : new Fraction(
+                  Math.floor(parseFloat(p.token0Price) * 10 ** 9),
+                  10 ** 9
+                ),
+          }))
         : null;
-
-    return priceHistory
-      ? priceHistory.pool.poolHourData.map((p) => ({
-          timestamp: +p.periodStartUnix,
-          price: invert
-            ? new Fraction(
-                10 ** 9,
-                Math.floor(parseFloat(p.token0Price) * 10 ** 9)
-              )
-            : new Fraction(
-                Math.floor(parseFloat(p.token0Price) * 10 ** 9),
-                10 ** 9
-              ),
-        }))
-      : null;
-  });
+    },
+    {
+      staleTime: Infinity,
+    }
+  );
 };
 
 type PriceResV3 = {
@@ -194,21 +206,27 @@ export const useCurrentPrice = (
   invert: boolean
 ): UseQueryResult<Fraction | null> => {
   const client = useClient();
-  return useQuery(["current price", externalExchange], async () => {
-    if (!externalExchange) return null;
+  return useQuery(
+    ["current price", externalExchange],
+    async () => {
+      if (!externalExchange) return null;
 
-    const priceRes = await client.request<PriceResV3>(PriceSearchV3, {
-      id: externalExchange.address.toLowerCase(),
-    });
+      const priceRes = await client.request<PriceResV3>(PriceSearchV3, {
+        id: externalExchange.address.toLowerCase(),
+      });
 
-    return invert
-      ? new Fraction(
-          10 ** 9,
-          Math.floor(parseFloat(priceRes.pool.token0Price) * 10 ** 9)
-        )
-      : new Fraction(
-          Math.floor(parseFloat(priceRes.pool.token0Price) * 10 ** 9),
-          10 ** 9
-        );
-  });
+      return invert
+        ? new Fraction(
+            10 ** 9,
+            Math.floor(parseFloat(priceRes.pool.token0Price) * 10 ** 9)
+          )
+        : new Fraction(
+            Math.floor(parseFloat(priceRes.pool.token0Price) * 10 ** 9),
+            10 ** 9
+          );
+    },
+    {
+      staleTime: Infinity,
+    }
+  );
 };

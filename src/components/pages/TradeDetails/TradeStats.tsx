@@ -13,7 +13,7 @@ export const TradeStats: React.FC = () => {
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Leverage</p>
-        <p>2x</p>
+        <p>x²</p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Liquidation price</p>

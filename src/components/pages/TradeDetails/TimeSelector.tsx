@@ -12,7 +12,7 @@ export const TimeSelector: React.FC = () => {
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_WEEK);
 
   return (
-    <div tw="flex gap-4 grid-flow-col text-sm justify-end py-4">
+    <div tw="flex gap-4 grid-flow-col text-sm justify-end py-2">
       {[Times.ONE_DAY, Times.ONE_WEEK, Times.THREE_MONTH, Times.ONE_YEAR].map(
         (s) => {
           return (

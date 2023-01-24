@@ -1,11 +1,10 @@
 import { useState } from "react";
-import invariant from "tiny-invariant";
 import tw, { css } from "twin.macro";
 
-import { useSpeculativeTokens } from "../../../hooks/useTokens";
 import { AssetSelection } from "../../common/AssetSelection";
 import { Button } from "../../common/Button";
 import { CenterSwitch } from "../../common/CenterSwitch";
+import { useTradeDetails } from ".";
 import { ProvideLiquidity } from "./ProvideLiquidity";
 import { TotalStats } from "./TotalStats";
 import { TradeStats } from "./TradeStats";
@@ -19,8 +18,7 @@ enum ActionType {
 export const TradeColumn: React.FC = () => {
   const [action, setAction] = useState<ActionType>(ActionType.Long);
 
-  const token = useSpeculativeTokens()[0];
-  invariant(token);
+  const { denom, other } = useTradeDetails();
 
   const Tabs = (
     <div tw="flex gap-4 text-sm justify-around items-center w-full col-start-2 col-span-5">
@@ -50,7 +48,7 @@ export const TradeColumn: React.FC = () => {
           tw=""
           label={<span>From</span>}
           // onSelect={(value) => onFieldSelect(Field.Input, value)}
-          selectedValue={token}
+          selectedValue={other}
           // inputValue={typedValue}
           // inputOnChange={(value) => onFieldInput(Field.Input, value)}
           currentAmount={{
@@ -63,7 +61,7 @@ export const TradeColumn: React.FC = () => {
         <AssetSelection
           label={<span>To</span>}
           // onSelect={(value) => onFieldSelect(Field.Input, value)}
-          selectedValue={token}
+          selectedValue={denom}
           // inputValue={typedValue}
           // inputOnChange={(value) => onFieldInput(Field.Input, value)}
           currentAmount={{

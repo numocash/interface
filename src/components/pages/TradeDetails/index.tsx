@@ -1,15 +1,59 @@
-import { Chart } from "./Chart";
+import type { Token } from "@dahlia-labs/token-utils";
+import { getAddress } from "@ethersproject/address";
+import { useNavigate, useParams } from "react-router-dom";
+import invariant from "tiny-invariant";
+import { createContainer } from "unstated-next";
+
+import { useAddressToToken } from "../../../hooks/useTokens";
+import { MainView } from "./MainView";
 import { TradeColumn } from "./TradeColumn";
+
+interface ITradeDetails {
+  denom: Token;
+  other: Token;
+}
+
+const useTradeDetailsInternal = (): ITradeDetails => {
+  const navigate = useNavigate();
+
+  const { denom, quote } = useParams<{
+    denom: string;
+    quote: string;
+  }>();
+
+  if (!denom || !quote) navigate("/trade/");
+  invariant(denom && quote);
+  try {
+    getAddress(denom);
+    getAddress(quote);
+  } catch (err) {
+    console.error(err);
+    navigate("/trade/");
+  }
+
+  const denomToken = useAddressToToken(denom);
+  const quoteToken = useAddressToToken(quote);
+
+  if (!denomToken || !quoteToken) navigate("/trade/");
+  invariant(denomToken && quoteToken, "Invalid token addresses");
+
+  return { denom: denomToken, other: quoteToken };
+};
+
+export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =
+  createContainer(useTradeDetailsInternal);
 
 export const TradeDetails: React.FC = () => {
   return (
     <div tw="w-full grid grid-cols-3">
-      <Chart tw="" />
-      <div tw="flex max-w-sm ">
-        {/* TODO: stick to the right side */}
-        <div tw="border-l-2 border-gray-200 sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
-        <TradeColumn tw="" />
-      </div>
+      <TradeDetailsProvider>
+        <MainView />
+        <div tw="flex max-w-sm justify-self-end">
+          {/* TODO: stick to the right side */}
+          <div tw="border-l-2 border-gray-200 sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
+          <TradeColumn tw="" />
+        </div>
+      </TradeDetailsProvider>
     </div>
   );
 };
