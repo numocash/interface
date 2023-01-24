@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { ModelMarket } from "../../../contexts/environment";
+import { useEnvironment } from "../../../contexts/environment";
 import { useGetSortDenomTokens } from "../../../hooks/useTokens";
 import { sortTokens } from "../../../hooks/useUniswapPair";
 import { MarketItem } from "./MarketItem";
@@ -8,7 +8,7 @@ import { MarketItem } from "./MarketItem";
 export const Markets: React.FC = () => {
   // Load markets
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const markets = [ModelMarket] as const;
+  const { markets } = useEnvironment();
   const getDenomSortedTokens = useGetSortDenomTokens();
 
   const denomSortedTokens = useMemo(() => {

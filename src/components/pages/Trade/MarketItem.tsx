@@ -9,7 +9,9 @@ import {
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../hooks/useUniswapPair";
+import { TokenIcon } from "../../common/TokenIcon";
 import { Times } from "../TradeDetails/TimeSelector";
+import { MiniChart } from "./MiniChart";
 
 interface Props {
   tokens: { denom: Token; other: Token };
@@ -27,13 +29,8 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
     invertPriceQuery
   );
 
-  // token0 = weth
-  // token1 = usdc
-
-  // denom token = usdc
-  // other token = weth
-
-  // uniswap price = weth / usdc
+  // tokens.other.symbol === "MAGIC" &&
+  //   console.log(priceHistoryQuery.data[2]?.price.asNumber);
 
   const currentPriceQuery = useCurrentPrice(
     referenceMarketQuery.data,
@@ -57,18 +54,33 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
     !priceHistoryQuery.data || !currentPriceQuery.data || !priceChange;
 
   return loading ? (
-    <div tw="w-full h-12 duration-300 animate-pulse bg-gray-300 rounded-xl" />
+    <div tw="w-full h-14 duration-300 animate-pulse bg-gray-300 rounded-xl" />
   ) : (
-    <div tw="w-full rounded-lg hover:bg-gray-200 transform ease-in-out duration-300 flex px-6 h-12 items-center justify-between">
-      <p tw="text-xl font-semibold">
-        {tokens.other.symbol} / {tokens.denom.symbol}
-      </p>
+    <div tw="w-full rounded-xl hover:bg-gray-200 transform ease-in-out duration-300 grid grid-cols-5 px-6 h-14 items-center justify-between">
+      <div tw="flex items-center gap-3 col-span-2">
+        <div tw="flex items-center space-x-[-0.5rem]">
+          <TokenIcon token={tokens.other} size={32} />
+          <TokenIcon token={tokens.denom} size={32} />
+        </div>
+        <div tw="grid gap-0.5">
+          <span tw="font-semibold text-lg text-default leading-tight">
+            {tokens.other.symbol} / {tokens.denom.symbol}
+          </span>
+        </div>
+      </div>
 
-      {priceChange.greaterThan(0) ? (
-        <p tw="text-green-500">+{priceChange.toFixed(2)}%</p>
-      ) : (
-        <p tw="text-red">{priceChange.toFixed(2)}%</p>
-      )}
+      <MiniChart
+        priceHistoryQuery={priceHistoryQuery}
+        currentPriceQuery={currentPriceQuery}
+      />
+
+      <p tw="text-lg font-semibold justify-self-end">
+        {priceChange.greaterThan(0) ? (
+          <p tw="text-green-500 ">+{priceChange.toFixed(2)}%</p>
+        ) : (
+          <p tw="text-red">{priceChange.toFixed(2)}%</p>
+        )}
+      </p>
     </div>
   );
 };

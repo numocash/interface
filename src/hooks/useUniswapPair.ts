@@ -1,5 +1,5 @@
 import type { IMarket } from "@dahlia-labs/numoen-utils";
-import type { Price, Token, TokenAmount } from "@dahlia-labs/token-utils";
+import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
 import { Fraction } from "@dahlia-labs/token-utils";
 import { reservesMulticall } from "@dahlia-labs/uniswapv2-utils";
 import { getAddress } from "@ethersproject/address";
@@ -140,12 +140,13 @@ export const usePriceHistory = (
 ): UseQueryResult<
   | {
       timestamp: number;
-      price: Price;
+      price: Fraction;
     }[]
   | null
 > => {
   const client = useClient();
 
+  // TODO: return type isn't being strictly typechecked
   return useQuery(["price history", externalExchange, timeframe], async () => {
     if (!externalExchange) return null;
 
