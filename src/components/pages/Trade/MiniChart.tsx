@@ -1,6 +1,6 @@
 import { curveNatural } from "@visx/curve";
 import { Group } from "@visx/group";
-import { scaleTime } from "@visx/scale";
+import { scaleLinear } from "@visx/scale";
 import { LinePath } from "@visx/shape";
 import { extent } from "d3-array";
 import { useMemo } from "react";
@@ -44,12 +44,12 @@ export const MiniChart: React.FC<Props> = ({
     []
   );
 
-  const xScale = scaleTime<number>({
+  const xScale = scaleLinear<number>({
     domain: priceHistoryQuery.data
       ? (extent(priceHistoryQuery.data, getX) as [number, number])
       : [0, 0],
   });
-  const yScale = scaleTime<number>({
+  const yScale = scaleLinear<number>({
     domain: priceHistoryQuery.data
       ? (extent(priceHistoryQuery.data, getY) as [number, number])
       : [0, 0],
