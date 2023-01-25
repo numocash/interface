@@ -38,22 +38,21 @@ export const Chart: React.FC = () => {
     invertPriceQuery
   );
 
+  const [crosshair, setCrosshair] = useState<number | null>(null);
+  const [displayPrice, setDisplayPrice] = useState<PricePoint | null>(null);
+
   const priceChange = useMemo(() => {
-    if (!currentPriceQuery.data || !priceHistoryQuery.data) return null;
+    const secondPrice = displayPrice?.price ?? currentPriceQuery.data;
+    if (!secondPrice || !priceHistoryQuery.data) return null;
 
     const oneDayOldPrice =
       priceHistoryQuery.data[priceHistoryQuery.data.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
     return Percent.fromFraction(
-      currentPriceQuery.data.subtract(oneDayOldPrice).divide(oneDayOldPrice)
+      secondPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice)
     );
-  }, [currentPriceQuery.data, priceHistoryQuery.data]);
-
-  const [crosshair, setCrosshair] = useState<number | null>(null);
-  const [displayPrice, setDisplayPrice] = useState<PricePoint | null>(null);
-
-  console.log(crosshair, displayPrice);
+  }, [currentPriceQuery.data, displayPrice?.price, priceHistoryQuery.data]);
 
   const getX = useMemo(
     () =>
@@ -138,9 +137,10 @@ export const Chart: React.FC = () => {
             <div tw="bg-gray-200 animate-pulse h-8 w-20 rounded" />
           ) : (
             <p tw=" text-2xl">
-              {currentPriceQuery.data?.toSignificant(5, {
-                groupSeparator: ",",
-              })}
+              {displayPrice?.price.toSignificant(5, { groupSeparator: "," }) ??
+                currentPriceQuery.data?.toSignificant(5, {
+                  groupSeparator: ",",
+                })}
             </p>
           )}
           {loading ? (
