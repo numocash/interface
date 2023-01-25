@@ -8,7 +8,7 @@ import { TimeSelector } from "./TimeSelector";
 export const MainView: React.FC = () => {
   const { denom, other } = useTradeDetails();
   return (
-    <div tw="col-span-2 w-full flex mt-2 flex-col pr-12 gap-2">
+    <div tw="col-span-2 w-full flex mt-2 flex-col pr-6 lg:pr-8 xl:pr-12 gap-2 transform ease-in-out duration-300">
       <div tw="flex w-full">
         <div tw="flex flex-col gap-2">
           <div tw="flex items-center gap-3 col-span-2">
