@@ -84,7 +84,7 @@ export const useMostLiquidMarket = (tokens: {
 }): UseQueryResult<UniswapV2Pool | UniswapV3Pool | null> => {
   const client = useClient();
 
-  return useQuery(
+  return useQuery<UniswapV2Pool | UniswapV3Pool | null>(
     ["query liquidity", tokens],
     async () => {
       const sortedTokens = sortTokens([tokens.denom, tokens.other]);
@@ -99,7 +99,6 @@ export const useMostLiquidMarket = (tokens: {
           token1: sortedTokens[1].address.toLowerCase(),
         }),
       ] as const);
-      console.log(v2, v3);
 
       if (!v2.pairs[0] && !v3.pools[0]) return null;
 
@@ -143,30 +142,6 @@ export const useMostLiquidMarket = (tokens: {
   );
 };
 
-// export const useMostLiquidMarketBatch = (
-//   markets: { denom: Token; other: Token }[]
-// ): UseQueryResult<(UniswapV3Pool | null)[]> => {
-//   const client = useClient();
-//   return useQuery(["most liquid batch", markets], async () => {
-//     const requests = markets.map((m) => {
-//       const sortedTokens = sortTokens([m.denom, m.other]);
-//       return {
-//         document: MOST_LIQUID_RES_SEARCH_V3,
-//         variables: {
-//           token0: sortedTokens[0].address.toLowerCase(),
-//           token1: sortedTokens[1].address.toLowerCase(),
-//         },
-//       };
-//     });
-
-//     const data = await client.batchRequests<MostLiquidResV3>(requests);
-
-//     console.log(data);
-
-//     return null;
-//   });
-// };
-
 export const usePriceHistory = (
   externalExchange: HookArg<UniswapV2Pool | UniswapV3Pool>,
   timeframe: Times,
@@ -180,8 +155,13 @@ export const usePriceHistory = (
 > => {
   const client = useClient();
 
-  // TODO: return type isn't being strictly typechecked
-  return useQuery(
+  return useQuery<
+    | {
+        timestamp: number;
+        price: Fraction;
+      }[]
+    | null
+  >(
     ["price history", externalExchange, timeframe],
     async () => {
       if (!externalExchange) return null;
@@ -233,56 +213,50 @@ export const usePriceHistory = (
         t: PriceHistoryHourResV3 | PriceHistoryDayResV3
       ): t is PriceHistoryHourResV3 => "poolHourData" in t.pool;
 
+      const parseV2 = (
+        data: PriceHistoryHourV2Res["pair"]["hourData"][number]
+      ): { timestamp: number; price: Fraction } => ({
+        timestamp: +data.date,
+        price: invert
+          ? new Fraction(
+              Math.floor(parseFloat(data.reserve1) * 10 ** 9),
+              Math.floor(parseFloat(data.reserve0) * 10 ** 9)
+            )
+          : new Fraction(
+              Math.floor(parseFloat(data.reserve0) * 10 ** 9),
+              Math.floor(parseFloat(data.reserve1) * 10 ** 9)
+            ),
+      });
+
+      const parseV3 = (
+        data: Pick<
+          PriceHistoryDayResV3["pool"]["poolDayData"][number],
+          "token0Price"
+        >
+      ): { price: Fraction } => ({
+        price: invert
+          ? new Fraction(
+              10 ** 9,
+              Math.floor(parseFloat(data.token0Price) * 10 ** 9)
+            )
+          : new Fraction(
+              Math.floor(parseFloat(data.token0Price) * 10 ** 9),
+              10 ** 9
+            ),
+      });
+
       return isV2(priceHistory)
         ? isHourV2(priceHistory)
-          ? priceHistory.pair.hourData.map((p) => ({
-              timestamp: +p.date,
-              price: invert
-                ? new Fraction(
-                    Math.floor(parseFloat(p.reserve1) * 10 ** 9),
-                    Math.floor(parseFloat(p.reserve0) * 10 ** 9)
-                  )
-                : new Fraction(
-                    Math.floor(parseFloat(p.reserve0) * 10 ** 9),
-                    Math.floor(parseFloat(p.reserve1) * 10 ** 9)
-                  ),
-            }))
-          : priceHistory.pair.dayData.map((p) => ({
-              timestamp: +p.date,
-              price: invert
-                ? new Fraction(
-                    Math.floor(parseFloat(p.reserve1) * 10 ** 9),
-                    Math.floor(parseFloat(p.reserve0) * 10 ** 9)
-                  )
-                : new Fraction(
-                    Math.floor(parseFloat(p.reserve0) * 10 ** 9),
-                    Math.floor(parseFloat(p.reserve1) * 10 ** 9)
-                  ),
-            }))
+          ? priceHistory.pair.hourData.map((p) => parseV2(p))
+          : priceHistory.pair.dayData.map((p) => parseV2(p))
         : isHourV3(priceHistory)
         ? priceHistory.pool.poolHourData.map((p) => ({
             timestamp: +p.periodStartUnix,
-            price: invert
-              ? new Fraction(
-                  10 ** 9,
-                  Math.floor(parseFloat(p.token0Price) * 10 ** 9)
-                )
-              : new Fraction(
-                  Math.floor(parseFloat(p.token0Price) * 10 ** 9),
-                  10 ** 9
-                ),
+            ...parseV3(p),
           }))
         : priceHistory.pool.poolDayData.map((p) => ({
             timestamp: +p.date,
-            price: invert
-              ? new Fraction(
-                  10 ** 9,
-                  Math.floor(parseFloat(p.token0Price) * 10 ** 9)
-                )
-              : new Fraction(
-                  Math.floor(parseFloat(p.token0Price) * 10 ** 9),
-                  10 ** 9
-                ),
+            ...parseV3(p),
           }));
     },
     {
@@ -296,7 +270,7 @@ export const useCurrentPrice = (
   invert: boolean
 ): UseQueryResult<Fraction | null> => {
   const client = useClient();
-  return useQuery(
+  return useQuery<Fraction | null>(
     ["current price", externalExchange],
     async () => {
       if (!externalExchange) return null;
