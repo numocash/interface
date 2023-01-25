@@ -5,14 +5,53 @@ import { reservesMulticall } from "@dahlia-labs/uniswapv2-utils";
 import { getAddress } from "@ethersproject/address";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
-import { gql } from "graphql-request";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 
 import { Times } from "../components/pages/TradeDetails/TimeSelector";
+import type {
+  LiquidResV2,
+  PriceHistoryDayV2Res,
+  PriceHistoryHourV2Res,
+  PriceResV2,
+} from "../services/graphql/uniswapV2";
+import {
+  LiquidSearchV2,
+  PriceHistoryDaySearchV2,
+  PriceHistoryHourSearchV2,
+  PriceSearchV2,
+} from "../services/graphql/uniswapV2";
+import type {
+  MostLiquidResV3,
+  PriceHistoryDayResV3,
+  PriceHistoryHourResV3,
+  PriceResV3,
+} from "../services/graphql/uniswapV3";
+import {
+  MostLiquidSearchV3,
+  PriceHistoryDaySearchV3,
+  PriceHistoryHourSearchV3,
+  PriceSearchV3,
+} from "../services/graphql/uniswapV3";
 import type { HookArg } from "./useApproval";
 import { useBlockMulticall } from "./useBlockQuery";
 import { useClient } from "./useClient";
+
+type UniswapV2Pool = {
+  token0: Token;
+  token1: Token;
+  address: Address;
+};
+
+type UniswapV3Pool = {
+  token0: Token;
+  token1: Token;
+  address: Address;
+  feeTier: "100" | "500" | "3000" | "10000";
+};
+
+const isV3 = (pool: UniswapV2Pool | UniswapV3Pool): pool is UniswapV3Pool =>
+  "feeTier" in pool;
 
 export const sortTokens = (
   tokens: readonly [Token, Token]
@@ -39,56 +78,64 @@ export const useUniswapPair = (
   ];
 };
 
-type MostLiquidResV3 = {
-  pools: readonly [{ id: string; feeTier: string }] | [];
-};
-
-const MOST_LIQUID_RES_SEARCH_V3 = gql`
-  query MostLiquidV3($token0: Bytes!, $token1: Bytes!) {
-    pools(
-      where: { token0: $token0, token1: $token1 }
-      orderBy: totalValueLockedToken0
-      orderDirection: desc
-      first: 1
-    ) {
-      id
-      feeTier
-    }
-  }
-`;
-
-type UniswapV3Pool = {
-  token0: Token;
-  token1: Token;
-  address: Address;
-  feeTier: "100" | "500" | "3000" | "10000";
-};
-
 export const useMostLiquidMarket = (tokens: {
   denom: Token;
   other: Token;
-}): UseQueryResult<UniswapV3Pool | null> => {
-  // TODO: query uniswapV2 TVL
+}): UseQueryResult<UniswapV2Pool | UniswapV3Pool | null> => {
   const client = useClient();
 
   return useQuery(
     ["query liquidity", tokens],
     async () => {
       const sortedTokens = sortTokens([tokens.denom, tokens.other]);
-      const mostLiquidPool = (
-        await client.request<MostLiquidResV3>(MOST_LIQUID_RES_SEARCH_V3, {
+
+      const [v2, v3] = await Promise.all([
+        client.sushiswap.request<LiquidResV2>(LiquidSearchV2, {
           token0: sortedTokens[0].address.toLowerCase(),
           token1: sortedTokens[1].address.toLowerCase(),
-        })
-      ).pools;
+        }),
+        client.uniswapv3.request<MostLiquidResV3>(MostLiquidSearchV3, {
+          token0: sortedTokens[0].address.toLowerCase(),
+          token1: sortedTokens[1].address.toLowerCase(),
+        }),
+      ] as const);
+      console.log(v2, v3);
 
-      if (mostLiquidPool.length === 0) return null;
-      return {
-        token0: sortedTokens[0],
-        token1: sortedTokens[1],
-        address: getAddress(mostLiquidPool[0].id),
-        feeTier: mostLiquidPool[0].feeTier as UniswapV3Pool["feeTier"],
-      };
+      if (!v2.pairs[0] && !v3.pools[0]) return null;
+
+      if (!v3.pools[0]) {
+        invariant(v2.pairs[0]);
+        return {
+          token0: sortedTokens[0],
+          token1: sortedTokens[1],
+          address: getAddress(v2.pairs[0].id),
+        };
+      }
+
+      if (!v2.pairs[0]) {
+        invariant(v3.pools[0]);
+        return {
+          token0: sortedTokens[0],
+          token1: sortedTokens[1],
+          address: getAddress(v3.pools[0].id),
+        };
+      }
+
+      invariant(v2.pairs[0] && v3.pools[0]);
+
+      return parseFloat(v2.pairs[0].reserve0) * 2 >
+        parseFloat(v3.pools[0].totalValueLockedToken0)
+        ? {
+            token0: sortedTokens[0],
+            token1: sortedTokens[1],
+            address: getAddress(v2.pairs[0].id),
+          }
+        : {
+            token0: sortedTokens[0],
+            token1: sortedTokens[1],
+            address: getAddress(v3.pools[0].id),
+            feeTier: v3.pools[0].feeTier as UniswapV3Pool["feeTier"],
+          };
     },
     {
       staleTime: Infinity,
@@ -120,42 +167,8 @@ export const useMostLiquidMarket = (tokens: {
 //   });
 // };
 
-type PriceHistoryHourResV3 = {
-  pool: { poolHourData: { token0Price: string; periodStartUnix: string }[] };
-};
-
-const PriceHistoryHourSearchV3 = gql`
-  query PriceHistoryV3($id: String, $amount: Int) {
-    pool(id: $id, subgraphError: allow) {
-      poolHourData(
-        orderBy: periodStartUnix
-        first: $amount
-        orderDirection: desc
-      ) {
-        token0Price
-        periodStartUnix
-      }
-    }
-  }
-`;
-
-type PriceHistoryDayResV3 = {
-  pool: { poolDayData: { token0Price: string; date: string }[] };
-};
-
-const PriceHistoryDaySearchV3 = gql`
-  query PriceHistoryV3($id: String, $amount: Int) {
-    pool(id: $id, subgraphError: allow) {
-      poolDayData(orderBy: date, first: $amount, orderDirection: desc) {
-        token0Price
-        date
-      }
-    }
-  }
-`;
-
 export const usePriceHistory = (
-  externalExchange: HookArg<UniswapV3Pool>,
+  externalExchange: HookArg<UniswapV2Pool | UniswapV3Pool>,
   timeframe: Times,
   invert: boolean
 ): UseQueryResult<
@@ -175,25 +188,78 @@ export const usePriceHistory = (
 
       const priceHistory =
         timeframe === Times.ONE_DAY || timeframe === Times.ONE_WEEK
-          ? await client.request<PriceHistoryHourResV3>(
-              PriceHistoryHourSearchV3,
+          ? isV3(externalExchange)
+            ? await client.uniswapv3.request<PriceHistoryHourResV3>(
+                PriceHistoryHourSearchV3,
+                {
+                  id: externalExchange.address.toLowerCase(),
+                  amount: timeframe === Times.ONE_DAY ? 24 : 24 * 7,
+                }
+              )
+            : await client.sushiswap.request<PriceHistoryHourV2Res>(
+                PriceHistoryHourSearchV2,
+                {
+                  id: externalExchange.address.toLowerCase(),
+                  amount: timeframe === Times.ONE_DAY ? 24 : 24 * 7,
+                }
+              )
+          : isV3(externalExchange)
+          ? await client.uniswapv3.request<PriceHistoryDayResV3>(
+              PriceHistoryDaySearchV3,
               {
                 id: externalExchange.address.toLowerCase(),
-                amount: timeframe === Times.ONE_DAY ? 24 : 24 * 7,
+                amount: timeframe === Times.THREE_MONTH ? 92 : 365,
               }
             )
-          : await client.request<PriceHistoryDayResV3>(
-              PriceHistoryDaySearchV3,
+          : await client.sushiswap.request<PriceHistoryDayV2Res>(
+              PriceHistoryDaySearchV2,
               {
                 id: externalExchange.address.toLowerCase(),
                 amount: timeframe === Times.THREE_MONTH ? 92 : 365,
               }
             );
 
-      const isHour = (t: typeof priceHistory): t is PriceHistoryHourResV3 =>
-        "poolHourData" in t.pool;
+      const isV2 = (
+        t: typeof priceHistory
+      ): t is PriceHistoryDayV2Res | PriceHistoryHourV2Res => {
+        return "pair" in t;
+      };
 
-      return isHour(priceHistory)
+      const isHourV2 = (
+        t: PriceHistoryHourV2Res | PriceHistoryDayV2Res
+      ): t is PriceHistoryHourV2Res => "hourData" in t.pair;
+
+      const isHourV3 = (
+        t: PriceHistoryHourResV3 | PriceHistoryDayResV3
+      ): t is PriceHistoryHourResV3 => "poolHourData" in t.pool;
+
+      return isV2(priceHistory)
+        ? isHourV2(priceHistory)
+          ? priceHistory.pair.hourData.map((p) => ({
+              timestamp: +p.date,
+              price: invert
+                ? new Fraction(
+                    Math.floor(parseFloat(p.reserve1) * 10 ** 9),
+                    Math.floor(parseFloat(p.reserve0) * 10 ** 9)
+                  )
+                : new Fraction(
+                    Math.floor(parseFloat(p.reserve0) * 10 ** 9),
+                    Math.floor(parseFloat(p.reserve1) * 10 ** 9)
+                  ),
+            }))
+          : priceHistory.pair.dayData.map((p) => ({
+              timestamp: +p.date,
+              price: invert
+                ? new Fraction(
+                    Math.floor(parseFloat(p.reserve1) * 10 ** 9),
+                    Math.floor(parseFloat(p.reserve0) * 10 ** 9)
+                  )
+                : new Fraction(
+                    Math.floor(parseFloat(p.reserve0) * 10 ** 9),
+                    Math.floor(parseFloat(p.reserve1) * 10 ** 9)
+                  ),
+            }))
+        : isHourV3(priceHistory)
         ? priceHistory.pool.poolHourData.map((p) => ({
             timestamp: +p.periodStartUnix,
             price: invert
@@ -225,22 +291,8 @@ export const usePriceHistory = (
   );
 };
 
-type PriceResV3 = {
-  pool: {
-    token0Price: string;
-  };
-};
-
-const PriceSearchV3 = gql`
-  query PriceV3($id: String) {
-    pool(id: $id, subgraphError: allow) {
-      token0Price
-    }
-  }
-`;
-
 export const useCurrentPrice = (
-  externalExchange: HookArg<UniswapV3Pool>,
+  externalExchange: HookArg<UniswapV2Pool | UniswapV3Pool>,
   invert: boolean
 ): UseQueryResult<Fraction | null> => {
   const client = useClient();
@@ -249,17 +301,26 @@ export const useCurrentPrice = (
     async () => {
       if (!externalExchange) return null;
 
-      const priceRes = await client.request<PriceResV3>(PriceSearchV3, {
-        id: externalExchange.address.toLowerCase(),
-      });
+      const priceRes = isV3(externalExchange)
+        ? await client.uniswapv3.request<PriceResV3>(PriceSearchV3, {
+            id: externalExchange.address.toLowerCase(),
+          })
+        : await client.sushiswap.request<PriceResV2>(PriceSearchV2, {
+            id: externalExchange.address.toLowerCase(),
+          });
+
+      const destructToken0Price =
+        "pair" in priceRes
+          ? priceRes.pair.token0Price
+          : priceRes.pool.token0Price;
 
       return invert
         ? new Fraction(
             10 ** 9,
-            Math.floor(parseFloat(priceRes.pool.token0Price) * 10 ** 9)
+            Math.floor(parseFloat(destructToken0Price) * 10 ** 9)
           )
         : new Fraction(
-            Math.floor(parseFloat(priceRes.pool.token0Price) * 10 ** 9),
+            Math.floor(parseFloat(destructToken0Price) * 10 ** 9),
             10 ** 9
           );
     },

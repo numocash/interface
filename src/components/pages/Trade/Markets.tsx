@@ -36,7 +36,10 @@ export const Markets: React.FC = () => {
       {denomSortedTokens.map((dst, i) => (
         <>
           {i !== 0 && (
-            <div tw="w-full flex justify-self-center border-b-2 border-gray-200" />
+            <div
+              key={i}
+              tw="w-full flex justify-self-center border-b-2 border-gray-200"
+            />
           )}
           <MarketItem
             tokens={dst}
