@@ -28,8 +28,8 @@ export const Header: React.FC = () => {
 
       <div tw="flex w-full md:(gap-2 justify-end) items-center justify-between">
         <Nav />
-        <MoreInfo />
         <Settings />
+        <MoreInfo />
         <ConnectButton />
       </div>
     </div>

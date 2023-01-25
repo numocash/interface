@@ -1,12 +1,16 @@
 import { Percent } from "@dahlia-labs/token-utils";
 import { curveNatural } from "@visx/curve";
+import { localPoint } from "@visx/event";
+import type { EventType } from "@visx/event/lib/types";
+import { GlyphCircle } from "@visx/glyph";
 import { Group } from "@visx/group";
 import { scaleLinear } from "@visx/scale";
 import { LinePath } from "@visx/shape";
 import { extent } from "d3-array";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
+import type { PricePoint } from "../../../hooks/useUniswapPair";
 import {
   sortTokens,
   useCurrentPrice,
@@ -46,6 +50,11 @@ export const Chart: React.FC = () => {
     );
   }, [currentPriceQuery.data, priceHistoryQuery.data]);
 
+  const [crosshair, setCrosshair] = useState<number | null>(null);
+  const [displayPrice, setDisplayPrice] = useState<PricePoint | null>(null);
+
+  console.log(crosshair, displayPrice);
+
   const getX = useMemo(
     () =>
       (p: NonNullable<ReturnType<typeof usePriceHistory>["data"]>[number]) =>
@@ -71,15 +80,55 @@ export const Chart: React.FC = () => {
       : [0, 0],
   });
 
-  // return null;
-  const loading =
-    !priceHistoryQuery.data || !currentPriceQuery.data || !priceChange;
-
   // update scale output ranges
   const windowDimensions = useWindowDimensions();
   const w = ((windowDimensions.width - 96) * 2) / 3 - 48;
   xScale.range([0, w]);
   yScale.range([178, 0]);
+
+  const handleHover = useCallback(
+    (event: Element | EventType) => {
+      if (!priceHistoryQuery.data) return;
+
+      // pixels
+      const { x } = localPoint(event) || { x: 0 };
+      // console.log(x, priceHistoryQuery.data.length);
+      const x0 = xScale.invert(x); // get timestamp from the scalexw
+      const index = priceHistoryQuery.data.reduce(
+        (acc, cur, i) => (x0 < cur.timestamp ? i : acc),
+        0
+      );
+
+      const d0 = priceHistoryQuery.data[index - 1];
+      invariant(d0); // TODO: why does Uniswap not need this
+      const d1 = priceHistoryQuery.data[index];
+      let pricePoint = d0;
+
+      const hasPreviousData = d1 && d1.timestamp;
+      if (hasPreviousData) {
+        pricePoint =
+          x0.valueOf() - d0.timestamp.valueOf() >
+          d1.timestamp.valueOf() - x0.valueOf()
+            ? d1
+            : d0;
+      }
+
+      if (pricePoint) {
+        setCrosshair(pricePoint.timestamp);
+        setDisplayPrice(pricePoint);
+      }
+    },
+    [priceHistoryQuery.data, xScale]
+  );
+
+  const resetDisplay = useCallback(() => {
+    setCrosshair(null);
+    setDisplayPrice(null);
+  }, [setCrosshair]);
+
+  // return null;
+  const loading =
+    !priceHistoryQuery.data || !currentPriceQuery.data || !priceChange;
 
   return (
     <div tw="col-span-2 w-full flex flex-col gap-12">
@@ -120,6 +169,25 @@ export const Chart: React.FC = () => {
               strokeOpacity={1}
             />
           </Group>
+          <GlyphCircle
+            left={crosshair ? xScale(crosshair) : undefined}
+            top={displayPrice ? yScale(getY(displayPrice)) + 8 : undefined}
+            size={50}
+            fill={"#333"}
+            stroke={"#333"}
+            strokeWidth={0.5}
+          />
+          <rect
+            x={0}
+            y={0}
+            width={w}
+            height={192}
+            fill="transparent"
+            onTouchStart={handleHover}
+            onTouchMove={handleHover}
+            onMouseMove={handleHover}
+            onMouseLeave={resetDisplay}
+          />
         </svg>
       )}
     </div>

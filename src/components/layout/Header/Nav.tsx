@@ -1,14 +1,15 @@
 import React from "react";
-import { FaMoneyBillWave } from "react-icons/fa";
-import { RiScales3Line } from "react-icons/ri";
 import { Link, useLocation } from "react-router-dom";
 import tw, { styled } from "twin.macro";
+
+import { ReactComponent as TradeIcon } from "../../../icons/activity.svg";
+import { ReactComponent as EarnIcon } from "../../../icons/banknote.svg";
 
 export const Nav: React.FC = () => {
   return (
     <>
-      <NavLink name="Trade" icon={<RiScales3Line size={24} />} to="/trade" />
-      <NavLink name="Earn" icon={<FaMoneyBillWave size={24} />} to="/earn" />
+      <NavLink name="Trade" icon={<TradeIcon tw="h-6" />} to="/trade" />
+      <NavLink name="Earn" icon={<EarnIcon tw="h-6" />} to="/earn" />
     </>
   );
 };

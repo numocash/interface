@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { AiOutlineMenu } from "react-icons/ai";
 import { FaDiscord } from "react-icons/fa";
 import { ImBook, ImGithub, ImTwitter } from "react-icons/im";
 import tw, { styled } from "twin.macro";
 
+import { ReactComponent as MoreIcon } from "../../../icons/more-horizontal.svg";
 import { Drop } from "../../common/Drop";
 import { Module } from "../../common/Module";
 import { HeaderItem } from "./Nav";
@@ -21,7 +21,7 @@ export const MoreInfo: React.FC = () => {
         target={targetRef}
         placement={"auto"}
       >
-        <Module tw="p-1">
+        <Module tw="p-1 border-2 border-gray-200">
           <InfoItem>
             <ImBook size={size} />
             <a
@@ -65,7 +65,7 @@ export const MoreInfo: React.FC = () => {
         </Module>
       </Drop>
       <button onClick={() => setShow(true)} ref={setTargetRef}>
-        <HeaderItem item={<AiOutlineMenu size={24} />} label="More" />
+        <HeaderItem item={<MoreIcon tw="h-6" />} label="More" />
       </button>
     </>
   );

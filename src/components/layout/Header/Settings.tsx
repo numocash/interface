@@ -1,9 +1,9 @@
 import { Percent } from "@dahlia-labs/token-utils";
 import { useCallback, useState } from "react";
-import { FiSettings } from "react-icons/fi";
 import { styled } from "twin.macro";
 
 import { useSettings } from "../../../contexts/settings";
+import { ReactComponent as SettingsIcon } from "../../../icons/settings.svg";
 import { Drop } from "../../common/Drop";
 import { BigNumericInput } from "../../common/inputs/BigNumericInput";
 import { Switch } from "../../common/inputs/Switch";
@@ -87,10 +87,7 @@ export const Settings: React.FC = () => {
       <button tw="" ref={setTargetRef} onClick={() => setShow(true)}>
         <HeaderItem
           item={
-            <FiSettings
-              tw="transform hover:rotate-90 duration-300 delay-100 ease-in-out"
-              size={24}
-            />
+            <SettingsIcon tw="transform hover:rotate-90 duration-300 ease-in-out h-6" />
           }
           label="Settings"
         />
