@@ -5,7 +5,7 @@ import type { EventType } from "@visx/event/lib/types";
 import { GlyphCircle } from "@visx/glyph";
 import { Group } from "@visx/group";
 import { scaleLinear } from "@visx/scale";
-import { LinePath } from "@visx/shape";
+import { Line, LinePath } from "@visx/shape";
 import { extent } from "d3-array";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
@@ -169,6 +169,14 @@ export const Chart: React.FC = () => {
               strokeOpacity={1}
             />
           </Group>
+          <Line
+            from={{ x: crosshair ? xScale(crosshair) : undefined, y: 0 }}
+            to={{ x: crosshair ? xScale(crosshair) : undefined, y: 192 }}
+            stroke={"#333"}
+            strokeWidth={1}
+            pointerEvents="none"
+            strokeDasharray="4,4"
+          />
           <GlyphCircle
             left={crosshair ? xScale(crosshair) : undefined}
             top={displayPrice ? yScale(getY(displayPrice)) + 8 : undefined}
