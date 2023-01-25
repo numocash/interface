@@ -2,8 +2,8 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 
-import { ReactComponent as TradeIcon } from "../../../icons/activity.svg";
 import { ReactComponent as EarnIcon } from "../../../icons/banknote.svg";
+import { ReactComponent as TradeIcon } from "../../../icons/coins.svg";
 
 export const Nav: React.FC = () => {
   return (

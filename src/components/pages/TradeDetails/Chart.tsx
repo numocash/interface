@@ -91,11 +91,10 @@ export const Chart: React.FC = () => {
 
       // pixels
       const { x } = localPoint(event) || { x: 0 };
-      // console.log(x, priceHistoryQuery.data.length);
-      const x0 = xScale.invert(x); // get timestamp from the scalexw
+      const x0 = xScale.invert(x); // get timestamp from the scalex
       const index = priceHistoryQuery.data.reduce(
         (acc, cur, i) => (x0 < cur.timestamp ? i : acc),
-        0
+        1
       );
 
       const d0 = priceHistoryQuery.data[index - 1];
@@ -106,7 +105,7 @@ export const Chart: React.FC = () => {
       const hasPreviousData = d1 && d1.timestamp;
       if (hasPreviousData) {
         pricePoint =
-          x0.valueOf() - d0.timestamp.valueOf() >
+          x0.valueOf() - d0.timestamp.valueOf() <
           d1.timestamp.valueOf() - x0.valueOf()
             ? d1
             : d0;
@@ -177,14 +176,16 @@ export const Chart: React.FC = () => {
             pointerEvents="none"
             strokeDasharray="4,4"
           />
-          <GlyphCircle
-            left={crosshair ? xScale(crosshair) : undefined}
-            top={displayPrice ? yScale(getY(displayPrice)) + 8 : undefined}
-            size={50}
-            fill={"#333"}
-            stroke={"#333"}
-            strokeWidth={0.5}
-          />
+          {crosshair && displayPrice && (
+            <GlyphCircle
+              left={xScale(crosshair)}
+              top={yScale(getY(displayPrice)) + 8}
+              size={50}
+              fill={"#E5E5EA"}
+              stroke={"#E5E5EA"}
+              strokeWidth={0.5}
+            />
+          )}
           <rect
             x={0}
             y={0}
