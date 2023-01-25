@@ -26,7 +26,7 @@ const Wrapper: React.FC<WrapperProps> = ({
 }: WrapperProps) => {
   return hasDeposit ? (
     <div tw="rounded-lg bg-black pt-1">
-      <Module tw="border-t-0 pb-3">{children}</Module>
+      <Module tw="border-2 border-gray-200 pb-3">{children}</Module>
     </div>
   ) : (
     <Module tw="pb-3 gap-4 flex flex-col">{children}</Module>
@@ -94,3 +94,7 @@ export const PositionCard: React.FC<Props> = ({ market, userInfo }: Props) => {
     </NavLink>
   );
 };
+
+// const Wrapper = styled.div<{ active: boolean }>(({ active }) => [
+//   tw`flex flex-col w-full`,
+// ]);

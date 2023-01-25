@@ -142,6 +142,8 @@ export const useMostLiquidMarket = (tokens: {
   );
 };
 
+// TODO: invert after the hook returns to increase speed
+
 export const usePriceHistory = (
   externalExchange: HookArg<UniswapV2Pool | UniswapV3Pool>,
   timeframe: Times,
@@ -162,7 +164,7 @@ export const usePriceHistory = (
       }[]
     | null
   >(
-    ["price history", externalExchange, timeframe],
+    ["price history", externalExchange, timeframe, invert],
     async () => {
       if (!externalExchange) return null;
 
@@ -271,7 +273,7 @@ export const useCurrentPrice = (
 ): UseQueryResult<Fraction | null> => {
   const client = useClient();
   return useQuery<Fraction | null>(
-    ["current price", externalExchange],
+    ["current price", externalExchange, invert],
     async () => {
       if (!externalExchange) return null;
 

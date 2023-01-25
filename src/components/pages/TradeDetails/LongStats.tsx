@@ -1,6 +1,6 @@
 import { RowBetween } from "../../common/RowBetween";
 
-export const TradeStats: React.FC = () => {
+export const LongStats: React.FC = () => {
   return (
     <div tw="flex flex-col w-full">
       <RowBetween tw="p-0">
@@ -17,7 +17,7 @@ export const TradeStats: React.FC = () => {
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Liquidation price</p>
-        <p>0 USDC / ETH</p>
+        <p>0</p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Fees</p>

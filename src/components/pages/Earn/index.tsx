@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment";
 import { useUserLendgines } from "../../../hooks/useLendgine";
+import { Button } from "../../common/Button";
 import { LoadingPage } from "../../common/LoadingPage";
 import { Sort } from "../Trade/Sort";
 import { Explain } from "./Explain";
@@ -44,9 +45,12 @@ export const Earn: React.FC = () => {
       <p tw="text-xs text-default">
         Displaying <span tw="font-semibold">{markets.length} markets</span>
       </p>
-      <div tw="flex gap-4">
+      <div tw="flex w-full justify-between gap-4">
         {/* <Filter /> */}
         <Sort />
+        <Button tw="h-12 text-lg" variant="primary">
+          Create new market
+        </Button>
       </div>
 
       {/* <Learn /> */}
@@ -56,7 +60,7 @@ export const Earn: React.FC = () => {
       {userMarketInfo === null && address !== undefined ? (
         <LoadingPage />
       ) : (
-        <div tw="grid md:grid-cols-2  gap-6">
+        <div tw="grid md:grid-cols-2 gap-6">
           {displayMarkets.map((d) => (
             <PositionCard
               key={d.market.address}

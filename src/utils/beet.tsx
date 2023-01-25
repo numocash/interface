@@ -3,6 +3,7 @@ import React, { useCallback } from "react";
 import toast from "react-hot-toast";
 import invariant from "tiny-invariant";
 import { styled } from "twin.macro";
+import type { Address } from "wagmi";
 
 import { useAwaitTX } from "../hooks/useAwaitTX";
 
@@ -345,6 +346,20 @@ export class DefaultToasterWrapper {
     );
   }
 }
+
+export const AddressLink: React.FC<{
+  address: Address;
+  className?: string;
+}> = ({ address, className }) => (
+  <a
+    href={`https://arbiscan.io/address/${address}`}
+    rel="noopener noreferrer"
+    target="_blank"
+    className={className}
+  >
+    {address.slice(0, 6)}...{address.slice(address.length - 4)}
+  </a>
+);
 
 const ToastContainer = styled.div`
   width: 290px;
