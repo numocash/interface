@@ -1,5 +1,6 @@
-import { useState } from "react";
 import tw, { css } from "twin.macro";
+
+import { useTradeDetails } from ".";
 
 export enum Times {
   ONE_DAY = "1d",
@@ -9,7 +10,7 @@ export enum Times {
 }
 
 export const TimeSelector: React.FC = () => {
-  const [timeframe, setTimeframe] = useState<Times>(Times.ONE_WEEK);
+  const { timeframe, setTimeframe } = useTradeDetails();
 
   return (
     <div tw="flex gap-4 grid-flow-col text-sm justify-end py-2">

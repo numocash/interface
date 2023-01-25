@@ -1,16 +1,21 @@
 import type { Token } from "@dahlia-labs/token-utils";
 import { getAddress } from "@ethersproject/address";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
 import { useAddressToToken } from "../../../hooks/useTokens";
 import { MainView } from "./MainView";
+import { Times } from "./TimeSelector";
 import { TradeColumn } from "./TradeColumn";
 
 interface ITradeDetails {
   denom: Token;
   other: Token;
+
+  timeframe: Times;
+  setTimeframe: (val: Times) => void;
 }
 
 const useTradeDetailsInternal = (): ITradeDetails => {
@@ -37,7 +42,9 @@ const useTradeDetailsInternal = (): ITradeDetails => {
   if (!denomToken || !quoteToken) navigate("/trade/");
   invariant(denomToken && quoteToken, "Invalid token addresses");
 
-  return { denom: denomToken, other: quoteToken };
+  const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
+
+  return { denom: denomToken, other: quoteToken, timeframe, setTimeframe };
 };
 
 export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =

@@ -120,11 +120,11 @@ export const useMostLiquidMarket = (tokens: {
 //   });
 // };
 
-type PriceHistoryResV3 = {
+type PriceHistoryHourResV3 = {
   pool: { poolHourData: { token0Price: string; periodStartUnix: string }[] };
 };
 
-const PriceHistorySearchV3 = gql`
+const PriceHistoryHourSearchV3 = gql`
   query PriceHistoryV3($id: String, $amount: Int) {
     pool(id: $id, subgraphError: allow) {
       poolHourData(
@@ -134,6 +134,21 @@ const PriceHistorySearchV3 = gql`
       ) {
         token0Price
         periodStartUnix
+      }
+    }
+  }
+`;
+
+type PriceHistoryDayResV3 = {
+  pool: { poolDayData: { token0Price: string; date: string }[] };
+};
+
+const PriceHistoryDaySearchV3 = gql`
+  query PriceHistoryV3($id: String, $amount: Int) {
+    pool(id: $id, subgraphError: allow) {
+      poolDayData(orderBy: date, first: $amount, orderDirection: desc) {
+        token0Price
+        date
       }
     }
   }
@@ -160,13 +175,25 @@ export const usePriceHistory = (
 
       const priceHistory =
         timeframe === Times.ONE_DAY || timeframe === Times.ONE_WEEK
-          ? await client.request<PriceHistoryResV3>(PriceHistorySearchV3, {
-              id: externalExchange.address.toLowerCase(),
-              amount: timeframe === Times.ONE_DAY ? 24 : 24 * 7,
-            })
-          : null;
+          ? await client.request<PriceHistoryHourResV3>(
+              PriceHistoryHourSearchV3,
+              {
+                id: externalExchange.address.toLowerCase(),
+                amount: timeframe === Times.ONE_DAY ? 24 : 24 * 7,
+              }
+            )
+          : await client.request<PriceHistoryDayResV3>(
+              PriceHistoryDaySearchV3,
+              {
+                id: externalExchange.address.toLowerCase(),
+                amount: timeframe === Times.THREE_MONTH ? 92 : 365,
+              }
+            );
 
-      return priceHistory
+      const isHour = (t: typeof priceHistory): t is PriceHistoryHourResV3 =>
+        "poolHourData" in t.pool;
+
+      return isHour(priceHistory)
         ? priceHistory.pool.poolHourData.map((p) => ({
             timestamp: +p.periodStartUnix,
             price: invert
@@ -179,7 +206,18 @@ export const usePriceHistory = (
                   10 ** 9
                 ),
           }))
-        : null;
+        : priceHistory.pool.poolDayData.map((p) => ({
+            timestamp: +p.date,
+            price: invert
+              ? new Fraction(
+                  10 ** 9,
+                  Math.floor(parseFloat(p.token0Price) * 10 ** 9)
+                )
+              : new Fraction(
+                  Math.floor(parseFloat(p.token0Price) * 10 ** 9),
+                  10 ** 9
+                ),
+          }));
     },
     {
       staleTime: Infinity,

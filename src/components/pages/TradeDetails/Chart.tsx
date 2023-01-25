@@ -16,17 +16,16 @@ import {
 import useWindowDimensions from "../../../utils/useWindowDimensions";
 import { useTradeDetails } from ".";
 import { EmptyChart } from "./EmptyChart";
-import { Times } from "./TimeSelector";
 
 export const Chart: React.FC = () => {
-  const { denom, other } = useTradeDetails();
+  const { denom, other, timeframe } = useTradeDetails();
   const referenceMarketQuery = useMostLiquidMarket({ denom, other });
 
   const invertPriceQuery = sortTokens([denom, other])[0] === other;
 
   const priceHistoryQuery = usePriceHistory(
     referenceMarketQuery.data,
-    Times.ONE_DAY,
+    timeframe,
     invertPriceQuery
   );
 
@@ -76,20 +75,25 @@ export const Chart: React.FC = () => {
   const loading =
     !priceHistoryQuery.data || !currentPriceQuery.data || !priceChange;
 
-  const windowDimensions = useWindowDimensions();
-
-  const w = ((windowDimensions.width - 96) * 2) / 3 - 48;
   // update scale output ranges
+  const windowDimensions = useWindowDimensions();
+  const w = ((windowDimensions.width - 96) * 2) / 3 - 48;
   xScale.range([0, w]);
-  yScale.range([150, 0]);
-
-  console.log(w);
+  yScale.range([178, 0]);
 
   return (
-    <div tw="col-span-2 w-full flex mt-2 flex-col gap-12">
+    <div tw="col-span-2 w-full flex flex-col gap-12">
       <div tw="flex w-full">
         <div tw="flex gap-2 items-center">
-          <div tw="bg-gray-200 animate-pulse h-8 w-20 rounded" />
+          {loading ? (
+            <div tw="bg-gray-200 animate-pulse h-8 w-20 rounded" />
+          ) : (
+            <p tw=" text-2xl">
+              {currentPriceQuery.data?.toSignificant(5, {
+                groupSeparator: ",",
+              })}
+            </p>
+          )}
           {loading ? (
             <div tw="bg-gray-200 animate-pulse h-5 w-12 rounded" />
           ) : priceChange.greaterThan(0) ? (
@@ -102,8 +106,8 @@ export const Chart: React.FC = () => {
       {loading ? (
         <EmptyChart />
       ) : (
-        <svg tw=" w-full h-40 justify-self-center col-span-2">
-          <Group top={4}>
+        <svg tw=" w-full h-48 justify-self-center col-span-2">
+          <Group top={8}>
             <LinePath<
               NonNullable<ReturnType<typeof usePriceHistory>["data"]>[number]
             >
