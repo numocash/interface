@@ -10,6 +10,7 @@ import type { Address } from "wagmi";
 
 import { Times } from "../components/pages/TradeDetails/TimeSelector";
 import type { PriceV2Query } from "../gql/uniswapV2/graphql";
+import type { PriceV3Query } from "../gql/uniswapV3/graphql";
 import type {
   LiquidResV2,
   PriceHistoryDayV2Res,
@@ -25,7 +26,6 @@ import type {
   MostLiquidResV3,
   PriceHistoryDayResV3,
   PriceHistoryHourResV3,
-  PriceResV3,
 } from "../services/graphql/uniswapV3";
 import {
   MostLiquidSearchV3,
@@ -268,19 +268,21 @@ export const useCurrentPrice = (
       if (!externalExchange) return null;
 
       const priceRes = isV3(externalExchange)
-        ? await client.uniswapv3.request<PriceResV3>(PriceSearchV3, {
+        ? await client.uniswapv3.request(PriceSearchV3, {
             id: externalExchange.address.toLowerCase(),
           })
         : await client.sushiswap.request(PriceSearchV2, {
             id: externalExchange.address.toLowerCase(),
           });
 
-      const isV2 = (t: PriceV2Query | PriceResV3): t is PriceV2Query =>
+      const isV2 = (t: PriceV2Query | PriceV3Query): t is PriceV2Query =>
         "pair" in t;
 
-      // const destructToken0Price = isV2(priceRes)
-      //   ? priceRes.pair?.token0Price
-      //   : priceRes.pool.token0Price;
+      const destructToken0Price = isV2(priceRes)
+        ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          (priceRes.pair!.token0Price as string)
+        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          (priceRes.pool!.token0Price as string);
 
       return invert
         ? new Fraction(

@@ -1,5 +1,7 @@
 import { gql } from "graphql-request";
 
+import { graphql } from "../../gql/uniswapV3";
+
 export type MostLiquidResV3 = {
   pools:
     | readonly [{ id: string; feeTier: string; totalValueLockedToken0: string }]
@@ -61,10 +63,10 @@ export type PriceResV3 = {
   };
 };
 
-export const PriceSearchV3 = gql`
+export const PriceSearchV3 = graphql(`
   query PriceV3($id: ID!) {
     pool(id: $id, subgraphError: allow) {
       token0Price
     }
   }
-`;
+`);

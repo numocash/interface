@@ -159,6 +159,7 @@
     "twin.macro": "^3.1.0",
     "typechain": "^8.1.1",
     "typescript": "4.9.4",
+    "typescript-operations": "link:@graphql/codegen/typescript-operations",
     "webpack": "^5.75.0",
     "webpack-bundle-analyzer": "^4.7.0"
   },

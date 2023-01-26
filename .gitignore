@@ -11,6 +11,7 @@
 # production
 /build
 /src/generated
+/src/gql
 
 # misc
 .DS_Store

@@ -7,7 +7,7 @@ module.exports = {
   parserOptions: {
     project: "tsconfig.json",
   },
-  ignorePatterns: ["*.js", "src/generated/*"],
+  ignorePatterns: ["*.js", "src/generated/*", "src/gql/*"],
   rules: {
     "react/no-unknown-property": ["error", { ignore: ["tw", "css"] }],
   },
