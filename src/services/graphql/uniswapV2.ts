@@ -1,18 +1,20 @@
 import { gql } from "graphql-request";
 
+import { graphql } from "../../gql/uniswapV2";
+
 export type PriceResV2 = {
   pair: {
     token0Price: string;
   };
 };
 
-export const PriceSearchV2 = gql`
+export const PriceSearchV2 = graphql(`
   query PriceV2($id: ID!) {
     pair(id: $id, subgraphError: allow) {
       token0Price
     }
   }
-`;
+`);
 
 export type LiquidResV2 = {
   pairs: readonly [{ id: string; reserve0: string }] | [];

@@ -9,11 +9,11 @@ import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 
 import { Times } from "../components/pages/TradeDetails/TimeSelector";
+import type { PriceV2Query } from "../gql/uniswapV2/graphql";
 import type {
   LiquidResV2,
   PriceHistoryDayV2Res,
   PriceHistoryHourV2Res,
-  PriceResV2,
 } from "../services/graphql/uniswapV2";
 import {
   LiquidSearchV2,
@@ -271,14 +271,16 @@ export const useCurrentPrice = (
         ? await client.uniswapv3.request<PriceResV3>(PriceSearchV3, {
             id: externalExchange.address.toLowerCase(),
           })
-        : await client.sushiswap.request<PriceResV2>(PriceSearchV2, {
+        : await client.sushiswap.request(PriceSearchV2, {
             id: externalExchange.address.toLowerCase(),
           });
 
-      const destructToken0Price =
-        "pair" in priceRes
-          ? priceRes.pair.token0Price
-          : priceRes.pool.token0Price;
+      const isV2 = (t: PriceV2Query | PriceResV3): t is PriceV2Query =>
+        "pair" in t;
+
+      // const destructToken0Price = isV2(priceRes)
+      //   ? priceRes.pair?.token0Price
+      //   : priceRes.pool.token0Price;
 
       return invert
         ? new Fraction(

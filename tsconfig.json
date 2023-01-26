@@ -5,6 +5,6 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["src/"],
-  "exclude": ["src/generated/*"]
+  "include": ["src/", "codegen.ts"],
+  "exclude": ["src/generated/*", "src/gql/*"]
 }
