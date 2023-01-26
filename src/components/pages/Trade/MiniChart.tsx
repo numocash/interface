@@ -9,50 +9,39 @@ import invariant from "tiny-invariant";
 import type {
   useCurrentPrice,
   usePriceHistory,
-} from "../../../hooks/useUniswapPair";
+} from "../../../hooks/useExternalExchange";
 
 interface Props {
-  priceHistoryQuery: ReturnType<typeof usePriceHistory>;
-  currentPriceQuery: ReturnType<typeof useCurrentPrice>;
+  priceHistory: NonNullable<ReturnType<typeof usePriceHistory>["data"]>;
+  currentPrice: NonNullable<ReturnType<typeof useCurrentPrice>["data"]>;
 }
 
 export const MiniChart: React.FC<Props> = ({
-  priceHistoryQuery,
-  currentPriceQuery,
+  priceHistory,
+  currentPrice,
 }: Props) => {
   const gain = useMemo(() => {
-    if (!priceHistoryQuery.data || !currentPriceQuery.data) return null;
-
-    const oneDayOldPrice =
-      priceHistoryQuery.data[priceHistoryQuery.data.length - 1]?.price;
+    const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
-    return currentPriceQuery.data.greaterThan(oneDayOldPrice);
-  }, [currentPriceQuery.data, priceHistoryQuery.data]);
+    return currentPrice.greaterThan(oneDayOldPrice);
+  }, [currentPrice, priceHistory]);
 
   const getX = useMemo(
-    () =>
-      (p: NonNullable<ReturnType<typeof usePriceHistory>["data"]>[number]) =>
-        p.timestamp,
+    () => (p: Props["priceHistory"][number]) => p.timestamp,
     []
   );
 
   const getY = useMemo(
-    () =>
-      (p: NonNullable<ReturnType<typeof usePriceHistory>["data"]>[number]) =>
-        p.price.asNumber,
+    () => (p: Props["priceHistory"][number]) => p.price.asNumber,
     []
   );
 
   const xScale = scaleLinear<number>({
-    domain: priceHistoryQuery.data
-      ? (extent(priceHistoryQuery.data, getX) as [number, number])
-      : [0, 0],
+    domain: extent(priceHistory, getX) as [number, number],
   });
   const yScale = scaleLinear<number>({
-    domain: priceHistoryQuery.data
-      ? (extent(priceHistoryQuery.data, getY) as [number, number])
-      : [0, 0],
+    domain: extent(priceHistory, getY) as [number, number],
   });
 
   // update scale output ranges
@@ -62,11 +51,9 @@ export const MiniChart: React.FC<Props> = ({
   return (
     <svg width={100} height={50} tw="justify-self-center col-span-2">
       <Group top={5}>
-        <LinePath<
-          NonNullable<ReturnType<typeof usePriceHistory>["data"]>[number]
-        >
+        <LinePath<Props["priceHistory"][number]>
           curve={curveNatural}
-          data={priceHistoryQuery.data ?? undefined}
+          data={(priceHistory as Props["priceHistory"][number][]) ?? undefined}
           x={(d) => xScale(getX(d)) ?? 0}
           y={(d) => yScale(getY(d)) ?? 0}
           stroke={

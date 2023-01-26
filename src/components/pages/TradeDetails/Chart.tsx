@@ -10,49 +10,62 @@ import { extent } from "d3-array";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
-import type { PricePoint } from "../../../hooks/useUniswapPair";
 import {
-  sortTokens,
   useCurrentPrice,
   useMostLiquidMarket,
   usePriceHistory,
-} from "../../../hooks/useUniswapPair";
+} from "../../../hooks/useExternalExchange";
+import { sortTokens } from "../../../hooks/useUniswapPair";
+import type { PricePoint } from "../../../services/graphql/uniswapV2";
 import useWindowDimensions from "../../../utils/useWindowDimensions";
 import { useTradeDetails } from ".";
 import { EmptyChart } from "./EmptyChart";
 
 export const Chart: React.FC = () => {
   const { denom, other, timeframe } = useTradeDetails();
-  const referenceMarketQuery = useMostLiquidMarket({ denom, other });
+  const referenceMarketQuery = useMostLiquidMarket([denom, other]);
 
-  const invertPriceQuery = sortTokens([denom, other])[0] === other;
+  // TODO: bug with inverting
+  const invertPriceQuery = sortTokens([denom, other])[1] === other;
 
   const priceHistoryQuery = usePriceHistory(
     referenceMarketQuery.data,
-    timeframe,
-    invertPriceQuery
+    timeframe
   );
 
-  const currentPriceQuery = useCurrentPrice(
-    referenceMarketQuery.data,
-    invertPriceQuery
-  );
+  const priceHistory = useMemo(() => {
+    if (!priceHistoryQuery.data) return null;
+    return invertPriceQuery
+      ? priceHistoryQuery.data.map((p) => ({
+          ...p,
+          price: p.price.invert(),
+        }))
+      : priceHistoryQuery.data;
+  }, [invertPriceQuery, priceHistoryQuery.data]);
+
+  const currentPriceQuery = useCurrentPrice(referenceMarketQuery.data);
+
+  const currentPrice = useMemo(() => {
+    if (!currentPriceQuery.data) return null;
+    return invertPriceQuery
+      ? currentPriceQuery.data.invert()
+      : currentPriceQuery.data;
+  }, [currentPriceQuery.data, invertPriceQuery]);
 
   const [crosshair, setCrosshair] = useState<number | null>(null);
   const [displayPrice, setDisplayPrice] = useState<PricePoint | null>(null);
 
   const priceChange = useMemo(() => {
-    const secondPrice = displayPrice?.price ?? currentPriceQuery.data;
-    if (!secondPrice || !priceHistoryQuery.data) return null;
+    const secondPrice = displayPrice?.price ?? currentPrice;
+    if (!secondPrice || !priceHistory) return null;
 
-    const oneDayOldPrice =
-      priceHistoryQuery.data[priceHistoryQuery.data.length - 1]?.price;
+    const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
     return Percent.fromFraction(
       secondPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice)
     );
-  }, [currentPriceQuery.data, displayPrice?.price, priceHistoryQuery.data]);
+  }, [currentPrice, displayPrice?.price, priceHistory]);
 
   const getX = useMemo(
     () =>
@@ -69,13 +82,13 @@ export const Chart: React.FC = () => {
   );
 
   const xScale = scaleLinear<number>({
-    domain: priceHistoryQuery.data
-      ? (extent(priceHistoryQuery.data, getX) as [number, number])
+    domain: priceHistory
+      ? (extent(priceHistory, getX) as [number, number])
       : [0, 0],
   });
   const yScale = scaleLinear<number>({
-    domain: priceHistoryQuery.data
-      ? (extent(priceHistoryQuery.data, getY) as [number, number])
+    domain: priceHistory
+      ? (extent(priceHistory, getY) as [number, number])
       : [0, 0],
   });
 
@@ -87,19 +100,19 @@ export const Chart: React.FC = () => {
 
   const handleHover = useCallback(
     (event: Element | EventType) => {
-      if (!priceHistoryQuery.data) return;
+      if (!priceHistory) return;
 
       // pixels
       const { x } = localPoint(event) || { x: 0 };
       const x0 = xScale.invert(x); // get timestamp from the scalex
-      const index = priceHistoryQuery.data.reduce(
+      const index = priceHistory.reduce(
         (acc, cur, i) => (x0 < cur.timestamp ? i : acc),
         1
       );
 
-      const d0 = priceHistoryQuery.data[index - 1];
+      const d0 = priceHistory[index - 1];
       invariant(d0); // TODO: why does Uniswap not need this
-      const d1 = priceHistoryQuery.data[index];
+      const d1 = priceHistory[index];
       let pricePoint = d0;
 
       const hasPreviousData = d1 && d1.timestamp;
@@ -116,7 +129,7 @@ export const Chart: React.FC = () => {
         setDisplayPrice(pricePoint);
       }
     },
-    [priceHistoryQuery.data, xScale]
+    [priceHistory, xScale]
   );
 
   const resetDisplay = useCallback(() => {
@@ -125,8 +138,7 @@ export const Chart: React.FC = () => {
   }, [setCrosshair]);
 
   // return null;
-  const loading =
-    !priceHistoryQuery.data || !currentPriceQuery.data || !priceChange;
+  const loading = !priceHistory || !currentPrice || !priceChange;
 
   return (
     <div tw="col-span-2 w-full flex flex-col gap-12">
@@ -137,7 +149,7 @@ export const Chart: React.FC = () => {
           ) : (
             <p tw=" text-2xl">
               {displayPrice?.price.toSignificant(5, { groupSeparator: "," }) ??
-                currentPriceQuery.data?.toSignificant(5, {
+                currentPrice.toSignificant(5, {
                   groupSeparator: ",",
                 })}
             </p>
@@ -160,7 +172,11 @@ export const Chart: React.FC = () => {
               NonNullable<ReturnType<typeof usePriceHistory>["data"]>[number]
             >
               curve={curveNatural}
-              data={priceHistoryQuery.data ?? undefined}
+              data={
+                (priceHistory as NonNullable<
+                  ReturnType<typeof usePriceHistory>["data"]
+                >[number][]) ?? undefined
+              }
               x={(d) => xScale(getX(d)) ?? 0}
               y={(d) => yScale(getY(d)) ?? 0}
               stroke={"#333"}

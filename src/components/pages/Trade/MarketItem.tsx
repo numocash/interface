@@ -5,11 +5,11 @@ import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 
 import {
-  sortTokens,
   useCurrentPrice,
   useMostLiquidMarket,
   usePriceHistory,
-} from "../../../hooks/useUniswapPair";
+} from "../../../hooks/useExternalExchange";
+import { sortTokens } from "../../../hooks/useUniswapPair";
 import { TokenIcon } from "../../common/TokenIcon";
 import { Times } from "../TradeDetails/TimeSelector";
 import { MiniChart } from "./MiniChart";
@@ -19,37 +19,51 @@ interface Props {
 }
 
 export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
-  const referenceMarketQuery = useMostLiquidMarket(tokens);
+  const referenceMarketQuery = useMostLiquidMarket([
+    tokens.denom,
+    tokens.other,
+  ]);
 
   const invertPriceQuery =
-    sortTokens([tokens.denom, tokens.other])[0] === tokens.other;
+    sortTokens([tokens.denom, tokens.other])[1] === tokens.other;
 
   const priceHistoryQuery = usePriceHistory(
     referenceMarketQuery.data,
-    Times.ONE_DAY,
-    invertPriceQuery
+    Times.ONE_DAY
   );
 
-  const currentPriceQuery = useCurrentPrice(
-    referenceMarketQuery.data,
-    invertPriceQuery
-  );
+  const priceHistory = useMemo(() => {
+    if (!priceHistoryQuery.data) return null;
+    return invertPriceQuery
+      ? priceHistoryQuery.data.map((p) => ({
+          ...p,
+          price: p.price.invert(),
+        }))
+      : priceHistoryQuery.data;
+  }, [invertPriceQuery, priceHistoryQuery.data]);
+
+  const currentPriceQuery = useCurrentPrice(referenceMarketQuery.data);
+
+  const currentPrice = useMemo(() => {
+    if (!currentPriceQuery.data) return null;
+    return invertPriceQuery
+      ? currentPriceQuery.data.invert()
+      : currentPriceQuery.data;
+  }, [currentPriceQuery.data, invertPriceQuery]);
 
   const priceChange = useMemo(() => {
-    if (!currentPriceQuery.data || !priceHistoryQuery.data) return null;
+    if (!currentPrice || !priceHistory) return null;
 
-    const oneDayOldPrice =
-      priceHistoryQuery.data[priceHistoryQuery.data.length - 1]?.price;
+    const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
     return Percent.fromFraction(
-      currentPriceQuery.data.subtract(oneDayOldPrice).divide(oneDayOldPrice)
+      currentPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice)
     );
-  }, [currentPriceQuery.data, priceHistoryQuery.data]);
+  }, [currentPrice, priceHistory]);
 
   // return null;
-  const loading =
-    !priceHistoryQuery.data || !currentPriceQuery.data || !priceChange;
+  const loading = !priceHistory || !currentPrice || !priceChange;
 
   return loading ? (
     <div tw="w-full h-14 duration-300 animate-pulse bg-gray-300 rounded-xl" />
@@ -71,10 +85,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
           </div>
         </div>
 
-        <MiniChart
-          priceHistoryQuery={priceHistoryQuery}
-          currentPriceQuery={currentPriceQuery}
-        />
+        <MiniChart priceHistory={priceHistory} currentPrice={currentPrice} />
 
         <p tw="text-lg font-semibold justify-self-end">
           {priceChange.greaterThan(0) ? (

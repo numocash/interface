@@ -6,7 +6,6 @@ import { useTrade } from ".";
 import { MarketItem } from "./MarketItem";
 
 export const Markets: React.FC = () => {
-  // Load markets
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const { markets } = useTrade();
   const getDenomSortedTokens = useGetSortDenomTokens();

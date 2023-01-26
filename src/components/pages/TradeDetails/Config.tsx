@@ -1,6 +1,6 @@
 import { getAddress } from "@ethersproject/address";
 
-import { useMostLiquidMarket } from "../../../hooks/useUniswapPair";
+import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { AddressLink } from "../../../utils/beet";
 import { LoadingSpinner } from "../../common/LoadingSpinner";
 import { RowBetween } from "../../common/RowBetween";
@@ -8,7 +8,7 @@ import { useTradeDetails } from ".";
 
 export const Config: React.FC = () => {
   const { denom, other } = useTradeDetails();
-  const referenceMarketQuery = useMostLiquidMarket({ denom, other });
+  const referenceMarketQuery = useMostLiquidMarket([denom, other]);
 
   return (
     <div tw="flex flex-col w-full">
