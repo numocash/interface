@@ -9,7 +9,8 @@ import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 
 import { Times } from "../components/pages/TradeDetails/TimeSelector";
-import type { PriceV2Query } from "../gql/uniswapV2/graphql";
+import type { PriceQuery } from "../gql/uniswapV2/graphql";
+import { PriceDocument } from "../gql/uniswapV2/graphql";
 import type { PriceV3Query } from "../gql/uniswapV3/graphql";
 import type {
   LiquidResV2,
@@ -20,7 +21,6 @@ import {
   LiquidSearchV2,
   PriceHistoryDaySearchV2,
   PriceHistoryHourSearchV2,
-  PriceSearchV2,
 } from "../services/graphql/uniswapV2";
 import type {
   MostLiquidResV3,
@@ -271,16 +271,16 @@ export const useCurrentPrice = (
         ? await client.uniswapv3.request(PriceSearchV3, {
             id: externalExchange.address.toLowerCase(),
           })
-        : await client.sushiswap.request(PriceSearchV2, {
+        : await client.sushiswap.request(PriceDocument, {
             id: externalExchange.address.toLowerCase(),
           });
 
-      const isV2 = (t: PriceV2Query | PriceV3Query): t is PriceV2Query =>
+      const isV2 = (t: PriceQuery | PriceV3Query): t is PriceQuery =>
         "pair" in t;
 
       const destructToken0Price = isV2(priceRes)
         ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          (priceRes.pair!.token0Price as string)
+          priceRes.pair!.token0Price
         : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           (priceRes.pool!.token0Price as string);
 

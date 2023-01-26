@@ -1,72 +1,67 @@
-import { gql } from "graphql-request";
+import type { Fraction, Token } from "@dahlia-labs/token-utils";
+import { getAddress } from "@ethersproject/address";
+import type { Address } from "wagmi";
 
-import { graphql } from "../../gql/uniswapV3";
+import type {
+  MostLiquidV3Query,
+  PriceHistoryDayV3Query,
+  PriceHistoryHourV3Query,
+  PriceV3Query,
+} from "../../gql/uniswapV3/graphql";
+import type { PricePoint } from "./uniswapV2";
+import { parsePriceHelper } from "./uniswapV2";
 
-export type MostLiquidResV3 = {
-  pools:
-    | readonly [{ id: string; feeTier: string; totalValueLockedToken0: string }]
-    | [];
+export type UniswapV3Pool = {
+  token0: Token;
+  token1: Token;
+  address: Address;
+  feeTier: "100" | "500" | "3000" | "10000";
 };
 
-export const MostLiquidSearchV3 = gql`
-  query MostLiquidV3($token0: String, $token1: String) {
-    pools(
-      where: { token0: $token0, token1: $token1 }
-      orderBy: totalValueLockedToken0
-      orderDirection: desc
-      first: 1
-    ) {
-      id
-      feeTier
-      totalValueLockedToken0
-    }
-  }
-`;
+// returns null if the id used to query was not valid
+export const parsePriceV3 = (priceV3Query: PriceV3Query): Fraction | null =>
+  priceV3Query.pool
+    ? parsePriceHelper(parseFloat(priceV3Query.pool.token0Price))
+    : null;
 
-export type PriceHistoryHourResV3 = {
-  pool: { poolHourData: { token0Price: string; periodStartUnix: string }[] };
-};
-
-export const PriceHistoryHourSearchV3 = gql`
-  query PriceHistoryHourV3($id: ID!, $amount: Int) {
-    pool(id: $id, subgraphError: allow) {
-      poolHourData(
-        orderBy: periodStartUnix
-        first: $amount
-        orderDirection: desc
-      ) {
-        token0Price
-        periodStartUnix
+// TODO: is this sorting by how much token0 is locked or tvl in terms of token0
+export const parseMostLiquidV3 = (
+  mostLiquidV3Query: MostLiquidV3Query,
+  tokens: readonly [Token, Token]
+): { pool: UniswapV3Pool; totalLiquidity: number } | null =>
+  mostLiquidV3Query.pools[0]
+    ? {
+        pool: {
+          token0: tokens[0],
+          token1: tokens[1],
+          address: getAddress(mostLiquidV3Query.pools[0].id),
+          feeTier: mostLiquidV3Query.pools[0]
+            .feeTier as UniswapV3Pool["feeTier"],
+        },
+        totalLiquidity: parseFloat(
+          mostLiquidV3Query.pools[0].totalValueLockedToken0
+        ),
       }
-    }
-  }
-`;
+    : null;
 
-export type PriceHistoryDayResV3 = {
-  pool: { poolDayData: { token0Price: string; date: string }[] };
-};
+// returns null if the id used to query was not valid
+export const parsePriceHistoryHourV3 = (
+  priceHistoryHourV3Query: PriceHistoryHourV3Query
+): readonly PricePoint[] | null =>
+  priceHistoryHourV3Query.pool
+    ? priceHistoryHourV3Query.pool.poolHourData.map((d) => ({
+        timestamp: d.periodStartUnix,
+        price: parsePriceHelper(parseFloat(d.token0Price)),
+      }))
+    : null;
 
-export const PriceHistoryDaySearchV3 = gql`
-  query PriceHistoryDayV3($id: ID!, $amount: Int) {
-    pool(id: $id, subgraphError: allow) {
-      poolDayData(orderBy: date, first: $amount, orderDirection: desc) {
-        token0Price
-        date
-      }
-    }
-  }
-`;
-
-export type PriceResV3 = {
-  pool: {
-    token0Price: string;
-  };
-};
-
-export const PriceSearchV3 = graphql(`
-  query PriceV3($id: ID!) {
-    pool(id: $id, subgraphError: allow) {
-      token0Price
-    }
-  }
-`);
+// returns null if the id used to query was not valid
+export const parsePriceHistoryDayV3 = (
+  priceHistoryDayV3Query: PriceHistoryDayV3Query
+): readonly PricePoint[] | null =>
+  priceHistoryDayV3Query.pool
+    ? priceHistoryDayV3Query.pool.poolDayData.map((d) => ({
+        timestamp: d.date,
+        price: parsePriceHelper(parseFloat(d.token0Price)),
+      }))
+    : null;
