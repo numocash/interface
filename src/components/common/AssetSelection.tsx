@@ -64,6 +64,7 @@ export const AssetSelection: React.FC<Props> = ({
   onSelect,
   selectedValue,
   inputValue,
+  className,
   inputDisabled = false,
   hideInput = false,
   inputOnChange,
@@ -83,7 +84,7 @@ export const AssetSelection: React.FC<Props> = ({
   const [show, setShow] = useState(false);
 
   return (
-    <div tw="flex w-full flex-col pt-2 px-2">
+    <div tw="flex w-full flex-col pt-2 px-2" className={className}>
       <>
         <Section>
           <div tw=" text-secondary text-xs">{label}</div>
