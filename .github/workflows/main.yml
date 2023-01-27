@@ -1,32 +1,55 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [master]
   push:
-    branches: [master]
+    branches:
+      - "**"
 
 jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/yarn
-      - run: yarn typechain
-      - run: yarn typecheck
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typechain
+      - run: pnpm graphql-codegen
+      - run: pnpm typecheck
 
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/yarn
-      - run: yarn typechain
-      - run: yarn lint:ci
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typechain
+      - run: pnpm graphql-codegen
+      - run: pnpm lint:ci
 
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/yarn
-      - run: yarn typechain
-      - run: yarn build
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typechain
+      - run: pnpm graphql-codegen
+      - run: pnpm build
