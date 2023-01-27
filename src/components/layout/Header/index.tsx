@@ -24,7 +24,7 @@ export const Header: React.FC = () => {
         }
       `}
     >
-      <h1 tw="font-bold text-2xl hidden md:flex">Numeon</h1>
+      <h1 tw="font-bold text-2xl hidden md:flex">Numoen</h1>
 
       <div tw="flex w-full md:(gap-2 justify-end) items-center justify-between">
         <Nav />

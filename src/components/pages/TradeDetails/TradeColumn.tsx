@@ -4,6 +4,7 @@ import tw, { css } from "twin.macro";
 import { Config } from "./Config";
 import { Long } from "./Long";
 import { ProvideLiquidity } from "./ProvideLiquidity";
+import { Returns } from "./Returns";
 import { Short } from "./Short";
 import { TotalStats } from "./TotalStats";
 
@@ -43,6 +44,9 @@ export const TradeColumn: React.FC = () => {
       {action === ActionType.Short && <Short />}
       <ProvideLiquidity />
       <div tw="w-full border-b-2 border-gray-200" />
+      <Returns />
+      <div tw="w-full border-b-2 border-gray-200" />
+
       <TotalStats />
       <div tw="w-full border-b-2 border-gray-200" />
       <Config />
