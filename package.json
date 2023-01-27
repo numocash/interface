@@ -41,7 +41,7 @@
     "@visx/shape": "^3.0.0",
     "@wagmi/chains": "^0.1.14",
     "apexcharts": "^3.36.3",
-    "axios": "^1.2.4",
+    "axios": "^1.2.5",
     "bn.js": "^5.2.1",
     "copy-to-clipboard": "^3.3.3",
     "d3": "^7.8.2",
@@ -64,15 +64,15 @@
     "react-hot-toast": "^2.4.0",
     "react-icons": "^4.7.1",
     "react-popper": "^2.3.0",
-    "react-router-dom": "^6.7.0",
+    "react-router-dom": "^6.8.0",
     "react-scripts": "^5.0.1",
     "react-use-gesture": "^9.1.3",
     "react-virtual": "^2.10.4",
     "tiny-invariant": "^1.3.1",
-    "tslib": "^2.4.1",
+    "tslib": "^2.5.0",
     "unstated-next": "^1.1.0",
     "use-debounce": "^9.0.3",
-    "wagmi": "^0.10.14"
+    "wagmi": "^0.10.15"
   },
   "scripts": {
     "start": "craco start",
@@ -124,7 +124,7 @@
     "@types/bn.js": "^5.1.1",
     "@types/d3": "^7.4.0",
     "@types/events": "^3.0.0",
-    "@types/jest": "^29.2.6",
+    "@types/jest": "^29.4.0",
     "@types/lodash": "^4.14.191",
     "@types/lodash.mapvalues": "^4.6.7",
     "@types/node": "^18.11.18",
@@ -159,7 +159,6 @@
     "twin.macro": "^3.1.0",
     "typechain": "^8.1.1",
     "typescript": "4.9.4",
-    "typescript-operations": "link:@graphql/codegen/typescript-operations",
     "webpack": "^5.75.0",
     "webpack-bundle-analyzer": "^4.7.0"
   },
@@ -176,5 +175,5 @@
       "preset": "emotion"
     }
   },
-  "packageManager": "pnpm@6.11.0"
+  "packageManager": "pnpm@7.26.0"
 }
