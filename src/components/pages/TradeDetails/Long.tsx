@@ -10,11 +10,11 @@ export const Long: React.FC = () => {
   return (
     <>
       <div tw="flex items-center gap-2 ">
-        <p tw="font-semibold">Buy</p>
+        <p tw="text-sm">Buy</p>
         <div tw="flex items-center space-x-2 px-1 py-2 rounded-lg bg-gray-200">
-          <TokenIcon size={24} token={other} />
+          <TokenIcon size={16} token={other} />
           <div tw="mr-1 space-y-1">
-            <div tw="text-xl font-semibold leading-none">{other.symbol}+</div>
+            <div tw=" text-sm font-semibold  leading-none">{other.symbol}+</div>
           </div>
         </div>
       </div>

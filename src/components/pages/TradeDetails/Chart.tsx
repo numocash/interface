@@ -105,23 +105,20 @@ export const Chart: React.FC = () => {
       // pixels
       const { x } = localPoint(event) || { x: 0 };
       const x0 = xScale.invert(x); // get timestamp from the scalex
+      // rounds down
       const index = priceHistory.reduce(
         (acc, cur, i) => (x0 < cur.timestamp ? i : acc),
         1
       );
 
-      const d0 = priceHistory[index - 1];
+      const d0 = priceHistory[index];
       invariant(d0); // TODO: why does Uniswap not need this
-      const d1 = priceHistory[index];
+      const d1 = priceHistory[index - 1]; // next data in terms of timestamp
       let pricePoint = d0;
 
-      const hasPreviousData = d1 && d1.timestamp;
-      if (hasPreviousData) {
-        pricePoint =
-          x0.valueOf() - d0.timestamp.valueOf() <
-          d1.timestamp.valueOf() - x0.valueOf()
-            ? d1
-            : d0;
+      const hasNextData = d1 && d1.timestamp;
+      if (hasNextData) {
+        pricePoint = x0 - d0.timestamp > d1.timestamp - x0 ? d1 : d0;
       }
 
       if (pricePoint) {

@@ -46,7 +46,6 @@ export const TradeColumn: React.FC = () => {
       <div tw="w-full border-b-2 border-gray-200" />
       <Returns />
       <div tw="w-full border-b-2 border-gray-200" />
-
       <TotalStats />
       <div tw="w-full border-b-2 border-gray-200" />
       <Config />

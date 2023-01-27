@@ -1,11 +1,14 @@
-import type { ChainsV1 } from "@dahlia-labs/numoen-utils";
+import { chainID } from "@dahlia-labs/use-ethers";
 import { useMemo } from "react";
+import { useChainId } from "wagmi";
 
-export const useChain = (): ChainsV1 => {
+import type { SupportedChains } from "../constants";
+
+export const useChain = (): SupportedChains => {
+  const chainNumber = useChainId();
   return useMemo(() => {
-    // if (!network.chain) return "arbitrum";
-    // if (chainID.goerli === network.chain?.id) return "goerli";
-    // else
+    // switch(chainID)
+    if (chainNumber === chainID.arbitrum) return "arbitrum";
     return "arbitrum";
-  }, []);
+  }, [chainNumber]);
 };

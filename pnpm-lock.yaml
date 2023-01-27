@@ -70,6 +70,7 @@ specifiers:
   '@visx/event': ^3.0.0
   '@visx/glyph': ^3.0.0
   '@visx/group': ^3.0.0
+  '@visx/responsive': ^3.0.0
   '@visx/scale': ^3.0.0
   '@visx/shape': ^3.0.0
   '@wagmi/chains': ^0.1.14
@@ -165,6 +166,7 @@ dependencies:
   '@visx/event': 3.0.0
   '@visx/glyph': 3.0.0_react@18.2.0
   '@visx/group': 3.0.0_react@18.2.0
+  '@visx/responsive': 3.0.0_react@18.2.0
   '@visx/scale': 3.0.0
   '@visx/shape': 3.0.0_react@18.2.0
   '@wagmi/chains': 0.1.14
@@ -4808,6 +4810,18 @@ packages:
 
   /@visx/point/3.0.0:
     resolution: {integrity: sha512-OWGTC9KZK63PSCXHpfFzez7InHW+eMdofVVyPUCtB3FG8Xr8qZbH8Ho17PH4e45AvGebOGW1F6ww391I1AV5fw==}
+    dev: false
+
+  /@visx/responsive/3.0.0_react@18.2.0:
+    resolution: {integrity: sha512-immnxQwOWlrxbnlCIqJWuDpPfrM6tglgMTN1WsyXyGluLMJqhuuxqxllfXaRPkQFS4fcvs66KCEELdazh96U2w==}
+    peerDependencies:
+      react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+    dependencies:
+      '@types/lodash': 4.14.191
+      '@types/react': 18.0.27
+      lodash: 4.17.21
+      prop-types: 15.8.1
+      react: 18.2.0
     dev: false
 
   /@visx/scale/3.0.0:

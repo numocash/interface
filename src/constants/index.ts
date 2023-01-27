@@ -3,6 +3,9 @@ import type { ChainsV1 } from "@dahlia-labs/numoen-utils";
 import { Token } from "@dahlia-labs/token-utils";
 import { chainID } from "@dahlia-labs/use-ethers";
 import { AddressZero } from "@ethersproject/constants";
+import type { Address } from "wagmi";
+
+import { ARBI_USDC, ARBI_WETH } from "./tokens";
 
 export const liquidityManagerGenesis: { [chain in ChainsV1]: number } = {
   goerli: 8055410,
@@ -39,4 +42,59 @@ export const NativeTokens: { [chain in ChainsV1]: [Token, Token] } = {
         "https://raw.githubusercontent.com/Numoen/config/master/src/images/eth.jpg",
     }),
   ],
+};
+
+export type SupportedChains = keyof Pick<
+  typeof chainID,
+  "arbitrum"
+  // "arbitrum" | "celo" | "polygon"
+>;
+
+// TODO: where to put factory address of uniswapv2 and v3
+export type NumoenBaseConfig = {
+  factory: Address;
+  lendgineRouter: Address;
+  liquidityManager: Address;
+};
+
+// TODO: CELO doesn't need to be used as a native token
+export type NumoenInterfaceConfig = {
+  uniswapV2subgraph: string;
+  uniswapV3subgraph: string;
+  wrappedNative: Token;
+  stablecoin: Token;
+  defaultActiveLists: string[];
+  defaultInactiveLists: string[];
+};
+
+export type NumoenChainConfig = {
+  blockExplorer: string;
+  rpc: string;
+};
+
+export const config: {
+  [chain in SupportedChains]: {
+    interface: NumoenInterfaceConfig;
+    chain: NumoenChainConfig;
+  };
+} = {
+  arbitrum: {
+    interface: {
+      uniswapV2subgraph:
+        "https://api.thegraph.com/subgraphs/name/sushiswap/exchange-arbitrum-backup",
+      uniswapV3subgraph:
+        "https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-dev",
+      wrappedNative: ARBI_WETH,
+      stablecoin: ARBI_USDC,
+      defaultActiveLists: [
+        "https://tokens.uniswap.org",
+        "https://bridge.arbitrum.io/token-list-42161.json",
+      ],
+      defaultInactiveLists: [],
+    },
+    chain: {
+      blockExplorer: "https://arbiscan.io/",
+      rpc: "https://arb1.arbitrum.io/rpc",
+    },
+  },
 };
