@@ -3,7 +3,8 @@
 ## Developing
 
 ```bash
-yarn install
-yarn typechain
-yarn start
+pnpm install
+pnpm typechain
+pnpm graphql-codegen
+pnpm start
 ```

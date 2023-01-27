@@ -40,7 +40,6 @@ specifiers:
   '@reach/dialog': ^0.18.0
   '@reach/slider': ^0.18.0
   '@react-spring/web': ^9.6.1
-  '@rushstack/eslint-patch': ^1.2.0
   '@saberhq/eslint-config-react': 2.1.0
   '@saberhq/tsconfig': ^2.1.0
   '@simbathesailor/babel-plugin-use-what-changed': ^2.1.0
@@ -211,7 +210,6 @@ devDependencies:
   '@graphql-codegen/cli': 2.16.4_dpkrn4fvym4uev25vxbmdlu2bu
   '@graphql-codegen/client-preset': 1.2.6_graphql@16.6.0
   '@graphql-typed-document-node/core': 3.1.1_graphql@16.6.0
-  '@rushstack/eslint-patch': 1.2.0
   '@saberhq/eslint-config-react': 2.1.0_7uibuqfxkfaozanbtbziikiqje
   '@saberhq/tsconfig': 2.1.0
   '@simbathesailor/babel-plugin-use-what-changed': 2.1.0_4yskjym75au5lhowg5xeuhaexa

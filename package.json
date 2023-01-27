@@ -108,7 +108,6 @@
     "@graphql-codegen/cli": "^2.16.4",
     "@graphql-codegen/client-preset": "^1.2.6",
     "@graphql-typed-document-node/core": "^3.1.1",
-    "@rushstack/eslint-patch": "^1.2.0",
     "@saberhq/eslint-config-react": "2.1.0",
     "@saberhq/tsconfig": "^2.1.0",
     "@simbathesailor/babel-plugin-use-what-changed": "^2.1.0",
