@@ -25,7 +25,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
   ]);
 
   const invertPriceQuery =
-    sortTokens([tokens.denom, tokens.other])[1] === tokens.other;
+    sortTokens([tokens.denom, tokens.other])[0] === tokens.denom;
 
   const priceHistoryQuery = usePriceHistory(
     referenceMarketQuery.data,
@@ -56,6 +56,8 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
 
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
+
+    console.log(oneDayOldPrice.asNumber, currentPrice.asNumber);
 
     return Percent.fromFraction(
       currentPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice)

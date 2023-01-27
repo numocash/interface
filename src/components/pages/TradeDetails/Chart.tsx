@@ -26,7 +26,7 @@ export const Chart: React.FC = () => {
   const referenceMarketQuery = useMostLiquidMarket([denom, other]);
 
   // TODO: bug with inverting
-  const invertPriceQuery = sortTokens([denom, other])[1] === other;
+  const invertPriceQuery = sortTokens([denom, other])[0] === other;
 
   const priceHistoryQuery = usePriceHistory(
     referenceMarketQuery.data,
