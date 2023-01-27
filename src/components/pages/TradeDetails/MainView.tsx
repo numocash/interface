@@ -1,6 +1,3 @@
-import { NavLink } from "react-router-dom";
-
-import { ReactComponent as ReverseIcon } from "../../../icons/repeat.svg";
 import { TokenIcon } from "../../common/TokenIcon";
 import { useTradeDetails } from ".";
 import { Chart } from "./Chart";
@@ -19,16 +16,11 @@ export const MainView: React.FC = () => {
               <TokenIcon token={other} size={32} />
               <TokenIcon token={denom} size={32} />
             </div>
-            <div tw="grid gap-0.5">
-              <span tw="font-semibold text-lg text-default leading-tight">
-                {other.symbol} / {denom.symbol}
-              </span>
+            <div tw="flex gap-1 font-semibold text-lg text-default ">
+              <p tw="border-b-2 border-b-green-500">{other.symbol}</p>
+              <p>/</p>
+              <p tw="border-b-2 border-b-red">{denom.symbol}</p>
             </div>
-            <NavLink
-              to={"/trade/details/" + other.address + "/" + denom.address}
-            >
-              <ReverseIcon tw="rounded-lg bg-gray-200 p-1" />
-            </NavLink>
           </div>
         </div>
       </div>

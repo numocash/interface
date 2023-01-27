@@ -68,7 +68,7 @@ export const useDenomToken = (tokens: readonly [Token, Token]): Token => {
 export const useGetDenomToken = () => {
   return useCallback((tokens: readonly [Token, Token]) => {
     const USDC = tokens.find((t) => t.symbol === "USDC");
-    const ETH = tokens.find((t) => t.symbol === "WETH");
+    const ETH = tokens.find((t) => t.symbol === "WETH" || t.symbol === "ETH");
     return USDC ?? ETH ?? tokens[0];
   }, []);
 };

@@ -5,7 +5,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
-import { useAddressToToken } from "../../../hooks/useTokens";
+import {
+  useAddressToToken,
+  useSortDenomTokens,
+} from "../../../hooks/useTokens";
 import { MainView } from "./MainView";
 import { Times } from "./TimeSelector";
 import { TradeColumn } from "./TradeColumn";
@@ -21,30 +24,37 @@ interface ITradeDetails {
 const useTradeDetailsInternal = (): ITradeDetails => {
   const navigate = useNavigate();
 
-  const { denom, quote } = useParams<{
-    denom: string;
-    quote: string;
+  const { addressA, addressB } = useParams<{
+    addressA: string;
+    addressB: string;
   }>();
+  if (!addressA || !addressB) navigate("/trade/");
+  invariant(addressA && addressB);
 
-  if (!denom || !quote) navigate("/trade/");
-  invariant(denom && quote);
   try {
-    getAddress(denom);
-    getAddress(quote);
+    getAddress(addressA);
+    getAddress(addressB);
   } catch (err) {
     console.error(err);
     navigate("/trade/");
   }
 
-  const denomToken = useAddressToToken(denom);
-  const quoteToken = useAddressToToken(quote);
+  const tokenA = useAddressToToken(addressA);
+  const tokenB = useAddressToToken(addressB);
+  if (!tokenA || !tokenB) navigate("/trade/");
+  invariant(tokenA && tokenB);
 
-  if (!denomToken || !quoteToken) navigate("/trade/");
-  invariant(denomToken && quoteToken, "Invalid token addresses");
+  const { denom, other: quote } = useSortDenomTokens([tokenA, tokenB] as const);
+
+  // TODO: handle nonAddresses
+  // TODO: verify correct ordering
+
+  if (!denom || !quote) navigate("/trade/");
+  invariant(denom && quote, "Invalid token addresses");
 
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
 
-  return { denom: denomToken, other: quoteToken, timeframe, setTimeframe };
+  return { denom, other: quote, timeframe, setTimeframe };
 };
 
 export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =

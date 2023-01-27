@@ -13,7 +13,10 @@ export const AppRouter: React.FC = () => {
   return (
     <Routes>
       <Route path="/trade" element={<Trade />} />
-      <Route path="/trade/details/:denom/:quote" element={<TradeDetails />} />
+      <Route
+        path="/trade/details/:addressA/:addressB"
+        element={<TradeDetails />}
+      />
 
       <Route path="/earn" element={<Earn />} />
       <Route path="/earn/:lendgineAddress" element={<Manage />} />
