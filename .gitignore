@@ -12,6 +12,7 @@
 /build
 /src/generated
 /src/gql
+/src/generated.ts
 
 # misc
 .DS_Store
