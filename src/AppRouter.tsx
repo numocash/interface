@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { Arb } from "./components/pages/Arb";
 import { Swap } from "./components/pages/Arb/Swap";
+import { Create } from "./components/pages/Create";
 import { Earn } from "./components/pages/Earn";
 import { Manage } from "./components/pages/Earn/Manage";
 import { Portfolio } from "./components/pages/Positions";
@@ -17,6 +18,7 @@ export const AppRouter: React.FC = () => {
         path="/trade/details/:addressA/:addressB"
         element={<TradeDetails />}
       />
+      <Route path="/create/" element={<Create />} />
 
       <Route path="/earn" element={<Earn />} />
       <Route path="/earn/:lendgineAddress" element={<Manage />} />

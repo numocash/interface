@@ -7,8 +7,8 @@ import type { SupportedChains } from "../constants";
 export const useChain = (): SupportedChains => {
   const chainNumber = useChainId();
   return useMemo(() => {
-    // switch(chainID)
     if (chainNumber === chainID.arbitrum) return "arbitrum";
+    if (chainNumber === chainID.celo) return "celo";
     return "arbitrum";
   }, [chainNumber]);
 };

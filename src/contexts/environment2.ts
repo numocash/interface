@@ -1,12 +1,12 @@
 import { createContainer } from "unstated-next";
 
-import type { NumoenChainConfig, NumoenInterfaceConfig } from "../constants";
+import type { NumoenBaseConfig, NumoenInterfaceConfig } from "../constants";
 import { config } from "../constants";
 import { useChain } from "../hooks/useChain";
 
 interface Environment {
-  // base: NumoenBaseConfig;
-  chain: NumoenChainConfig;
+  base: NumoenBaseConfig;
+  // chain: NumoenChainConfig;
   interface: NumoenInterfaceConfig;
 }
 

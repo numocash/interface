@@ -7,8 +7,8 @@ import invariant from "tiny-invariant";
 import { useDebounce } from "use-debounce";
 import { useAccount } from "wagmi";
 
-import { useTokenBalances } from "../../../../hooks/useTokenBalance";
-import { useAllTokens } from "../../../../hooks/useTokens";
+import { useTokenBalances } from "../../../hooks/useTokenBalance";
+import { LoadingSpinner } from "../LoadingSpinner";
 import { SearchInput } from "./SearchInput";
 import { TokenResults } from "./TokenResults";
 
@@ -36,24 +36,20 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const { address } = useAccount();
 
-  const allTokens = useAllTokens();
-
   const [searchQueryDebounced] = useDebounce(searchQuery, 200, {
     leading: true,
   });
   // const debouncedQueryKey = getAddress(searchQueryDebounced);
   // const searchToken = useToken2(debouncedQueryKey);
 
-  const allTokensUnfiltered = useMemo(
-    () => (tokens ?? allTokens).map((t) => t),
-    [allTokens, tokens]
-  );
-  const userTokenBalances = useTokenBalances(allTokensUnfiltered, address);
+  const userTokenBalances = useTokenBalances(tokens, address);
 
   const tokensWithBalances = useMemo(
     () =>
-      userTokenBalances
-        ? zip(userTokenBalances, allTokensUnfiltered)
+      !tokens
+        ? []
+        : userTokenBalances
+        ? zip(userTokenBalances, tokens)
             .map(([tokenBalance, t]) => {
               invariant(t, "token");
 
@@ -83,13 +79,13 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
               }
             })
         : address === null
-        ? allTokensUnfiltered.map((t) => ({
+        ? tokens.map((t) => ({
             token: t,
             balance: new TokenAmount(t, 0),
             hasBalance: false,
           }))
         : [],
-    [userTokenBalances, allTokensUnfiltered, address]
+    [userTokenBalances, tokens, address]
   );
 
   const fuse = useMemo(
@@ -136,11 +132,11 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
       </div>
 
       <div tw={"overflow-y-scroll flex-1"}>
-        {/* {results.length === 0 && loading && (
+        {(results.length === 0 || !tokens) && (
           <div tw={"p-8 w-full flex items-center justify-center"}>
-            <Spinner />
+            <LoadingSpinner />
           </div>
-        )} */}
+        )}
         {/* {!loading && results.length === 0 && !searchToken && (
           <div tw="py-[3rem]">
             <div tw="text-center">Nothing Found</div>

@@ -57,8 +57,8 @@ const StyledInput = styled.input<{
   hasBackground?: boolean;
   disabled?: boolean;
 }>`
-  ${tw`border-none focus:border-none `}
-  color: ${({ theme }) => theme.colors.text.bold};
+  ${tw`border-none focus:border-none text-default `}
+  // color: ${({ theme }) => theme.colors.text.bold};
   font-weight: 400;
   font-size: 24px;
   &:disabled {

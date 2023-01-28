@@ -2,10 +2,11 @@ import { weth } from "@dahlia-labs/numoen-config";
 import type { ChainsV1 } from "@dahlia-labs/numoen-utils";
 import { Token } from "@dahlia-labs/token-utils";
 import { chainID } from "@dahlia-labs/use-ethers";
+import { getAddress } from "@ethersproject/address";
 import { AddressZero } from "@ethersproject/constants";
 import type { Address } from "wagmi";
 
-import { ARBI_USDC, ARBI_WETH } from "./tokens";
+import { CELO_CELO, CELO_CUSD } from "./tokens";
 
 export const liquidityManagerGenesis: { [chain in ChainsV1]: number } = {
   goerli: 8055410,
@@ -46,7 +47,7 @@ export const NativeTokens: { [chain in ChainsV1]: [Token, Token] } = {
 
 export type SupportedChains = keyof Pick<
   typeof chainID,
-  "arbitrum"
+  "celo"
   // "arbitrum" | "celo" | "polygon"
 >;
 
@@ -67,34 +68,47 @@ export type NumoenInterfaceConfig = {
   defaultInactiveLists: string[];
 };
 
-export type NumoenChainConfig = {
-  blockExplorer: string;
-  rpc: string;
-};
-
 export const config: {
   [chain in SupportedChains]: {
     interface: NumoenInterfaceConfig;
-    chain: NumoenChainConfig;
+    base: NumoenBaseConfig;
   };
 } = {
-  arbitrum: {
+  // arbitrum: {
+  //   interface: {
+  //     uniswapV2subgraph:
+  //       "https://api.thegraph.com/subgraphs/name/sushiswap/exchange-arbitrum-backup",
+  //     uniswapV3subgraph:
+  //       "https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-dev",
+  //     wrappedNative: ARBI_WETH,
+  //     stablecoin: ARBI_USDC,
+  //     defaultActiveLists: [
+  //       "https://tokens.uniswap.org",
+  //       "https://bridge.arbitrum.io/token-list-42161.json",
+  //     ],
+  //     defaultInactiveLists: [],
+  //   },
+  // },
+  celo: {
     interface: {
       uniswapV2subgraph:
-        "https://api.thegraph.com/subgraphs/name/sushiswap/exchange-arbitrum-backup",
+        "https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap",
       uniswapV3subgraph:
-        "https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-dev",
-      wrappedNative: ARBI_WETH,
-      stablecoin: ARBI_USDC,
+        "https://api.thegraph.com/subgraphs/name/jesse-sawa/uniswap-celo",
+      wrappedNative: CELO_CELO,
+      stablecoin: CELO_CUSD,
       defaultActiveLists: [
         "https://tokens.uniswap.org",
-        "https://bridge.arbitrum.io/token-list-42161.json",
+        "https://celo-org.github.io/celo-token-list/celo.tokenlist.json",
       ],
       defaultInactiveLists: [],
     },
-    chain: {
-      blockExplorer: "https://arbiscan.io/",
-      rpc: "https://arb1.arbitrum.io/rpc",
+    base: {
+      factory: getAddress("0x09C1133669cB9b49704Dc27aE0b523Be74467f2A"),
+      liquidityManager: getAddress(
+        "0x0D0932B07Aca7Ea902d2432e70e054DE8B12A834"
+      ),
+      lendgineRouter: getAddress("0x4D908e627C8E5126558Dc29B46dF2c9b5B150470"),
     },
   },
 };

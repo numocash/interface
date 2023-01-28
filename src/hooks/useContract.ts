@@ -23,10 +23,26 @@ import { useMemo } from "react";
 import { useProvider, useSigner } from "wagmi";
 
 import ARB_ABI from "../abis/Arbitrage.json";
+import FACTORY_ABI from "../abis/Factory.json";
 import { ArbitrageAddress } from "../constants";
+import { useEnvironment } from "../contexts/environment2";
 import type { Arbitrage } from "../generated/Arbitrage";
+import type { Factory } from "../generated/Factory";
 import type { HookArg } from "./useApproval";
 import { useChain } from "./useChain";
+
+export const useFactory = (withSignerIfPossible: boolean): Factory | null => {
+  const environment = useEnvironment();
+  return useContract(
+    (provider: ProviderOrSigner) =>
+      getContract(
+        environment.base.factory,
+        FACTORY_ABI.abi,
+        provider
+      ) as Factory,
+    withSignerIfPossible
+  );
+};
 
 export function useTokenContractFromAddress(
   tokenAddress: HookArg<string>,

@@ -59,10 +59,10 @@ export const useCurrentPrice = (
       const id = externalExchange.address.toLowerCase();
 
       const priceRes = isV3(externalExchange)
-        ? await client.uniswapv3.request(PriceV3Document, {
+        ? await client.uniswapV3.request(PriceV3Document, {
             id,
           })
-        : await client.sushiswap.request(PriceV2Document, {
+        : await client.uniswapV2.request(PriceV2Document, {
             id,
           });
 
@@ -81,22 +81,27 @@ export const useCurrentPrice = (
 };
 
 export const useMostLiquidMarket = (
-  tokens: readonly [Token, Token]
+  tokens: readonly [HookArg<Token>, HookArg<Token>]
 ): UseQueryResult<UniswapV2Pool | UniswapV3Pool | null> => {
   const client = useClient();
-  const sortedTokens = sortTokens(tokens);
+  const sortedTokens =
+    tokens[0] && tokens[1]
+      ? sortTokens(tokens as readonly [Token, Token])
+      : null;
 
   return useQuery<UniswapV2Pool | UniswapV3Pool | null>(
     ["query liquidity", sortedTokens],
     async () => {
+      if (!sortedTokens) return null;
+
       const variables = {
         token0: sortedTokens[0].address.toLowerCase(),
         token1: sortedTokens[1].address.toLowerCase(),
       };
 
       const [v2, v3] = await Promise.all([
-        client.sushiswap.request(PairV2Document, variables),
-        client.uniswapv3.request(MostLiquidV3Document, variables),
+        client.uniswapV2.request(PairV2Document, variables),
+        client.uniswapV3.request(MostLiquidV3Document, variables),
       ] as const);
 
       const v2data = parsePairV2(v2, sortedTokens);
@@ -150,17 +155,17 @@ export const usePriceHistory = (
       const priceHistory =
         timeframe === Times.ONE_DAY || timeframe === Times.ONE_WEEK
           ? isV3(externalExchange)
-            ? await client.uniswapv3.request(
+            ? await client.uniswapV3.request(
                 PriceHistoryHourV3Document,
                 variables
               )
-            : await client.sushiswap.request(
+            : await client.uniswapV2.request(
                 PriceHistoryHourV2Document,
                 variables
               )
           : isV3(externalExchange)
-          ? await client.uniswapv3.request(PriceHistoryDayV3Document, variables)
-          : await client.sushiswap.request(
+          ? await client.uniswapV3.request(PriceHistoryDayV3Document, variables)
+          : await client.uniswapV2.request(
               PriceHistoryDayV2Document,
               variables
             );

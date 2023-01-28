@@ -1,9 +1,7 @@
 import type { Token } from "@dahlia-labs/token-utils";
 import React from "react";
-import invariant from "tiny-invariant";
 import tw, { styled } from "twin.macro";
 
-import { useDisplayToken } from "../../hooks/useTokens";
 import { TokenIcon } from "./TokenIcon";
 
 interface IProps {
@@ -21,8 +19,8 @@ export const TokenInfo: React.FC<IProps> = ({
   small = false,
   showName = true,
 }: IProps) => {
-  const displayToken = useDisplayToken(token);
-  invariant(displayToken);
+  // TODO: handle ETH
+  const displayToken = token;
 
   return (
     <TokenInfoWrapper className={className}>

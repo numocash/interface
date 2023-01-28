@@ -1,38 +1,65 @@
+// Import CELO chain information
+import { Celo } from "@celo/rainbowkit-celo/chains";
+// Import known recommended wallets
+import { CeloDance, CeloWallet, Valora } from "@celo/rainbowkit-celo/wallets";
 import { ThemeProvider } from "@emotion/react";
-import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import {
+  connectorsForWallets,
+  getDefaultWallets,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
+import {
+  omniWallet,
+  walletConnectWallet,
+} from "@rainbow-me/rainbowkit/wallets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { arbitrum } from "@wagmi/chains";
 import React from "react";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
-import { alchemyProvider } from "wagmi/providers/alchemy";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
 import { App } from "./App";
 import { BlockProvider } from "./contexts/block";
 import { EnvironmentProvider } from "./contexts/environment";
+import { EnvironmentProvider as EnvironmentProvider2 } from "./contexts/environment2";
 import { SettingsProvider } from "./contexts/settings";
 import { theme } from "./theme";
 
 const { provider, chains } = configureChains(
-  [arbitrum],
+  [Celo],
   [
-    alchemyProvider({
-      apiKey: "UVgzpWCHx6zsVDO7qC8mtcA6jCl0vgV4",
-    }),
-    // infuraProvider({
-    //   apiKey: "6f9c9bc239054e9fb755198cc1e4973a",
+    // alchemyProvider({
+    //   apiKey: "UVgzpWCHx6zsVDO7qC8mtcA6jCl0vgV4",
     // }),
+    jsonRpcProvider({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      rpc: () => ({ http: Celo.rpcUrls.default.http[0]! }),
+    }),
   ]
 );
+
+export { chains };
 
 const { connectors } = getDefaultWallets({
   appName: "Numoen",
   chains,
 });
+const connectorsCELO = connectorsForWallets([
+  {
+    groupName: "Recommended with CELO",
+    wallets: [
+      Valora({ chains: [Celo] }),
+      CeloWallet({ chains: [Celo] }),
+      CeloDance({ chains: [Celo] }),
+      omniWallet({ chains: [Celo] }),
+      walletConnectWallet({ chains: [Celo] }),
+    ],
+  },
+]);
 
 const wagmiClient = createClient({
   autoConnect: true,
-  connectors,
+  connectors: [...connectors(), ...connectorsCELO()],
   provider,
 });
 
@@ -48,9 +75,12 @@ export const AppWithProviders: React.FC = () => {
               <QueryClientProvider client={queryClient}>
                 <ReactQueryDevtools initialIsOpen={false} />
                 <EnvironmentProvider>
-                  <SettingsProvider>
-                    <App />
-                  </SettingsProvider>
+                  <EnvironmentProvider2>
+                    useEnvironment
+                    <SettingsProvider>
+                      <App />
+                    </SettingsProvider>
+                  </EnvironmentProvider2>
                 </EnvironmentProvider>
               </QueryClientProvider>
             </BlockProvider>

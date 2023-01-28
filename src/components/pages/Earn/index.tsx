@@ -1,5 +1,6 @@
 import type { IMarket, IMarketUserInfo } from "@dahlia-labs/numoen-utils";
 import { useMemo } from "react";
+import { NavLink } from "react-router-dom";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment";
@@ -48,9 +49,11 @@ export const Earn: React.FC = () => {
       <div tw="flex w-full justify-between gap-4">
         {/* <Filter /> */}
         <Sort />
-        <Button tw="h-12 text-lg" variant="primary">
-          Create new market
-        </Button>
+        <NavLink to="/create/">
+          <Button tw="h-12 text-lg" variant="primary">
+            Create new market
+          </Button>
+        </NavLink>
       </div>
 
       {/* <Learn /> */}

@@ -8,13 +8,13 @@ import tw, { css, styled } from "twin.macro";
 import { useAddressToMarket } from "../../contexts/environment";
 import { useDisplayToken } from "../../hooks/useTokens";
 import useWindowDimensions from "../../utils/useWindowDimensions";
-import SelectTokenDialog from "../pages/TradeOld/SelectTokenDialog";
+import SelectTokenDialog from "./SelectTokenDialog";
 import { BigNumericInput } from "./inputs/BigNumericInput";
 import { PowerIcon } from "./PowerIcon";
 import { TokenAmountDisplay } from "./TokenAmountDisplay";
 import { TokenIcon } from "./TokenIcon";
 
-const AssetSelectButton = styled.button(
+export const AssetSelectButton = styled.button(
   ({ noAsset }: { noAsset?: boolean }) => [
     tw`relative flex items-center justify-between flex-none text-left text-black `,
     tw`text-base appearance-none cursor-pointer`,

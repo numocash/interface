@@ -1,7 +1,7 @@
 import type { Token } from "@dahlia-labs/token-utils";
 import React from "react";
 
-import { Modal } from "../../../common/Modal";
+import { Modal } from "../Modal";
 import { TokenSearch } from "./TokenSearch";
 
 export enum TokenModalView {
@@ -13,7 +13,6 @@ interface SelectTokenDialogProps {
   onDismiss: () => void;
   onSelect?: (value: Token) => void;
   onClose?: () => void;
-  token?: Token;
   selectedToken?: Token;
 }
 
