@@ -1,10 +1,14 @@
 import type { Token } from "@dahlia-labs/token-utils";
 import { TokenAmount } from "@dahlia-labs/token-utils";
+import { getAddress } from "@ethersproject/address";
+import { BigNumber } from "@ethersproject/bignumber";
+import { AddressZero } from "@ethersproject/constants";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
+import { useSigner } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment2";
-import { useFactory } from "../../../hooks/useContract";
+import { useFactory, useFactoryGetLendgine } from "../../../generated";
 import {
   useCurrentPrice,
   useMostLiquidMarket,
@@ -25,9 +29,11 @@ export const Create: React.FC = () => {
   const tokens = useDefaultTokenList();
   const environment = useEnvironment();
   const marketToken = useMarketToken(specToken, "+");
-  const factoryContract = useFactory(true);
-
-  // TODO: check if pool already exists
+  const signer = useSigner();
+  const factoryContract = useFactory({
+    address: environment.base.factory,
+    signerOrProvider: signer.data,
+  });
 
   // price is in terms of base / speculative
   const invertPriceQuery =
@@ -63,12 +69,30 @@ export const Create: React.FC = () => {
     [boundInput, marketToken]
   );
 
+  const lendgine = useFactoryGetLendgine({
+    args:
+      baseToken && specToken && bound
+        ? [
+            getAddress(baseToken.address),
+            getAddress(specToken.address),
+            BigNumber.from(baseToken.decimals),
+            BigNumber.from(specToken.decimals),
+            BigNumber.from(bound.raw.toString()),
+          ]
+        : undefined,
+    address: environment.base.factory,
+    watch: true,
+    staleTime: Infinity,
+  });
+
   const disableReason = useMemo(
     () =>
       !specToken || !baseToken
         ? "Select a token"
-        : !tokens || !currentPrice || !factoryContract
+        : !tokens || !currentPrice || !factoryContract || !lendgine.data
         ? "Loading"
+        : lendgine.data !== AddressZero
+        ? " Market already exists"
         : !baseToken.equals(environment.interface.wrappedNative) &&
           !baseToken.equals(environment.interface.stablecoin) &&
           !specToken.equals(environment.interface.wrappedNative) &&
@@ -87,6 +111,7 @@ export const Create: React.FC = () => {
       environment.interface.stablecoin,
       environment.interface.wrappedNative,
       factoryContract,
+      lendgine.data,
       specToken,
       tokens,
     ]
@@ -98,9 +123,9 @@ export const Create: React.FC = () => {
         Numoen allows for the permissionless creation of markets. Read here to
         learn more about the structure of a Numoen market.
       </p>
-      <div tw="rounded-lg p-4 flex flex-col w-full shadow-2xl bg-amber-200">
-        <RowBetween>
-          <p>Speculative token</p>
+      <div tw="rounded-lg p-4 gap-4 flex flex-col w-full shadow-2xl border-2 border-gray-300">
+        <RowBetween tw="items-center p-0">
+          <p>Long</p>
           <div>
             <TokenSelection
               selectedToken={specToken}
@@ -109,8 +134,8 @@ export const Create: React.FC = () => {
             />
           </div>
         </RowBetween>
-        <RowBetween>
-          <p>Base token</p>
+        <RowBetween tw="items-center p-0">
+          <p>Short</p>
           <div>
             <TokenSelection
               selectedToken={baseToken}
@@ -119,11 +144,10 @@ export const Create: React.FC = () => {
             />
           </div>
         </RowBetween>
-        <RowBetween>
-          <p>Upper bound</p>
-          {/* TODO: make a slider */}
+        <RowBetween tw="items-center p-0">
+          <p>Bound</p>
           <BigNumericInput
-            tw="text-right text-lg"
+            tw="text-right text-lg border-2 border-blue"
             inputMode="numeric"
             autoComplete="off"
             disabled={false}
@@ -132,20 +156,19 @@ export const Create: React.FC = () => {
           />
         </RowBetween>
         {currentPrice && (
-          <RowBetween>
-            <p>Current price</p>
-            <p>
+          <div tw="w-full justify-end flex mt-[-1rem]">
+            <p tw="text-sm">
               {currentPrice.toSignificant(6, { groupSeparator: "," })}{" "}
               <span tw="text-xs text-secondary">
                 {baseToken?.symbol} / {specToken?.symbol}
               </span>
             </p>
-          </RowBetween>
+          </div>
         )}
       </div>
       <AsyncButton
         variant="primary"
-        tw="py-2"
+        tw="h-12 text-lg"
         disabled={!!disableReason}
         onClick={async () => {
           invariant(specToken && baseToken && bound && factoryContract);
@@ -158,11 +181,11 @@ export const Create: React.FC = () => {
                   description: `Deploy a ${specToken.symbol} + ${baseToken.symbol} market`,
                   txEnvelope: () =>
                     factoryContract.createLendgine(
-                      baseToken.address,
-                      specToken.address,
+                      getAddress(baseToken.address),
+                      getAddress(specToken.address),
                       baseToken.decimals,
                       specToken.decimals,
-                      bound.raw.toString()
+                      BigNumber.from(bound.raw.toString())
                     ),
                 },
               ],

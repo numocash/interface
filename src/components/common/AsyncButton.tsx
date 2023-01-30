@@ -40,12 +40,7 @@ export const AsyncButton: React.FC<IProps> = ({
       {children}
     </Button>
   ) : (
-    <Button
-      size="lg"
-      {...rest}
-      disabled={false}
-      onClick={() => openConnectModal && openConnectModal()}
-    >
+    <Button size="lg" {...rest} disabled={false} onClick={openConnectModal}>
       {connectWalletOverride ?? "Connect Wallet"}
     </Button>
   );

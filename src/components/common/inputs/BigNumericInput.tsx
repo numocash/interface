@@ -31,6 +31,7 @@ export const BigNumericInput: React.FC<IProps> = ({
     autoCorrect="off"
     type="text"
     spellCheck="false"
+    // style={{ borderWidth: "0px" }}
     onChange={(e) => {
       const { value } = e.target;
       if (integerOnly) {
@@ -53,11 +54,12 @@ export const BigNumericInput: React.FC<IProps> = ({
   />
 );
 
+// TODO: global css is setting with width to 1px
 const StyledInput = styled.input<{
   hasBackground?: boolean;
   disabled?: boolean;
 }>`
-  ${tw`border-none focus:border-none text-default `}
+  ${tw`border text-default`}
   // color: ${({ theme }) => theme.colors.text.bold};
   font-weight: 400;
   font-size: 24px;

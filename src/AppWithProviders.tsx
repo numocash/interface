@@ -76,7 +76,6 @@ export const AppWithProviders: React.FC = () => {
                 <ReactQueryDevtools initialIsOpen={false} />
                 <EnvironmentProvider>
                   <EnvironmentProvider2>
-                    useEnvironment
                     <SettingsProvider>
                       <App />
                     </SettingsProvider>

@@ -98,7 +98,7 @@ export const config: {
       wrappedNative: CELO_CELO,
       stablecoin: CELO_CUSD,
       defaultActiveLists: [
-        "https://tokens.uniswap.org",
+        // "https://tokens.uniswap.org", // TODO: this is not returning very fast
         "https://celo-org.github.io/celo-token-list/celo.tokenlist.json",
       ],
       defaultInactiveLists: [],
