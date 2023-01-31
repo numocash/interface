@@ -42,8 +42,8 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
     () =>
       !tokens
         ? []
-        : userTokenBalances.data
-        ? zip(userTokenBalances.data, tokens)
+        : userTokenBalances
+        ? zip(userTokenBalances, tokens)
             .map(([tokenBalance, t]) => {
               invariant(t, "token");
 

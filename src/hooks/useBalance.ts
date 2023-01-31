@@ -1,9 +1,10 @@
 import { getAddress } from "@ethersproject/address";
-import { useQuery } from "@tanstack/react-query";
+import type { BigNumber } from "@ethersproject/bignumber";
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
+import { erc20ABI, useContractReads } from "wagmi";
 
 import { useErc20BalanceOf } from "../generated";
 import type { HookArg } from "./useApproval";
@@ -47,15 +48,38 @@ export const useBalance = <T extends Token>(
 
 export const useBalances = <T extends Token>(
   tokens: HookArg<readonly T[]>,
-  _address: HookArg<Address>
+  address: HookArg<Address>
 ) => {
-  return useQuery<readonly CurrencyAmount<T>[]>(
-    ["read balances", tokens],
-    () => {
-      return [] as readonly CurrencyAmount<T>[];
-    },
-    { staleTime: Infinity }
-  );
+  const contracts =
+    !!tokens && !!address
+      ? tokens.map((t) => ({
+          address: getAddress(t.address),
+          abi: erc20ABI,
+          functionName: "balanceOf",
+          args: [address],
+        }))
+      : undefined;
+
+  const contractRead = useContractReads({
+    contracts,
+    allowFailure: true,
+    watch: true,
+    staleTime: Infinity,
+    enabled: !!tokens && !!address,
+  });
+
+  const data: BigNumber[] | undefined = contractRead.data as
+    | BigNumber[]
+    | undefined;
+
+  return data
+    ? data.map((d, i) => {
+        invariant(tokens);
+        const token = tokens[i];
+        invariant(token);
+        return CurrencyAmount.fromRawAmount(token, d.toString());
+      })
+    : undefined;
 };
 
 // export const useBalance = (

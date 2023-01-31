@@ -7,7 +7,7 @@ import JSBI from "jsbi";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import type { usePrepareContractWrite } from "wagmi";
-import { useAccount, useSigner } from "wagmi";
+import { useSigner } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment2";
 import {
@@ -16,7 +16,6 @@ import {
   useFactoryGetLendgine,
   usePrepareFactoryCreateLendgine,
 } from "../../../generated";
-import { useBalance } from "../../../hooks/useBalance";
 import {
   useCurrentPrice,
   useMostLiquidMarket,
@@ -45,7 +44,6 @@ export const Create: React.FC = () => {
     address: environment.base.factory,
     signerOrProvider: signer.data,
   });
-  const { address } = useAccount();
 
   // price is in terms of base / speculative
   const invertPriceQuery =
@@ -116,13 +114,12 @@ export const Create: React.FC = () => {
   });
   const write = useFactoryCreateLendgine(prepare.data);
 
-  const balanceQuery = useBalance(environment.interface.stablecoin, address);
-  console.log(balanceQuery.data?.toExact());
-
   const disableReason = useMemo(
     () =>
       !specToken || !baseToken
         ? "Select a token"
+        : boundInput === ""
+        ? "Enter an amount"
         : !tokens ||
           !currentPrice ||
           !factoryContract ||
@@ -138,8 +135,6 @@ export const Create: React.FC = () => {
         ? `One token must be ${
             environment.interface.wrappedNative.symbol ?? ""
           } or ${environment.interface.stablecoin.symbol ?? ""}`
-        : boundInput === ""
-        ? "Enter an amount"
         : !bound || bound.equalTo(0)
         ? "Invalid amount"
         : null,
@@ -190,6 +185,7 @@ export const Create: React.FC = () => {
           <BigNumericInput
             tw="text-right text-lg border-2 border-blue"
             inputMode="numeric"
+            placeholder="0"
             autoComplete="off"
             disabled={false}
             value={boundInput}
