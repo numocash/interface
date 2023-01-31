@@ -1,9 +1,10 @@
-import type { Token } from "@dahlia-labs/token-utils";
 import { useState } from "react";
 import { styled } from "twin.macro";
 
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+
 interface Props {
-  token?: Token | null;
+  token?: WrappedTokenInfo | null;
   size?: number;
   className?: string;
 }
@@ -21,11 +22,11 @@ export const TokenIcon: React.FC<Props> = ({
       className={className}
       size={size}
     >
-      {invalid || !token?.icon ? (
+      {invalid || !token?.logoURI ? (
         <Placeholder />
       ) : (
         <img
-          src={token.icon}
+          src={token.logoURI}
           onError={() => {
             setInvalid(true);
           }}

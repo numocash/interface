@@ -6,7 +6,6 @@ import { useChain } from "../hooks/useChain";
 
 interface Environment {
   base: NumoenBaseConfig;
-  // chain: NumoenChainConfig;
   interface: NumoenInterfaceConfig;
 }
 

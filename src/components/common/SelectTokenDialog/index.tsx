@@ -1,6 +1,6 @@
-import type { Token } from "@dahlia-labs/token-utils";
 import React from "react";
 
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { Modal } from "../Modal";
 import { TokenSearch } from "./TokenSearch";
 
@@ -8,12 +8,11 @@ export enum TokenModalView {
   search,
 }
 interface SelectTokenDialogProps {
-  tokens?: readonly Token[];
+  tokens?: readonly WrappedTokenInfo[];
   isOpen: boolean;
   onDismiss: () => void;
-  onSelect?: (value: Token) => void;
-  onClose?: () => void;
-  selectedToken?: Token;
+  onSelect?: (value: WrappedTokenInfo) => void;
+  selectedToken?: WrappedTokenInfo;
 }
 
 const SelectTokenDialog: React.FC<SelectTokenDialogProps> = ({
@@ -30,7 +29,6 @@ const SelectTokenDialog: React.FC<SelectTokenDialogProps> = ({
         tokens={tokens}
         isOpen={isOpen}
         onSelect={onSelect}
-        onDismiss={onDismiss}
       />
     </Modal>
   );

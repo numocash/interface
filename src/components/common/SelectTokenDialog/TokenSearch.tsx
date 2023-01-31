@@ -1,5 +1,4 @@
-import type { Token } from "@dahlia-labs/token-utils";
-import { TokenAmount } from "@dahlia-labs/token-utils";
+import { CurrencyAmount } from "@uniswap/sdk-core";
 import Fuse from "fuse.js";
 import { zip } from "lodash";
 import React, { useEffect, useMemo, useState } from "react";
@@ -7,23 +6,18 @@ import invariant from "tiny-invariant";
 import { useDebounce } from "use-debounce";
 import { useAccount } from "wagmi";
 
-import { useTokenBalances } from "../../../hooks/useTokenBalance";
+import { useBalances } from "../../../hooks/useBalance";
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { SearchInput } from "./SearchInput";
 import { TokenResults } from "./TokenResults";
 
 interface TokenSearchProps {
   isOpen: boolean;
-  tokens?: readonly Token[];
+  tokens?: readonly WrappedTokenInfo[];
 
-  onDismiss: () => void;
-  onSelect?: (value: Token) => void;
-  onClose?: () => void;
-  selectedToken?: Token;
-
-  //   showCommonBases?: boolean;
-  //   showCurrencyAmount?: boolean;
-  //   disableNonToken?: boolean;
+  onSelect?: (value: WrappedTokenInfo) => void;
+  selectedToken?: WrappedTokenInfo;
 }
 
 export const TokenSearch: React.FC<TokenSearchProps> = ({
@@ -42,14 +36,14 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
   // const debouncedQueryKey = getAddress(searchQueryDebounced);
   // const searchToken = useToken2(debouncedQueryKey);
 
-  const userTokenBalances = useTokenBalances(tokens, address);
+  const userTokenBalances = useBalances(tokens, address);
 
   const tokensWithBalances = useMemo(
     () =>
       !tokens
         ? []
-        : userTokenBalances
-        ? zip(userTokenBalances, tokens)
+        : userTokenBalances.data
+        ? zip(userTokenBalances.data, tokens)
             .map(([tokenBalance, t]) => {
               invariant(t, "token");
 
@@ -59,7 +53,7 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
               }
               return {
                 token: t,
-                balance: new TokenAmount(t, 0),
+                balance: CurrencyAmount.fromRawAmount(t, 0),
                 hasBalance: false,
               };
             })
@@ -81,7 +75,7 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
         : address === null
         ? tokens.map((t) => ({
             token: t,
-            balance: new TokenAmount(t, 0),
+            balance: CurrencyAmount.fromRawAmount(t, 0),
             hasBalance: false,
           }))
         : [],

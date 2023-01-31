@@ -2,7 +2,6 @@ import styled from "@emotion/styled";
 import React, { useState } from "react";
 import tw from "twin.macro";
 
-import { handleException } from "../../utils/error";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 type Variant =
@@ -64,13 +63,7 @@ export const Button: React.FC<ButtonProps> = ({
         onClick
           ? async (e) => {
               setLoading(true);
-              try {
-                await onClick(e);
-              } catch (e) {
-                handleException(e, {
-                  source: "button",
-                });
-              }
+              await onClick(e);
               setLoading(false);
             }
           : undefined

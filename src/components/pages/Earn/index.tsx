@@ -1,50 +1,48 @@
 import type { IMarket, IMarketUserInfo } from "@dahlia-labs/numoen-utils";
-import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../contexts/environment";
-import { useUserLendgines } from "../../../hooks/useLendgine";
 import { Button } from "../../common/Button";
 import { LoadingPage } from "../../common/LoadingPage";
 import { Sort } from "../Trade/Sort";
 import { Explain } from "./Explain";
-import { PositionCard } from "./PositionCard";
 
 export const Earn: React.FC = () => {
-  const { markets } = useEnvironment();
+  // const { markets } = useEnvironment();
   const { address } = useAccount();
 
-  const userMarketInfo = useUserLendgines(address, markets);
+  // const userMarketInfo = useUserLendgines(address, markets);
 
   type display = {
     market: IMarket;
     userInfo: IMarketUserInfo | null;
   };
 
-  const { displayMarkets, hasDeposit } = useMemo(() => {
-    const userMarkets: display[] =
-      userMarketInfo?.map((m) => ({
-        market: m.market,
-        userInfo: m,
-      })) ?? [];
+  // const createdLendgines = useCreatedLendgines();
 
-    const hold = userMarkets.map((m) => m.market);
+  // const { displayMarkets, hasDeposit } = useMemo(() => {
+  //   const userMarkets: display[] =
+  //     userMarketInfo?.map((m) => ({
+  //       market: m.market,
+  //       userInfo: m,
+  //     })) ?? [];
 
-    const nonUserMarkets: display[] = markets
-      .filter((m) => !hold.includes(m))
-      .map((m) => ({ market: m, userInfo: null }));
-    return {
-      displayMarkets: userMarkets.concat(nonUserMarkets),
-      hasDeposit: userMarkets.length > 0,
-    };
-  }, [markets, userMarketInfo]);
+  //   const hold = userMarkets.map((m) => m.market);
+
+  //   const nonUserMarkets: display[] = markets
+  //     .filter((m) => !hold.includes(m))
+  //     .map((m) => ({ market: m, userInfo: null }));
+  //   return {
+  //     displayMarkets: userMarkets.concat(nonUserMarkets),
+  //     hasDeposit: userMarkets.length > 0,
+  //   };
+  // }, [markets, userMarketInfo]);
 
   return (
     <div tw="grid w-full max-w-3xl flex-col gap-4">
       <Explain />
       <p tw="text-xs text-default">
-        Displaying <span tw="font-semibold">{markets.length} markets</span>
+        Displaying <span tw="font-semibold">{2} markets</span>
       </p>
       <div tw="flex w-full justify-between gap-4">
         {/* <Filter /> */}
@@ -56,13 +54,13 @@ export const Earn: React.FC = () => {
         </NavLink>
       </div>
 
-      {/* <Learn /> */}
+      {/* <Learn />
       {hasDeposit && (
         <p tw="text-xs text-black font-semibold mb-[-0.5rem]">Your positions</p>
       )}
-      {userMarketInfo === null && address !== undefined ? (
-        <LoadingPage />
-      ) : (
+      {userMarketInfo === null && address !== undefined ? ( */}
+      <LoadingPage />
+      {/* ) : (
         <div tw="grid md:grid-cols-2 gap-6">
           {displayMarkets.map((d) => (
             <PositionCard
@@ -72,7 +70,7 @@ export const Earn: React.FC = () => {
             />
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 };

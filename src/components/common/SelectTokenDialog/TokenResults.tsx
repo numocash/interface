@@ -1,19 +1,20 @@
-import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
+import type { CurrencyAmount } from "@uniswap/sdk-core";
 import { partition } from "lodash";
 import type { CSSProperties } from "react";
 import React, { useCallback, useMemo, useRef } from "react";
 import { useVirtual } from "react-virtual";
 
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { TokenItem } from "./TokenItem";
 
 interface Props {
   results: readonly {
-    token: Token;
-    balance: TokenAmount;
+    token: WrappedTokenInfo;
+    balance: CurrencyAmount<WrappedTokenInfo>;
     hasBalance: boolean;
   }[];
-  selectedToken?: Token;
-  onSelect?: (token: Token) => void;
+  selectedToken?: WrappedTokenInfo;
+  onSelect?: (token: WrappedTokenInfo) => void;
 }
 
 export const TokenResults: React.FC<Props> = ({
@@ -45,8 +46,8 @@ export const TokenResults: React.FC<Props> = ({
     }: {
       data:
         | {
-            token: Token;
-            balance: TokenAmount;
+            token: WrappedTokenInfo;
+            balance: CurrencyAmount<WrappedTokenInfo>;
             hasBalance: boolean;
           }
         | undefined;

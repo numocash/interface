@@ -1,8 +1,9 @@
-import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
+import type { CurrencyAmount } from "@uniswap/sdk-core";
 import type { CSSProperties } from "react";
 import React from "react";
 import tw, { styled } from "twin.macro";
 
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { TokenInfo } from "../TokenInfo";
 
 const Balance = styled.div(() => [tw`text-base text-secondary`]);
@@ -19,8 +20,8 @@ const Wrapper = styled.div<{ disabled?: boolean }>(({ disabled }) => [
 
 interface Props {
   onClick?: () => void;
-  token: Token;
-  amount: TokenAmount;
+  token: WrappedTokenInfo;
+  amount: CurrencyAmount<WrappedTokenInfo>;
   style?: CSSProperties;
   isSelected?: boolean;
 }

@@ -1,11 +1,11 @@
-import type { Token } from "@dahlia-labs/token-utils";
 import React from "react";
 import tw, { styled } from "twin.macro";
 
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { TokenIcon } from "./TokenIcon";
 
 interface IProps {
-  token: Token;
+  token: WrappedTokenInfo;
   iconSize?: number;
   className?: string;
   small?: boolean;

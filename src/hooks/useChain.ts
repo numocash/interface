@@ -1,14 +1,8 @@
-import { chainID } from "@dahlia-labs/use-ethers";
-import { useMemo } from "react";
 import { useChainId } from "wagmi";
 
-import type { SupportedChains } from "../constants";
+import type { SupportedChainIDs } from "../constants";
 
-export const useChain = (): SupportedChains => {
+export const useChain = (): SupportedChainIDs => {
   const chainNumber = useChainId();
-  return useMemo(() => {
-    if (chainNumber === chainID.arbitrum) return "arbitrum";
-    if (chainNumber === chainID.celo) return "celo";
-    return "arbitrum";
-  }, [chainNumber]);
+  return chainNumber as SupportedChainIDs;
 };

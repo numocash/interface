@@ -1,5 +1,5 @@
-import type { Fraction, Token } from "@dahlia-labs/token-utils";
 import { getAddress } from "@ethersproject/address";
+import type { Fraction, Token } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
 import type {

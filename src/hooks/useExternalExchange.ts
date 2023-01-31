@@ -1,6 +1,6 @@
-import type { Fraction, Token } from "@dahlia-labs/token-utils";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
+import type { Fraction, Token } from "@uniswap/sdk-core";
 import invariant from "tiny-invariant";
 
 import { Times } from "../components/pages/TradeDetails/TimeSelector";
@@ -41,7 +41,6 @@ import {
 } from "../services/graphql/uniswapV3";
 import type { HookArg } from "./useApproval";
 import { useClient } from "./useClient";
-import { sortTokens } from "./useUniswapPair";
 
 const isV3 = (
   t: NonNullable<Parameters<typeof useCurrentPrice>[0]>
@@ -86,7 +85,9 @@ export const useMostLiquidMarket = (
   const client = useClient();
   const sortedTokens =
     tokens[0] && tokens[1]
-      ? sortTokens(tokens as readonly [Token, Token])
+      ? tokens[0].sortsBefore(tokens[1])
+        ? ([tokens[0], tokens[1]] as const)
+        : ([tokens[1], tokens[0]] as const)
       : null;
 
   return useQuery<UniswapV2Pool | UniswapV3Pool | null>(

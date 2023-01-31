@@ -1,20 +1,28 @@
-import type { Token } from "@dahlia-labs/token-utils";
-import { TokenAmount } from "@dahlia-labs/token-utils";
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
+import { parseUnits } from "@ethersproject/units";
+import { Fraction } from "@uniswap/sdk-core";
+import JSBI from "jsbi";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
-import { useSigner } from "wagmi";
+import type { usePrepareContractWrite } from "wagmi";
+import { useAccount, useSigner } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment2";
-import { useFactory, useFactoryGetLendgine } from "../../../generated";
+import {
+  useFactory,
+  useFactoryCreateLendgine,
+  useFactoryGetLendgine,
+  usePrepareFactoryCreateLendgine,
+} from "../../../generated";
+import { useBalance } from "../../../hooks/useBalance";
 import {
   useCurrentPrice,
   useMostLiquidMarket,
 } from "../../../hooks/useExternalExchange";
-import { useDefaultTokenList, useMarketToken } from "../../../hooks/useTokens2";
-import { sortTokens } from "../../../hooks/useUniswapPair";
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import { useDefaultTokenList } from "../../../hooks/useTokens2";
 import { useBeet } from "../../../utils/beet";
 import { AsyncButton } from "../../common/AsyncButton";
 import { BigNumericInput } from "../../common/inputs/BigNumericInput";
@@ -23,26 +31,27 @@ import { TokenSelection } from "../../common/TokenSelection";
 
 export const Create: React.FC = () => {
   const Beet = useBeet();
-  const [specToken, setSpecToken] = useState<Token | undefined>(undefined);
-  const [baseToken, setBaseToken] = useState<Token | undefined>(undefined);
+  const [specToken, setSpecToken] = useState<WrappedTokenInfo | undefined>(
+    undefined
+  );
+  const [baseToken, setBaseToken] = useState<WrappedTokenInfo | undefined>(
+    undefined
+  );
   const [boundInput, setBoundInput] = useState("");
   const tokens = useDefaultTokenList();
   const environment = useEnvironment();
-  const marketToken = useMarketToken(specToken, "+");
   const signer = useSigner();
   const factoryContract = useFactory({
     address: environment.base.factory,
     signerOrProvider: signer.data,
   });
+  const { address } = useAccount();
 
   // price is in terms of base / speculative
   const invertPriceQuery =
-    specToken && baseToken
-      ? sortTokens([specToken, baseToken])[0].equals(specToken)
-      : null;
+    specToken && baseToken ? specToken.sortsBefore(baseToken) : null;
 
   const mostLiquidQuery = useMostLiquidMarket([specToken, baseToken] as const);
-
   const currentPriceQuery = useCurrentPrice(mostLiquidQuery.data);
 
   const currentPrice = useMemo(() => {
@@ -64,32 +73,61 @@ export const Create: React.FC = () => {
     [specToken, tokens.data]
   );
 
-  const bound = useMemo(
-    () => (marketToken ? TokenAmount.parse(marketToken, boundInput) : null),
-    [boundInput, marketToken]
-  );
+  const bound = useMemo(() => {
+    try {
+      const parsed = parseUnits(boundInput);
+      return new Fraction(JSBI.BigInt(parsed));
+    } catch (err) {
+      console.error(err);
+    }
+    return undefined;
+  }, [boundInput]);
 
   const lendgine = useFactoryGetLendgine({
+    args:
+      baseToken && specToken && bound
+        ? ([
+            getAddress(baseToken.address),
+            getAddress(specToken.address),
+            BigNumber.from(baseToken.decimals),
+            BigNumber.from(specToken.decimals),
+            BigNumber.from(bound.quotient.toString()),
+          ] as const)
+        : undefined,
+    address: environment.base.factory,
+    enabled: !!baseToken && !!specToken && !!bound,
+    watch: true,
+    staleTime: Infinity,
+  });
+
+  const prepare = usePrepareFactoryCreateLendgine({
     args:
       baseToken && specToken && bound
         ? [
             getAddress(baseToken.address),
             getAddress(specToken.address),
-            BigNumber.from(baseToken.decimals),
-            BigNumber.from(specToken.decimals),
-            BigNumber.from(bound.raw.toString()),
+            baseToken.decimals,
+            specToken.decimals,
+            BigNumber.from(bound.quotient.toString()),
           ]
         : undefined,
     address: environment.base.factory,
-    watch: true,
-    staleTime: Infinity,
+    enabled: !!baseToken && !!specToken && !!bound,
   });
+  const write = useFactoryCreateLendgine(prepare.data);
+
+  const balanceQuery = useBalance(environment.interface.stablecoin, address);
+  console.log(balanceQuery.data?.toExact());
 
   const disableReason = useMemo(
     () =>
       !specToken || !baseToken
         ? "Select a token"
-        : !tokens || !currentPrice || !factoryContract || !lendgine.data
+        : !tokens ||
+          !currentPrice ||
+          !factoryContract ||
+          !lendgine.data ||
+          !prepare.config
         ? "Loading"
         : lendgine.data !== AddressZero
         ? " Market already exists"
@@ -97,7 +135,9 @@ export const Create: React.FC = () => {
           !baseToken.equals(environment.interface.stablecoin) &&
           !specToken.equals(environment.interface.wrappedNative) &&
           !specToken.equals(environment.interface.stablecoin)
-        ? `One token must be ${environment.interface.wrappedNative.symbol} or ${environment.interface.stablecoin.symbol}`
+        ? `One token must be ${
+            environment.interface.wrappedNative.symbol ?? ""
+          } or ${environment.interface.stablecoin.symbol ?? ""}`
         : boundInput === ""
         ? "Enter an amount"
         : !bound || bound.equalTo(0)
@@ -112,6 +152,7 @@ export const Create: React.FC = () => {
       environment.interface.wrappedNative,
       factoryContract,
       lendgine.data,
+      prepare.config,
       specToken,
       tokens,
     ]
@@ -172,21 +213,22 @@ export const Create: React.FC = () => {
         disabled={!!disableReason}
         onClick={async () => {
           invariant(specToken && baseToken && bound && factoryContract);
-          await Beet("Deploy new market", [
+          await Beet([
             {
-              stageTitle: "Deploy new market",
+              stageTitle: `New ${specToken.symbol ?? ""} + ${
+                baseToken.symbol ?? ""
+              } market`,
               parallelTransactions: [
                 {
-                  title: "Deploy new market",
-                  description: `Deploy a ${specToken.symbol} + ${baseToken.symbol} market`,
-                  txEnvelope: () =>
-                    factoryContract.createLendgine(
-                      getAddress(baseToken.address),
-                      getAddress(specToken.address),
-                      baseToken.decimals,
-                      specToken.decimals,
-                      BigNumber.from(bound.raw.toString())
-                    ),
+                  title: `New ${specToken.symbol ?? ""} + ${
+                    baseToken.symbol ?? ""
+                  } market`,
+                  tx: {
+                    prepare: prepare as ReturnType<
+                      typeof usePrepareContractWrite
+                    >,
+                    send: write,
+                  },
                 },
               ],
             },

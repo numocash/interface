@@ -1,16 +1,16 @@
-import type { Token } from "@dahlia-labs/token-utils";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { AssetSelectButton } from "./AssetSelection";
 import SelectTokenDialog from "./SelectTokenDialog";
 import { TokenIcon } from "./TokenIcon";
 
 interface Props {
-  selectedToken?: Token;
-  onSelect: (val: Token) => void;
-  tokens?: readonly Token[];
+  selectedToken?: WrappedTokenInfo;
+  onSelect: (val: WrappedTokenInfo) => void;
+  tokens?: readonly WrappedTokenInfo[];
 }
 
 export const TokenSelection: React.FC<Props> = ({
