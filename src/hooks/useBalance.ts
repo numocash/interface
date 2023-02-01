@@ -2,14 +2,21 @@ import { getAddress } from "@ethersproject/address";
 import type { BigNumber } from "@ethersproject/bignumber";
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
+import type {
+  Abi,
+  AbiFunction,
+  AbiParametersToPrimitiveTypes,
+  AbiStateMutability,
+  Address,
+  ExtractAbiFunction,
+  ExtractAbiFunctionNames,
+  Narrow,
+} from "abitype";
 import invariant from "tiny-invariant";
-import type { Address } from "wagmi";
 import { erc20ABI, useContractReads } from "wagmi";
 
 import { useEnvironment } from "../contexts/environment2";
 import { useErc20BalanceOf } from "../generated";
-import type { Tuple } from "../utils/readonlyTuple";
-import { tupleMapInner } from "../utils/readonlyTuple";
 import type { HookArg } from "./useApproval";
 
 // how can the return type be determined
@@ -49,11 +56,70 @@ export const useBalance = <T extends Token>(
   return updatedQuery;
 };
 
+export type Contract<
+  TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
+  TFunctionName extends string = string
+> = { abi: TAbi; functionName: TFunctionName };
+
+export type GetConfig<
+  TAbi extends Abi | readonly unknown[] = Abi,
+  TFunctionName extends string = string,
+  TAbiStateMutability extends AbiStateMutability = AbiStateMutability
+> = {
+  /** Contract ABI */
+  abi: Narrow<TAbi>; // infer `TAbi` type for inline usage
+  /** Contract address */
+  address: Address;
+  /** Function to invoke on the contract */
+  functionName: GetFunctionName<TAbi, TFunctionName, TAbiStateMutability>;
+} & GetArgs<TAbi, TFunctionName>;
+
+export type GetFunctionName<
+  TAbi extends Abi | readonly unknown[] = Abi,
+  TFunctionName extends string = string,
+  TAbiStateMutability extends AbiStateMutability = AbiStateMutability
+> = TAbi extends Abi
+  ? ExtractAbiFunctionNames<
+      TAbi,
+      TAbiStateMutability
+    > extends infer AbiFunctionNames
+    ?
+        | AbiFunctionNames
+        | (TFunctionName extends AbiFunctionNames ? TFunctionName : never)
+        | (Abi extends TAbi ? string : never)
+    : never
+  : TFunctionName;
+
+export type GetArgs<
+  TAbi extends Abi | readonly unknown[],
+  TFunctionName extends string,
+  TAbiFunction extends AbiFunction & { type: "function" } = TAbi extends Abi
+    ? ExtractAbiFunction<TAbi, TFunctionName>
+    : AbiFunction & { type: "function" },
+  TArgs = AbiParametersToPrimitiveTypes<TAbiFunction["inputs"]>,
+  FailedToParseArgs =
+    | ([TArgs] extends [never] ? true : false)
+    | (readonly unknown[] extends TArgs ? true : false)
+> = true extends FailedToParseArgs
+  ? {
+      /**
+       * Arguments to pass contract method
+       *
+       * Use a [const assertion](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions) on {@link abi} for type inference.
+       */
+      args?: readonly unknown[];
+    }
+  : TArgs extends readonly []
+  ? { args?: never }
+  : {
+      /** Arguments to pass contract method */ args: TArgs;
+    };
+
 // accept a tuple of tokens
 // must get contractRead to be strictly typed
 // return a tuple of currency amounts
-export const useBalances = <T extends Token, Length extends number>(
-  tokens: HookArg<Tuple<T, Length>>,
+export const useBalances = <T extends readonly Token[]>(
+  tokens: HookArg<T>,
   address: HookArg<Address>
 ) => {
   // const contracts =
@@ -67,6 +133,24 @@ export const useBalances = <T extends Token, Length extends number>(
   //     : undefined;
 
   const environment = useEnvironment();
+
+  const ts = [
+    environment.interface.stablecoin,
+    environment.interface.wrappedNative,
+  ] as const;
+
+  const contracts = address
+    ? ts.map(
+        (t) =>
+          ({
+            address: getAddress(t.address),
+            abi: erc20ABI,
+            functionName: "balanceOf",
+            args: [address],
+          } as const)
+      )
+    : undefined;
+
   // const contracts = address
   //   ? ([
   //       {
@@ -75,21 +159,14 @@ export const useBalances = <T extends Token, Length extends number>(
   //         functionName: "balanceOf",
   //         args: [address],
   //       },
+  //       {
+  //         address: getAddress(environment.interface.wrappedNative.address),
+  //         abi: erc20ABI,
+  //         functionName: "balanceOf",
+  //         args: [address],
+  //       },
   //     ] as const)
   //   : undefined;
-
-  const contracts =
-    address && tokens
-      ? tupleMapInner(
-          (t: T) => ({
-            address: getAddress(t.address),
-            abi: erc20ABI,
-            functionName: "balanceOf",
-            args: [address] as const,
-          }),
-          tokens
-        )
-      : undefined;
 
   const contractRead = useContractReads({
     //  ^?
