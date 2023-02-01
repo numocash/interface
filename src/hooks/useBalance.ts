@@ -6,7 +6,10 @@ import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 import { erc20ABI, useContractReads } from "wagmi";
 
+import { useEnvironment } from "../contexts/environment2";
 import { useErc20BalanceOf } from "../generated";
+import type { Tuple } from "../utils/readonlyTuple";
+import { tupleMapInner } from "../utils/readonlyTuple";
 import type { HookArg } from "./useApproval";
 
 // how can the return type be determined
@@ -46,21 +49,50 @@ export const useBalance = <T extends Token>(
   return updatedQuery;
 };
 
-export const useBalances = <T extends Token>(
-  tokens: HookArg<readonly T[]>,
+// accept a tuple of tokens
+// must get contractRead to be strictly typed
+// return a tuple of currency amounts
+export const useBalances = <T extends Token, Length extends number>(
+  tokens: HookArg<Tuple<T, Length>>,
   address: HookArg<Address>
 ) => {
+  // const contracts =
+  //   !!tokens && !!address
+  //     ? tokens.map((t) => ({
+  //         address: getAddress(t.address),
+  //         abi: erc20ABI,
+  //         functionName: "balanceOf",
+  //         args: [address],
+  //       }))
+  //     : undefined;
+
+  const environment = useEnvironment();
+  // const contracts = address
+  //   ? ([
+  //       {
+  //         address: getAddress(environment.interface.stablecoin.address),
+  //         abi: erc20ABI,
+  //         functionName: "balanceOf",
+  //         args: [address],
+  //       },
+  //     ] as const)
+  //   : undefined;
+
   const contracts =
-    !!tokens && !!address
-      ? tokens.map((t) => ({
-          address: getAddress(t.address),
-          abi: erc20ABI,
-          functionName: "balanceOf",
-          args: [address],
-        }))
+    address && tokens
+      ? tupleMapInner(
+          (t: T) => ({
+            address: getAddress(t.address),
+            abi: erc20ABI,
+            functionName: "balanceOf",
+            args: [address] as const,
+          }),
+          tokens
+        )
       : undefined;
 
   const contractRead = useContractReads({
+    //  ^?
     contracts,
     allowFailure: true,
     watch: true,
