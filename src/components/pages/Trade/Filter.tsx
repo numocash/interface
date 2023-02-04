@@ -3,11 +3,8 @@ import { FiCheck } from "react-icons/fi";
 import { IoIosArrowDown } from "react-icons/io";
 import tw, { styled } from "twin.macro";
 
-import {
-  dedupeTokens,
-  useBaseTokens,
-  useSpeculativeTokens,
-} from "../../../hooks/useTokens";
+import { useToken0s, useToken1s } from "../../../hooks/useTokens";
+import { dedupeTokens } from "../../../hooks/useTokens2";
 import { Drop } from "../../common/Drop";
 import { Module } from "../../common/Module";
 import { TokenIcon } from "../../common/TokenIcon";
@@ -18,12 +15,12 @@ export const Filter: React.FC = () => {
   const [show, setShow] = useState(false);
   const { assets, setAssets } = useTrade();
 
-  const baseTokens = useBaseTokens();
-  const speculativeTokens = useSpeculativeTokens();
+  const token0s = useToken0s();
+  const token1s = useToken1s();
 
   const allTokensDedupe = useMemo(
-    () => dedupeTokens(baseTokens.concat(speculativeTokens)),
-    [baseTokens, speculativeTokens]
+    () => dedupeTokens(token0s.concat(token1s)),
+    [token0s, token1s]
   );
 
   // TODO: close drop on click

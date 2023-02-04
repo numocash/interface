@@ -1,36 +1,35 @@
-import type { IMarket } from "@dahlia-labs/numoen-utils";
-import type { Token } from "@dahlia-labs/token-utils";
 import { useMemo, useState } from "react";
 import { createContainer } from "unstated-next";
 
-import { useEnvironment } from "../../../contexts/environment";
+import type { Lendgine } from "../../../constants";
+import { useEnvironment } from "../../../contexts/environment2";
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { Display } from "./Display";
 import { Explain } from "./Explain";
 import { Filter } from "./Filter";
 import { Markets } from "./Markets";
 
 interface ITrade {
-  assets: readonly Token[];
-  setAssets: (val: readonly Token[]) => void;
-  markets: readonly IMarket[];
+  assets: readonly WrappedTokenInfo[];
+  setAssets: (val: readonly WrappedTokenInfo[]) => void;
+  lendgines: readonly Lendgine[];
 }
 
 const useTradeInternal = (): ITrade => {
-  const [assets, setAssets] = useState<readonly Token[]>([]);
+  const [assets, setAssets] = useState<readonly WrappedTokenInfo[]>([]);
 
-  const { markets } = useEnvironment();
+  const environment = useEnvironment();
+  const lendgines = environment.lendgines;
 
   const filteredMarkets = useMemo(() => {
-    if (assets.length === 0) return markets;
+    if (assets.length === 0) return lendgines;
 
-    return markets.filter(
-      (m) =>
-        assets.includes(m.pair.baseToken) ||
-        assets.includes(m.pair.speculativeToken)
+    return lendgines.filter(
+      (l) => assets.includes(l.token0) || assets.includes(l.token1)
     );
-  }, [assets, markets]);
+  }, [assets, lendgines]);
 
-  return { assets, setAssets, markets: filteredMarkets };
+  return { assets, setAssets, lendgines: filteredMarkets };
 };
 
 export const { Provider: TradeProvider, useContainer: useTrade } =

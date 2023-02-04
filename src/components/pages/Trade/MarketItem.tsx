@@ -1,5 +1,4 @@
-import type { Token } from "@dahlia-labs/token-utils";
-import { Percent } from "@dahlia-labs/token-utils";
+import { Percent } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -9,23 +8,19 @@ import {
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../hooks/useExternalExchange";
-import { sortTokens } from "../../../hooks/useUniswapPair";
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { TokenIcon } from "../../common/TokenIcon";
 import { Times } from "../TradeDetails/TimeSelector";
 import { MiniChart } from "./MiniChart";
 
 interface Props {
-  tokens: { denom: Token; other: Token };
+  tokens: readonly [WrappedTokenInfo, WrappedTokenInfo];
 }
 
 export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
-  const referenceMarketQuery = useMostLiquidMarket([
-    tokens.denom,
-    tokens.other,
-  ]);
+  const referenceMarketQuery = useMostLiquidMarket(tokens);
 
-  const invertPriceQuery =
-    sortTokens([tokens.denom, tokens.other])[0] === tokens.other;
+  const invertPriceQuery = tokens[1].sortsBefore(tokens[0]);
 
   const priceHistoryQuery = usePriceHistory(
     referenceMarketQuery.data,
@@ -57,11 +52,9 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
-    console.log(oneDayOldPrice.asNumber, currentPrice.asNumber);
+    const f = currentPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice);
 
-    return Percent.fromFraction(
-      currentPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice)
-    );
+    return new Percent(f.numerator, f.denominator);
   }, [currentPrice, priceHistory]);
 
   // return null;
@@ -72,17 +65,17 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
   ) : (
     <NavLink
       tw=""
-      to={`/trade/details/${tokens.denom.address}/${tokens.other.address}`}
+      to={`/trade/details/${tokens[0].address}/${tokens[1].address}`}
     >
       <div tw="w-full rounded-xl hover:bg-gray-200 transform ease-in-out duration-1000 grid grid-cols-5 px-6 h-14 items-center justify-between">
         <div tw="flex items-center gap-3 col-span-2">
           <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
-            <TokenIcon token={tokens.other} size={32} />
-            <TokenIcon token={tokens.denom} size={32} />
+            <TokenIcon token={tokens[1]} size={32} />
+            <TokenIcon token={tokens[0]} size={32} />
           </div>
           <div tw="grid gap-0.5">
             <span tw="font-semibold text-lg text-default leading-tight">
-              {tokens.other.symbol} / {tokens.denom.symbol}
+              {tokens[1].symbol} / {tokens[0].symbol}
             </span>
           </div>
         </div>

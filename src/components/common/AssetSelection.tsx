@@ -1,16 +1,13 @@
-import type { Token } from "@dahlia-labs/token-utils";
-import { TokenAmount } from "@dahlia-labs/token-utils";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import React, { useState } from "react";
 import tw, { css, styled } from "twin.macro";
 
 import { useAddressToMarket } from "../../contexts/environment";
-import { useDisplayToken } from "../../hooks/useTokens";
 import useWindowDimensions from "../../utils/useWindowDimensions";
-import SelectTokenDialog from "./SelectTokenDialog";
 import { BigNumericInput } from "./inputs/BigNumericInput";
-import { PowerIcon } from "./PowerIcon";
+import SelectTokenDialog from "./SelectTokenDialog";
 import { TokenAmountDisplay } from "./TokenAmountDisplay";
 import { TokenIcon } from "./TokenIcon";
 
@@ -43,10 +40,10 @@ const Section = styled.div(tw`flex items-center justify-between`);
 
 const DEFAULT_TOKEN_DECIMALS = 3;
 
-interface Props {
-  tokens?: readonly Token[];
-  onSelect?: (token: Token) => void;
-  selectedValue: Token | null;
+type Props<T extends Token> = {
+  tokens?: readonly T[];
+  onSelect?: (token: T) => void;
+  selectedValue: T | null;
   inputOnChange?: (val: string) => void;
   inputValue?: string;
   hideInput?: boolean;
@@ -54,13 +51,13 @@ interface Props {
   className?: string;
   label?: string | React.ReactNode;
   currentAmount?: {
-    amount?: TokenAmount;
+    amount?: CurrencyAmount<T>;
     allowSelect?: boolean;
     label?: string;
   };
-}
+};
 
-export const AssetSelection: React.FC<Props> = ({
+export const AssetSelection = <T extends Token>({
   onSelect,
   selectedValue,
   inputValue,
@@ -71,13 +68,13 @@ export const AssetSelection: React.FC<Props> = ({
   label,
   currentAmount,
   tokens,
-}: Props) => {
+}: Props<T>) => {
   const { width } = useWindowDimensions();
 
   const uiDecimals =
     width < 600 ? 4 : selectedValue?.decimals ?? DEFAULT_TOKEN_DECIMALS;
 
-  const token = useDisplayToken(selectedValue);
+  const token = selectedValue;
 
   const market = useAddressToMarket(token?.address ?? null);
 

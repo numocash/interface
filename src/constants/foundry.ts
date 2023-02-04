@@ -1,6 +1,7 @@
 import { getAddress } from "@ethersproject/address";
 import { Price, Token } from "@uniswap/sdk-core";
 
+import { WrappedTokenInfo } from "../hooks/useTokens2";
 import type { Lendgine } from ".";
 import { Stable, WrappedNative } from "./tokens";
 
@@ -11,8 +12,8 @@ export const wethLendgine = {
   bound: new Price(
     Stable[1],
     WrappedNative[1],
-    "22_045_404_859_097",
-    "13_909_675_486_950_929_136_232"
+    "22045404859097",
+    "13909675486950929136232"
   ),
   token0Exp: Stable[1].decimals,
   token1Exp: WrappedNative[1].decimals,
@@ -20,13 +21,13 @@ export const wethLendgine = {
   address: "0x984EC0723D3EB2CA58bD17401eCc00f0468bFbFa",
 } as const satisfies Lendgine;
 
-const Illuvium = new Token(
-  1,
-  "0x767FE9EDC9E0dF98E07454847909b5E959D7ca0E",
-  18,
-  "ILV",
-  "Illuvium"
-);
+const Illuvium = new WrappedTokenInfo({
+  chainId: 1,
+  address: "0x767FE9EDC9E0dF98E07454847909b5E959D7ca0E",
+  decimals: 18,
+  symbol: "ILV",
+  name: "Illuvium",
+});
 
 export const illuviumLendgine = {
   token0: WrappedNative[1],
@@ -35,8 +36,8 @@ export const illuviumLendgine = {
   bound: new Price(
     WrappedNative[1],
     Illuvium,
-    "18_803_309_900_546_737_348_402",
-    "450_163_348_659_183_003_126_396"
+    "18803309900546737348402",
+    "450163348659183003126396"
   ),
 
   token0Exp: WrappedNative[1].decimals,

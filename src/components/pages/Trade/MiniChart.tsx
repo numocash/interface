@@ -33,7 +33,7 @@ export const MiniChart: React.FC<Props> = ({
   );
 
   const getY = useMemo(
-    () => (p: Props["priceHistory"][number]) => p.price.asNumber,
+    () => (p: Props["priceHistory"][number]) => parseFloat(p.price.toFixed(10)),
     []
   );
 

@@ -2,6 +2,7 @@ import type { Price, Token } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
 import type { chains, foundry } from "../AppWithProviders";
+import type { WrappedTokenInfo } from "../hooks/useTokens2";
 import { foundryConfig } from "./foundry";
 
 export type SupportedChainIDs = (typeof chains)[number]["id"];
@@ -17,17 +18,17 @@ export type NumoenBaseConfig = {
 export type NumoenInterfaceConfig = {
   uniswapV2subgraph: string;
   uniswapV3subgraph: string;
-  wrappedNative: Token;
-  stablecoin: Token;
+  wrappedNative: WrappedTokenInfo;
+  stablecoin: WrappedTokenInfo;
   defaultActiveLists: readonly string[];
   defaultInactiveLists: readonly string[];
 };
 
 export type Lendgine = {
-  token0: Token;
-  token1: Token;
+  token0: WrappedTokenInfo;
+  token1: WrappedTokenInfo;
   lendgine: Token;
-  bound: Price<Token, Token>;
+  bound: Price<WrappedTokenInfo, WrappedTokenInfo>;
 
   token0Exp: number;
   token1Exp: number;
