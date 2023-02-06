@@ -4,7 +4,7 @@
 
 ```bash
 pnpm install
-pnpm typechain
 pnpm graphql-codegen
+pnpm wagmi generate
 pnpm start
 ```

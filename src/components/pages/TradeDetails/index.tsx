@@ -1,4 +1,3 @@
-import type { Token } from "@dahlia-labs/token-utils";
 import { getAddress } from "@ethersproject/address";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -9,13 +8,14 @@ import {
   useAddressToToken,
   useSortDenomTokens,
 } from "../../../hooks/useTokens";
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { MainView } from "./MainView";
 import { Times } from "./TimeSelector";
 import { TradeColumn } from "./TradeColumn";
 
 interface ITradeDetails {
-  denom: Token;
-  other: Token;
+  denom: WrappedTokenInfo;
+  other: WrappedTokenInfo;
 
   timeframe: Times;
   setTimeframe: (val: Times) => void;
@@ -44,7 +44,7 @@ const useTradeDetailsInternal = (): ITradeDetails => {
   if (!tokenA || !tokenB) navigate("/trade/");
   invariant(tokenA && tokenB);
 
-  const { denom, other: quote } = useSortDenomTokens([tokenA, tokenB] as const);
+  const [denom, quote] = useSortDenomTokens([tokenA, tokenB] as const);
 
   // TODO: handle nonAddresses
   // TODO: verify correct ordering

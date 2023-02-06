@@ -1,5 +1,5 @@
-import type { Fraction, Percent } from "@dahlia-labs/token-utils";
 import { ZERO } from "@dahlia-labs/token-utils";
+import type { Fraction, Percent } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
 export const FORMAT_PERCENT: Intl.NumberFormatOptions = {

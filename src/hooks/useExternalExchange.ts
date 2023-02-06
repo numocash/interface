@@ -39,7 +39,7 @@ import {
   parsePriceHistoryHourV3,
   parsePriceV3,
 } from "../services/graphql/uniswapV3";
-import type { HookArg } from "./useApproval";
+import type { HookArg } from "./useBalance";
 import { useClient } from "./useClient";
 
 const isV3 = (

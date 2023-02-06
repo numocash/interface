@@ -54,9 +54,9 @@ export const foundryConfig = {
   },
   interface: {
     uniswapV2subgraph:
-      "https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap",
+      "https://api.thegraph.com/subgraphs/name/sushiswap/exchange",
     uniswapV3subgraph:
-      "https://api.thegraph.com/subgraphs/name/jesse-sawa/uniswap-celo",
+      "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
     wrappedNative: WrappedNative[1],
     stablecoin: Stable[1],
     defaultActiveLists: [
@@ -67,3 +67,8 @@ export const foundryConfig = {
   },
   lendgines: [wethLendgine, illuviumLendgine] as const,
 } as const;
+
+// uniswapV2subgraph:
+// "https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap",
+// uniswapV3subgraph:
+// "https://api.thegraph.com/subgraphs/name/jesse-sawa/uniswap-celo",

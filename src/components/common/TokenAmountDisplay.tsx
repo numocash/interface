@@ -1,16 +1,13 @@
-import type {
-  IFormatUint,
-  Percent,
-  TokenAmount,
-} from "@dahlia-labs/token-utils";
+import type { CurrencyAmount, Percent } from "@uniswap/sdk-core";
 import React from "react";
 import { css, styled } from "twin.macro";
 
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { formatDisplayWithSoftLimit, formatPercent } from "../../utils/format";
 import { TokenIcon } from "./TokenIcon";
 
-export interface IProps extends IFormatUint {
-  amount: TokenAmount;
+export interface IProps {
+  amount: CurrencyAmount<WrappedTokenInfo>;
   isMonoNumber?: boolean;
   showIcon?: boolean;
   percent?: Percent;
@@ -34,7 +31,7 @@ export const TokenAmountDisplay: React.FC<IProps> = ({
           css={css`
             margin-right: 4px;
           `}
-          token={amount.token}
+          token={amount.currency}
         />
       )}
 
@@ -43,7 +40,7 @@ export const TokenAmountDisplay: React.FC<IProps> = ({
       {showSymbol && (
         <span>
           {"\u00A0"}
-          {amount.token.symbol}
+          {amount.currency.symbol}
         </span>
       )}
       {percent && <PercentFmt>({formatPercent(percent)})</PercentFmt>}

@@ -6,7 +6,8 @@ import invariant from "tiny-invariant";
 import { erc20ABI, useContractReads } from "wagmi";
 
 import { useErc20BalanceOf } from "../generated";
-import type { HookArg } from "./useApproval";
+
+export type HookArg<T> = T | null | undefined;
 
 // how can the return type be determined
 export const useBalance = <T extends Token>(

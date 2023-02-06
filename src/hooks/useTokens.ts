@@ -2,11 +2,11 @@ import { getAddress } from "@ethersproject/address";
 import type { Token } from "@uniswap/sdk-core";
 
 import { useEnvironment } from "../contexts/environment2";
-import type { HookArg } from "./useApproval";
+import type { HookArg } from "./useBalance";
 import type { WrappedTokenInfo } from "./useTokens2";
 import { dedupeTokens } from "./useTokens2";
 
-export const useAddressToToken = (address: HookArg<string>): Token | null => {
+export const useAddressToToken = (address: HookArg<string>) => {
   const tokens = useAllTokens();
   if (!address) return null;
   return (
@@ -28,8 +28,23 @@ export const useToken1s = (): readonly WrappedTokenInfo[] => {
 
 export const useAllTokens = (): readonly WrappedTokenInfo[] => {
   const token0s = useToken0s();
-  const token1s = useToken0s();
+  const token1s = useToken1s();
   return dedupeTokens(token0s.concat(token1s));
 };
 
-// https://api.thegraph.com/subgraphs/name/sushiswap/exchange-arbitrum-backup/graphql?query=query+MyQuery+%7B%0A++pair%28id%3A+%220x905dfcd5649217c42684f23958568e533c711aa3%22%29+%7B%0A++++id%0A++++token1Price%0A++++reserve1%0A++%7D%0A%7D
+export const useSortDenomTokens = (
+  tokens: readonly [WrappedTokenInfo, WrappedTokenInfo]
+) => {
+  const environment = useEnvironment();
+  if (
+    tokens[0].equals(environment.interface.stablecoin) ||
+    tokens[1].equals(environment.interface.stablecoin)
+  ) {
+    return tokens[0].equals(environment.interface.stablecoin)
+      ? tokens
+      : ([tokens[1], tokens[0]] as const);
+  }
+  return tokens[0].equals(environment.interface.wrappedNative)
+    ? tokens
+    : ([tokens[1], tokens[0]] as const);
+};

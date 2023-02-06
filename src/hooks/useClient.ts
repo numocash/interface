@@ -3,10 +3,6 @@ import { useMemo } from "react";
 
 import { useEnvironment } from "../contexts/environment2";
 
-const arbitrumClient = new GraphQLClient(
-  "https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-dev"
-);
-
 export const useClient = () => {
   const environment = useEnvironment();
   return useMemo(

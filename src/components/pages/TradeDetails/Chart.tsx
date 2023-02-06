@@ -1,4 +1,4 @@
-import { Percent } from "@dahlia-labs/token-utils";
+import { Percent } from "@uniswap/sdk-core";
 import { curveNatural } from "@visx/curve";
 import { localPoint } from "@visx/event";
 import type { EventType } from "@visx/event/lib/types";
@@ -15,7 +15,6 @@ import {
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../hooks/useExternalExchange";
-import { sortTokens } from "../../../hooks/useUniswapPair";
 import type { PricePoint } from "../../../services/graphql/uniswapV2";
 import useWindowDimensions from "../../../utils/useWindowDimensions";
 import { useTradeDetails } from ".";
@@ -26,7 +25,7 @@ export const Chart: React.FC = () => {
   const referenceMarketQuery = useMostLiquidMarket([denom, other]);
 
   // TODO: bug with inverting
-  const invertPriceQuery = sortTokens([denom, other])[0] === other;
+  const invertPriceQuery = other.sortsBefore(denom);
 
   const priceHistoryQuery = usePriceHistory(
     referenceMarketQuery.data,
@@ -62,9 +61,9 @@ export const Chart: React.FC = () => {
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
-    return Percent.fromFraction(
-      secondPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice)
-    );
+    const f = secondPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice);
+
+    return new Percent(f.numerator, f.denominator);
   }, [currentPrice, displayPrice?.price, priceHistory]);
 
   const getX = useMemo(
@@ -77,7 +76,7 @@ export const Chart: React.FC = () => {
   const getY = useMemo(
     () =>
       (p: NonNullable<ReturnType<typeof usePriceHistory>["data"]>[number]) =>
-        p.price.asNumber,
+        parseFloat(p.price.toFixed(10)),
     []
   );
 

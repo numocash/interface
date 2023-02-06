@@ -1,11 +1,10 @@
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
+import { CurrencyAmount } from "@uniswap/sdk-core";
 import React, { useState } from "react";
 import tw, { css, styled } from "twin.macro";
 
-import { useAddressToMarket } from "../../contexts/environment";
-import useWindowDimensions from "../../utils/useWindowDimensions";
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { BigNumericInput } from "./inputs/BigNumericInput";
 import SelectTokenDialog from "./SelectTokenDialog";
 import { TokenAmountDisplay } from "./TokenAmountDisplay";
@@ -38,12 +37,12 @@ const Balance = styled.div(tw`flex items-center`);
 
 const Section = styled.div(tw`flex items-center justify-between`);
 
-const DEFAULT_TOKEN_DECIMALS = 3;
+// const DEFAULT_TOKEN_DECIMALS = 3;
 
-type Props<T extends Token> = {
-  tokens?: readonly T[];
-  onSelect?: (token: T) => void;
-  selectedValue: T | null;
+type Props = {
+  tokens?: readonly WrappedTokenInfo[];
+  onSelect?: (token: WrappedTokenInfo) => void;
+  selectedValue: WrappedTokenInfo | null;
   inputOnChange?: (val: string) => void;
   inputValue?: string;
   hideInput?: boolean;
@@ -51,13 +50,13 @@ type Props<T extends Token> = {
   className?: string;
   label?: string | React.ReactNode;
   currentAmount?: {
-    amount?: CurrencyAmount<T>;
+    amount?: CurrencyAmount<WrappedTokenInfo>;
     allowSelect?: boolean;
     label?: string;
   };
 };
 
-export const AssetSelection = <T extends Token>({
+export const AssetSelection = ({
   onSelect,
   selectedValue,
   inputValue,
@@ -68,15 +67,13 @@ export const AssetSelection = <T extends Token>({
   label,
   currentAmount,
   tokens,
-}: Props<T>) => {
-  const { width } = useWindowDimensions();
+}: Props) => {
+  // const { width } = useWindowDimensions();
 
-  const uiDecimals =
-    width < 600 ? 4 : selectedValue?.decimals ?? DEFAULT_TOKEN_DECIMALS;
+  // const uiDecimals =
+  //   width < 600 ? 4 : selectedValue?.decimals ?? DEFAULT_TOKEN_DECIMALS;
 
   const token = selectedValue;
-
-  const market = useAddressToMarket(token?.address ?? null);
 
   const [show, setShow] = useState(false);
 
@@ -110,13 +107,13 @@ export const AssetSelection = <T extends Token>({
                       tw="text-default "
                       amount={
                         currentAmount.amount ??
-                        new TokenAmount(selectedValue, 0)
+                        CurrencyAmount.fromRawAmount(selectedValue, 0)
                       }
-                      locale="en-US"
-                      numberFormatOptions={{
-                        minimumFractionDigits: uiDecimals,
-                        maximumFractionDigits: uiDecimals,
-                      }}
+                      // locale="en-US"
+                      // numberFormatOptions={{
+                      //   minimumFractionDigits: uiDecimals,
+                      //   maximumFractionDigits: uiDecimals,
+                      // }}
                     />
                   </Accent>
                 </Balance>
@@ -155,8 +152,6 @@ export const AssetSelection = <T extends Token>({
                       Select a token
                     </div>
                   </div>
-                ) : market ? (
-                  <PowerIcon market={market} />
                 ) : (
                   <div tw="flex items-center space-x-2">
                     <TokenIcon size={24} token={token} />
@@ -173,11 +168,11 @@ export const AssetSelection = <T extends Token>({
                     <div tw="text-sm flex items-center ml-2 text-white">
                       <FontAwesomeIcon fixedWidth icon={faChevronDown} />
                     </div>
-                  ) : !market ? (
+                  ) : (
                     <div tw="text-sm flex items-center ml-2">
                       <FontAwesomeIcon fixedWidth icon={faChevronDown} />
                     </div>
-                  ) : null)}
+                  ))}
               </AssetSelectButton>
             </div>
           </div>

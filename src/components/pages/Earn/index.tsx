@@ -1,6 +1,4 @@
-import type { IMarket, IMarketUserInfo } from "@dahlia-labs/numoen-utils";
 import { NavLink } from "react-router-dom";
-import { useAccount } from "wagmi";
 
 import { Button } from "../../common/Button";
 import { LoadingPage } from "../../common/LoadingPage";
@@ -9,14 +7,8 @@ import { Explain } from "./Explain";
 
 export const Earn: React.FC = () => {
   // const { markets } = useEnvironment();
-  const { address } = useAccount();
 
   // const userMarketInfo = useUserLendgines(address, markets);
-
-  type display = {
-    market: IMarket;
-    userInfo: IMarketUserInfo | null;
-  };
 
   // const createdLendgines = useCreatedLendgines();
 
