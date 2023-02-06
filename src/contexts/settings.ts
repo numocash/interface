@@ -1,4 +1,4 @@
-import { Percent } from "@dahlia-labs/token-utils";
+import { Percent } from "@uniswap/sdk-core";
 import { useState } from "react";
 import { createContainer } from "unstated-next";
 

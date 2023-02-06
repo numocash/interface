@@ -5,12 +5,7 @@
   "author": "Kyle Scott <kyle@numoen.com>",
   "dependencies": {
     "@celo/rainbowkit-celo": "^0.8.1",
-    "@dahlia-labs/celo-contrib": "^0.10.4",
-    "@dahlia-labs/celo-tokens": "^0.10.4",
-    "@dahlia-labs/numoen-config": "^0.4.12",
     "@dahlia-labs/numoen-utils": "^0.10.4",
-    "@dahlia-labs/token-utils": "^0.10.4",
-    "@dahlia-labs/uniswapv2-utils": "^0.10.4",
     "@dahlia-labs/use-ethers": "^0.10.4",
     "@emotion/core": "^11.0.0",
     "@emotion/react": "^11.10.5",
@@ -80,8 +75,7 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "typechain": "typechain --target=ethers-v5 'src/**/abis/**/*.json' --out-dir src/generated/",
-    "build:production": "npm run typechain && npm run build && npm run delete-sourcemaps",
+    "build:production": "npm run build && npm run delete-sourcemaps",
     "build:analyze": "ANALYZE=1 craco build",
     "delete-sourcemaps": "find ./build -name \"*.map\" -delete",
     "test": "craco test",
@@ -121,7 +115,6 @@
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.9",
     "@tanstack/query-core": "^4.24.4",
-    "@typechain/ethers-v5": "^10.2.0",
     "@types/babel__core": "^7.20.0",
     "@types/bn.js": "^5.1.1",
     "@types/events": "^3.0.0",
@@ -159,7 +152,6 @@
     "react-dev-utils": "^12.0.1",
     "tailwindcss": "^3.2.4",
     "twin.macro": "^3.1.0",
-    "typechain": "^8.1.1",
     "typescript": "4.9.4",
     "webpack": "^5.75.0",
     "webpack-bundle-analyzer": "^4.7.0"

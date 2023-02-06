@@ -1,6 +1,7 @@
-import { ZERO } from "@dahlia-labs/token-utils";
 import type { Fraction, Percent } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
+
+export const ZERO = JSBI.BigInt(0);
 
 export const FORMAT_PERCENT: Intl.NumberFormatOptions = {
   minimumFractionDigits: 2,
