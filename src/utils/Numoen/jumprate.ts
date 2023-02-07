@@ -1,22 +1,25 @@
+import type { Fraction } from "@uniswap/sdk-core";
 import { Percent } from "@uniswap/sdk-core";
-
-import type { LendgineInfo } from "../../hooks/useLendgine";
 
 const kink = new Percent(8, 10);
 const multiplier = new Percent(1375, 100000);
 const jumpMultiplier = new Percent(89, 200);
 
-export const utilizationRate = (lendgineInfo: LendgineInfo): Percent => {
-  const totalLiquiditySupplied = lendgineInfo.totalLiquidity.add(
-    lendgineInfo.totalLiquidityBorrowed
-  );
+export const utilizationRate = (
+  totalLiquidity: Fraction,
+  totalLiquidityBorrowed: Fraction
+): Percent => {
+  const totalLiquiditySupplied = totalLiquidity.add(totalLiquidityBorrowed);
   if (totalLiquiditySupplied.equalTo(0)) return new Percent(0);
-  const f = lendgineInfo.totalLiquidityBorrowed.divide(totalLiquiditySupplied);
+  const f = totalLiquidityBorrowed.divide(totalLiquiditySupplied);
   return new Percent(f.numerator, f.denominator);
 };
 
-export const borrowRate = (lendgineInfo: LendgineInfo): Percent => {
-  const utilization = utilizationRate(lendgineInfo);
+export const borrowRate = (
+  totalLiquidity: Fraction,
+  totalLiquidityBorrowed: Fraction
+): Percent => {
+  const utilization = utilizationRate(totalLiquidity, totalLiquidityBorrowed);
 
   if (utilization.greaterThan(kink)) {
     const normalRate = kink.multiply(multiplier).multiply(100);
@@ -27,10 +30,13 @@ export const borrowRate = (lendgineInfo: LendgineInfo): Percent => {
   }
 };
 
-export const supplyRate = (lendgineInfo: LendgineInfo): Percent => {
-  const utilization = utilizationRate(lendgineInfo);
+export const supplyRate = (
+  totalLiquidity: Fraction,
+  totalLiquidityBorrowed: Fraction
+): Percent => {
+  const utilization = utilizationRate(totalLiquidity, totalLiquidityBorrowed);
 
-  const borrow = borrowRate(lendgineInfo);
+  const borrow = borrowRate(totalLiquidity, totalLiquidityBorrowed);
 
   return utilization.multiply(borrow);
 };
