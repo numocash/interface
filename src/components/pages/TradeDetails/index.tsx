@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
+import type { Lendgine } from "../../../constants";
+import { useLendginesForTokens } from "../../../hooks/useLendgine";
 import {
   useAddressToToken,
   useSortDenomTokens,
@@ -19,6 +21,8 @@ interface ITradeDetails {
 
   timeframe: Times;
   setTimeframe: (val: Times) => void;
+
+  lendgines: Lendgine[];
 }
 
 const useTradeDetailsInternal = (): ITradeDetails => {
@@ -54,7 +58,10 @@ const useTradeDetailsInternal = (): ITradeDetails => {
 
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
 
-  return { denom, other: quote, timeframe, setTimeframe };
+  const lendgines = useLendginesForTokens([denom, quote] as const);
+  invariant(lendgines);
+
+  return { denom, other: quote, timeframe, setTimeframe, lendgines };
 };
 
 export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =

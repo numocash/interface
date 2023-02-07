@@ -11,7 +11,7 @@ import { TotalStats } from "./TotalStats";
 enum ActionType {
   Long = "Long",
   Short = "Short",
-  Swap = "Swap",
+  // Swap = "Swap",
 }
 
 export const TradeColumn: React.FC = () => {
@@ -19,7 +19,7 @@ export const TradeColumn: React.FC = () => {
 
   const Tabs = (
     <div tw="flex gap-4 text-sm justify-around items-center w-full col-start-2 col-span-5">
-      {[ActionType.Long, ActionType.Short, ActionType.Swap].map((s) => {
+      {[ActionType.Long, ActionType.Short].map((s) => {
         return (
           <div key={s}>
             <button
