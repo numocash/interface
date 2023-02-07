@@ -11,7 +11,7 @@ export const TotalStats: React.FC = () => {
       </div>
       <div tw="flex flex-col gap-1 items-center">
         <p tw="font-semibold text-lg">100 {denom.symbol}</p>
-        <p tw="text-secondary text-sm">Volume</p>
+        <p tw="text-secondary text-sm">Total Value Locked</p>
       </div>
     </div>
   );

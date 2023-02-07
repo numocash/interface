@@ -63,6 +63,7 @@ specifiers:
   '@ubeswap/token-math': ^5.2.1
   '@uniswap/sdk-core': ^3.1.1
   '@uniswap/token-lists': 1.0.0-beta.31
+  '@visx/axis': ^3.0.0
   '@visx/curve': ^3.0.0
   '@visx/event': ^3.0.0
   '@visx/glyph': ^3.0.0
@@ -70,6 +71,7 @@ specifiers:
   '@visx/responsive': ^3.0.0
   '@visx/scale': ^3.0.0
   '@visx/shape': ^3.0.0
+  '@visx/threshold': ^3.0.0
   '@wagmi/cli': ^0.1.5
   '@wagmi/core': ^0.9.4
   '@walletconnect/encoding': ^1.0.2
@@ -158,6 +160,7 @@ dependencies:
   '@types/d3-array': 3.0.4
   '@uniswap/sdk-core': 3.1.1
   '@uniswap/token-lists': 1.0.0-beta.31
+  '@visx/axis': 3.0.0_react@18.2.0
   '@visx/curve': 3.0.0
   '@visx/event': 3.0.0
   '@visx/glyph': 3.0.0_react@18.2.0
@@ -165,6 +168,7 @@ dependencies:
   '@visx/responsive': 3.0.0_react@18.2.0
   '@visx/scale': 3.0.0
   '@visx/shape': 3.0.0_react@18.2.0
+  '@visx/threshold': 3.0.0_react@18.2.0
   '@wagmi/core': 0.9.4_smx5asmksjrybkxkseybts4voa
   abitype: 0.3.0_typescript@4.9.4
   apexcharts: 3.37.0
@@ -4726,6 +4730,32 @@ packages:
       '@vanilla-extract/css': 1.9.1
     dev: false
 
+  /@visx/axis/3.0.0_react@18.2.0:
+    resolution: {integrity: sha512-5vvTPPFUcIZ78ttd8MJLlWuwT+UmvO/sBZIzY2TYETda7ebDiMT/IkFHhIMtr1j/ugvqmcHKVW5jlAJCTnrOCw==}
+    peerDependencies:
+      react: ^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0
+    dependencies:
+      '@types/react': 18.0.27
+      '@visx/group': 3.0.0_react@18.2.0
+      '@visx/point': 3.0.0
+      '@visx/scale': 3.0.0
+      '@visx/shape': 3.0.0_react@18.2.0
+      '@visx/text': 3.0.0_react@18.2.0
+      classnames: 2.3.2
+      prop-types: 15.8.1
+      react: 18.2.0
+    dev: false
+
+  /@visx/clip-path/3.0.0_react@18.2.0:
+    resolution: {integrity: sha512-Kvoi2qDVNrB4PoSaOUhw7SKEVSXrSyz8oZggoIb5OoA6feeG7CQQEbNQyOS2wW2zmOuxnwkg3EB7sOBxC6c7WA==}
+    peerDependencies:
+      react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+    dependencies:
+      '@types/react': 18.0.27
+      prop-types: 15.8.1
+      react: 18.2.0
+    dev: false
+
   /@visx/curve/3.0.0:
     resolution: {integrity: sha512-kvHJDLBeczTQ87ZExSTfRxej06l6o6UiQ0NHf9+xpAin06y6Qk1ThOHHWJTGM6KGzwlu7jEauJGHwZs6nMhDvA==}
     dependencies:
@@ -4808,6 +4838,33 @@ packages:
       d3-path: 1.0.9
       d3-shape: 1.3.7
       lodash: 4.17.21
+      prop-types: 15.8.1
+      react: 18.2.0
+    dev: false
+
+  /@visx/text/3.0.0_react@18.2.0:
+    resolution: {integrity: sha512-LW6v5T/gpd9RGw83/ScXncYc6IlcfzXTpaN8WbbxLRI65gdvSqrykwAMR0cbpQmzoVFuZXljqOf0QslHGnBg1w==}
+    peerDependencies:
+      react: ^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0
+    dependencies:
+      '@types/lodash': 4.14.191
+      '@types/react': 18.0.27
+      classnames: 2.3.2
+      lodash: 4.17.21
+      prop-types: 15.8.1
+      react: 18.2.0
+      reduce-css-calc: 1.3.0
+    dev: false
+
+  /@visx/threshold/3.0.0_react@18.2.0:
+    resolution: {integrity: sha512-fEvn0kTjV9+GVOan+a9zodNjCuJggGiQtujcYEGb0ozjpKGI5peMye19JBAAChFukQ5smiW3L5a3mLJW3wUvoQ==}
+    peerDependencies:
+      react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+    dependencies:
+      '@types/react': 18.0.27
+      '@visx/clip-path': 3.0.0_react@18.2.0
+      '@visx/shape': 3.0.0_react@18.2.0
+      classnames: 2.3.2
       prop-types: 15.8.1
       react: 18.2.0
     dev: false
@@ -6179,6 +6236,10 @@ packages:
     resolution: {integrity: sha512-q/UEjfGJ2Cm3oKV71DJz9d25TPnq5rhBVL2Q4fA5wcC3jcrdn7+SssEybFIxwAvvP+YCsCYNKughoF33GxgycQ==}
     hasBin: true
     dev: true
+
+  /balanced-match/0.4.2:
+    resolution: {integrity: sha512-STw03mQKnGUYtoNjmowo4F2cRmIIxYEGiMsjjwla/u5P1lxadj/05WkNaFjNiKTgJkj8KiXbgAiRTmcQRwQNtg==}
+    dev: false
 
   /balanced-match/1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -11191,6 +11252,10 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  /math-expression-evaluator/1.4.0:
+    resolution: {integrity: sha512-4vRUvPyxdO8cWULGTh9dZWL2tZK6LDBvj+OGHBER7poH9Qdt7kXEoj20wiz4lQUbUXQZFjPbe5mVDo9nutizCw==}
+    dev: false
+
   /md5.js/1.3.5:
     resolution: {integrity: sha512-xitP+WxNPcTTOgnTJcrhM0xvdPepipPSf3I8EIpGKeFLjt3PlJLIDG3u8EX53ZIubkb+5U2+3rELYpEhHhzdkg==}
     dependencies:
@@ -13325,6 +13390,20 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       minimatch: 3.1.2
+
+  /reduce-css-calc/1.3.0:
+    resolution: {integrity: sha512-0dVfwYVOlf/LBA2ec4OwQ6p3X9mYxn/wOl2xTcLwjnPYrkgEfPx3VI4eGCH3rQLlPISG5v9I9bkZosKsNRTRKA==}
+    dependencies:
+      balanced-match: 0.4.2
+      math-expression-evaluator: 1.4.0
+      reduce-function-call: 1.0.3
+    dev: false
+
+  /reduce-function-call/1.0.3:
+    resolution: {integrity: sha512-Hl/tuV2VDgWgCSEeWMLwxLZqX7OK59eU1guxXsRKTAyeYimivsKdtcV4fu3r710tpG5GmDKDhQ0HSZLExnNmyQ==}
+    dependencies:
+      balanced-match: 1.0.2
+    dev: false
 
   /regenerate-unicode-properties/10.1.0:
     resolution: {integrity: sha512-d1VudCLoIGitcU/hEg2QqvyGZQmdC0Lf8BqdOMXGFSvJP4bNV1+XqbPQeHHLD51Jh4QJJ225dlIFvY4Ly6MXmQ==}
