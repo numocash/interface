@@ -46,6 +46,23 @@ export const illuviumLendgine = {
   address: "0x6E26283717a0c6A8b0986fCad083DC628f340656",
 } as const satisfies Lendgine;
 
+export const inverseIlluviumLendgine = {
+  token0: Illuvium,
+  token1: WrappedNative[1],
+  lendgine: new Token(1, "0x04a50D3263e2164EE8A462260aAaB0eAFc15bFFb", 18),
+  bound: new Price(
+    Illuvium,
+    WrappedNative[1],
+    "18803309900546737348402",
+    "450163348659183003126396"
+  ).multiply(new Price(WrappedNative[1], Illuvium, 1, 3)),
+
+  token0Exp: Illuvium.decimals,
+  token1Exp: WrappedNative[1].decimals,
+
+  address: "0x04a50D3263e2164EE8A462260aAaB0eAFc15bFFb",
+} as const satisfies Lendgine;
+
 export const foundryConfig = {
   base: {
     factory: getAddress("0x09c1133669cb9b49704dc27ae0b523be74467f2a"),
@@ -65,7 +82,7 @@ export const foundryConfig = {
     ],
     defaultInactiveLists: [],
   },
-  lendgines: [wethLendgine, illuviumLendgine] as const,
+  lendgines: [wethLendgine, illuviumLendgine, inverseIlluviumLendgine] as const,
 } as const;
 
 // uniswapV2subgraph:

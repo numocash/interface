@@ -1,8 +1,8 @@
 import { TokenIcon } from "../../common/TokenIcon";
 import { useTradeDetails } from ".";
 import { Chart } from "./Chart";
-import { EmptyPosition } from "./EmptyPosition";
 import { History } from "./History";
+import { Positions } from "./Positions";
 import { TimeSelector } from "./TimeSelector";
 
 export const MainView: React.FC = () => {
@@ -28,7 +28,7 @@ export const MainView: React.FC = () => {
       <TimeSelector />
       <div tw="border-b-2 border-gray-200" />
       <History />
-      <EmptyPosition />
+      <Positions />
     </div>
   );
 };

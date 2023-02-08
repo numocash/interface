@@ -32,7 +32,7 @@ import tryParseCurrencyAmount from "../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { useTradeDetails } from ".";
-import { LongStats } from "./LongStats";
+import { ShortStats } from "./ShortStats";
 
 export const Short: React.FC = () => {
   const { other, denom, lendgines } = useTradeDetails();
@@ -193,7 +193,7 @@ export const Short: React.FC = () => {
         }}
       />
 
-      <LongStats bound={selectedLendgine.bound} borrowRate={bRate} />
+      <ShortStats bound={selectedLendgine.bound} borrowRate={bRate} />
 
       <AsyncButton
         variant="primary"

@@ -13,9 +13,10 @@ import invariant from "tiny-invariant";
 
 import { RowBetween } from "../../common/RowBetween";
 import { useTradeDetails } from ".";
+import { TradeType } from "./TradeColumn";
 
 export const Returns: React.FC = () => {
-  const { other, denom } = useTradeDetails();
+  const { other, denom, trade } = useTradeDetails();
   const min = -0.75;
   const max = 1.5;
   const points = 300;
@@ -23,7 +24,9 @@ export const Returns: React.FC = () => {
   const baseReturns = new Array(points)
     .fill(null)
     .map((_, i) => ((max - min) * i) / points + min);
-  const optionReturns = (r: number) => r * r + 2 * r;
+  // TODO: account for bounds
+  const optionReturns = (r: number) =>
+    trade === TradeType.Long ? r * r + 2 * r : 1 / (r + 1) - 1;
 
   const data: [number, number][] = baseReturns.map((b) => [
     b,
@@ -80,7 +83,7 @@ export const Returns: React.FC = () => {
 
   return (
     <>
-      <RowBetween>
+      <RowBetween tw="items-center">
         <p tw="text-sm">Expected Profit and Loss</p>
         {derivReturns.lessThan(0) ? (
           <p tw="font-semibold text-red">

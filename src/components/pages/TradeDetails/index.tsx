@@ -13,7 +13,7 @@ import {
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { MainView } from "./MainView";
 import { Times } from "./TimeSelector";
-import { TradeColumn } from "./TradeColumn";
+import { TradeColumn, TradeType } from "./TradeColumn";
 
 interface ITradeDetails {
   denom: WrappedTokenInfo;
@@ -21,6 +21,9 @@ interface ITradeDetails {
 
   timeframe: Times;
   setTimeframe: (val: Times) => void;
+
+  trade: TradeType;
+  setTrade: (val: TradeType) => void;
 
   lendgines: Lendgine[];
 }
@@ -57,11 +60,20 @@ const useTradeDetailsInternal = (): ITradeDetails => {
   invariant(denom && quote, "Invalid token addresses");
 
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
+  const [trade, setTrade] = useState<TradeType>(TradeType.Long);
 
   const lendgines = useLendginesForTokens([denom, quote] as const);
   invariant(lendgines);
 
-  return { denom, other: quote, timeframe, setTimeframe, lendgines };
+  return {
+    denom,
+    other: quote,
+    timeframe,
+    setTimeframe,
+    lendgines,
+    trade,
+    setTrade,
+  };
 };
 
 export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =

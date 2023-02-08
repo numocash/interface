@@ -7,7 +7,7 @@ import { RowBetween } from "../../common/RowBetween";
 import { useTradeDetails } from ".";
 
 export const Config: React.FC = () => {
-  const { denom, other } = useTradeDetails();
+  const { denom, other, lendgines } = useTradeDetails();
   const referenceMarketQuery = useMostLiquidMarket([denom, other]);
 
   return (
@@ -37,6 +37,19 @@ export const Config: React.FC = () => {
         ) : (
           <LoadingSpinner />
         )}
+      </RowBetween>
+      <RowBetween tw="items-start">
+        <p tw="text-sm">Lendgines:</p>
+
+        <div tw="flex flex-col gap-4">
+          {lendgines.map((l) => (
+            <AddressLink
+              key={l.address}
+              address={l.address}
+              tw="text-sm underline"
+            />
+          ))}
+        </div>
       </RowBetween>
     </div>
   );
