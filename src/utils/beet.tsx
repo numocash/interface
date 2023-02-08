@@ -84,14 +84,16 @@ export const useBeet = () => {
 
       // Error if any errors are present
       for (const [index, bpTx] of stage.parallelTransactions.entries()) {
-        if (bpTx.tx.prepare.error) {
+        if (!bpTx.tx.send.writeAsync) {
           const humanCount = `${1 + index + previousTxs}/${totaltx}`;
+
+          toaster.dismiss(`${random}-${stageIndex}-pre`);
 
           toaster.txError(
             _generateToasterId(stageIndex, index),
             stage.stageTitle,
             humanCount,
-            bpTx.tx.prepare.error.message
+            "Error with transaction"
           );
           return;
         }
@@ -173,11 +175,9 @@ export const useBeet = () => {
 
         invariant(h);
         // wait for transactions to return
-        console.log("here");
         // const rec = await tx.wait(); // TODO: why can't we use web sockets
         const rec = await waitForTransaction({ hash: tx.hash });
         // const rec = await awaitTX(tx.hash); // TODO: could just wait for the first out the two
-        console.log("cuh", rec);
         if (rec.status === 0) {
           // clearTimeout(signPromptNotification);
           toaster.dismiss(`${random}-general`);
