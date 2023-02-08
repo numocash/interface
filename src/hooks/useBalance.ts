@@ -69,7 +69,7 @@ export const useBalances = <T extends Token>(
   const balanceQuery = useContractReads({
     //  ^?
     contracts,
-    allowFailure: true,
+    allowFailure: false, // TODO: what does this do
     watch: true,
     staleTime: Infinity,
     enabled: !!tokens && !!address,

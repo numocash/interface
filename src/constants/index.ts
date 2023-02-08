@@ -46,5 +46,5 @@ export const config: {
       : never; // include a lendgine property for testnet chains
   };
 } = {
-  1: foundryConfig,
+  6969: foundryConfig,
 };

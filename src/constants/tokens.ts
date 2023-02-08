@@ -4,8 +4,8 @@ import { getAddress } from "@ethersproject/address";
 import { WrappedTokenInfo } from "../hooks/useTokens2";
 
 export const Stable = {
-  1: new WrappedTokenInfo({
-    chainId: 1,
+  6969: new WrappedTokenInfo({
+    chainId: 6969,
     address: getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
     decimals: 6,
     symbol: "USDC",
@@ -28,8 +28,8 @@ export const Stable = {
 } as const;
 
 export const WrappedNative = {
-  1: new WrappedTokenInfo({
-    chainId: 1,
+  6969: new WrappedTokenInfo({
+    chainId: 6969,
     address: getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"),
     decimals: 18,
     symbol: "WETH",
