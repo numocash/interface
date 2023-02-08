@@ -119,9 +119,11 @@ export const Long: React.FC = () => {
               amountIn: BigNumber.from(parsedAmount.quotient.toString()),
               amountBorrow: BigNumber.from(borrowAmount.quotient.toString()),
               sharesMin: BigNumber.from(
-                shares.multiply(
-                  ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
-                )
+                shares
+                  .multiply(
+                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+                  )
+                  .quotient.toString()
               ),
               swapType: 0,
               swapExtraData: AddressZero,
@@ -168,12 +170,15 @@ export const Long: React.FC = () => {
         ? "Loading"
         : liquidity.greaterThan(selectedLendgineInfo.data.totalLiquidity)
         ? "Insufficient liquidity"
+        : prepareMint.error
+        ? "Error estimating gas"
         : null,
     [
       input,
       liquidity,
       parsedAmount,
       prepareMint.config,
+      prepareMint.error,
       selectedLendgineInfo.data,
       shares,
     ]
