@@ -35,20 +35,11 @@ import { useTradeDetails } from ".";
 import { ShortStats } from "./ShortStats";
 
 export const Short: React.FC = () => {
-  const { other, denom, lendgines } = useTradeDetails();
+  const { quote, base, selectedLendgine } = useTradeDetails();
   const Beet = useBeet();
   const { address } = useAccount();
   const environment = useEnvironment();
   const settings = useSettings();
-
-  const shortLendgines = useMemo(
-    () => lendgines.filter((l) => l.token0.equals(other)),
-    [lendgines, other]
-  );
-
-  // TODO: allow user to select
-  const selectedLendgine = shortLendgines[0];
-  invariant(selectedLendgine);
 
   const selectedLendgineInfo = useLendgine(selectedLendgine);
 
@@ -184,7 +175,7 @@ export const Short: React.FC = () => {
       <AssetSelection
         tw="border-2 border-gray-200 rounded-lg "
         label={<span>Pay</span>}
-        selectedValue={denom}
+        selectedValue={base}
         inputValue={input}
         inputOnChange={(value) => setInput(value)}
         currentAmount={{
@@ -239,7 +230,7 @@ export const Short: React.FC = () => {
           setInput("");
         }}
       >
-        {disableReason ?? <p>Buy {other.symbol}-</p>}
+        {disableReason ?? <p>Buy {quote.symbol}-</p>}
       </AsyncButton>
     </>
   );

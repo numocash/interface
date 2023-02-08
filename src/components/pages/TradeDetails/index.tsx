@@ -11,19 +11,23 @@ import {
   useSortDenomTokens,
 } from "../../../hooks/useTokens";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import { pickLongLendgines } from "../../../utils/lendgines";
 import { MainView } from "./MainView";
 import { Times } from "./TimeSelector";
 import { TradeColumn, TradeType } from "./TradeColumn";
 
 interface ITradeDetails {
-  denom: WrappedTokenInfo;
-  other: WrappedTokenInfo;
+  base: WrappedTokenInfo;
+  quote: WrappedTokenInfo;
 
   timeframe: Times;
   setTimeframe: (val: Times) => void;
 
   trade: TradeType;
   setTrade: (val: TradeType) => void;
+
+  selectedLendgine: Lendgine;
+  setSelectedLendgine: (val: Lendgine) => void;
 
   lendgines: Lendgine[];
 }
@@ -51,26 +55,34 @@ const useTradeDetailsInternal = (): ITradeDetails => {
   if (!tokenA || !tokenB) navigate("/trade/");
   invariant(tokenA && tokenB);
 
-  const [denom, quote] = useSortDenomTokens([tokenA, tokenB] as const);
+  const [base, quote] = useSortDenomTokens([tokenA, tokenB] as const);
 
   // TODO: handle nonAddresses
   // TODO: verify correct ordering
 
-  if (!denom || !quote) navigate("/trade/");
-  invariant(denom && quote, "Invalid token addresses");
+  if (!base || !quote) navigate("/trade/");
+  invariant(base && quote, "Invalid token addresses");
 
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
   const [trade, setTrade] = useState<TradeType>(TradeType.Long);
 
-  const lendgines = useLendginesForTokens([denom, quote] as const);
+  const lendgines = useLendginesForTokens([base, quote] as const);
   invariant(lendgines);
 
+  const longLendgine = pickLongLendgines(lendgines, base)[0];
+  invariant(longLendgine);
+
+  const [selectedLendgine, setSelectedLendgine] =
+    useState<Lendgine>(longLendgine);
+
   return {
-    denom,
-    other: quote,
+    base: base,
+    quote: quote,
     timeframe,
     setTimeframe,
     lendgines,
+    selectedLendgine,
+    setSelectedLendgine,
     trade,
     setTrade,
   };

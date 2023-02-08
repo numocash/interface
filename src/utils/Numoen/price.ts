@@ -3,6 +3,7 @@ import { Price } from "@uniswap/sdk-core";
 import type { Lendgine } from "../../constants";
 import type { LendgineInfo } from "../../hooks/useLendgine";
 
+// returns price in token0 / token1
 export const numoenPrice = (lendgine: Lendgine, lendgineInfo: LendgineInfo) => {
   if (lendgineInfo.totalLiquidity.equalTo(0))
     return new Price(lendgine.token1, lendgine.token0, 1, 0);

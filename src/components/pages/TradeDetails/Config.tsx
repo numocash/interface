@@ -7,7 +7,7 @@ import { RowBetween } from "../../common/RowBetween";
 import { useTradeDetails } from ".";
 
 export const Config: React.FC = () => {
-  const { denom, other, lendgines } = useTradeDetails();
+  const { base: denom, quote: other, lendgines } = useTradeDetails();
   const referenceMarketQuery = useMostLiquidMarket([denom, other]);
 
   return (

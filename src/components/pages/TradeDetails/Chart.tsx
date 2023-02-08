@@ -21,7 +21,7 @@ import { useTradeDetails } from ".";
 import { EmptyChart } from "./EmptyChart";
 
 export const Chart: React.FC = () => {
-  const { denom, other, timeframe } = useTradeDetails();
+  const { base: denom, quote: other, timeframe } = useTradeDetails();
   const referenceMarketQuery = useMostLiquidMarket([denom, other]);
 
   // TODO: bug with inverting

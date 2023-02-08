@@ -6,7 +6,7 @@ import { Positions } from "./Positions";
 import { TimeSelector } from "./TimeSelector";
 
 export const MainView: React.FC = () => {
-  const { denom, other } = useTradeDetails();
+  const { base: denom, quote: other } = useTradeDetails();
   return (
     <div tw="col-span-2 w-full flex mt-2 flex-col pr-6 lg:pr-8 xl:pr-12 gap-2 transform ease-in-out duration-300">
       <div tw="flex w-full">

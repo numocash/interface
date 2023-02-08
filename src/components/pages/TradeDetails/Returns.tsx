@@ -11,22 +11,38 @@ import { bisect } from "d3-array";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
+import { isLongLendgine } from "../../../utils/lendgines";
 import { RowBetween } from "../../common/RowBetween";
 import { useTradeDetails } from ".";
-import { TradeType } from "./TradeColumn";
 
 export const Returns: React.FC = () => {
-  const { other, denom, trade } = useTradeDetails();
+  const { quote, base, selectedLendgine } = useTradeDetails();
+  const long = useMemo(
+    () => isLongLendgine(selectedLendgine, base),
+    [base, selectedLendgine]
+  );
   const min = -0.75;
   const max = 1.5;
   const points = 300;
+
+  // const selectedLendgineInfo = useLendgine(selectedLendgine);
+
+  // useMemo(() => {
+  //   const price = selectedLendgineInfo.data
+  //     ? numoenPrice(selectedLendgine, selectedLendgineInfo.data)
+  //     : null;
+  //   // const kink = price ? selectedLendgine.bound.divide(price) : null;
+  //   // return { kink };
+  // }, [selectedLendgine, selectedLendgineInfo.data]);
+
+  // console.log(kink?.toSignificant(4));
+  // TODO: account for kink in the charts
 
   const baseReturns = new Array(points)
     .fill(null)
     .map((_, i) => ((max - min) * i) / points + min);
   // TODO: account for bounds
-  const optionReturns = (r: number) =>
-    trade === TradeType.Long ? r * r + 2 * r : 1 / (r + 1) - 1;
+  const optionReturns = (r: number) => (long ? r * r + 2 * r : 1 / (r + 1) - 1);
 
   const data: [number, number][] = baseReturns.map((b) => [
     b,
@@ -171,7 +187,7 @@ export const Returns: React.FC = () => {
       </ParentSize>
       <RowBetween tw="text-sm">
         <p tw="">
-          {other.symbol} / {denom.symbol} Price
+          {quote.symbol} / {base.symbol} Price
         </p>
         {underlyingReturns.lessThan(0) ? (
           <p tw="">{underlyingReturns.toFixed(2, { groupSeparator: "," })}%</p>

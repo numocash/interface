@@ -84,7 +84,11 @@ export const useBeet = () => {
 
       // Error if any errors are present
       for (const [index, bpTx] of stage.parallelTransactions.entries()) {
-        if (!bpTx.tx.send.writeAsync) {
+        if (
+          !bpTx.tx.send.writeAsync ||
+          !!bpTx.tx.prepare.error ||
+          !!bpTx.tx.send.error
+        ) {
           const humanCount = `${1 + index + previousTxs}/${totaltx}`;
 
           toaster.dismiss(`${random}-${stageIndex}-pre`);

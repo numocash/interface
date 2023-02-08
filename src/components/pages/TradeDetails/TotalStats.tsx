@@ -1,7 +1,7 @@
 import { useTradeDetails } from ".";
 
 export const TotalStats: React.FC = () => {
-  const { denom } = useTradeDetails();
+  const { base: denom } = useTradeDetails();
 
   return (
     <div tw="flex justify-around w-full">

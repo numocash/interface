@@ -7,7 +7,7 @@ import { useTradeDetails } from ".";
 import { EmptyPosition } from "./EmptyPosition";
 
 export const Positions: React.FC = () => {
-  const { lendgines, other } = useTradeDetails();
+  const { lendgines, quote: other } = useTradeDetails();
   const { address } = useAccount();
   const balances = useBalances(
     lendgines.map((l) => l.lendgine),

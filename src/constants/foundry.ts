@@ -36,8 +36,8 @@ export const illuviumLendgine = {
   bound: new Price(
     WrappedNative[1],
     Illuvium,
-    "450163348659183003126396",
-    "18803309900546737348402"
+    "1000000000000000000",
+    "41769970737405930"
   ).multiply(new Price(Illuvium, WrappedNative[1], 1, 3)),
 
   token0Exp: WrappedNative[1].decimals,

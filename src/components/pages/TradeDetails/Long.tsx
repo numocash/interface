@@ -1,6 +1,7 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
+import { parseEther } from "@ethersproject/units";
 import { Fraction } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
@@ -23,32 +24,20 @@ import {
   convertLiquidityToShare,
 } from "../../../utils/Numoen/lendgineMath";
 import { numoenPrice } from "../../../utils/Numoen/price";
-import {
-  determineBorrowAmount,
-  ONE_HUNDRED_PERCENT,
-  scale,
-} from "../../../utils/Numoen/trade";
+import { determineBorrowAmount, scale } from "../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
 import { useTradeDetails } from ".";
 import { LongStats } from "./LongStats";
 
+// TODO: combine with short into one component
 export const Long: React.FC = () => {
-  const { other, lendgines } = useTradeDetails();
+  const { quote, selectedLendgine } = useTradeDetails();
   const Beet = useBeet();
   const { address } = useAccount();
   const environment = useEnvironment();
   const settings = useSettings();
-
-  const longLendgines = useMemo(
-    () => lendgines.filter((l) => l.token1.equals(other)),
-    [lendgines, other]
-  );
-
-  // TODO: allow user to select
-  const selectedLendgine = longLendgines[0];
-  invariant(selectedLendgine);
 
   const selectedLendgineInfo = useLendgine(selectedLendgine);
 
@@ -117,14 +106,16 @@ export const Long: React.FC = () => {
                   .quotient.toString()
               ),
               amountIn: BigNumber.from(parsedAmount.quotient.toString()),
-              amountBorrow: BigNumber.from(borrowAmount.quotient.toString()),
-              sharesMin: BigNumber.from(
-                shares
-                  .multiply(
-                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
-                  )
-                  .quotient.toString()
-              ),
+              // amountBorrow: BigNumber.from(borrowAmount.quotient.toString()),
+              amountBorrow: parseEther("4"),
+              // sharesMin: BigNumber.from(
+              //   shares
+              //     .multiply(
+              //       ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+              //     )
+              //     .quotient.toString()
+              // ),
+              sharesMin: BigNumber.from(0),
               swapType: 0,
               swapExtraData: AddressZero,
               recipient: address,
@@ -143,7 +134,6 @@ export const Long: React.FC = () => {
       selectedLendgine.token0.decimals,
       selectedLendgine.token1.address,
       selectedLendgine.token1.decimals,
-      settings.maxSlippagePercent,
       settings.timeout,
       shares,
     ]
@@ -152,7 +142,7 @@ export const Long: React.FC = () => {
   const prepareMint = usePrepareLendgineRouterMint({
     address: environment.base.lendgineRouter,
     args: args,
-    enabled: !!borrowAmount && !!parsedAmount && !!address && !shares,
+    enabled: !!borrowAmount && !!parsedAmount && !!address && !!shares,
   });
 
   const sendMint = useLendgineRouterMint(prepareMint.config);
@@ -170,7 +160,7 @@ export const Long: React.FC = () => {
         ? "Loading"
         : liquidity.greaterThan(selectedLendgineInfo.data.totalLiquidity)
         ? "Insufficient liquidity"
-        : prepareMint.error
+        : !sendMint.write
         ? "Error estimating gas"
         : null,
     [
@@ -178,8 +168,8 @@ export const Long: React.FC = () => {
       liquidity,
       parsedAmount,
       prepareMint.config,
-      prepareMint.error,
       selectedLendgineInfo.data,
+      sendMint.write,
       shares,
     ]
   );
@@ -189,7 +179,7 @@ export const Long: React.FC = () => {
       <AssetSelection
         tw="border-2 border-gray-200 rounded-lg "
         label={<span>Pay</span>}
-        selectedValue={other}
+        selectedValue={selectedLendgine.token1}
         inputValue={input}
         inputOnChange={(value) => setInput(value)}
         currentAmount={{
@@ -244,7 +234,7 @@ export const Long: React.FC = () => {
           setInput("");
         }}
       >
-        {disableReason ?? <p>Buy {other.symbol}+</p>}
+        {disableReason ?? <p>Buy {quote.symbol}+</p>}
       </AsyncButton>
     </>
   );
