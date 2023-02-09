@@ -160,8 +160,6 @@ export const Long: React.FC = () => {
         ? "Loading"
         : liquidity.greaterThan(selectedLendgineInfo.data.totalLiquidity)
         ? "Insufficient liquidity"
-        : !sendMint.write
-        ? "Error estimating gas"
         : null,
     [
       input,
@@ -169,7 +167,6 @@ export const Long: React.FC = () => {
       parsedAmount,
       prepareMint.config,
       selectedLendgineInfo.data,
-      sendMint.write,
       shares,
     ]
   );

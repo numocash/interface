@@ -32,7 +32,8 @@ export const Positions: React.FC = () => {
             tw="w-full justify-between bg-gray-200  rounded-lg px-4 py-2 flex font-semibold h-12 items-center"
             key={d.currency.address}
           >
-            {symbol}
+            <p>{symbol}</p>
+            <p tw="font-semibold">{d.toSignificant(4)}</p>
 
             <Button variant="primary" tw="bg-red">
               Close
