@@ -180,7 +180,9 @@ export const useBeet = () => {
         invariant(h);
         // wait for transactions to return
         // const rec = await tx.wait(); // TODO: why can't we use web sockets
+        console.log("here");
         const rec = await waitForTransaction({ hash: tx.hash });
+        console.log("cuh");
         // const rec = await awaitTX(tx.hash); // TODO: could just wait for the first out the two
         if (rec.status === 0) {
           // clearTimeout(signPromptNotification);

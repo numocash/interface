@@ -18,6 +18,7 @@ import { useBalance } from "../../../hooks/useBalance";
 import { useLendgine } from "../../../hooks/useLendgine";
 import type { BeetStage } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
+import { isLongLendgine } from "../../../utils/lendgines";
 import { borrowRate } from "../../../utils/Numoen/jumprate";
 import {
   convertCollateralToLiquidity,
@@ -36,8 +37,9 @@ import { useTradeDetails } from ".";
 import { LongStats } from "./LongStats";
 
 // TODO: combine with short into one component
-export const Long: React.FC = () => {
-  const { quote, selectedLendgine } = useTradeDetails();
+export const Trade: React.FC = () => {
+  const { quote, base, selectedLendgine } = useTradeDetails();
+  const isLong = isLongLendgine(selectedLendgine, base);
   const Beet = useBeet();
   const { address } = useAccount();
   const environment = useEnvironment();
@@ -219,7 +221,12 @@ export const Long: React.FC = () => {
           setInput("");
         }}
       >
-        {disableReason ?? <p>Buy {quote.symbol}+</p>}
+        {disableReason ?? (
+          <p>
+            Buy {quote.symbol}
+            {isLong ? "+" : "-"}
+          </p>
+        )}
       </AsyncButton>
     </>
   );

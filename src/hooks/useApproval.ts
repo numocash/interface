@@ -1,14 +1,17 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
-import { CurrencyAmount } from "@uniswap/sdk-core";
+import { CurrencyAmount, MaxUint256 } from "@uniswap/sdk-core";
 import invariant from "tiny-invariant";
-import type { Address } from "wagmi";
+import type { Address, usePrepareContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 
+import { useSettings } from "../contexts/settings";
 import {
   useErc20Allowance,
   useErc20Approve,
   usePrepareErc20Approve,
 } from "../generated";
+import type { BeetStage } from "../utils/beet";
 import type { HookArg } from "./useBalance";
 import type { WrappedTokenInfo } from "./useTokens2";
 
@@ -51,10 +54,31 @@ export const useApprove = (
   tokenAmount: HookArg<CurrencyAmount<WrappedTokenInfo>>,
   spender: HookArg<Address>
 ) => {
+  const settings = useSettings();
+  const { address } = useAccount();
+
+  const allowanceQuery = useAllowance(tokenAmount?.currency, address, spender);
+
+  // const approvalRequired = useMemo(
+  //   () =>
+  //     allowanceQuery.data && tokenAmount
+  //       ? !allowanceQuery.data.greaterThan(tokenAmount)
+  //       : null,
+  //   [allowanceQuery.data, tokenAmount]
+  // );
+
+  const approvalRequired = true;
+  // return null if approval is already met
+  // return a Beet Transaction
   const prepare = usePrepareErc20Approve({
     args:
       !!tokenAmount && !!spender
-        ? [spender, BigNumber.from(tokenAmount.asFraction.quotient.toString())]
+        ? [
+            spender,
+            settings.infiniteApprove
+              ? BigNumber.from(MaxUint256.toString())
+              : BigNumber.from(tokenAmount.asFraction.quotient.toString()),
+          ]
         : undefined,
     address: tokenAmount
       ? getAddress(tokenAmount?.currency.address)
@@ -64,5 +88,29 @@ export const useApprove = (
 
   const write = useErc20Approve(prepare.config);
 
-  return { prepare, write };
+  const title = `Approve  ${
+    settings.infiniteApprove
+      ? "infinite"
+      : tokenAmount?.toSignificant(5, { groupSeparator: "," }) ?? ""
+  } ${tokenAmount?.currency.symbol ?? ""}`;
+
+  const beetStage: BeetStage = {
+    stageTitle: title,
+    parallelTransactions: [
+      {
+        title,
+        tx: {
+          prepare: prepare as ReturnType<typeof usePrepareContractWrite>,
+          send: write,
+        },
+      },
+    ],
+  };
+
+  return {
+    prepare,
+    write,
+    allowanceQuery,
+    beetStage: approvalRequired === true ? beetStage : null,
+  };
 };

@@ -12,8 +12,8 @@ export const wethLendgine = {
   bound: new Price(
     Stable[6969],
     WrappedNative[6969],
-    "22045404859097",
-    "13909675486950929136232"
+    "1000000000000000000",
+    "4754691411696506159799"
   ),
   token0Exp: Stable[6969].decimals,
   token1Exp: WrappedNative[6969].decimals,
@@ -37,8 +37,8 @@ export const illuviumLendgine = {
     WrappedNative[6969],
     Illuvium,
     "1000000000000000000",
-    "41769970737405930"
-  ).multiply(new Price(Illuvium, WrappedNative[6969], 1, 3)),
+    "125309912212217790"
+  ),
 
   token0Exp: WrappedNative[6969].decimals,
   token1Exp: Illuvium.decimals,
@@ -53,9 +53,9 @@ export const inverseIlluviumLendgine = {
   bound: new Price(
     Illuvium,
     WrappedNative[6969],
-    "18803309900546737348402",
-    "450163348659183003126396"
-  ).multiply(new Price(WrappedNative[6969], Illuvium, 1, 3)),
+    "1000000000000000000",
+    "71821932049222954980"
+  ),
 
   token0Exp: Illuvium.decimals,
   token1Exp: WrappedNative[6969].decimals,

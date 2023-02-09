@@ -11,8 +11,8 @@ import { Config } from "./Config";
 import { Long } from "./Long";
 import { ProvideLiquidity } from "./ProvideLiquidity";
 import { Returns } from "./Returns";
-import { Short } from "./Short";
 import { TotalStats } from "./TotalStats";
+import { Trade } from "./Trade";
 
 export enum TradeType {
   Long = "Long",
@@ -64,7 +64,7 @@ export const TradeColumn: React.FC = () => {
     <div tw="pl-6 lg:pl-8 xl:pl-12 transform ease-in-out duration-300 py-2 flex flex-col gap-4 w-full">
       {Tabs}
       {trade === TradeType.Long && <Long />}
-      {trade === TradeType.Short && <Short />}
+      {trade === TradeType.Short && <Trade />}
       <ProvideLiquidity />
       <div tw="w-full border-b-2 border-gray-200" />
       <Returns />
