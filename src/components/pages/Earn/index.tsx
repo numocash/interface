@@ -1,9 +1,9 @@
 import { NavLink } from "react-router-dom";
 
 import { Button } from "../../common/Button";
-import { LoadingPage } from "../../common/LoadingPage";
 import { Sort } from "../Trade/Sort";
 import { Explain } from "./Explain";
+import { Markets } from "./Markets";
 
 export const Earn: React.FC = () => {
   // const { markets } = useEnvironment();
@@ -31,7 +31,7 @@ export const Earn: React.FC = () => {
   // }, [markets, userMarketInfo]);
 
   return (
-    <div tw="grid w-full max-w-3xl flex-col gap-4">
+    <div tw="grid w-full max-w-4xl flex-col gap-4">
       <Explain />
       <p tw="text-xs text-default">
         Displaying <span tw="font-semibold">{2} markets</span>
@@ -51,7 +51,8 @@ export const Earn: React.FC = () => {
         <p tw="text-xs text-black font-semibold mb-[-0.5rem]">Your positions</p>
       )}
       {userMarketInfo === null && address !== undefined ? ( */}
-      <LoadingPage />
+      {/* <LoadingPage /> */}
+      <Markets />
       {/* ) : (
         <div tw="grid md:grid-cols-2 gap-6">
           {displayMarkets.map((d) => (
