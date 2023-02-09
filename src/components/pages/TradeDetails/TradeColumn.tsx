@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import invariant from "tiny-invariant";
 import tw, { css } from "twin.macro";
 
 import {
+  isLongLendgine,
   pickLongLendgines,
   pickShortLendgines,
 } from "../../../utils/lendgines";
@@ -21,7 +21,7 @@ export enum TradeType {
 }
 
 export const TradeColumn: React.FC = () => {
-  const { trade, setTrade, lendgines, base, setSelectedLendgine } =
+  const { trade, lendgines, base, setSelectedLendgine, selectedLendgine } =
     useTradeDetails();
 
   const shortLendgine = useMemo(
@@ -33,27 +33,28 @@ export const TradeColumn: React.FC = () => {
     () => pickLongLendgines(lendgines, base)[0],
     [base, lendgines]
   );
-  invariant(shortLendgine && longLendgine);
+  // invariant(shortLendgine && longLendgine);
+  const selectedLong = isLongLendgine(selectedLendgine, base);
 
   const Tabs = (
     <div tw="flex gap-4 text-sm items-center w-full col-start-2 col-span-5">
-      {[TradeType.Long, TradeType.Short].map((s) => {
+      {[longLendgine, shortLendgine].map((s) => {
+        if (!s) return null;
+        const isLong = isLongLendgine(s, base);
+
         return (
-          <div key={s}>
+          <div key={s.address}>
             <button
               css={css`
                 ${tw`text-xl font-semibold text-secondary`}
                 ${tw`hover:(text-default) transform duration-300 ease-in-out`}
-                ${trade === s && tw`text-default`}
+                ${isLong === selectedLong && tw`text-default`}
               `}
               onClick={() => {
-                setTrade(s);
-                s === TradeType.Long
-                  ? setSelectedLendgine(longLendgine)
-                  : setSelectedLendgine(shortLendgine);
+                setSelectedLendgine(s);
               }}
             >
-              <span>{s}</span>
+              <span>{isLong ? "Long" : "Short"}</span>
             </button>
           </div>
         );

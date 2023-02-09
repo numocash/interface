@@ -14,7 +14,7 @@ export const LongStats: React.FC<Props> = ({ bound, borrowRate }: Props) => {
     <div tw="flex flex-col w-full">
       <RowBetween tw="p-0">
         <p>Bound</p>
-        <p>{bound?.toSignificant(5, { groupSeparator: "," })}</p>
+        <p>{bound?.asFraction.toSignificant(5, { groupSeparator: "," })}</p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Funding APR</p>
