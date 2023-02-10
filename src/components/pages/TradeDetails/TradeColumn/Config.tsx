@@ -1,10 +1,10 @@
 import { getAddress } from "@ethersproject/address";
 
-import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
-import { AddressLink } from "../../../utils/beet";
-import { LoadingSpinner } from "../../common/LoadingSpinner";
-import { RowBetween } from "../../common/RowBetween";
-import { useTradeDetails } from ".";
+import { useMostLiquidMarket } from "../../../../hooks/useExternalExchange";
+import { AddressLink } from "../../../../utils/beet";
+import { LoadingSpinner } from "../../../common/LoadingSpinner";
+import { RowBetween } from "../../../common/RowBetween";
+import { useTradeDetails } from "..";
 
 export const Config: React.FC = () => {
   const { base: denom, quote: other, lendgines } = useTradeDetails();

@@ -3,15 +3,15 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import tw, { styled } from "twin.macro";
 
-import { useLendgines } from "../../../hooks/useLendgine";
+import { useLendgines } from "../../../../hooks/useLendgine";
 import {
   convertLiquidityToCollateral,
   convertPriceToLiquidityPrice,
-} from "../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../utils/Numoen/price";
-import { scale } from "../../../utils/Numoen/trade";
-import { VerticalItem } from "../../common/VerticalItem";
-import { useTradeDetails } from ".";
+} from "../../../../utils/Numoen/lendgineMath";
+import { numoenPrice } from "../../../../utils/Numoen/price";
+import { scale } from "../../../../utils/Numoen/trade";
+import { VerticalItem } from "../../../common/VerticalItem";
+import { useTradeDetails } from "..";
 
 export const TotalStats: React.FC = () => {
   const { base, lendgines } = useTradeDetails();

@@ -7,37 +7,38 @@ import invariant from "tiny-invariant";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../contexts/environment2";
-import { useSettings } from "../../../contexts/settings";
+import { useEnvironment } from "../../../../contexts/environment2";
+import { useSettings } from "../../../../contexts/settings";
 import {
   useLendgineRouterMint,
   usePrepareLendgineRouterMint,
-} from "../../../generated";
-import { useApprove } from "../../../hooks/useApproval";
-import { useBalance } from "../../../hooks/useBalance";
-import { useLendgine } from "../../../hooks/useLendgine";
-import type { BeetStage } from "../../../utils/beet";
-import { useBeet } from "../../../utils/beet";
-import { borrowRate } from "../../../utils/Numoen/jumprate";
+} from "../../../../generated";
+import { useApprove } from "../../../../hooks/useApproval";
+import { useBalance } from "../../../../hooks/useBalance";
+import { useLendgine } from "../../../../hooks/useLendgine";
+import type { BeetStage } from "../../../../utils/beet";
+import { useBeet } from "../../../../utils/beet";
+import { isLongLendgine } from "../../../../utils/lendgines";
+import { borrowRate } from "../../../../utils/Numoen/jumprate";
 import {
   convertCollateralToLiquidity,
   convertLiquidityToShare,
-} from "../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../utils/Numoen/price";
+} from "../../../../utils/Numoen/lendgineMath";
+import { numoenPrice } from "../../../../utils/Numoen/price";
 import {
   determineBorrowAmount,
   ONE_HUNDRED_PERCENT,
   scale,
-} from "../../../utils/Numoen/trade";
-import tryParseCurrencyAmount from "../../../utils/tryParseCurrencyAmount";
-import { AssetSelection } from "../../common/AssetSelection";
-import { AsyncButton } from "../../common/AsyncButton";
-import { useTradeDetails } from ".";
-import { LongStats } from "./LongStats";
+} from "../../../../utils/Numoen/trade";
+import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
+import { AssetSelection } from "../../../common/AssetSelection";
+import { AsyncButton } from "../../../common/AsyncButton";
+import { useTradeDetails } from "..";
+import { BuyStats } from "./BuyStats";
 
-// TODO: combine with short into one component
-export const Long: React.FC = () => {
-  const { quote, selectedLendgine } = useTradeDetails();
+export const Buy: React.FC = () => {
+  const { quote, base, selectedLendgine } = useTradeDetails();
+  const isLong = isLongLendgine(selectedLendgine, base);
   const Beet = useBeet();
   const { address } = useAccount();
   const environment = useEnvironment();
@@ -188,7 +189,11 @@ export const Long: React.FC = () => {
         }}
       />
 
-      <LongStats bound={selectedLendgine.bound} borrowRate={bRate} />
+      <BuyStats
+        bound={selectedLendgine.bound}
+        borrowRate={bRate}
+        isInverse={!isLong}
+      />
 
       <AsyncButton
         variant="primary"
@@ -219,7 +224,12 @@ export const Long: React.FC = () => {
           setInput("");
         }}
       >
-        {disableReason ?? <p>Buy {quote.symbol}+</p>}
+        {disableReason ?? (
+          <p>
+            Buy {quote.symbol}
+            {isLong ? "+" : "-"}
+          </p>
+        )}
       </AsyncButton>
     </>
   );

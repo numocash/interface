@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Fraction, Token } from "@uniswap/sdk-core";
 import invariant from "tiny-invariant";
 
-import { Times } from "../components/pages/TradeDetails/TimeSelector";
+import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
 import type {
   PriceHistoryDayV2Query,
   PriceHistoryHourV2Query,

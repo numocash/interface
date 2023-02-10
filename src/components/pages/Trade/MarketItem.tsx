@@ -10,7 +10,7 @@ import {
 } from "../../../hooks/useExternalExchange";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { TokenIcon } from "../../common/TokenIcon";
-import { Times } from "../TradeDetails/TimeSelector";
+import { Times } from "../TradeDetails/Chart/TimeSelector";
 import { MiniChart } from "./MiniChart";
 
 interface Props {

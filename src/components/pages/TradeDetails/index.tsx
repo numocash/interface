@@ -12,9 +12,9 @@ import {
 } from "../../../hooks/useTokens";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { pickLongLendgines } from "../../../utils/lendgines";
+import { Times } from "./Chart/TimeSelector";
 import { MainView } from "./MainView";
-import { Times } from "./TimeSelector";
-import { TradeColumn, TradeType } from "./TradeColumn";
+import { TradeColumn, TradeType } from "./TradeColumn/TradeColumn";
 
 interface ITradeDetails {
   base: WrappedTokenInfo;
@@ -28,6 +28,9 @@ interface ITradeDetails {
 
   selectedLendgine: Lendgine;
   setSelectedLendgine: (val: Lendgine) => void;
+
+  close: boolean;
+  setClose: (val: boolean) => void;
 
   lendgines: Lendgine[];
 }
@@ -65,6 +68,7 @@ const useTradeDetailsInternal = (): ITradeDetails => {
 
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
   const [trade, setTrade] = useState<TradeType>(TradeType.Long);
+  const [close, setClose] = useState(false);
 
   const lendgines = useLendginesForTokens([base, quote] as const);
   invariant(lendgines);
@@ -76,15 +80,22 @@ const useTradeDetailsInternal = (): ITradeDetails => {
     useState<Lendgine>(longLendgine);
 
   return {
-    base: base,
-    quote: quote,
+    base,
+    quote,
+
     timeframe,
     setTimeframe,
-    lendgines,
+
     selectedLendgine,
     setSelectedLendgine,
+
     trade,
     setTrade,
+
+    close,
+    setClose,
+
+    lendgines,
   };
 };
 

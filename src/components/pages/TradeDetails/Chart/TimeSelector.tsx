@@ -1,6 +1,6 @@
 import tw, { css } from "twin.macro";
 
-import { useTradeDetails } from ".";
+import { useTradeDetails } from "..";
 
 export enum Times {
   ONE_DAY = "1d",

@@ -1,20 +1,29 @@
 import type { Percent, Price } from "@uniswap/sdk-core";
 
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import { LoadingSpinner } from "../../common/LoadingSpinner";
-import { RowBetween } from "../../common/RowBetween";
+import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
+import { LoadingSpinner } from "../../../common/LoadingSpinner";
+import { RowBetween } from "../../../common/RowBetween";
 
 interface Props {
   bound: Price<WrappedTokenInfo, WrappedTokenInfo>;
   borrowRate: Percent | null;
+  isInverse: boolean;
 }
 
-export const ShortStats: React.FC<Props> = ({ bound, borrowRate }: Props) => {
+export const BuyStats: React.FC<Props> = ({
+  bound,
+  borrowRate,
+  isInverse,
+}: Props) => {
   return (
     <div tw="flex flex-col w-full">
       <RowBetween tw="p-0">
         <p>Bound</p>
-        <p>{bound?.invert().toSignificant(5, { groupSeparator: "," })}</p>
+        <p>
+          {(isInverse ? bound.invert() : bound).asFraction.toSignificant(5, {
+            groupSeparator: ",",
+          })}
+        </p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Funding APR</p>
@@ -28,11 +37,11 @@ export const ShortStats: React.FC<Props> = ({ bound, borrowRate }: Props) => {
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Leverage</p>
-        <p>1/x</p>
+        <p>{isInverse ? "1/x" : "x²"}</p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Liquidation price</p>
-        <p>0</p>
+        <p>{isInverse ? "∞" : 0}</p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Fees</p>

@@ -9,7 +9,7 @@ export const VerticalItem: React.FC<Props> = ({
   className,
 }: Props) => {
   return (
-    <div tw="flex flex-col gap-1" className={className}>
+    <div tw="flex flex-col" className={className}>
       <p tw="font-semibold text-lg">{item}</p>
       <p tw="text-secondary text-sm">{label}</p>
     </div>

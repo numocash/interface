@@ -15,9 +15,9 @@ import {
   useCurrentPrice,
   useMostLiquidMarket,
   usePriceHistory,
-} from "../../../hooks/useExternalExchange";
-import type { PricePoint } from "../../../services/graphql/uniswapV2";
-import { useTradeDetails } from ".";
+} from "../../../../hooks/useExternalExchange";
+import type { PricePoint } from "../../../../services/graphql/uniswapV2";
+import { useTradeDetails } from "..";
 import { EmptyChart } from "./EmptyChart";
 
 export const Chart: React.FC = () => {
