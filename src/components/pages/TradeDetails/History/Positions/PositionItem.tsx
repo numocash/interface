@@ -32,7 +32,6 @@ export const PositionItem: React.FC<Props> = ({
     const collateral = convertLiquidityToCollateral(liquidity, lendgine);
 
     const liquidityPrice = convertPriceToLiquidityPrice(price, lendgine);
-    console.log(liquidityPrice.toSignificant(6));
 
     const liquidityValue = liquidity.multiply(liquidityPrice).divide(scale);
     const collateralValue = collateral.multiply(price).divide(scale);

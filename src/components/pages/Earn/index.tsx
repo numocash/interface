@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 
 import { Button } from "../../common/Button";
-import { Sort } from "../Trade/Sort";
 import { Explain } from "./Explain";
 import { Markets } from "./Markets";
 
@@ -38,7 +37,7 @@ export const Earn: React.FC = () => {
       </p>
       <div tw="flex w-full justify-between gap-4">
         {/* <Filter /> */}
-        <Sort />
+        {/* <Sort /> */}
         <NavLink to="/create/">
           <Button tw="h-12 text-lg" variant="primary">
             Create new market

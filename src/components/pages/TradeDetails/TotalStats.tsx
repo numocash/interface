@@ -57,11 +57,6 @@ export const TotalStats: React.FC = () => {
         .multiply(liquidityPrice)
         .divide(scale);
 
-      console.log(
-        collateralValue.toSignificant(5),
-        liquidityValue.toSignificant(5)
-      );
-
       const totalValue = collateralValue.add(liquidityValue);
 
       return (

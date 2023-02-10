@@ -1,27 +1,48 @@
 import { useState } from "react";
+import { objectKeys } from "ts-extras";
 
-import { Drop } from "../../common/Drop";
+import { Modal } from "../../common/Modal";
 import { Module } from "../../common/Module";
-import { FilterButton, RotateArrow } from "./Filter";
+import { useTrade } from ".";
+import { Check, FilterButton, FilterItem, RotateArrow, X } from "./Filter";
+
+export const Sorts = {
+  default: "Default",
+  change: "24h change",
+  // tvl: "Total value locked",
+} as const;
 
 export const Sort: React.FC = () => {
-  const [targetRef, setTargetRef] = useState<HTMLElement | null>(null);
   const [show, setShow] = useState(false);
+  const { sort, setSort } = useTrade();
   return (
     <>
-      <Drop
-        onDismiss={() => setShow(false)}
-        show={show}
-        target={targetRef}
-        placement={"auto"}
-      >
-        <Module tw="p-1">
-          <p>Volume</p>
-          <p>24h change</p>
+      <Modal onDismiss={() => setShow(false)} isOpen={show}>
+        <Module tw="flex flex-col p-1 gap-1 w-full">
+          <div tw="flex items-center gap-2 px-4 py-2 bg-gray-200 rounded-t-lg text-xl font-semibold w-full justify-between">
+            <p>Select asset</p>
+            <button onClick={() => setShow(false)}>
+              <X />
+            </button>
+          </div>
+          {objectKeys(Sorts).map((t) => (
+            <FilterItem
+              key={t}
+              selected={sort === t}
+              onClick={() => {
+                sort === t ? setSort("default") : setSort(t);
+              }}
+            >
+              <div tw="flex items-center gap-4">
+                <p tw="text-lg font-semibold">{Sorts[t]}</p>
+              </div>
+              <Check show={sort === t} />
+            </FilterItem>
+          ))}
         </Module>
-      </Drop>
-      <FilterButton onClick={() => setShow(!show)} ref={setTargetRef}>
-        <p>Sort by</p>
+      </Modal>
+      <FilterButton onClick={() => setShow(!show)}>
+        <p>{sort === "default" ? "Sort by" : Sorts[sort]}</p>
         <RotateArrow open={show} />
       </FilterButton>
     </>
