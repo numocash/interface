@@ -91,7 +91,7 @@ export const StyledButton = styled.button<AdditionalButtonProps>(
     tw`flex flex-row items-center justify-center leading-normal`,
     tw`rounded-lg`,
     tw`text-sm font-semibold`,
-    tw`text-white transform active:scale-98 hover:bg-opacity-90`,
+    tw`text-white active:scale-98 hover:bg-opacity-90`,
     tw`transition-transform`,
 
     variant === "outline" &&

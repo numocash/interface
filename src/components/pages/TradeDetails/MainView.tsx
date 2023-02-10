@@ -1,8 +1,8 @@
 import { TokenIcon } from "../../common/TokenIcon";
 import { useTradeDetails } from ".";
 import { Chart } from "./Chart";
-import { History } from "./History";
-import { Positions } from "./Positions";
+import { History } from "./History/History";
+import { Positions } from "./History/Positions/Positions";
 import { TimeSelector } from "./TimeSelector";
 
 export const MainView: React.FC = () => {
