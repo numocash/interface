@@ -113,7 +113,7 @@ export const Returns: React.FC = () => {
       </RowBetween>
 
       {/* height being set to 100% */}
-      <ParentSize tw="" style={{}}>
+      <ParentSize style={{}}>
         {(parent) => {
           xScale.range([0, parent.width]);
           yScale.range([90, 0]);

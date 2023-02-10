@@ -1,3 +1,4 @@
+import { VerticalItem } from "../../common/VerticalItem";
 import { useTradeDetails } from ".";
 
 export const TotalStats: React.FC = () => {
@@ -19,14 +20,16 @@ export const TotalStats: React.FC = () => {
 
   return (
     <div tw="flex justify-around w-full">
-      <div tw="flex flex-col gap-1 items-center">
-        <p tw="font-semibold text-lg">100 {base.symbol}</p>
-        <p tw="text-secondary text-sm">Open Interest</p>
-      </div>
-      <div tw="flex flex-col gap-1 items-center">
-        <p tw="font-semibold text-lg">100 {base.symbol}</p>
-        <p tw="text-secondary text-sm">Total Value Locked</p>
-      </div>
+      <VerticalItem
+        tw="items-center"
+        label="Open interest"
+        item={`100 ${base.symbol}`}
+      />
+      <VerticalItem
+        tw="items-center"
+        label="Total value locked"
+        item={`100 ${base.symbol}`}
+      />
     </div>
   );
 };

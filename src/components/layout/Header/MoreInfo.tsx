@@ -22,46 +22,38 @@ export const MoreInfo: React.FC = () => {
         placement={"auto"}
       >
         <Module tw="p-1 border-2 border-gray-200">
-          <InfoItem>
-            <ImBook size={size} />
-            <a
-              href="https://numoen.gitbook.io/numoen/"
-              target="_blank"
-              rel="noreferrer"
-            >
+          <a
+            href="https://numoen.gitbook.io/numoen/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <InfoItem>
+              <ImBook size={size} />
               Documentation
-            </a>
-          </InfoItem>
-          <InfoItem>
-            <FaDiscord size={size} />
-            <a
-              href="https://discord.com/invite/6Dtc49Dt4W"
-              target="_blank"
-              rel="noreferrer"
-            >
+            </InfoItem>
+          </a>
+          <a
+            href="https://discord.com/invite/6Dtc49Dt4W"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <InfoItem>
+              <FaDiscord size={size} />
               Discord
-            </a>
-          </InfoItem>
-          <InfoItem>
-            <ImGithub size={size} />
-            <a
-              href="https://github.com/Numoen"
-              target="_blank"
-              rel="noreferrer"
-            >
+            </InfoItem>
+          </a>
+          <a href="https://github.com/Numoen" target="_blank" rel="noreferrer">
+            <InfoItem>
+              <ImGithub size={size} />
               Github
-            </a>
-          </InfoItem>
-          <InfoItem>
-            <ImTwitter size={size} />
-            <a
-              href="https://twitter.com/numoen"
-              target="_blank"
-              rel="noreferrer"
-            >
+            </InfoItem>
+          </a>
+          <a href="https://twitter.com/numoen" target="_blank" rel="noreferrer">
+            <InfoItem>
+              <ImTwitter size={size} />
               Twitter
-            </a>
-          </InfoItem>
+            </InfoItem>
+          </a>
         </Module>
       </Drop>
       <button onClick={() => setShow(true)} ref={setTargetRef}>
@@ -72,5 +64,5 @@ export const MoreInfo: React.FC = () => {
 };
 
 const InfoItem = styled.div`
-  ${tw`flex items-center gap-2 px-4 py-2 rounded text-default hover:bg-gray-100`}
+  ${tw`flex items-center gap-2 px-4 py-2 duration-300 ease-in-out transform rounded text-default hover:bg-gray-100`}
 `;

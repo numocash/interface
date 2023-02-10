@@ -58,16 +58,13 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
   }, [currentPrice, priceHistory]);
 
   // return null;
-  const loading = !priceHistory || !currentPrice || !priceChange;
 
-  return loading ? (
-    <div tw="w-full h-14 duration-300 animate-pulse bg-gray-300 rounded-xl" />
-  ) : (
+  return (
     <NavLink
       tw=""
       to={`/trade/details/${tokens[0].address}/${tokens[1].address}`}
     >
-      <div tw="w-full rounded-xl hover:bg-gray-200 transform ease-in-out duration-1000 grid grid-cols-5 px-6 h-14 items-center justify-between">
+      <div tw="w-full rounded-xl hover:bg-gray-200 transform ease-in-out duration-1000 grid grid-cols-5 px-6 h-14 items-center justify-between ">
         <div tw="flex items-center gap-3 col-span-2">
           <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
             <TokenIcon token={tokens[1]} size={32} />
@@ -80,15 +77,23 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
           </div>
         </div>
 
-        <MiniChart priceHistory={priceHistory} currentPrice={currentPrice} />
+        {!!priceHistory && !!currentPrice ? (
+          <MiniChart priceHistory={priceHistory} currentPrice={currentPrice} />
+        ) : (
+          <div tw="rounded-lg h-10 w-32 animate-pulse transform ease-in-out duration-300 bg-gray-200 justify-self-center col-span-2" />
+        )}
 
-        <div tw="text-lg font-semibold justify-self-end">
-          {priceChange.greaterThan(0) ? (
-            <p tw="text-green-500 ">+{priceChange.toFixed(2)}%</p>
-          ) : (
-            <p tw="text-red">{priceChange.toFixed(2)}%</p>
-          )}
-        </div>
+        {priceChange ? (
+          <div tw="text-lg font-semibold justify-self-end">
+            {priceChange.greaterThan(0) ? (
+              <p tw="text-green-500 ">+{priceChange.toFixed(2)}%</p>
+            ) : (
+              <p tw="text-red">{priceChange.toFixed(2)}%</p>
+            )}
+          </div>
+        ) : (
+          <div tw=" justify-self-end h-6 rounded-lg bg-gray-200 w-16 transform animate-pulse ease-in-out duration-300" />
+        )}
       </div>
     </NavLink>
   );

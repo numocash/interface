@@ -37,7 +37,7 @@ export const { Provider: TradeProvider, useContainer: useTrade } =
 
 export const Trade: React.FC = () => {
   return (
-    <div tw="flex flex-col gap-4 w-full max-w-xl">
+    <div tw="flex flex-col gap-4 w-full max-w-3xl">
       <TradeProvider>
         <Explain />
         <Display />

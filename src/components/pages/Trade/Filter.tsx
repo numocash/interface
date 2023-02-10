@@ -53,7 +53,7 @@ export const Filter: React.FC = () => {
         </Module>
       </Drop>
       <FilterButton onClick={() => !show && setShow(true)} ref={setTargetRef}>
-        <p>Asset</p>
+        <p>Asset{assets.length > 0 && `  (${assets.length})`}</p>
         <RotateArrow open={show} />
       </FilterButton>
     </>
@@ -79,5 +79,5 @@ export const RotateArrow = styled(IoIosArrowDown)<{ open: boolean }>(
 );
 
 export const FilterButton = styled.button`
-  ${tw`flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200`}
+  ${tw`flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200`}
 `;

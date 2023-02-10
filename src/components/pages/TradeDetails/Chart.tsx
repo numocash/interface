@@ -4,6 +4,7 @@ import { localPoint } from "@visx/event";
 import type { EventType } from "@visx/event/lib/types";
 import { GlyphCircle } from "@visx/glyph";
 import { Group } from "@visx/group";
+import { ParentSize } from "@visx/responsive";
 import { scaleLinear } from "@visx/scale";
 import { Line, LinePath } from "@visx/shape";
 import { extent } from "d3-array";
@@ -16,16 +17,15 @@ import {
   usePriceHistory,
 } from "../../../hooks/useExternalExchange";
 import type { PricePoint } from "../../../services/graphql/uniswapV2";
-import useWindowDimensions from "../../../utils/useWindowDimensions";
 import { useTradeDetails } from ".";
 import { EmptyChart } from "./EmptyChart";
 
 export const Chart: React.FC = () => {
-  const { base: denom, quote: other, timeframe } = useTradeDetails();
-  const referenceMarketQuery = useMostLiquidMarket([denom, other]);
+  const { base, quote, timeframe } = useTradeDetails();
+  const referenceMarketQuery = useMostLiquidMarket([base, quote]);
 
   // TODO: bug with inverting
-  const invertPriceQuery = other.sortsBefore(denom);
+  const invertPriceQuery = quote.sortsBefore(base);
 
   const priceHistoryQuery = usePriceHistory(
     referenceMarketQuery.data,
@@ -90,12 +90,6 @@ export const Chart: React.FC = () => {
       ? (extent(priceHistory, getY) as [number, number])
       : [0, 0],
   });
-
-  // update scale output ranges
-  const windowDimensions = useWindowDimensions();
-  const w = ((windowDimensions.width - 96) * 2) / 3 - 48;
-  xScale.range([0, w]);
-  yScale.range([178, 0]);
 
   const handleHover = useCallback(
     (event: Element | EventType) => {
@@ -162,54 +156,68 @@ export const Chart: React.FC = () => {
       {loading ? (
         <EmptyChart />
       ) : (
-        <svg tw=" w-full h-48 justify-self-center col-span-2">
-          <Group top={8}>
-            <LinePath<
-              NonNullable<ReturnType<typeof usePriceHistory>["data"]>[number]
-            >
-              curve={curveNatural}
-              data={
-                (priceHistory as NonNullable<
-                  ReturnType<typeof usePriceHistory>["data"]
-                >[number][]) ?? undefined
-              }
-              x={(d) => xScale(getX(d)) ?? 0}
-              y={(d) => yScale(getY(d)) ?? 0}
-              stroke={"#333"}
-              strokeWidth={2}
-              strokeOpacity={1}
-            />
-          </Group>
-          <Line
-            from={{ x: crosshair ? xScale(crosshair) : undefined, y: 0 }}
-            to={{ x: crosshair ? xScale(crosshair) : undefined, y: 192 }}
-            stroke={"#333"}
-            strokeWidth={1}
-            pointerEvents="none"
-            strokeDasharray="4,4"
-          />
-          {crosshair && displayPrice && (
-            <GlyphCircle
-              left={xScale(crosshair)}
-              top={yScale(getY(displayPrice)) + 8}
-              size={50}
-              fill={"#E5E5EA"}
-              stroke={"#E5E5EA"}
-              strokeWidth={0.5}
-            />
-          )}
-          <rect
-            x={0}
-            y={0}
-            width={w}
-            height={192}
-            fill="transparent"
-            onTouchStart={handleHover}
-            onTouchMove={handleHover}
-            onMouseMove={handleHover}
-            onMouseLeave={resetDisplay}
-          />
-        </svg>
+        <ParentSize style={{}}>
+          {(parent) => {
+            const marginTop = 15;
+            xScale.range([0, parent.width]);
+            yScale.range([208 - marginTop * 2, 0]);
+
+            return (
+              <svg tw="w-full h-52 justify-self-center col-span-2">
+                <Group top={marginTop}>
+                  <LinePath<
+                    NonNullable<
+                      ReturnType<typeof usePriceHistory>["data"]
+                    >[number]
+                  >
+                    curve={curveNatural}
+                    data={
+                      (priceHistory as NonNullable<
+                        ReturnType<typeof usePriceHistory>["data"]
+                      >[number][]) ?? undefined
+                    }
+                    x={(d) => xScale(getX(d)) ?? 0}
+                    y={(d) => yScale(getY(d)) ?? 0}
+                    stroke={"#333"}
+                    strokeWidth={2}
+                    strokeOpacity={1}
+                  />
+                </Group>
+                {crosshair && (
+                  <Line
+                    from={{ x: xScale(crosshair), y: 0 }}
+                    to={{ x: xScale(crosshair), y: 208 }}
+                    stroke={"#333"}
+                    strokeWidth={1}
+                    pointerEvents="none"
+                    strokeDasharray="4,4"
+                  />
+                )}
+                {crosshair && displayPrice && (
+                  <GlyphCircle
+                    left={xScale(crosshair)}
+                    top={yScale(getY(displayPrice)) + marginTop}
+                    size={50}
+                    fill={"#E5E5EA"}
+                    stroke={"#E5E5EA"}
+                    strokeWidth={0.5}
+                  />
+                )}
+                <rect
+                  x={0}
+                  y={0}
+                  width={parent.width}
+                  height={208}
+                  fill="transparent"
+                  onTouchStart={handleHover}
+                  onTouchMove={handleHover}
+                  onMouseMove={handleHover}
+                  onMouseLeave={resetDisplay}
+                />
+              </svg>
+            );
+          }}
+        </ParentSize>
       )}
     </div>
   );
