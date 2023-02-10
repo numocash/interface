@@ -1,3 +1,5 @@
+import { NavLink } from "react-router-dom";
+
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenIcon } from "../../common/TokenIcon";
@@ -8,37 +10,42 @@ interface Props {
 
 export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
   return (
-    <Wrapper hasDeposit={false}>
-      <div tw="py-2 px-4 gap-4 flex flex-col bg-white rounded-t-xl">
-        <div tw="flex items-center gap-3 col-span-2">
-          <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
-            <TokenIcon token={tokens[1]} size={32} />
-            <TokenIcon token={tokens[0]} size={32} />
+    <NavLink
+      tw=""
+      to={`/earn/details/${tokens[0].address}/${tokens[1].address}`}
+    >
+      <Wrapper hasDeposit={false}>
+        <div tw="py-2 px-4 gap-4 flex flex-col bg-white rounded-t-xl">
+          <div tw="flex items-center gap-3 col-span-2">
+            <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
+              <TokenIcon token={tokens[1]} size={32} />
+              <TokenIcon token={tokens[0]} size={32} />
+            </div>
+            <div tw="grid gap-0.5">
+              <span tw="font-semibold text-lg text-default leading-tight">
+                {tokens[1].symbol} / {tokens[0].symbol}
+              </span>
+            </div>
           </div>
-          <div tw="grid gap-0.5">
-            <span tw="font-semibold text-lg text-default leading-tight">
-              {tokens[1].symbol} / {tokens[0].symbol}
-            </span>
+
+          <div tw="flex flex-col ">
+            <p tw="text-sm text-secondary">Best APR</p>
+            <p tw="text-default font-bold">21.4%</p>
+          </div>
+
+          <div tw="flex flex-col">
+            <p tw="text-sm text-secondary">TVL</p>
+            <p tw="text-default font-bold">1000 {tokens[0].symbol}</p>
           </div>
         </div>
-
-        <div tw="flex flex-col ">
-          <p tw="text-sm text-secondary">Best APR</p>
-          <p tw="text-default font-bold">21.4%%</p>
+        <div tw="bg-gray-200 w-full overflow-hidden">
+          <RowBetween tw="items-center bg-transparent">
+            <p>Your position</p>
+            <p>--</p>
+          </RowBetween>
         </div>
-
-        <div tw="flex flex-col">
-          <p tw="text-sm text-secondary">TVL</p>
-          <p tw="text-default font-bold">1000 {tokens[0].symbol}</p>
-        </div>
-      </div>
-      <div tw="bg-gray-200 w-full overflow-hidden">
-        <RowBetween tw="items-center bg-transparent">
-          <p>Your position</p>
-          <p>--</p>
-        </RowBetween>
-      </div>
-    </Wrapper>
+      </Wrapper>
+    </NavLink>
   );
 };
 

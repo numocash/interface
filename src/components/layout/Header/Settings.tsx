@@ -4,15 +4,15 @@ import { styled } from "twin.macro";
 
 import { useSettings } from "../../../contexts/settings";
 import { ReactComponent as SettingsIcon } from "../../../icons/settings.svg";
-import { Drop } from "../../common/Drop";
 import { BigNumericInput } from "../../common/inputs/BigNumericInput";
 import { Switch } from "../../common/inputs/Switch";
+import { Modal } from "../../common/Modal";
 import { HeaderItem } from "./Nav";
 
 export const Settings: React.FC = () => {
   const settings = useSettings();
   const [show, setShow] = useState(false);
-  const [targetRef, setTargetRef] = useState<HTMLElement | null>(null);
+  // const [targetRef, setTargetRef] = useState<HTMLElement | null>(null);
   const [inputDeadline, setInputDeadline] = useState("");
   const [inputSlippage, setInputSlippage] = useState("");
 
@@ -32,12 +32,7 @@ export const Settings: React.FC = () => {
 
   return (
     <>
-      <Drop
-        onDismiss={onDismiss}
-        show={show}
-        target={targetRef}
-        placement="auto"
-      >
+      <Modal onDismiss={onDismiss} isOpen={show}>
         <div tw="p-3 rounded-lg border border-gray-400 bg-white  w-full">
           <div tw="flex justify-between items-center">
             <div tw="font-semibold text-lg">Settings</div>
@@ -83,8 +78,8 @@ export const Settings: React.FC = () => {
             </div>
           </div>
         </div>
-      </Drop>
-      <button tw="" ref={setTargetRef} onClick={() => setShow(true)}>
+      </Modal>
+      <button tw="" onClick={() => setShow(true)}>
         <HeaderItem
           item={
             <SettingsIcon tw="transform hover:rotate-90 duration-300 ease-in-out h-6" />

@@ -29,7 +29,7 @@ export const Modal: React.FC<ModalProps> = ({
   maxHeight,
 }: ModalProps) => {
   const fadeTransition = useTransition(isOpen, {
-    config: { duration: 150 },
+    config: { duration: 300 },
     from: { opacity: 0 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },

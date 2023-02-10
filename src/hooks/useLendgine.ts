@@ -1,10 +1,13 @@
 import { Fraction } from "@uniswap/sdk-core";
+import type { BigNumber } from "ethers";
+import { chunk } from "lodash";
 import { useMemo } from "react";
 import { useContractReads } from "wagmi";
 
 import type { Lendgine } from "../constants";
 import { useEnvironment } from "../contexts/environment2";
 import { lendgineABI } from "../generated";
+import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./useBalance";
 import type { WrappedTokenInfo } from "./useTokens2";
 
@@ -105,6 +108,95 @@ export const useLendgine = (lendgine: HookArg<Lendgine>) => {
       reserve1: new Fraction(lendgine[6].toString()),
       totalLiquidity: new Fraction(lendgine[7].toString()),
     };
+  };
+
+  const updatedQuery = {
+    ...query,
+    data: parseReturn(query.data),
+    refetch: async (options: Parameters<(typeof query)["refetch"]>[0]) => {
+      const data = await query.refetch(options);
+      return parseReturn(data.data);
+    },
+  };
+
+  return updatedQuery;
+};
+
+export const useLendgines = (lendgines: HookArg<readonly Lendgine[]>) => {
+  const contracts = lendgines
+    ? lendgines.flatMap(
+        (lendgine) =>
+          [
+            {
+              address: lendgine.address,
+              abi: lendgineABI,
+              functionName: "totalPositionSize",
+            },
+            {
+              address: lendgine.address,
+              abi: lendgineABI,
+              functionName: "totalLiquidityBorrowed",
+            },
+            {
+              address: lendgine.address,
+              abi: lendgineABI,
+              functionName: "rewardPerPositionStored",
+            },
+            {
+              address: lendgine.address,
+              abi: lendgineABI,
+              functionName: "lastUpdate",
+            },
+            {
+              address: lendgine.address,
+              abi: lendgineABI,
+              functionName: "totalSupply",
+            },
+            {
+              address: lendgine.address,
+              abi: lendgineABI,
+              functionName: "reserve0",
+            },
+            {
+              address: lendgine.address,
+              abi: lendgineABI,
+              functionName: "reserve1",
+            },
+            {
+              address: lendgine.address,
+              abi: lendgineABI,
+              functionName: "totalLiquidity",
+            },
+          ] as const
+      )
+    : undefined;
+
+  const query = useContractReads({
+    //  ^?
+    contracts,
+    allowFailure: false,
+    watch: true,
+    staleTime: Infinity,
+    enabled: !!lendgines,
+  });
+
+  const parseReturn = (
+    lendginesQuery: (typeof query)["data"]
+  ): LendgineInfo[] | undefined => {
+    if (!lendginesQuery) return undefined;
+    return chunk(lendginesQuery, 8).map((c) => {
+      const lendgine = c as Tuple<BigNumber, 8>;
+      return {
+        totalPositionSize: new Fraction(lendgine[0].toString()),
+        totalLiquidityBorrowed: new Fraction(lendgine[1].toString()),
+        rewardPerPositionStored: new Fraction(lendgine[2].toString()),
+        lastUpdate: +lendgine[3].toString(),
+        totalSupply: new Fraction(lendgine[4].toString()),
+        reserve0: new Fraction(lendgine[5].toString()),
+        reserve1: new Fraction(lendgine[6].toString()),
+        totalLiquidity: new Fraction(lendgine[7].toString()),
+      };
+    });
   };
 
   const updatedQuery = {
