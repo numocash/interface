@@ -70,8 +70,12 @@ export const TradeColumn: React.FC = () => {
       {!close && Tabs}
       {(trade === TradeType.Long || trade === TradeType.Short) && <Trade />}
       <ProvideLiquidity />
-      <div tw="w-full border-b-2 border-gray-200" />
-      <Returns />
+      {!close && (
+        <>
+          <div tw="w-full border-b-2 border-gray-200" />
+          <Returns />
+        </>
+      )}
       <div tw="w-full border-b-2 border-gray-200" />
       <TotalStats />
       <div tw="w-full border-b-2 border-gray-200" />

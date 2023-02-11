@@ -24,7 +24,7 @@ import {
   convertShareToLiquidity,
 } from "../../../../utils/Numoen/lendgineMath";
 import { numoenPrice } from "../../../../utils/Numoen/price";
-import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
+import { scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
@@ -83,10 +83,16 @@ export const Close: React.FC = () => {
     const value = collateralValue.subtract(liquidityValue).divide(scale);
     if (!parsedAmount) return { value };
 
-    const shares = parsedAmount
+    const sharesFraction = parsedAmount
       .multiply(balanceQuery.data)
       .divide(value)
       .divide(scale);
+
+    const shares = CurrencyAmount.fromFractionalAmount(
+      selectedLendgine.lendgine,
+      sharesFraction.quotient,
+      1
+    );
 
     const liquidityMinted = convertShareToLiquidity(
       shares,
@@ -103,16 +109,10 @@ export const Close: React.FC = () => {
     selectedLendgine,
   ]);
 
-  const approve = useApprove(
-    shares
-      ? CurrencyAmount.fromFractionalAmount(
-          selectedLendgine.lendgine,
-          shares.numerator,
-          shares.denominator
-        )
-      : null,
-    environment.base.lendgineRouter
-  );
+  console.log(shares?.quotient.toString());
+
+  // TODO: approving slightly too little
+  const approve = useApprove(shares, environment.base.lendgineRouter);
 
   const args = useMemo(
     () =>
@@ -128,14 +128,15 @@ export const Close: React.FC = () => {
                   .multiply(scale)
                   .quotient.toString()
               ),
-              shares: BigNumber.from(shares?.quotient.toString()),
-              collateralMin: BigNumber.from(
-                parsedAmount
-                  .multiply(
-                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
-                  )
-                  .quotient.toString()
-              ),
+              shares: BigNumber.from(shares.quotient.toString()),
+              // collateralMin: BigNumber.from(
+              //   parsedAmount
+              //     .multiply(
+              //       ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+              //     )
+              //     .quotient.toString()
+              // ),
+              collateralMin: BigNumber.from(0),
               amount0Min: BigNumber.from(0),
               amount1Min: BigNumber.from(0),
               swapType: 0,
@@ -155,7 +156,6 @@ export const Close: React.FC = () => {
       selectedLendgine.token0.decimals,
       selectedLendgine.token1.address,
       selectedLendgine.token1.decimals,
-      settings.maxSlippagePercent,
       settings.timeout,
       shares,
     ]
@@ -173,13 +173,13 @@ export const Close: React.FC = () => {
     () =>
       input === ""
         ? "Enter an amount"
+        : !parsedAmount
+        ? "Invalid input"
         : !shares ||
           !balanceQuery.data ||
           balanceQuery.isLoading ||
           !approve.allowanceQuery.data
         ? "Loading"
-        : !parsedAmount
-        ? "Invalid input"
         : shares.greaterThan(balanceQuery.data)
         ? "Insufficient balance"
         : null,

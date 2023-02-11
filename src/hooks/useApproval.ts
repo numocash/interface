@@ -63,9 +63,14 @@ export const useApprove = <T extends Token>(
   const approvalRequired = useMemo(
     () =>
       allowanceQuery.data && tokenAmount
-        ? !allowanceQuery.data.greaterThan(tokenAmount)
+        ? tokenAmount.greaterThan(allowanceQuery.data)
         : null,
     [allowanceQuery.data, tokenAmount]
+  );
+
+  console.log(
+    allowanceQuery.data?.quotient.toString(),
+    tokenAmount?.quotient.toString()
   );
 
   // const approvalRequired = true;
@@ -78,12 +83,10 @@ export const useApprove = <T extends Token>(
             spender,
             settings.infiniteApprove
               ? BigNumber.from(MaxUint256.toString())
-              : BigNumber.from(tokenAmount.asFraction.quotient.toString()),
+              : BigNumber.from(tokenAmount.quotient.toString()),
           ]
         : undefined,
-    address: tokenAmount
-      ? getAddress(tokenAmount?.currency.address)
-      : undefined,
+    address: tokenAmount ? getAddress(tokenAmount.currency.address) : undefined,
     enabled: !!tokenAmount && !!spender,
   });
 
@@ -109,7 +112,7 @@ export const useApprove = <T extends Token>(
   };
 
   return {
-    prepare,
+    prepare: prepare as ReturnType<typeof usePrepareContractWrite>,
     write,
     allowanceQuery,
     beetStage: approvalRequired === true ? beetStage : null,
