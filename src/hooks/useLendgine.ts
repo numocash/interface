@@ -88,7 +88,7 @@ export const useLendgine = (lendgine: HookArg<Lendgine>) => {
   const query = useContractReads({
     //  ^?
     contracts,
-    allowFailure: true,
+    allowFailure: false,
     watch: true,
     staleTime: Infinity,
     enabled: !!lendgine,
@@ -98,6 +98,7 @@ export const useLendgine = (lendgine: HookArg<Lendgine>) => {
     lendgine: (typeof query)["data"]
   ): LendgineInfo | undefined => {
     if (!lendgine) return undefined;
+
     return {
       totalPositionSize: new Fraction(lendgine[0].toString()),
       totalLiquidityBorrowed: new Fraction(lendgine[1].toString()),

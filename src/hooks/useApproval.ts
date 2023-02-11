@@ -1,6 +1,8 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
+import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount, MaxUint256 } from "@uniswap/sdk-core";
+import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import type { Address, usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
@@ -13,10 +15,9 @@ import {
 } from "../generated";
 import type { BeetStage } from "../utils/beet";
 import type { HookArg } from "./useBalance";
-import type { WrappedTokenInfo } from "./useTokens2";
 
-export const useAllowance = (
-  token: HookArg<WrappedTokenInfo>,
+export const useAllowance = <T extends Token>(
+  token: HookArg<T>,
   address: HookArg<Address>,
   spender: HookArg<Address>
 ) => {
@@ -50,8 +51,8 @@ export const useAllowance = (
   return updatedQuery;
 };
 
-export const useApprove = (
-  tokenAmount: HookArg<CurrencyAmount<WrappedTokenInfo>>,
+export const useApprove = <T extends Token>(
+  tokenAmount: HookArg<CurrencyAmount<T>>,
   spender: HookArg<Address>
 ) => {
   const settings = useSettings();
@@ -59,15 +60,15 @@ export const useApprove = (
 
   const allowanceQuery = useAllowance(tokenAmount?.currency, address, spender);
 
-  // const approvalRequired = useMemo(
-  //   () =>
-  //     allowanceQuery.data && tokenAmount
-  //       ? !allowanceQuery.data.greaterThan(tokenAmount)
-  //       : null,
-  //   [allowanceQuery.data, tokenAmount]
-  // );
+  const approvalRequired = useMemo(
+    () =>
+      allowanceQuery.data && tokenAmount
+        ? !allowanceQuery.data.greaterThan(tokenAmount)
+        : null,
+    [allowanceQuery.data, tokenAmount]
+  );
 
-  const approvalRequired = true;
+  // const approvalRequired = true;
   // return null if approval is already met
   // return a Beet Transaction
   const prepare = usePrepareErc20Approve({

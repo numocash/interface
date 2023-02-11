@@ -10,7 +10,11 @@ export const VerticalItem: React.FC<Props> = ({
 }: Props) => {
   return (
     <div tw="flex flex-col" className={className}>
-      <p tw="font-semibold text-lg">{item}</p>
+      {typeof item === "string" ? (
+        <p tw="font-semibold text-lg">{item}</p>
+      ) : (
+        item
+      )}
       <p tw="text-secondary text-sm">{label}</p>
     </div>
   );

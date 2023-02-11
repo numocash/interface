@@ -20,8 +20,14 @@ export enum TradeType {
 }
 
 export const TradeColumn: React.FC = () => {
-  const { trade, lendgines, base, setSelectedLendgine, selectedLendgine } =
-    useTradeDetails();
+  const {
+    trade,
+    lendgines,
+    base,
+    setSelectedLendgine,
+    selectedLendgine,
+    close,
+  } = useTradeDetails();
 
   const shortLendgine = useMemo(
     () => pickShortLendgines(lendgines, base)[0],
@@ -61,7 +67,7 @@ export const TradeColumn: React.FC = () => {
   );
   return (
     <div tw="pl-6 lg:pl-8 xl:pl-12 transform ease-in-out duration-300 py-2 flex flex-col gap-4 w-full">
-      {Tabs}
+      {!close && Tabs}
       {(trade === TradeType.Long || trade === TradeType.Short) && <Trade />}
       <ProvideLiquidity />
       <div tw="w-full border-b-2 border-gray-200" />

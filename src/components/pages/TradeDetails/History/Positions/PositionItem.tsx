@@ -25,6 +25,7 @@ export const PositionItem: React.FC<Props> = ({
 }: Props) => {
   const { base, quote, setSelectedLendgine, setClose } = useTradeDetails();
   const symbol = quote.symbol + (lendgine.token1.equals(quote) ? "+" : "-");
+  const isInverse = base.equals(lendgine.token1);
 
   const value = useMemo(() => {
     const price = numoenPrice(lendgine, lendgineInfo);
@@ -38,8 +39,8 @@ export const PositionItem: React.FC<Props> = ({
 
     const value = collateralValue.subtract(liquidityValue);
 
-    return value;
-  }, [balance, lendgine, lendgineInfo]);
+    return isInverse ? value.divide(price) : value;
+  }, [balance, isInverse, lendgine, lendgineInfo]);
   return (
     <div
       tw="w-full justify-between  grid grid-cols-9  h-12 items-center"
@@ -47,7 +48,10 @@ export const PositionItem: React.FC<Props> = ({
     >
       <p tw="font-semibold pl-4 col-span-2">{symbol}</p>
       <p tw="justify-self-start col-span-2">
-        {lendgine.bound.asFraction.toSignificant(5)}
+        {(isInverse
+          ? lendgine.bound.asFraction.invert()
+          : lendgine.bound.asFraction
+        ).toSignificant(5)}
       </p>
 
       <p tw="justify-self-start col-span-2">

@@ -76,10 +76,10 @@ export const TotalStats: React.FC = () => {
           !openInterest ? (
             <Loading />
           ) : (
-            <p>
+            <>
               {openInterest.toSignificant(5)}{" "}
               <span tw="text-xs font-normal">{base.symbol}</span>
-            </p>
+            </>
           )
         }
       />
@@ -90,10 +90,10 @@ export const TotalStats: React.FC = () => {
           !tvl ? (
             <Loading />
           ) : (
-            <p>
+            <>
               {tvl.toSignificant(5)}{" "}
               <span tw="text-xs font-normal">{base.symbol}</span>
-            </p>
+            </>
           )
         }
       />

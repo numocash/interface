@@ -3,7 +3,6 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
 import { Fraction } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
-import invariant from "tiny-invariant";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
@@ -200,7 +199,6 @@ export const Buy: React.FC = () => {
         tw="h-12 text-xl font-bold items-center"
         disabled={!!disableReason}
         onClick={async () => {
-          invariant(parsedAmount);
           await Beet(
             [
               approve.beetStage,
@@ -234,3 +232,6 @@ export const Buy: React.FC = () => {
     </>
   );
 };
+
+// 17gwei etherscan
+// 27320201259
