@@ -68,11 +68,6 @@ export const useApprove = <T extends Token>(
     [allowanceQuery.data, tokenAmount]
   );
 
-  console.log(
-    allowanceQuery.data?.quotient.toString(),
-    tokenAmount?.quotient.toString()
-  );
-
   // const approvalRequired = true;
   // return null if approval is already met
   // return a Beet Transaction

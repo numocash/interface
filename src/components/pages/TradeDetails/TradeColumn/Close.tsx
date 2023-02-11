@@ -18,13 +18,9 @@ import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import type { BeetStage } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
-import {
-  convertLiquidityToCollateral,
-  convertPriceToLiquidityPrice,
-  convertShareToLiquidity,
-} from "../../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../../utils/Numoen/price";
-import { scale } from "../../../../utils/Numoen/trade";
+import { convertShareToLiquidity } from "../../../../utils/Numoen/lendgineMath";
+import { numoenPrice, pricePerShare } from "../../../../utils/Numoen/price";
+import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
@@ -35,12 +31,13 @@ import { useTradeDetails } from "..";
 
 export const Close: React.FC = () => {
   const { setClose, quote, selectedLendgine } = useTradeDetails();
+
   const environment = useEnvironment();
   const settings = useSettings();
   const Beet = useBeet();
   const { address } = useAccount();
-  const symbol =
-    quote.symbol + (selectedLendgine.token1.equals(quote) ? "+" : "-");
+  const isInverse = selectedLendgine.token1.equals(quote);
+  const symbol = quote.symbol + (isInverse ? "+" : "-");
 
   const lendgineInfoQuery = useLendgine(selectedLendgine);
   const balanceQuery = useBalance(selectedLendgine.lendgine, address);
@@ -53,7 +50,12 @@ export const Close: React.FC = () => {
   );
 
   // TODO: account for unaccrued interest
-  const { value: positionValue, shares } = useMemo(() => {
+  const {
+    value: positionValue,
+    shares,
+    amount0,
+    amount1,
+  } = useMemo(() => {
     if (
       !lendgineInfoQuery.data ||
       lendgineInfoQuery.isLoading ||
@@ -62,31 +64,21 @@ export const Close: React.FC = () => {
     )
       return {};
 
+    // token0 / share
+    const sharePrice = pricePerShare(selectedLendgine, lendgineInfoQuery.data);
+
+    // token0 / token1
     const price = numoenPrice(selectedLendgine, lendgineInfoQuery.data);
-    const liquidityPrice = convertPriceToLiquidityPrice(
-      price,
-      selectedLendgine
-    );
 
-    const liquidity = convertShareToLiquidity(
-      balanceQuery.data,
-      lendgineInfoQuery.data
-    );
-    const collateral = convertLiquidityToCollateral(
-      liquidity,
-      selectedLendgine
-    );
+    // token1 / share
+    const sharePriceToken1 = sharePrice.divide(price);
 
-    const liquidityValue = liquidity.multiply(liquidityPrice).divide(price);
-    const collateralValue = collateral;
+    // token1 / shares
+    const value = sharePriceToken1.multiply(balanceQuery.data).divide(scale);
 
-    const value = collateralValue.subtract(liquidityValue).divide(scale);
     if (!parsedAmount) return { value };
 
-    const sharesFraction = parsedAmount
-      .multiply(balanceQuery.data)
-      .divide(value)
-      .divide(scale);
+    const sharesFraction = parsedAmount.divide(sharePriceToken1);
 
     const shares = CurrencyAmount.fromFractionalAmount(
       selectedLendgine.lendgine,
@@ -99,7 +91,15 @@ export const Close: React.FC = () => {
       lendgineInfoQuery.data
     );
 
-    return { value, shares };
+    const amount0 = liquidityMinted
+      .multiply(lendgineInfoQuery.data.reserve0)
+      .divide(lendgineInfoQuery.data.totalLiquidity);
+
+    const amount1 = liquidityMinted
+      .multiply(lendgineInfoQuery.data.reserve1)
+      .divide(lendgineInfoQuery.data.totalLiquidity);
+
+    return { value, shares, amount0, amount1 };
   }, [
     balanceQuery.data,
     balanceQuery.isLoading,
@@ -109,14 +109,12 @@ export const Close: React.FC = () => {
     selectedLendgine,
   ]);
 
-  console.log(shares?.quotient.toString());
-
   // TODO: approving slightly too little
   const approve = useApprove(shares, environment.base.lendgineRouter);
 
   const args = useMemo(
     () =>
-      !!shares && !!parsedAmount && !!address
+      !!shares && !!parsedAmount && !!address && !!amount0 && !!amount1
         ? ([
             {
               token0: getAddress(selectedLendgine.token0.address),
@@ -129,16 +127,27 @@ export const Close: React.FC = () => {
                   .quotient.toString()
               ),
               shares: BigNumber.from(shares.quotient.toString()),
-              // collateralMin: BigNumber.from(
-              //   parsedAmount
-              //     .multiply(
-              //       ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
-              //     )
-              //     .quotient.toString()
-              // ),
-              collateralMin: BigNumber.from(0),
-              amount0Min: BigNumber.from(0),
-              amount1Min: BigNumber.from(0),
+              collateralMin: BigNumber.from(
+                parsedAmount
+                  .multiply(
+                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+                  )
+                  .quotient.toString()
+              ),
+              amount0Min: BigNumber.from(
+                amount0
+                  .multiply(
+                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+                  )
+                  .quotient.toString()
+              ),
+              amount1Min: BigNumber.from(
+                amount1
+                  .multiply(
+                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+                  )
+                  .quotient.toString()
+              ),
               swapType: 0,
               swapExtraData: AddressZero,
               recipient: address,
@@ -150,12 +159,15 @@ export const Close: React.FC = () => {
         : undefined,
     [
       address,
+      amount0,
+      amount1,
       parsedAmount,
       selectedLendgine.bound.asFraction,
       selectedLendgine.token0.address,
       selectedLendgine.token0.decimals,
       selectedLendgine.token1.address,
       selectedLendgine.token1.decimals,
+      settings.maxSlippagePercent,
       settings.timeout,
       shares,
     ]
@@ -173,18 +185,22 @@ export const Close: React.FC = () => {
     () =>
       input === ""
         ? "Enter an amount"
-        : !parsedAmount
+        : // : parsedAmount && parsedAmount.equalTo(0)
+        // ? "Enter more than zero"
+        !parsedAmount
         ? "Invalid input"
         : !shares ||
           !balanceQuery.data ||
           balanceQuery.isLoading ||
-          !approve.allowanceQuery.data
+          !approve.allowanceQuery.data ||
+          !args
         ? "Loading"
         : shares.greaterThan(balanceQuery.data)
         ? "Insufficient balance"
         : null,
     [
       approve.allowanceQuery.data,
+      args,
       balanceQuery.data,
       balanceQuery.isLoading,
       input,

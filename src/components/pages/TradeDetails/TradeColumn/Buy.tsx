@@ -53,7 +53,7 @@ export const Buy: React.FC = () => {
     [input, selectedLendgine.token1]
   );
   const approve = useApprove(parsedAmount, environment.base.lendgineRouter);
-
+  // TODO: short funding rate is wrong
   const { borrowAmount, liquidity, shares, bRate } = useMemo(() => {
     const price = selectedLendgineInfo.data
       ? numoenPrice(selectedLendgine, selectedLendgineInfo.data)

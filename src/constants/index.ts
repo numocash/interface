@@ -1,7 +1,8 @@
 import type { Price, Token } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
+import type { foundry } from "wagmi/chains";
 
-import type { chains, foundry } from "../AppWithProviders";
+import type { chains } from "../AppWithProviders";
 import type { WrappedTokenInfo } from "../hooks/useTokens2";
 import { foundryConfig } from "./foundry";
 
