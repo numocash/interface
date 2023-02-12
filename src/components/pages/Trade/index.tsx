@@ -2,10 +2,15 @@ import { useMemo, useState } from "react";
 import { createContainer } from "unstated-next";
 
 import { useEnvironment } from "../../../contexts/environment2";
+import type { Market } from "../../../hooks/useMarket";
+import {
+  dedupeMarkets,
+  useGetLendgineToMarket,
+} from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import { Display } from "./Display";
+import { Display } from "../../common/Display";
+import { Filter } from "../../common/Filter";
 import { Explain } from "./Explain";
-import { Filter } from "./Filter";
 import { Markets } from "./Markets";
 import type { Sorts } from "./Sort";
 
@@ -16,7 +21,7 @@ interface ITrade {
   sort: keyof typeof Sorts;
   setSort: (val: keyof typeof Sorts) => void;
 
-  markets: readonly (readonly [WrappedTokenInfo, WrappedTokenInfo])[];
+  markets: readonly Market[];
 }
 
 const useTradeInternal = (): ITrade => {
@@ -26,52 +31,22 @@ const useTradeInternal = (): ITrade => {
   const environment = useEnvironment();
   const lendgines = environment.lendgines;
 
+  const getLendgineToMarket = useGetLendgineToMarket();
+
   const markets = useMemo(() => {
-    const lendgineTokens = lendgines.map((m) => [m.token0, m.token1] as const);
+    const markets = lendgines.map((l) => getLendgineToMarket(l));
 
-    const seen = new Set<string>();
+    const dedupedMarkets = dedupeMarkets(markets);
 
-    const dedupedLendgineTokens = lendgineTokens.filter((t) => {
-      const sortedTokens = t[0].sortsBefore(t[1])
-        ? ([t[0], t[1]] as const)
-        : ([t[1], t[0]] as const);
-      const tokenID = `${sortedTokens[0].address}_${sortedTokens[1].address}`;
-      if (seen.has(tokenID)) {
-        return false;
-      } else {
-        seen.add(tokenID);
-        return true;
-      }
-    });
-
-    const orderedLendginetokens = dedupedLendgineTokens.map((dt) => {
-      if (
-        dt[0].equals(environment.interface.stablecoin) ||
-        dt[1].equals(environment.interface.stablecoin)
-      ) {
-        return dt[0].equals(environment.interface.stablecoin)
-          ? dt
-          : ([dt[1], dt[0]] as const);
-      }
-      return dt[0].equals(environment.interface.wrappedNative)
-        ? dt
-        : ([dt[1], dt[0]] as const);
-    });
-
-    const filteredLendginetokens =
+    const filteredMarkets =
       assets.length === 0
-        ? orderedLendginetokens
-        : orderedLendginetokens.filter(
-            (l) => assets.includes(l[0]) || assets.includes(l[1])
+        ? dedupedMarkets
+        : dedupedMarkets.filter(
+            (m) => assets.includes(m[0]) || assets.includes(m[1])
           );
 
-    return filteredLendginetokens;
-  }, [
-    assets,
-    environment.interface.stablecoin,
-    environment.interface.wrappedNative,
-    lendgines,
-  ]);
+    return filteredMarkets;
+  }, [assets, getLendgineToMarket, lendgines]);
 
   return {
     assets,
@@ -86,13 +61,14 @@ export const { Provider: TradeProvider, useContainer: useTrade } =
   createContainer(useTradeInternal);
 
 export const Trade: React.FC = () => {
+  const { markets, assets, setAssets } = useTradeInternal();
   return (
     <div tw="flex flex-col gap-4 w-full max-w-3xl">
       <TradeProvider>
         <Explain />
-        <Display />
+        <Display numMarkets={markets.length} />
         <div tw="flex gap-4">
-          <Filter />
+          <Filter assets={assets} setAssets={setAssets} />
           {/* <Sort /> */}
         </div>
         <Markets />

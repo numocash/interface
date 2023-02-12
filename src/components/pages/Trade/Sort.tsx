@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { objectKeys } from "ts-extras";
 
+import {
+  Check,
+  FilterButton,
+  FilterItem,
+  RotateArrow,
+  X,
+} from "../../common/Filter";
 import { Modal } from "../../common/Modal";
 import { Module } from "../../common/Module";
 import { useTrade } from ".";
-import { Check, FilterButton, FilterItem, RotateArrow, X } from "./Filter";
 
 export const Sorts = {
   default: "Default",

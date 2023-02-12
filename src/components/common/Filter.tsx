@@ -3,16 +3,20 @@ import { FiCheck, FiX } from "react-icons/fi";
 import { IoIosArrowDown } from "react-icons/io";
 import tw, { styled } from "twin.macro";
 
-import { useToken0s, useToken1s } from "../../../hooks/useTokens";
-import { dedupeTokens } from "../../../hooks/useTokens2";
-import { Modal } from "../../common/Modal";
-import { Module } from "../../common/Module";
-import { TokenIcon } from "../../common/TokenIcon";
-import { useTrade } from ".";
+import { useToken0s, useToken1s } from "../../hooks/useTokens";
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+import { dedupeTokens } from "../../hooks/useTokens2";
+import { Modal } from "./Modal";
+import { Module } from "./Module";
+import { TokenIcon } from "./TokenIcon";
 
-export const Filter: React.FC = () => {
+interface Props {
+  assets: readonly WrappedTokenInfo[];
+  setAssets: (val: readonly WrappedTokenInfo[]) => void;
+}
+
+export const Filter: React.FC<Props> = ({ assets, setAssets }: Props) => {
   const [show, setShow] = useState(false);
-  const { assets, setAssets } = useTrade();
 
   const token0s = useToken0s();
   const token1s = useToken1s();

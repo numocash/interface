@@ -24,7 +24,6 @@ export const PositionItem: React.FC<Props> = ({
 
   const value = useMemo(() => {
     const sharePrice = pricePerShare(lendgine, lendgineInfo);
-    console.log(sharePrice.toSignificant(5), balance.toSignificant(5));
     // token0 / token1
     const price = numoenPrice(lendgine, lendgineInfo);
 

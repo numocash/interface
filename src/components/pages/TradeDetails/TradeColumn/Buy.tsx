@@ -81,7 +81,9 @@ export const Buy: React.FC = () => {
 
     const bRate = selectedLendgineInfo.data
       ? borrowRate(
-          selectedLendgineInfo.data.totalLiquidity,
+          selectedLendgineInfo.data.totalLiquidity.subtract(
+            liquidity ? liquidity : new Fraction(0)
+          ),
           selectedLendgineInfo.data.totalLiquidityBorrowed.add(
             liquidity ? liquidity : new Fraction(0)
           )
