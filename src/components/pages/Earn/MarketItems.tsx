@@ -1,41 +1,104 @@
+import { Fraction, Percent } from "@uniswap/sdk-core";
+import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
+import invariant from "tiny-invariant";
 
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import { useLendgines } from "../../../hooks/useLendgine";
+import type { Market } from "../../../hooks/useMarket";
+import { useMarketToLendgines } from "../../../hooks/useMarket";
+import { supplyRate } from "../../../utils/Numoen/jumprate";
+import { convertPriceToLiquidityPrice } from "../../../utils/Numoen/lendgineMath";
+import { numoenPrice } from "../../../utils/Numoen/price";
+import { scale } from "../../../utils/Numoen/trade";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenIcon } from "../../common/TokenIcon";
 
 interface Props {
-  tokens: readonly [WrappedTokenInfo, WrappedTokenInfo];
+  market: Market;
 }
 
-export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
+export const MarketItem: React.FC<Props> = ({ market }: Props) => {
+  const lendgines = useMarketToLendgines(market);
+
+  const lendgineInfosQuery = useLendgines(lendgines);
+
+  const { bestSupplyRate, tvl } = useMemo(() => {
+    if (!lendgineInfosQuery.data || lendgineInfosQuery.isLoading) return {};
+
+    const supplyRates = lendgineInfosQuery.data.map((l) =>
+      supplyRate(l.totalLiquidity, l.totalLiquidityBorrowed)
+    );
+
+    const bestSupplyRate = supplyRates.reduce(
+      (acc, cur) => (cur.greaterThan(acc) ? cur : acc),
+      new Percent(0)
+    );
+
+    const tvl = lendgineInfosQuery.data.reduce((acc, cur, i) => {
+      const lendgine = lendgines[i];
+      invariant(lendgine);
+      // token0 / token1
+      const price = numoenPrice(lendgine, cur);
+      // token0 / liq
+      const liquidityPrice = convertPriceToLiquidityPrice(price, lendgine);
+
+      const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);
+
+      const liquidityValue = liquidity.multiply(liquidityPrice).divide(scale);
+      return (
+        lendgine.token0.equals(market[0])
+          ? liquidityValue
+          : liquidityValue.divide(price)
+      ).add(acc);
+    }, new Fraction(0));
+    return { bestSupplyRate, tvl };
+  }, [
+    lendgineInfosQuery.data,
+    lendgineInfosQuery.isLoading,
+    lendgines,
+    market,
+  ]);
   return (
     <NavLink
       tw=""
-      to={`/earn/details/${tokens[0].address}/${tokens[1].address}`}
+      to={`/earn/details/${market[0].address}/${market[1].address}`}
     >
       <Wrapper hasDeposit={false}>
         <div tw="py-2 px-4 gap-4 flex flex-col bg-white rounded-t-xl">
           <div tw="flex items-center gap-3 col-span-2">
             <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
-              <TokenIcon token={tokens[1]} size={32} />
-              <TokenIcon token={tokens[0]} size={32} />
+              <TokenIcon token={market[1]} size={32} />
+              <TokenIcon token={market[0]} size={32} />
             </div>
             <div tw="grid gap-0.5">
               <span tw="font-semibold text-lg text-default leading-tight">
-                {tokens[1].symbol} / {tokens[0].symbol}
+                {market[1].symbol} / {market[0].symbol}
               </span>
             </div>
           </div>
 
           <div tw="flex flex-col ">
             <p tw="text-sm text-secondary">Best APR</p>
-            <p tw="text-default font-bold">21.4%</p>
+            <p tw="text-default font-bold">
+              {bestSupplyRate ? (
+                bestSupplyRate.toFixed(1) + "%"
+              ) : (
+                <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-12" />
+              )}
+            </p>
           </div>
 
           <div tw="flex flex-col">
             <p tw="text-sm text-secondary">TVL</p>
-            <p tw="text-default font-bold">1000 {tokens[0].symbol}</p>
+            <p tw="text-default font-bold">
+              {tvl ? (
+                <p>
+                  {tvl.toSignificant(5)} {market[0].symbol}
+                </p>
+              ) : (
+                <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-12" />
+              )}
+            </p>
           </div>
         </div>
         <div tw="bg-gray-200 w-full overflow-hidden">

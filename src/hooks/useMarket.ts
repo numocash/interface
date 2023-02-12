@@ -31,6 +31,13 @@ export const useGetLendgineToMarket = () => {
   );
 };
 
+export const useMarketToLendgines = (market: Market): readonly Lendgine[] => {
+  const { lendgines } = useEnvironment();
+  return lendgines.filter(
+    (l) => market.includes(l.token0) && market.includes(l.token1)
+  );
+};
+
 // dedupe markets
 export const dedupeMarkets = (
   markets: readonly Market[]
