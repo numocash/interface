@@ -1,7 +1,6 @@
 import { Fraction } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
-import tw, { styled } from "twin.macro";
 
 import { useLendgines } from "../../../../hooks/useLendgine";
 import {
@@ -16,56 +15,57 @@ import { useTradeDetails } from "..";
 export const TotalStats: React.FC = () => {
   const { base, lendgines } = useTradeDetails();
 
-  const lendgineInfo = useLendgines(lendgines);
+  const lendgineInfosQuery = useLendgines(lendgines);
 
   const { openInterest, tvl } = useMemo(() => {
-    if (lendgineInfo.isLoading || !lendgineInfo.data) return {};
-    const openInterest = lendgineInfo.data.reduce((acc: Fraction, cur, i) => {
+    if (lendgineInfosQuery.isLoading || !lendgineInfosQuery.data) return {};
+
+    const openInterest = lendgineInfosQuery.data.reduce((acc, cur, i) => {
       const lendgine = lendgines[i];
       invariant(lendgine);
-
-      const isInverse = lendgine.token1.equals(base);
-
+      // token0 / token1
       const price = numoenPrice(lendgine, cur);
+      // token0 / liq
       const liquidityPrice = convertPriceToLiquidityPrice(price, lendgine);
 
-      const borrowedValue = liquidityPrice
-        .multiply(cur.totalLiquidityBorrowed)
-        .divide(scale);
+      const liquidity = cur.totalLiquidityBorrowed;
 
+      const liquidityValue = liquidity.multiply(liquidityPrice).divide(scale);
       return (
-        isInverse ? borrowedValue.multiply(price).divide(scale) : borrowedValue
+        lendgine.token0.equals(base)
+          ? liquidityValue
+          : liquidityValue.divide(price)
       ).add(acc);
     }, new Fraction(0));
 
-    const tvl = lendgineInfo.data.reduce((acc: Fraction, cur, i) => {
+    const tvl = lendgineInfosQuery.data.reduce((acc, cur, i) => {
       const lendgine = lendgines[i];
       invariant(lendgine);
-
-      const isInverse = lendgine.token1.equals(base);
-
+      // token0 / token1
       const price = numoenPrice(lendgine, cur);
+      // token0 / liq
       const liquidityPrice = convertPriceToLiquidityPrice(price, lendgine);
 
-      const totalCollateral = convertLiquidityToCollateral(
+      // token1
+      const collateral = convertLiquidityToCollateral(
         cur.totalLiquidityBorrowed,
         lendgine
       );
 
-      const collateralValue = totalCollateral.multiply(price).divide(scale);
-      const liquidityValue = cur.totalLiquidity
-        .multiply(liquidityPrice)
-        .divide(scale);
+      const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);
 
-      const totalValue = collateralValue.add(liquidityValue);
-
+      // token0
+      const liquidityValue = liquidity.multiply(liquidityPrice).divide(scale);
+      const collateralValue = collateral.multiply(price).divide(scale);
       return (
-        isInverse ? totalValue.multiply(price).divide(scale) : totalValue
+        lendgine.token0.equals(base)
+          ? liquidityValue.add(collateralValue)
+          : liquidityValue.add(collateralValue).divide(price)
       ).add(acc);
     }, new Fraction(0));
 
     return { openInterest, tvl };
-  }, [base, lendgineInfo.data, lendgineInfo.isLoading, lendgines]);
+  }, [base, lendgineInfosQuery.data, lendgineInfosQuery.isLoading, lendgines]);
 
   return (
     <div tw="flex justify-around w-full">
@@ -74,7 +74,7 @@ export const TotalStats: React.FC = () => {
         label="Open interest"
         item={
           !openInterest ? (
-            <Loading />
+            <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-8 w-20" />
           ) : (
             <>
               {openInterest.toSignificant(5)}{" "}
@@ -88,7 +88,7 @@ export const TotalStats: React.FC = () => {
         label="Total value locked"
         item={
           !tvl ? (
-            <Loading />
+            <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-8 w-20" />
           ) : (
             <>
               {tvl.toSignificant(5)}{" "}
@@ -100,7 +100,3 @@ export const TotalStats: React.FC = () => {
     </div>
   );
 };
-
-const Loading = styled.div(() => [
-  tw`h-6 duration-300 ease-in-out transform rounded-lg w-14 animate-pulse`,
-]);

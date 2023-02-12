@@ -96,7 +96,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
                   {tvl.toSignificant(5)} {market[0].symbol}
                 </p>
               ) : (
-                <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-12" />
+                <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-20" />
               )}
             </p>
           </div>
