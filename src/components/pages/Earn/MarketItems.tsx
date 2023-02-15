@@ -1,16 +1,18 @@
-import { Fraction, Percent } from "@uniswap/sdk-core";
+import { CurrencyAmount, Percent } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
+import { useAccount } from "wagmi";
 
-import { useLendgines } from "../../../hooks/useLendgine";
+import { useLendgines, useLendginesPosition } from "../../../hooks/useLendgine";
 import type { Market } from "../../../hooks/useMarket";
 import { useMarketToLendgines } from "../../../hooks/useMarket";
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
-import { convertPriceToLiquidityPrice } from "../../../utils/Numoen/lendgineMath";
+import { liquidityPerCollateral } from "../../../utils/Numoen/lendgineMath";
 import { numoenPrice } from "../../../utils/Numoen/price";
-import { scale } from "../../../utils/Numoen/trade";
 import { RowBetween } from "../../common/RowBetween";
+import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
 import { TokenIcon } from "../../common/TokenIcon";
 
 interface Props {
@@ -19,6 +21,9 @@ interface Props {
 
 export const MarketItem: React.FC<Props> = ({ market }: Props) => {
   const lendgines = useMarketToLendgines(market);
+  const { address } = useAccount();
+
+  useLendginesPosition(lendgines, address);
 
   const lendgineInfosQuery = useLendgines(lendgines);
 
@@ -39,18 +44,23 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       invariant(lendgine);
       // token0 / token1
       const price = numoenPrice(lendgine, cur);
-      // token0 / liq
-      const liquidityPrice = convertPriceToLiquidityPrice(price, lendgine);
+      // liq / token1
+      const liqPerCol = liquidityPerCollateral(lendgine);
 
+      // token0 / liq
+      const liquidityPrice = liqPerCol.invert().multiply(price);
+      // liq
       const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);
 
-      const liquidityValue = liquidity.multiply(liquidityPrice).divide(scale);
+      // token0
+      const liquidityValue = liquidityPrice.quote(liquidity);
+
       return (
         lendgine.token0.equals(market[0])
           ? liquidityValue
-          : liquidityValue.divide(price)
+          : price.invert().quote(liquidityValue)
       ).add(acc);
-    }, new Fraction(0));
+    }, CurrencyAmount.fromRawAmount(market[0], 0));
     return { bestSupplyRate, tvl };
   }, [
     lendgineInfosQuery.data,
@@ -58,54 +68,45 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
     lendgines,
     market,
   ]);
+
   return (
     <NavLink
       tw=""
       to={`/earn/details/${market[0].address}/${market[1].address}`}
     >
-      <Wrapper hasDeposit={false}>
-        <div tw="py-2 px-4 gap-4 flex flex-col bg-white rounded-t-xl">
-          <div tw="flex items-center gap-3 col-span-2">
-            <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
-              <TokenIcon token={market[1]} size={32} />
-              <TokenIcon token={market[0]} size={32} />
-            </div>
-            <div tw="grid gap-0.5">
-              <span tw="font-semibold text-lg text-default leading-tight">
-                {market[1].symbol} / {market[0].symbol}
-              </span>
-            </div>
+      <Wrapper positionValue={CurrencyAmount.fromRawAmount(market[0], 1)}>
+        <div tw="flex items-center gap-3 col-span-2">
+          <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
+            <TokenIcon token={market[1]} size={32} />
+            <TokenIcon token={market[0]} size={32} />
           </div>
-
-          <div tw="flex flex-col ">
-            <p tw="text-sm text-secondary">Best APR</p>
-            <p tw="text-default font-bold">
-              {bestSupplyRate ? (
-                bestSupplyRate.toFixed(1) + "%"
-              ) : (
-                <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-12" />
-              )}
-            </p>
-          </div>
-
-          <div tw="flex flex-col">
-            <p tw="text-sm text-secondary">TVL</p>
-            <p tw="text-default font-bold">
-              {tvl ? (
-                <p>
-                  {tvl.toSignificant(5)} {market[0].symbol}
-                </p>
-              ) : (
-                <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-20" />
-              )}
-            </p>
+          <div tw="grid gap-0.5">
+            <span tw="font-semibold text-lg text-default leading-tight">
+              {market[1].symbol} / {market[0].symbol}
+            </span>
           </div>
         </div>
-        <div tw="bg-gray-200 w-full overflow-hidden">
-          <RowBetween tw="items-center bg-transparent">
-            <p>Your position</p>
-            <p>--</p>
-          </RowBetween>
+
+        <div tw="flex flex-col ">
+          <p tw="text-sm text-secondary">Best APR</p>
+          <p tw="text-default font-bold">
+            {bestSupplyRate ? (
+              bestSupplyRate.toFixed(1) + "%"
+            ) : (
+              <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-12" />
+            )}
+          </p>
+        </div>
+
+        <div tw="flex flex-col">
+          <p tw="text-sm text-secondary">TVL</p>
+          <p tw="text-default font-bold">
+            {tvl ? (
+              <TokenAmountDisplay amount={tvl} showSymbol />
+            ) : (
+              <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-20" />
+            )}
+          </p>
         </div>
       </Wrapper>
     </NavLink>
@@ -113,23 +114,29 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
 };
 
 interface WrapperProps {
-  hasDeposit: boolean;
+  positionValue: CurrencyAmount<WrappedTokenInfo>;
 
   children?: React.ReactNode;
 }
 
 const Wrapper: React.FC<WrapperProps> = ({
-  hasDeposit,
+  positionValue,
   children,
 }: WrapperProps) => {
-  return hasDeposit ? (
-    <div tw="border-t-2 border-black rounded-xl transform ease-in-out hover:scale-110 duration-300">
-      <div tw="rounded-xl w-full border-2 bg-gray-200 border-t-0">
+  return positionValue.greaterThan(0) ? (
+    <div tw="rounded-xl w-full border-2 transform ease-in-out hover:scale-110 duration-300 bg-gray-200">
+      <div tw="py-2 px-4 gap-4 flex flex-col bg-white rounded-t-xl">
         {children}
+      </div>
+      <div tw="w-full overflow-hidden">
+        <RowBetween tw="items-center bg-transparent">
+          <p>Your position</p>
+          <p>--</p>
+        </RowBetween>
       </div>
     </div>
   ) : (
-    <div tw="rounded-xl w-full border-2  transform ease-in-out hover:scale-110 duration-300 bg-gray-200">
+    <div tw="rounded-xl w-full border-2 transform ease-in-out hover:scale-110 duration-300 flex py-2 px-4 gap-4 flex-col">
       {children}
     </div>
   );

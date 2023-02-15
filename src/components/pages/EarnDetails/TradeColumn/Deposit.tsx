@@ -4,22 +4,22 @@ import { useCallback, useMemo, useState } from "react";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../contexts/environment2";
-import { useSettings } from "../../../contexts/settings";
+import { useEnvironment } from "../../../../contexts/environment2";
+import { useSettings } from "../../../../contexts/settings";
 import {
   useLiquidityManagerAddLiquidity,
   usePrepareLiquidityManagerAddLiquidity,
-} from "../../../generated";
-import { useApprove } from "../../../hooks/useApproval";
-import { useBalances } from "../../../hooks/useBalance";
-import { useLendgine } from "../../../hooks/useLendgine";
-import type { BeetStage } from "../../../utils/beet";
-import { useBeet } from "../../../utils/beet";
-import { ONE_HUNDRED_PERCENT, scale } from "../../../utils/Numoen/trade";
-import tryParseCurrencyAmount from "../../../utils/tryParseCurrencyAmount";
-import { AssetSelection } from "../../common/AssetSelection";
-import { AsyncButton } from "../../common/AsyncButton";
-import { useEarnDetails } from ".";
+} from "../../../../generated";
+import { useApprove } from "../../../../hooks/useApproval";
+import { useBalances } from "../../../../hooks/useBalance";
+import { useLendgine } from "../../../../hooks/useLendgine";
+import type { BeetStage } from "../../../../utils/beet";
+import { useBeet } from "../../../../utils/beet";
+import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
+import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
+import { AssetSelection } from "../../../common/AssetSelection";
+import { AsyncButton } from "../../../common/AsyncButton";
+import { useEarnDetails } from "..";
 
 export const Deposit: React.FC = () => {
   const { address } = useAccount();
@@ -188,30 +188,31 @@ export const Deposit: React.FC = () => {
   );
 
   return (
-    <div tw="flex flex-col rounded-lg bg-gray-100">
-      <div tw="gap-2 flex flex-col p-6 bg-white">
-        <AssetSelection
-          label={<span>Input</span>}
-          selectedValue={base}
-          inputValue={
-            baseInput === ""
-              ? baseInputAmount?.toSignificant(5) ?? ""
-              : baseInput
-          }
-          inputOnChange={(value) => {
-            onInput(value, "base");
-          }}
-          currentAmount={{
-            amount: balances.data?.[0],
-            allowSelect: true,
-          }}
-        />
-      </div>
-      <div tw="flex items-center justify-center self-center">
-        <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-white w-0" />
-        <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-gray-100 w-0 mt-[-30px]  " />
-      </div>
-      <div tw="flex flex-col gap-2 p-6 pt-3">
+    <>
+      <div tw="flex flex-col rounded-lg bg-gray-100">
+        <div tw=" flex flex-col bg-white">
+          <AssetSelection
+            tw="pb-6"
+            label={<span>Input</span>}
+            selectedValue={base}
+            inputValue={
+              baseInput === ""
+                ? baseInputAmount?.toSignificant(5) ?? ""
+                : baseInput
+            }
+            inputOnChange={(value) => {
+              onInput(value, "base");
+            }}
+            currentAmount={{
+              amount: balances.data?.[0],
+              allowSelect: true,
+            }}
+          />
+        </div>
+        <div tw="flex items-center justify-center self-center">
+          <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-white w-0" />
+          <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-gray-100 w-0 mt-[-30px]  " />
+        </div>
         <AssetSelection
           label={<span>Input</span>}
           tw=""
@@ -241,10 +242,10 @@ export const Deposit: React.FC = () => {
               approveBase.beetStage,
               approveQuote.beetStage,
               {
-                stageTitle: `Add ${quote.symbol} / ${base.symbol} liquiidty`,
+                stageTitle: `Add ${quote.symbol} / ${base.symbol} liquidty`,
                 parallelTransactions: [
                   {
-                    title: `Add ${quote.symbol} / ${base.symbol} liquiidty`,
+                    title: `Add ${quote.symbol} / ${base.symbol} liquidty`,
                     tx: {
                       prepare: prepareAdd as ReturnType<
                         typeof usePrepareContractWrite
@@ -263,6 +264,6 @@ export const Deposit: React.FC = () => {
       >
         {disableReason ?? "Add liquidity"}
       </AsyncButton>
-    </div>
+    </>
   );
 };

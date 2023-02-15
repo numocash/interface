@@ -8,11 +8,8 @@ import {
   useGetLendgineToMarket,
 } from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import { Display } from "../../common/Display";
-import { Filter } from "../../common/Filter";
-import { Explain } from "./Explain";
-import { Markets } from "./Markets";
 import type { Sorts } from "./Sort";
+import { TradeInner } from "./TradeInner";
 
 interface ITrade {
   assets: readonly WrappedTokenInfo[];
@@ -61,18 +58,9 @@ export const { Provider: TradeProvider, useContainer: useTrade } =
   createContainer(useTradeInternal);
 
 export const Trade: React.FC = () => {
-  const { markets, assets, setAssets } = useTradeInternal();
   return (
-    <div tw="flex flex-col gap-4 w-full max-w-3xl">
-      <TradeProvider>
-        <Explain />
-        <Display numMarkets={markets.length} />
-        <div tw="flex gap-4">
-          <Filter assets={assets} setAssets={setAssets} />
-          {/* <Sort /> */}
-        </div>
-        <Markets />
-      </TradeProvider>
-    </div>
+    <TradeProvider>
+      <TradeInner />
+    </TradeProvider>
   );
 };

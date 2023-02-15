@@ -18,8 +18,12 @@ import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import type { BeetStage } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
-import { convertShareToLiquidity } from "../../../../utils/Numoen/lendgineMath";
-import { numoenPrice, pricePerShare } from "../../../../utils/Numoen/price";
+import {
+  convertShareToLiquidity,
+  liquidityPerCollateral,
+  liquidityPerShare,
+} from "../../../../utils/Numoen/lendgineMath";
+import { numoenPrice } from "../../../../utils/Numoen/price";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
@@ -64,17 +68,25 @@ export const Close: React.FC = () => {
     )
       return {};
 
-    // token0 / share
-    const sharePrice = pricePerShare(selectedLendgine, lendgineInfoQuery.data);
-
     // token0 / token1
     const price = numoenPrice(selectedLendgine, lendgineInfoQuery.data);
 
-    // token1 / share
-    const sharePriceToken1 = sharePrice.divide(price);
+    // liq / token1
+    const liqPerCol = liquidityPerCollateral(selectedLendgine);
 
-    // token1 / shares
-    const value = sharePriceToken1.multiply(balanceQuery.data).divide(scale);
+    // liq / share
+    const liqPerShare = liquidityPerShare(
+      selectedLendgine,
+      lendgineInfoQuery.data
+    );
+
+    // token0 / share
+    const sharePrice = liqPerShare.multiply(liqPerCol.invert().multiply(price));
+
+    const sharePriceToken1 = sharePrice.multiply(price.invert());
+
+    // token0
+    const value = sharePrice.quote(balanceQuery.data);
 
     if (!parsedAmount) return { value };
 

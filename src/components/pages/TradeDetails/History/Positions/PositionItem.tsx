@@ -3,15 +3,18 @@ import { useMemo } from "react";
 
 import type { Lendgine } from "../../../../../constants";
 import type { LendgineInfo } from "../../../../../hooks/useLendgine";
-import { numoenPrice, pricePerShare } from "../../../../../utils/Numoen/price";
-import { scale } from "../../../../../utils/Numoen/trade";
+import {
+  liquidityPerCollateral,
+  liquidityPerShare,
+} from "../../../../../utils/Numoen/lendgineMath";
+import { numoenPrice } from "../../../../../utils/Numoen/price";
 import { useTradeDetails } from "../..";
 
-interface Props {
+type Props<L extends Lendgine = Lendgine> = {
   balance: CurrencyAmount<Token>;
-  lendgine: Lendgine;
-  lendgineInfo: LendgineInfo;
-}
+  lendgine: L;
+  lendgineInfo: LendgineInfo<L>;
+};
 
 export const PositionItem: React.FC<Props> = ({
   balance,
@@ -23,12 +26,20 @@ export const PositionItem: React.FC<Props> = ({
   const isInverse = base.equals(lendgine.token1);
 
   const value = useMemo(() => {
-    const sharePrice = pricePerShare(lendgine, lendgineInfo);
     // token0 / token1
     const price = numoenPrice(lendgine, lendgineInfo);
 
+    // liq / token1
+    const liqPerCol = liquidityPerCollateral(lendgine);
+
+    // liq / share
+    const liqPerShare = liquidityPerShare(lendgine, lendgineInfo);
+
+    // token0 / share
+    const sharePrice = liqPerShare.multiply(liqPerCol.invert().multiply(price));
+
     // token0
-    const value = sharePrice.multiply(balance).divide(scale);
+    const value = sharePrice.quote(balance);
 
     return isInverse ? value.divide(price) : value;
   }, [balance, isInverse, lendgine, lendgineInfo]);

@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { NavLink } from "react-router-dom";
 import { createContainer } from "unstated-next";
 
 import { useEnvironment } from "../../../contexts/environment2";
@@ -9,11 +8,7 @@ import {
   useGetLendgineToMarket,
 } from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import { Button } from "../../common/Button";
-import { Display } from "../../common/Display";
-import { Filter } from "../../common/Filter";
-import { Explain } from "./Explain";
-import { Markets } from "./Markets";
+import { EarnInner } from "./EarnInner";
 
 interface IEarn {
   assets: readonly WrappedTokenInfo[];
@@ -56,23 +51,9 @@ export const { Provider: EarnProvider, useContainer: useEarn } =
   createContainer(useEarnInternal);
 
 export const Earn: React.FC = () => {
-  const { markets, assets, setAssets } = useEarnInternal();
   return (
     <EarnProvider>
-      <div tw="grid w-full max-w-4xl flex-col gap-4">
-        <Explain />
-        <Display numMarkets={markets.length} />
-        <div tw="flex w-full justify-between gap-4">
-          <Filter assets={assets} setAssets={setAssets} />
-          {/* <Sort /> */}
-          <NavLink to="/create/">
-            <Button tw="h-12 text-lg" variant="primary">
-              Create new market
-            </Button>
-          </NavLink>
-        </div>
-        <Markets />
-      </div>
+      <EarnInner />
     </EarnProvider>
   );
 };

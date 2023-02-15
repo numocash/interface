@@ -13,7 +13,7 @@ export const Lendgines: React.FC = () => {
   return lendgineInfos.isLoading ? (
     <LoadingSpinner />
   ) : (
-    <div tw="flex flex-col">
+    <div tw="flex gap-4 w-full justify-around">
       {lendgines.map((l, i) => {
         const info = lendgineInfos?.data?.[i];
 

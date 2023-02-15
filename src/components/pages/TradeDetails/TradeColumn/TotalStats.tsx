@@ -1,14 +1,13 @@
-import { Fraction } from "@uniswap/sdk-core";
+import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
 import { useLendgines } from "../../../../hooks/useLendgine";
 import {
   convertLiquidityToCollateral,
-  convertPriceToLiquidityPrice,
+  liquidityPerCollateral,
 } from "../../../../utils/Numoen/lendgineMath";
 import { numoenPrice } from "../../../../utils/Numoen/price";
-import { scale } from "../../../../utils/Numoen/trade";
 import { VerticalItem } from "../../../common/VerticalItem";
 import { useTradeDetails } from "..";
 
@@ -25,26 +24,33 @@ export const TotalStats: React.FC = () => {
       invariant(lendgine);
       // token0 / token1
       const price = numoenPrice(lendgine, cur);
+
+      // liq / token1
+      const liqPerCol = liquidityPerCollateral(lendgine);
+
       // token0 / liq
-      const liquidityPrice = convertPriceToLiquidityPrice(price, lendgine);
+      const liquidityPrice = liqPerCol.invert().multiply(price);
 
       const liquidity = cur.totalLiquidityBorrowed;
 
-      const liquidityValue = liquidity.multiply(liquidityPrice).divide(scale);
+      const liquidityValue = liquidityPrice.quote(liquidity);
       return (
         lendgine.token0.equals(base)
           ? liquidityValue
           : liquidityValue.divide(price)
       ).add(acc);
-    }, new Fraction(0));
+    }, CurrencyAmount.fromRawAmount(base, 0));
 
     const tvl = lendgineInfosQuery.data.reduce((acc, cur, i) => {
       const lendgine = lendgines[i];
       invariant(lendgine);
       // token0 / token1
       const price = numoenPrice(lendgine, cur);
+      // liq / token1
+      const liqPerCol = liquidityPerCollateral(lendgine);
+
       // token0 / liq
-      const liquidityPrice = convertPriceToLiquidityPrice(price, lendgine);
+      const liquidityPrice = liqPerCol.invert().multiply(price);
 
       // token1
       const collateral = convertLiquidityToCollateral(
@@ -55,14 +61,14 @@ export const TotalStats: React.FC = () => {
       const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);
 
       // token0
-      const liquidityValue = liquidity.multiply(liquidityPrice).divide(scale);
-      const collateralValue = collateral.multiply(price).divide(scale);
+      const liquidityValue = liquidityPrice.quote(liquidity);
+      const collateralValue = price.quote(collateral);
       return (
         lendgine.token0.equals(base)
           ? liquidityValue.add(collateralValue)
           : liquidityValue.add(collateralValue).divide(price)
       ).add(acc);
-    }, new Fraction(0));
+    }, CurrencyAmount.fromRawAmount(base, 0));
 
     return { openInterest, tvl };
   }, [base, lendgineInfosQuery.data, lendgineInfosQuery.isLoading, lendgines]);

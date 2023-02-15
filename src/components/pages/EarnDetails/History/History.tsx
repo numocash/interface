@@ -1,18 +1,17 @@
 import { useState } from "react";
+import { objectKeys } from "ts-extras";
 import tw, { css } from "twin.macro";
 
-enum HistoryType {
-  Position = "Your positions",
-  Trade = "Your trade history",
-  Total = "Total trade history",
-}
+const Histories = {
+  position: "Your positions",
+} as const;
 
 export const History: React.FC = () => {
-  const [history, setHistory] = useState<HistoryType>(HistoryType.Position);
+  const [history, setHistory] = useState<keyof typeof Histories>("position");
 
   return (
-    <div tw="flex gap-4 grid-flow-col  py-4">
-      {[HistoryType.Position, HistoryType.Trade, HistoryType.Total].map((s) => {
+    <div tw="flex gap-4 grid-flow-col">
+      {objectKeys(Histories).map((s) => {
         return (
           <div key={s}>
             <button
@@ -23,7 +22,7 @@ export const History: React.FC = () => {
               `}
               onClick={() => setHistory(s)}
             >
-              <span>{s}</span>
+              <span>{Histories[s]}</span>
             </button>
           </div>
         );

@@ -28,6 +28,7 @@ export const TokenAmountDisplay: React.FC<IProps> = ({
     <TokenAmountWrapper className={className}>
       {showIcon && (
         <TokenIcon
+          size={20}
           css={css`
             margin-right: 4px;
           `}

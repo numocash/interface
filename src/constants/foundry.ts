@@ -8,6 +8,7 @@ import { Stable, WrappedNative } from "./tokens";
 export const wethLendgine = {
   token0: Stable[31337],
   token1: WrappedNative[31337],
+  liquidity: new Token(31337, "0x984EC0723D3EB2CA58bD17401eCc00f0468bFbFa", 18),
   lendgine: new Token(31337, "0x984EC0723D3EB2CA58bD17401eCc00f0468bFbFa", 18),
   bound: new Price(
     Stable[31337],
@@ -32,6 +33,7 @@ const Illuvium = new WrappedTokenInfo({
 export const illuviumLendgine = {
   token0: WrappedNative[31337],
   token1: Illuvium,
+  liquidity: new Token(31337, "0x6E26283717a0c6A8b0986fCad083DC628f340656", 18),
   lendgine: new Token(31337, "0x6E26283717a0c6A8b0986fCad083DC628f340656", 18),
   bound: new Price(
     WrappedNative[31337],
@@ -49,6 +51,7 @@ export const illuviumLendgine = {
 export const inverseIlluviumLendgine = {
   token0: Illuvium,
   token1: WrappedNative[31337],
+  liquidity: new Token(31337, "0x04a50D3263e2164EE8A462260aAaB0eAFc15bFFb", 18),
   lendgine: new Token(31337, "0x04a50D3263e2164EE8A462260aAaB0eAFc15bFFb", 18),
   bound: new Price(
     Illuvium,

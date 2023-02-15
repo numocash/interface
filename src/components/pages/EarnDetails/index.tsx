@@ -12,10 +12,8 @@ import {
 } from "../../../hooks/useTokens";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { pickLongLendgines } from "../../../utils/lendgines";
-import { DepositWithdraw } from "./DepositWithdraw";
-import { EmptyPosition } from "./EmptyPosition";
-import { History } from "./History";
-import { Lendgines } from "./Lendgines";
+import { EarnDetailsInner } from "./EarnDetailsInner";
+import { TradeColumn } from "./TradeColumn/TradeColumn";
 
 interface IEarnDetails {
   base: WrappedTokenInfo;
@@ -81,12 +79,14 @@ export const { Provider: EarnDetailsProvider, useContainer: useEarnDetails } =
 
 export const EarnDetails: React.FC = () => {
   return (
-    <div tw="w-full flex flex-col max-w-3xl">
+    <div tw="w-full grid grid-cols-3">
       <EarnDetailsProvider>
-        <Lendgines />
-        <DepositWithdraw />
-        <History />
-        <EmptyPosition />
+        <EarnDetailsInner />
+        <div tw="flex max-w-sm justify-self-end">
+          {/* TODO: stick to the right side */}
+          <div tw="border-l-2 border-gray-200 sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
+          <TradeColumn tw="" />
+        </div>
       </EarnDetailsProvider>
     </div>
   );

@@ -28,6 +28,7 @@ export type NumoenInterfaceConfig = {
 export type Lendgine = {
   token0: WrappedTokenInfo;
   token1: WrappedTokenInfo;
+  liquidity: Token;
   lendgine: Token;
   bound: Price<WrappedTokenInfo, WrappedTokenInfo>;
 

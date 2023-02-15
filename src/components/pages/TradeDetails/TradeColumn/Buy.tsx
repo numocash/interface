@@ -1,7 +1,7 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
-import { Fraction } from "@uniswap/sdk-core";
+import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
@@ -76,16 +76,24 @@ export const Buy: React.FC = () => {
         : null;
     const shares =
       liquidity && selectedLendgineInfo.data
-        ? convertLiquidityToShare(liquidity, selectedLendgineInfo.data)
+        ? convertLiquidityToShare(
+            liquidity,
+            selectedLendgine,
+            selectedLendgineInfo.data
+          )
         : null;
 
     const bRate = selectedLendgineInfo.data
       ? borrowRate(
           selectedLendgineInfo.data.totalLiquidity.subtract(
-            liquidity ? liquidity : new Fraction(0)
+            liquidity
+              ? liquidity
+              : CurrencyAmount.fromRawAmount(selectedLendgine.liquidity, 0)
           ),
           selectedLendgineInfo.data.totalLiquidityBorrowed.add(
-            liquidity ? liquidity : new Fraction(0)
+            liquidity
+              ? liquidity
+              : CurrencyAmount.fromRawAmount(selectedLendgine.liquidity, 0)
           )
         )
       : null;
