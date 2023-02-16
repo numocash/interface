@@ -1,16 +1,26 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
+import type { usePrepareContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 
 import type {
   Lendgine,
   LendgineInfo,
   LendginePosition,
 } from "../../../../../constants/types";
+import { useEnvironment } from "../../../../../contexts/environment2";
+import {
+  useLiquidityManagerCollect,
+  usePrepareLiquidityManagerCollect,
+} from "../../../../../generated";
+import { useBeet } from "../../../../../utils/beet";
 import {
   accruedLendgineInfo,
   accruedLendginePositionInfo,
   convertPositionToLiquidity,
 } from "../../../../../utils/Numoen/lendgineMath";
+import { AsyncButton } from "../../../../common/AsyncButton";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
 import { useEarnDetails } from "../..";
 
@@ -25,6 +35,9 @@ export const PositionItem: React.FC<Props> = ({
   lendgineInfo,
   position,
 }: Props) => {
+  const { address } = useAccount();
+  const environment = useEnvironment();
+  const Beet = useBeet();
   const { base, setSelectedLendgine, setClose } = useEarnDetails();
   const isInverse = base.equals(lendgine.token1);
 
@@ -58,6 +71,24 @@ export const PositionItem: React.FC<Props> = ({
     return { amount0, amount1 };
   }, [lendgine.token0, lendgine.token1, position, updatedLendgineInfo]);
 
+  const prepareCollect = usePrepareLiquidityManagerCollect({
+    enabled: !!address,
+    address: environment.base.liquidityManager,
+    args: address
+      ? [
+          {
+            lendgine: lendgine.address,
+            recipient: address,
+            amountRequested: BigNumber.from(
+              updatedPositionInfo.tokensOwed.quotient.toString()
+            ),
+          },
+        ]
+      : undefined,
+  });
+
+  const sendCollect = useLiquidityManagerCollect(prepareCollect.config);
+
   return (
     <div
       tw="w-full justify-between grid grid-cols-7 h-12 items-center"
@@ -80,9 +111,34 @@ export const PositionItem: React.FC<Props> = ({
           showIcon
           showSymbol
         />
-        <button tw="px-2 py-0 rounded-lg bg-blue w-min text-white">
+        <AsyncButton
+          variant="primary"
+          tw="w-min px-1 py-0.5"
+          disabled={
+            prepareCollect.isLoading ||
+            updatedPositionInfo.tokensOwed.equalTo(0)
+          }
+          onClick={async () => {
+            await Beet([
+              {
+                stageTitle: "Collect interest",
+                parallelTransactions: [
+                  {
+                    title: `Collect interest`,
+                    tx: {
+                      prepare: prepareCollect as ReturnType<
+                        typeof usePrepareContractWrite
+                      >,
+                      send: sendCollect,
+                    },
+                  },
+                ],
+              },
+            ]);
+          }}
+        >
           Collect
-        </button>
+        </AsyncButton>
       </div>
 
       <p tw="justify-self-start col-span-2">N/A</p>
