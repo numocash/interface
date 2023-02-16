@@ -22,6 +22,9 @@ interface IEarnDetails {
   selectedLendgine: Lendgine;
   setSelectedLendgine: (val: Lendgine) => void;
 
+  close: boolean;
+  setClose: (val: boolean) => void;
+
   lendgines: Lendgine[];
 }
 
@@ -49,6 +52,7 @@ const useEarnDetailsInternal = (): IEarnDetails => {
   invariant(tokenA && tokenB);
 
   const [base, quote] = useSortDenomTokens([tokenA, tokenB] as const);
+  const [close, setClose] = useState(false);
 
   // TODO: handle nonAddresses
   // TODO: verify correct ordering
@@ -66,11 +70,13 @@ const useEarnDetailsInternal = (): IEarnDetails => {
     useState<Lendgine>(longLendgine);
 
   return {
-    base: base,
-    quote: quote,
+    base,
+    quote,
     lendgines,
     selectedLendgine,
     setSelectedLendgine,
+    close,
+    setClose,
   };
 };
 

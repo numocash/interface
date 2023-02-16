@@ -33,11 +33,13 @@ export const TotalStats: React.FC = () => {
 
       const liquidity = cur.totalLiquidityBorrowed;
 
+      // token0
       const liquidityValue = liquidityPrice.quote(liquidity);
+
       return (
         lendgine.token0.equals(base)
           ? liquidityValue
-          : liquidityValue.divide(price)
+          : price.invert().quote(liquidityValue)
       ).add(acc);
     }, CurrencyAmount.fromRawAmount(base, 0));
 
@@ -66,7 +68,7 @@ export const TotalStats: React.FC = () => {
       return (
         lendgine.token0.equals(base)
           ? liquidityValue.add(collateralValue)
-          : liquidityValue.add(collateralValue).divide(price)
+          : price.invert().quote(liquidityValue.add(collateralValue))
       ).add(acc);
     }, CurrencyAmount.fromRawAmount(base, 0));
 

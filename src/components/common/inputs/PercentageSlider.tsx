@@ -20,7 +20,7 @@ export const PercentageSlider: React.FC<Props> = ({
   return (
     <div tw="flex items-center justify-between w-full rounded-lg">
       <div tw="flex">
-        <div tw="rounded-xl text-2xl w-20 justify-center text-default">
+        <div tw="rounded-xl text-xl w-16 justify-center text-default">
           {input.toFixed(0)}%
         </div>
       </div>

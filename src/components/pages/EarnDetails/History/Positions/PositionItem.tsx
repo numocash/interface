@@ -25,7 +25,7 @@ export const PositionItem: React.FC<Props> = ({
   lendgineInfo,
   position,
 }: Props) => {
-  const { base, setSelectedLendgine } = useEarnDetails();
+  const { base, setSelectedLendgine, setClose } = useEarnDetails();
   const isInverse = base.equals(lendgine.token1);
 
   const { updatedLendgineInfo, updatedPositionInfo } = useMemo(
@@ -48,23 +48,15 @@ export const PositionItem: React.FC<Props> = ({
       };
 
     const amount0 = updatedLendgineInfo.reserve0
-      .multiply(convertPositionToLiquidity(position, lendgineInfo))
+      .multiply(convertPositionToLiquidity(position, updatedLendgineInfo))
       .divide(updatedLendgineInfo.totalSupply);
 
     const amount1 = updatedLendgineInfo.reserve1
-      .multiply(convertPositionToLiquidity(position, lendgineInfo))
+      .multiply(convertPositionToLiquidity(position, updatedLendgineInfo))
       .divide(updatedLendgineInfo.totalSupply);
 
     return { amount0, amount1 };
-  }, [
-    lendgine.token0,
-    lendgine.token1,
-    lendgineInfo,
-    position,
-    updatedLendgineInfo.reserve0,
-    updatedLendgineInfo.reserve1,
-    updatedLendgineInfo.totalSupply,
-  ]);
+  }, [lendgine.token0, lendgine.token1, position, updatedLendgineInfo]);
 
   return (
     <div
@@ -99,6 +91,7 @@ export const PositionItem: React.FC<Props> = ({
         tw="text-red text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90"
         onClick={() => {
           setSelectedLendgine(lendgine);
+          setClose(true);
         }}
       >
         Close

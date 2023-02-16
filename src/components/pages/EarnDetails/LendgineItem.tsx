@@ -21,7 +21,8 @@ type Props<L extends Lendgine = Lendgine> = {
 };
 
 export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
-  const { base, selectedLendgine, setSelectedLendgine } = useEarnDetails();
+  const { base, selectedLendgine, setSelectedLendgine, setClose, close } =
+    useEarnDetails();
   const inverse = base.equals(lendgine.token1);
 
   const updatedInfo = useMemo(
@@ -67,7 +68,10 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
   return (
     <Wrapper
       selected={selectedLendgine === lendgine}
-      onClick={() => setSelectedLendgine(lendgine)}
+      onClick={() => {
+        setSelectedLendgine(lendgine);
+        close && setClose(false);
+      }}
     >
       <RowBetween tw="px-0">
         <p tw="text-xl">APR</p>

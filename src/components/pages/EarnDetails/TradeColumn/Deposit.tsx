@@ -139,7 +139,7 @@ export const Deposit: React.FC = () => {
                   )
                   .quotient.toString()
               ),
-              sizeMin: BigNumber.from("0"),
+              sizeMin: BigNumber.from("0"), // TODO: fix
 
               recipient: address,
               deadline: BigNumber.from(
