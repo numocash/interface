@@ -37,49 +37,57 @@ export const Deposit: React.FC = () => {
   const [baseInput, setBaseInput] = useState("");
   const [quoteInput, setQuoteInput] = useState("");
 
-  const { baseInputAmount, quoteInputAmount, liquidity } = useMemo(() => {
-    if (!lendgineInfo.data) {
+  const { baseInputAmount, quoteInputAmount, liquidity, positionSize } =
+    useMemo(() => {
+      if (!lendgineInfo.data) {
+        return {
+          baseInputAmount: tryParseCurrencyAmount(baseInput, base),
+          quoteInputAmount: tryParseCurrencyAmount(quoteInput, quote),
+        };
+      }
+      const inverse = base.equals(selectedLendgine.token1);
+      const parsedAmount =
+        tryParseCurrencyAmount(baseInput, base) ??
+        tryParseCurrencyAmount(quoteInput, quote);
+      if (!parsedAmount) return {};
+
+      const updatedInfo = accruedLendgineInfo(
+        selectedLendgine,
+        lendgineInfo.data
+      );
+
+      const [baseAmount, quoteAmount] = inverse
+        ? [updatedInfo.reserve1, updatedInfo.reserve0]
+        : [updatedInfo.reserve0, updatedInfo.reserve1];
+
+      // determine percentage of pool
+      const share = parsedAmount.currency.equals(base)
+        ? parsedAmount.divide(baseAmount).asFraction
+        : parsedAmount.divide(quoteAmount).asFraction;
+
+      const liquidity = updatedInfo.totalLiquidity.multiply(share);
+
+      const positionSize = convertLiquidityToPosition(
+        liquidity,
+        selectedLendgine,
+        updatedInfo
+      );
+
+      // TODO: make sure the tokens are correct
       return {
-        baseInputAmount: tryParseCurrencyAmount(baseInput, base),
-        quoteInputAmount: tryParseCurrencyAmount(quoteInput, quote),
+        baseInputAmount: baseAmount.multiply(share),
+        quoteInputAmount: quoteAmount.multiply(share),
+        liquidity,
+        positionSize,
       };
-    }
-    const inverse = base.equals(selectedLendgine.token1);
-    const parsedAmount =
-      tryParseCurrencyAmount(baseInput, base) ??
-      tryParseCurrencyAmount(quoteInput, quote);
-    if (!parsedAmount) return {};
-
-    const updatedInfo = accruedLendgineInfo(
+    }, [
+      base,
+      baseInput,
+      lendgineInfo.data,
+      quote,
+      quoteInput,
       selectedLendgine,
-      lendgineInfo.data
-    );
-
-    const [baseAmount, quoteAmount] = inverse
-      ? [updatedInfo.reserve1, updatedInfo.reserve0]
-      : [updatedInfo.reserve0, updatedInfo.reserve1];
-
-    // determine percentage of pool
-    const share = parsedAmount.currency.equals(base)
-      ? parsedAmount.divide(baseAmount).asFraction
-      : parsedAmount.divide(quoteAmount).asFraction;
-
-    const liquidity = updatedInfo.totalLiquidity.multiply(share);
-
-    const positionSize = convertLiquidityToPosition(
-      liquidity,
-      selectedLendgine,
-      updatedInfo
-    );
-
-    // TODO: make sure the tokens are correct
-    return {
-      baseInputAmount: baseAmount.multiply(share),
-      quoteInputAmount: quoteAmount.multiply(share),
-      liquidity,
-      positionSize,
-    };
-  }, [base, baseInput, lendgineInfo.data, quote, quoteInput, selectedLendgine]);
+    ]);
 
   const onInput = useCallback(
     (value: string, field: "base" | "quote") => {
@@ -139,7 +147,13 @@ export const Deposit: React.FC = () => {
                   )
                   .quotient.toString()
               ),
-              sizeMin: BigNumber.from("0"), // TODO: fix
+              sizeMin: BigNumber.from(
+                positionSize
+                  .multiply(
+                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+                  )
+                  .quotient.toString()
+              ), // TODO: fix
 
               recipient: address,
               deadline: BigNumber.from(
@@ -153,6 +167,7 @@ export const Deposit: React.FC = () => {
       base,
       baseInputAmount,
       liquidity,
+      positionSize,
       quoteInputAmount,
       selectedLendgine.bound.asFraction,
       selectedLendgine.token0,
