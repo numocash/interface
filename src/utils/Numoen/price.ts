@@ -1,4 +1,5 @@
 import { Fraction, Price } from "@uniswap/sdk-core";
+import JSBI from "jsbi";
 
 import type { Lendgine, LendgineInfo } from "../../constants/types";
 import type { WrappedTokenInfo } from "../../hooks/useTokens2";
@@ -12,14 +13,22 @@ export const numoenPrice = <L extends Lendgine>(
   if (lendgineInfo.totalLiquidity.equalTo(0))
     return new Price(lendgine.token1, lendgine.token0, 1, 0);
 
-  const scale1 = lendgineInfo.reserve1.divide(lendgineInfo.totalLiquidity);
-  const priceFraction = lendgine.bound.subtract(scale1.divide(2));
+  const scale1 = lendgineInfo.reserve1.asFraction.divide(
+    lendgineInfo.totalLiquidity
+  );
+
+  const priceFraction = lendgine.bound.asFraction.subtract(
+    scale1.asFraction.divide(2)
+  );
 
   return new Price(
     lendgine.token1,
     lendgine.token0,
-    priceFraction.denominator,
-    priceFraction.numerator
+    JSBI.multiply(
+      priceFraction.denominator,
+      lendgineInfo.reserve1.decimalScale
+    ),
+    JSBI.multiply(priceFraction.numerator, lendgineInfo.reserve0.decimalScale)
   );
 };
 
@@ -39,6 +48,7 @@ export const pricePerLiquidity = <L extends Lendgine>(
   lendgineInfo: LendgineInfo<L>
 ) => {
   const price = numoenPrice(lendgine, lendgineInfo);
+  console.log("price", price.toSignificant(5));
 
   const f = lendgine.bound.asFraction
     .multiply(price)
