@@ -84,18 +84,19 @@ export const Buy: React.FC = () => {
         : null;
 
     const bRate = selectedLendgineInfo.data
-      ? borrowRate(
-          selectedLendgineInfo.data.totalLiquidity.subtract(
+      ? borrowRate({
+          totalLiquidity: selectedLendgineInfo.data.totalLiquidity.subtract(
             liquidity
               ? liquidity
-              : CurrencyAmount.fromRawAmount(selectedLendgine.liquidity, 0)
+              : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
           ),
-          selectedLendgineInfo.data.totalLiquidityBorrowed.add(
-            liquidity
-              ? liquidity
-              : CurrencyAmount.fromRawAmount(selectedLendgine.liquidity, 0)
-          )
-        )
+          totalLiquidityBorrowed:
+            selectedLendgineInfo.data.totalLiquidityBorrowed.add(
+              liquidity
+                ? liquidity
+                : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
+            ),
+        })
       : null;
     return { price, borrowAmount, liquidity, shares, bRate };
   }, [

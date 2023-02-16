@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import type { Lendgine } from "../constants";
+import type { Lendgine } from "../constants/types";
 import { useEnvironment } from "../contexts/environment2";
 import type { WrappedTokenInfo } from "./useTokens2";
 

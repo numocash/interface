@@ -1,8 +1,7 @@
 import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
-import type { Lendgine } from "../../../../../constants";
-import type { LendgineInfo } from "../../../../../hooks/useLendgine";
+import type { Lendgine, LendgineInfo } from "../../../../../constants/types";
 import {
   liquidityPerCollateral,
   liquidityPerShare,

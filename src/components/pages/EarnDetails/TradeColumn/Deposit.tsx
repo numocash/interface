@@ -15,6 +15,10 @@ import { useBalances } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import type { BeetStage } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
+import {
+  accruedLendgineInfo,
+  convertLiquidityToPosition,
+} from "../../../../utils/Numoen/lendgineMath";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
@@ -33,7 +37,7 @@ export const Deposit: React.FC = () => {
   const [baseInput, setBaseInput] = useState("");
   const [quoteInput, setQuoteInput] = useState("");
 
-  const { baseInputAmount, quoteInputAmount } = useMemo(() => {
+  const { baseInputAmount, quoteInputAmount, liquidity } = useMemo(() => {
     if (!lendgineInfo.data) {
       return {
         baseInputAmount: tryParseCurrencyAmount(baseInput, base),
@@ -46,28 +50,36 @@ export const Deposit: React.FC = () => {
       tryParseCurrencyAmount(quoteInput, quote);
     if (!parsedAmount) return {};
 
+    const updatedInfo = accruedLendgineInfo(
+      selectedLendgine,
+      lendgineInfo.data
+    );
+
     const [baseAmount, quoteAmount] = inverse
-      ? [lendgineInfo.data.reserve1, lendgineInfo.data.reserve0]
-      : [lendgineInfo.data.reserve0, lendgineInfo.data.reserve1];
+      ? [updatedInfo.reserve1, updatedInfo.reserve0]
+      : [updatedInfo.reserve0, updatedInfo.reserve1];
 
     // determine percentage of pool
     const share = parsedAmount.currency.equals(base)
-      ? parsedAmount.divide(baseAmount)
-      : parsedAmount.divide(quoteAmount);
+      ? parsedAmount.divide(baseAmount).asFraction
+      : parsedAmount.divide(quoteAmount).asFraction;
+
+    const liquidity = updatedInfo.totalLiquidity.multiply(share);
+
+    const positionSize = convertLiquidityToPosition(
+      liquidity,
+      selectedLendgine,
+      updatedInfo
+    );
 
     // TODO: make sure the tokens are correct
     return {
-      baseInputAmount: share.multiply(baseAmount),
-      quoteInputAmount: share.multiply(quoteAmount),
+      baseInputAmount: baseAmount.multiply(share),
+      quoteInputAmount: quoteAmount.multiply(share),
+      liquidity,
+      positionSize,
     };
-  }, [
-    base,
-    baseInput,
-    lendgineInfo.data,
-    quote,
-    quoteInput,
-    selectedLendgine.token1,
-  ]);
+  }, [base, baseInput, lendgineInfo.data, quote, quoteInput, selectedLendgine]);
 
   const onInput = useCallback(
     (value: string, field: "base" | "quote") => {
@@ -94,7 +106,7 @@ export const Deposit: React.FC = () => {
 
   const args = useMemo(
     () =>
-      !!baseInputAmount && !!quoteInputAmount && !!address
+      !!baseInputAmount && !!quoteInputAmount && !!address && !!liquidity
         ? ([
             {
               token0: getAddress(selectedLendgine.token0.address),
@@ -106,7 +118,7 @@ export const Deposit: React.FC = () => {
                   .multiply(scale)
                   .quotient.toString()
               ),
-              liquidity: BigNumber.from("0"),
+              liquidity: BigNumber.from(liquidity.quotient.toString()),
               amount0Min: BigNumber.from(
                 (base.equals(selectedLendgine.token0)
                   ? baseInputAmount
@@ -140,6 +152,7 @@ export const Deposit: React.FC = () => {
       address,
       base,
       baseInputAmount,
+      liquidity,
       quoteInputAmount,
       selectedLendgine.bound.asFraction,
       selectedLendgine.token0,
@@ -255,7 +268,7 @@ export const Deposit: React.FC = () => {
                   },
                 ],
               },
-            ].filter((s) => !!s) as BeetStage[]
+            ].filter((s): s is BeetStage => !!s)
           );
 
           onInput("", "base");

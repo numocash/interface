@@ -1,10 +1,10 @@
-import type { Price, Token } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 import type { foundry } from "wagmi/chains";
 
 import type { chains } from "../AppWithProviders";
 import type { WrappedTokenInfo } from "../hooks/useTokens2";
 import { foundryConfig } from "./foundry";
+import type { Lendgine } from "./types";
 
 export type SupportedChainIDs = (typeof chains)[number]["id"];
 
@@ -23,19 +23,6 @@ export type NumoenInterfaceConfig = {
   stablecoin: WrappedTokenInfo;
   defaultActiveLists: readonly string[];
   defaultInactiveLists: readonly string[];
-};
-
-export type Lendgine = {
-  token0: WrappedTokenInfo;
-  token1: WrappedTokenInfo;
-  liquidity: Token;
-  lendgine: Token;
-  bound: Price<WrappedTokenInfo, WrappedTokenInfo>;
-
-  token0Exp: number;
-  token1Exp: number;
-
-  address: Address;
 };
 
 // TODO: make lendgines type conditional on whether testnet property is set on chain

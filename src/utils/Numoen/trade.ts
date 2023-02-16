@@ -2,7 +2,7 @@ import type { CurrencyAmount, Percent, Price } from "@uniswap/sdk-core";
 import { Fraction } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
-import type { Lendgine } from "../../constants";
+import type { Lendgine } from "../../constants/types";
 import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 
 export const ONE_HUNDRED_PERCENT = new Fraction(1);

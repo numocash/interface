@@ -1,6 +1,6 @@
 import type { Token } from "@uniswap/sdk-core";
 
-import type { Lendgine } from "../constants";
+import type { Lendgine } from "../constants/types";
 
 export const pickLongLendgines = (
   lendgines: readonly Lendgine[],

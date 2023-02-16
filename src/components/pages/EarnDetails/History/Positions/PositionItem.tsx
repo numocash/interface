@@ -1,17 +1,23 @@
+import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
-import type { Lendgine } from "../../../../../constants";
 import type {
+  Lendgine,
   LendgineInfo,
   LendginePosition,
-} from "../../../../../hooks/useLendgine";
+} from "../../../../../constants/types";
+import {
+  accruedLendgineInfo,
+  accruedLendginePositionInfo,
+  convertPositionToLiquidity,
+} from "../../../../../utils/Numoen/lendgineMath";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
 import { useEarnDetails } from "../..";
 
 type Props<L extends Lendgine = Lendgine> = {
   lendgine: L;
   lendgineInfo: LendgineInfo<L>;
-  position: LendginePosition;
+  position: LendginePosition<L>;
 };
 
 export const PositionItem: React.FC<Props> = ({
@@ -22,21 +28,42 @@ export const PositionItem: React.FC<Props> = ({
   const { base, setSelectedLendgine } = useEarnDetails();
   const isInverse = base.equals(lendgine.token1);
 
-  const { amount0, amount1 } = useMemo(() => {
-    const amount0 = lendgineInfo.reserve0
-      .multiply(position.size)
-      .divide(lendgineInfo.totalPositionSize);
+  const { updatedLendgineInfo, updatedPositionInfo } = useMemo(
+    () => ({
+      updatedLendgineInfo: accruedLendgineInfo(lendgine, lendgineInfo),
+      updatedPositionInfo: accruedLendginePositionInfo(
+        lendgine,
+        accruedLendgineInfo(lendgine, lendgineInfo),
+        position
+      ),
+    }),
+    [lendgine, lendgineInfo, position]
+  );
 
-    const amount1 = lendgineInfo.reserve1
-      .multiply(position.size)
-      .divide(lendgineInfo.totalPositionSize);
+  const { amount0, amount1 } = useMemo(() => {
+    if (updatedLendgineInfo.totalSupply.equalTo(0))
+      return {
+        amount0: CurrencyAmount.fromRawAmount(lendgine.token0, 0),
+        amount1: CurrencyAmount.fromRawAmount(lendgine.token1, 0),
+      };
+
+    const amount0 = updatedLendgineInfo.reserve0
+      .multiply(convertPositionToLiquidity(position, lendgineInfo))
+      .divide(updatedLendgineInfo.totalSupply);
+
+    const amount1 = updatedLendgineInfo.reserve1
+      .multiply(convertPositionToLiquidity(position, lendgineInfo))
+      .divide(updatedLendgineInfo.totalSupply);
 
     return { amount0, amount1 };
   }, [
-    lendgineInfo.reserve0,
-    lendgineInfo.reserve1,
-    lendgineInfo.totalPositionSize,
-    position.size,
+    lendgine.token0,
+    lendgine.token1,
+    lendgineInfo,
+    position,
+    updatedLendgineInfo.reserve0,
+    updatedLendgineInfo.reserve1,
+    updatedLendgineInfo.totalSupply,
   ]);
 
   return (
@@ -57,7 +84,7 @@ export const PositionItem: React.FC<Props> = ({
       <div tw="col-span-2 flex flex-col gap-1 justify-self-start">
         <TokenAmountDisplay
           tw="col-span-2"
-          amount={position.tokensOwed}
+          amount={updatedPositionInfo.tokensOwed}
           showIcon
           showSymbol
         />

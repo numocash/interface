@@ -1,12 +1,15 @@
-import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import tw, { styled } from "twin.macro";
 
-import type { Lendgine } from "../../../constants";
-import type { LendgineInfo } from "../../../hooks/useLendgine";
+import type { Lendgine, LendgineInfo } from "../../../constants/types";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
-import { liquidityPerCollateral } from "../../../utils/Numoen/lendgineMath";
-import { lvrCoef, numoenPrice } from "../../../utils/Numoen/price";
+import { accruedLendgineInfo } from "../../../utils/Numoen/lendgineMath";
+import {
+  lvrCoef,
+  numoenPrice,
+  pricePerCollateral,
+  pricePerLiquidity,
+} from "../../../utils/Numoen/price";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../common/VerticalItem";
@@ -20,40 +23,35 @@ type Props<L extends Lendgine = Lendgine> = {
 export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
   const { base, selectedLendgine, setSelectedLendgine } = useEarnDetails();
   const inverse = base.equals(lendgine.token1);
+
+  const updatedInfo = useMemo(
+    () => accruedLendgineInfo(lendgine, info),
+    [info, lendgine]
+  );
+
   const { apr, tvl, borrowValue, il, iv } = useMemo(() => {
-    const price = numoenPrice(lendgine, info);
-    // liq / token1
-    const liqPerCol = liquidityPerCollateral(lendgine);
-
     // token0 / liq
-    const liquidityPrice = liqPerCol.invert().multiply(price);
+    const liquidityPrice = pricePerLiquidity(lendgine, updatedInfo);
 
-    const collateralValue = price.quote(
-      CurrencyAmount.fromFractionalAmount(
-        lendgine.token1,
-        lendgine.bound.asFraction.multiply(2).numerator,
-        lendgine.bound.asFraction.multiply(2).denominator
-      )
-    );
-    const liquidityValue = liquidityPrice.quote(
-      CurrencyAmount.fromFractionalAmount(lendgine.liquidity, 1, 1)
-    );
+    // col / liq
+    const collateralPrice = pricePerCollateral(lendgine, updatedInfo);
+
+    const interestPremium = collateralPrice
+      .subtract(liquidityPrice)
+      .divide(liquidityPrice);
+
+    const price = numoenPrice(lendgine, updatedInfo);
 
     // token0
     const tvl = liquidityPrice.quote(
-      info.totalLiquidity.add(info.totalLiquidityBorrowed)
+      updatedInfo.totalLiquidity.add(updatedInfo.totalLiquidityBorrowed)
     );
 
-    const borrowValue = liquidityPrice.quote(info.totalLiquidityBorrowed);
+    const borrowValue = liquidityPrice.quote(
+      updatedInfo.totalLiquidityBorrowed
+    );
 
-    const interestPremium = collateralValue
-      .subtract(liquidityValue)
-      .divide(liquidityValue);
-
-    const apr = supplyRate(
-      info.totalLiquidity,
-      info.totalLiquidityBorrowed
-    ).multiply(interestPremium);
+    const apr = supplyRate(updatedInfo).multiply(interestPremium);
 
     const lvr = lvrCoef(price, lendgine);
     const il = lvr.multiply(8);
@@ -65,7 +63,7 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
       il,
       iv,
     };
-  }, [info, inverse, lendgine]);
+  }, [updatedInfo, inverse, lendgine]);
   return (
     <Wrapper
       selected={selectedLendgine === lendgine}

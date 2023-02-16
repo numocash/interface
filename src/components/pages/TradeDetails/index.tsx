@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
-import type { Lendgine } from "../../../constants";
+import type { Lendgine } from "../../../constants/types";
 import { useLendginesForTokens } from "../../../hooks/useLendgine";
 import {
   useAddressToToken,

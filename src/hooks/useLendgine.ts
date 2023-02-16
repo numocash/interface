@@ -1,4 +1,4 @@
-import { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
+import { CurrencyAmount, Price } from "@uniswap/sdk-core";
 import type { BigNumber } from "ethers";
 import { chunk } from "lodash";
 import { useMemo } from "react";
@@ -6,7 +6,11 @@ import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 import { useContractReads } from "wagmi";
 
-import type { Lendgine } from "../constants";
+import type {
+  Lendgine,
+  LendgineInfo,
+  LendginePosition,
+} from "../constants/types";
 import { useEnvironment } from "../contexts/environment2";
 import {
   lendgineABI,
@@ -30,19 +34,6 @@ export const useLendginesForTokens = (
         (l.token0.equals(tokens[1]) && l.token1.equals(tokens[0]))
     );
   }, [environment.lendgines, tokens]);
-};
-
-export type LendgineInfo<L extends Lendgine> = {
-  totalPositionSize: Fraction;
-  totalLiquidityBorrowed: CurrencyAmount<L["liquidity"]>;
-  rewardPerPositionStored: Fraction;
-  lastUpdate: number;
-
-  totalSupply: Fraction;
-
-  reserve0: CurrencyAmount<L["token0"]>;
-  reserve1: CurrencyAmount<L["token1"]>;
-  totalLiquidity: CurrencyAmount<L["liquidity"]>;
 };
 
 export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
@@ -108,14 +99,25 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
     invariant(!!lendgine);
 
     return {
-      totalPositionSize: new Fraction(lendgineInfo[0].toString()),
+      totalPositionSize: CurrencyAmount.fromRawAmount(
+        lendgine.lendgine,
+        lendgineInfo[0].toString()
+      ),
       totalLiquidityBorrowed: CurrencyAmount.fromRawAmount(
-        lendgine.liquidity,
+        lendgine.lendgine,
         lendgineInfo[1].toString()
       ),
-      rewardPerPositionStored: new Fraction(lendgineInfo[2].toString()),
+      rewardPerPositionStored: new Price(
+        lendgine.lendgine,
+        lendgine.token1,
+        1,
+        lendgineInfo[2].toString()
+      ),
       lastUpdate: +lendgineInfo[3].toString(),
-      totalSupply: new Fraction(lendgineInfo[4].toString()),
+      totalSupply: CurrencyAmount.fromRawAmount(
+        lendgine.lendgine,
+        lendgineInfo[4].toString()
+      ),
       reserve0: CurrencyAmount.fromRawAmount(
         lendgine.token0,
         lendgineInfo[5].toString()
@@ -125,7 +127,7 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
         lendgineInfo[6].toString()
       ),
       totalLiquidity: CurrencyAmount.fromRawAmount(
-        lendgine.liquidity,
+        lendgine.lendgine,
         lendgineInfo[7].toString()
       ),
     };
@@ -214,14 +216,25 @@ export const useLendgines = <L extends Lendgine>(
       invariant(lendgine);
 
       return {
-        totalPositionSize: new Fraction(lendgineInfo[0].toString()),
+        totalPositionSize: CurrencyAmount.fromRawAmount(
+          lendgine.lendgine,
+          lendgineInfo[0].toString()
+        ),
         totalLiquidityBorrowed: CurrencyAmount.fromRawAmount(
-          lendgine.liquidity,
+          lendgine.lendgine,
           lendgineInfo[1].toString()
         ),
-        rewardPerPositionStored: new Fraction(lendgineInfo[2].toString()),
+        rewardPerPositionStored: new Price(
+          lendgine.lendgine,
+          lendgine.token1,
+          1,
+          lendgineInfo[2].toString()
+        ),
         lastUpdate: +lendgineInfo[3].toString(),
-        totalSupply: new Fraction(lendgineInfo[4].toString()),
+        totalSupply: CurrencyAmount.fromRawAmount(
+          lendgine.lendgine,
+          lendgineInfo[4].toString()
+        ),
         reserve0: CurrencyAmount.fromRawAmount(
           lendgine.token0,
           lendgineInfo[5].toString()
@@ -231,7 +244,7 @@ export const useLendgines = <L extends Lendgine>(
           lendgineInfo[6].toString()
         ),
         totalLiquidity: CurrencyAmount.fromRawAmount(
-          lendgine.liquidity,
+          lendgine.lendgine,
           lendgineInfo[7].toString()
         ),
       };
@@ -250,14 +263,8 @@ export const useLendgines = <L extends Lendgine>(
   return updatedQuery;
 };
 
-export type LendginePosition = {
-  size: Fraction;
-  rewardPerPositionPaid: Fraction;
-  tokensOwed: CurrencyAmount<WrappedTokenInfo>;
-};
-
-export const useLendginePosition = (
-  lendgine: HookArg<Lendgine>,
+export const useLendginePosition = <L extends Lendgine>(
+  lendgine: HookArg<L>,
   address: HookArg<Address>
 ) => {
   const environment = useEnvironment();
@@ -271,12 +278,20 @@ export const useLendginePosition = (
 
   // This function should be generalized to take the FetchBalanceResult type and then parsing it
   // parse the return type into a more expressive type
-  const parseReturn = (position: (typeof positionQuery)["data"]) => {
+  const parseReturn = (
+    position: (typeof positionQuery)["data"]
+  ): LendginePosition<L> | undefined => {
     if (!position) return undefined;
     invariant(lendgine && address); // if a balance is returned then the data passed must be valid
     return {
-      size: new Fraction(position.size.toString()),
-      rewardPerPositionPaid: new Fraction(
+      size: CurrencyAmount.fromRawAmount(
+        lendgine.lendgine,
+        position.size.toString()
+      ),
+      rewardPerPositionPaid: new Price(
+        lendgine.lendgine,
+        lendgine.token1,
+        1,
         position.rewardPerPositionPaid.toString()
       ),
       tokensOwed: CurrencyAmount.fromRawAmount(
@@ -302,8 +317,8 @@ export const useLendginePosition = (
   return updatedQuery;
 };
 
-export const useLendginesPosition = (
-  lendgines: HookArg<readonly Lendgine[]>,
+export const useLendginesPosition = <L extends Lendgine>(
+  lendgines: HookArg<readonly L[]>,
   address: HookArg<Address>
 ) => {
   const environment = useEnvironment();
@@ -330,15 +345,25 @@ export const useLendginesPosition = (
 
   // This function should be generalized to take the FetchBalanceResult type and then parsing it
   // parse the return type into a more expressive type
-  const parseReturn = (positions: (typeof positionsQuery)["data"]) => {
+  const parseReturn = (
+    positions: (typeof positionsQuery)["data"]
+  ): LendginePosition<L>[] | undefined => {
     if (!positions) return undefined;
     invariant(lendgines && address); // if a balance is returned then the data passed must be valid
     return positions.map((p, i) => {
       const lendgine = lendgines[i];
       invariant(lendgine);
       return {
-        size: new Fraction(p.size.toString()),
-        rewardPerPositionPaid: new Fraction(p.rewardPerPositionPaid.toString()),
+        size: CurrencyAmount.fromRawAmount(
+          lendgine.lendgine,
+          p.size.toString()
+        ),
+        rewardPerPositionPaid: new Price(
+          lendgine.lendgine,
+          lendgine.token1,
+          1,
+          p.rewardPerPositionPaid.toString()
+        ),
         tokensOwed: CurrencyAmount.fromRawAmount(
           lendgine.token1,
           p.tokensOwed.toString()

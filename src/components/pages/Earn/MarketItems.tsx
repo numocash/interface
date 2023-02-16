@@ -9,8 +9,7 @@ import type { Market } from "../../../hooks/useMarket";
 import { useMarketToLendgines } from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
-import { liquidityPerCollateral } from "../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../utils/Numoen/price";
+import { numoenPrice, pricePerLiquidity } from "../../../utils/Numoen/price";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
 import { TokenIcon } from "../../common/TokenIcon";
@@ -30,9 +29,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
   const { bestSupplyRate, tvl } = useMemo(() => {
     if (!lendgineInfosQuery.data || lendgineInfosQuery.isLoading) return {};
 
-    const supplyRates = lendgineInfosQuery.data.map((l) =>
-      supplyRate(l.totalLiquidity, l.totalLiquidityBorrowed)
-    );
+    const supplyRates = lendgineInfosQuery.data.map((l) => supplyRate(l));
 
     const bestSupplyRate = supplyRates.reduce(
       (acc, cur) => (cur.greaterThan(acc) ? cur : acc),
@@ -44,11 +41,10 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       invariant(lendgine);
       // token0 / token1
       const price = numoenPrice(lendgine, cur);
-      // liq / token1
-      const liqPerCol = liquidityPerCollateral(lendgine);
 
       // token0 / liq
-      const liquidityPrice = liqPerCol.invert().multiply(price);
+      const liquidityPrice = pricePerLiquidity(lendgine, cur);
+
       // liq
       const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);
 
