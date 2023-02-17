@@ -24,6 +24,8 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
 
   useLendginesPosition(lendgines, address);
 
+  // TODO: calculate position values
+
   const lendgineInfosQuery = useLendgines(lendgines);
 
   const { bestSupplyRate, tvl } = useMemo(() => {
@@ -31,6 +33,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
 
     const supplyRates = lendgineInfosQuery.data.map((l) => supplyRate(l));
 
+    // TODO: fix this to include the premium
     const bestSupplyRate = supplyRates.reduce(
       (acc, cur) => (cur.greaterThan(acc) ? cur : acc),
       new Percent(0)
@@ -70,7 +73,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       tw=""
       to={`/earn/details/${market[0].address}/${market[1].address}`}
     >
-      <Wrapper positionValue={CurrencyAmount.fromRawAmount(market[0], 1)}>
+      <Wrapper positionValue={CurrencyAmount.fromRawAmount(market[0], 0)}>
         <div tw="flex items-center gap-3 col-span-2">
           <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
             <TokenIcon token={market[1]} size={32} />
