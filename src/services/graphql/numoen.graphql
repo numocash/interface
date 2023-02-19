@@ -1,0 +1,6 @@
+query LendgineQuery($id: ID!) {
+  lendgine(id: $id) {
+    token0
+    token1
+  }
+}

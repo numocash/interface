@@ -5,7 +5,7 @@ export default defineConfig({
   out: "src/generated.ts",
   plugins: [
     foundry({
-      project: "./lib/",
+      project: "./lib/numoen-contracts",
     }),
     actions(),
     react(),

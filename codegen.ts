@@ -23,6 +23,13 @@ const codegenConfig: CodegenConfig = {
       config,
       plugins: [],
     },
+    "./src/gql/numoen/": {
+      schema: "http://localhost:8000/subgraphs/name/kyscott/numoen",
+      documents: "src/services/graphql/numoen.graphql",
+      preset: "client",
+      config,
+      plugins: [],
+    },
   },
 };
 export default codegenConfig;
