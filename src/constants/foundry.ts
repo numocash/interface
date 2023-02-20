@@ -8,17 +8,17 @@ import type { Lendgine } from "./types";
 export const wethLendgine = {
   token0: Stable[31337],
   token1: WrappedNative[31337],
-  lendgine: new Token(31337, "0x984EC0723D3EB2CA58bD17401eCc00f0468bFbFa", 18),
+  lendgine: new Token(31337, "0x66F62E3d661e82B4191B9ED8F5795ac57a65C246", 18),
   bound: new Price(
     Stable[31337],
     WrappedNative[31337],
     "1000000000000000000",
-    "4754691411696506159799"
+    "3000000000000000000000"
   ),
   token0Exp: Stable[31337].decimals,
   token1Exp: WrappedNative[31337].decimals,
 
-  address: "0x984EC0723D3EB2CA58bD17401eCc00f0468bFbFa",
+  address: "0x66F62E3d661e82B4191B9ED8F5795ac57a65C246",
 } as const satisfies Lendgine;
 
 const Illuvium = new WrappedTokenInfo({
@@ -32,35 +32,35 @@ const Illuvium = new WrappedTokenInfo({
 export const illuviumLendgine = {
   token0: WrappedNative[31337],
   token1: Illuvium,
-  lendgine: new Token(31337, "0x6E26283717a0c6A8b0986fCad083DC628f340656", 18),
+  lendgine: new Token(31337, "0x35988a69DdF99f522c7AA6E0ad80D52813BF2069", 18),
   bound: new Price(
     WrappedNative[31337],
     Illuvium,
     "1000000000000000000",
-    "125309912212217790"
+    "150000000000000000"
   ),
 
   token0Exp: WrappedNative[31337].decimals,
   token1Exp: Illuvium.decimals,
 
-  address: "0x6E26283717a0c6A8b0986fCad083DC628f340656",
+  address: "0x35988a69DdF99f522c7AA6E0ad80D52813BF2069",
 } as const satisfies Lendgine;
 
 export const inverseIlluviumLendgine = {
   token0: Illuvium,
   token1: WrappedNative[31337],
-  lendgine: new Token(31337, "0x04a50D3263e2164EE8A462260aAaB0eAFc15bFFb", 18),
+  lendgine: new Token(31337, "0xEf921A20A2eA86Dea5C3a572633f867d3c01AA33", 18),
   bound: new Price(
     Illuvium,
     WrappedNative[31337],
     "1000000000000000000",
-    "71821932049222954980"
+    "60000000000000000000"
   ),
 
   token0Exp: Illuvium.decimals,
   token1Exp: WrappedNative[31337].decimals,
 
-  address: "0x04a50D3263e2164EE8A462260aAaB0eAFc15bFFb",
+  address: "0xEf921A20A2eA86Dea5C3a572633f867d3c01AA33",
 } as const satisfies Lendgine;
 
 export const foundryConfig = {
