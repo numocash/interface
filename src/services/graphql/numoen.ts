@@ -11,6 +11,7 @@ export type RawLendgine = {
   token0Exp: number;
   token1Exp: number;
   upperBound: Fraction;
+  address: Address;
 };
 
 export const parseLendgines = (
@@ -22,5 +23,6 @@ export const parseLendgines = (
     token0Exp: l.token0Exp,
     token1Exp: l.token1Exp,
     upperBound: new Fraction(l.upperBound, scale),
+    address: getAddress(l.id),
   }));
 };

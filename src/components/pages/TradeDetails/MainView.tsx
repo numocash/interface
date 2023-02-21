@@ -1,9 +1,9 @@
 import { TokenIcon } from "../../common/TokenIcon";
-import { useTradeDetails } from ".";
 import { Chart } from "./Chart/Chart";
 import { TimeSelector } from "./Chart/TimeSelector";
 import { History } from "./History/History";
 import { Positions } from "./History/Positions/Positions";
+import { useTradeDetails } from "./TradeDetailsInner";
 
 export const MainView: React.FC = () => {
   const { base: denom, quote: other } = useTradeDetails();

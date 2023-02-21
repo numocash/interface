@@ -1,4 +1,4 @@
-import { useEarnDetails } from "..";
+import { useEarnDetails } from "../EarnDetailsInner";
 import { Config } from "./Config";
 import { DepositWithdraw } from "./DepositWithdraw";
 import { Trade } from "./Trade";

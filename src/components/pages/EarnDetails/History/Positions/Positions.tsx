@@ -6,7 +6,7 @@ import {
   useLendginesPosition,
 } from "../../../../../hooks/useLendgine";
 import { EmptyPosition } from "../../../../common/EmptyPosition";
-import { useEarnDetails } from "../..";
+import { useEarnDetails } from "../../EarnDetailsInner";
 import { PositionItem } from "./PositionItem";
 
 export const Positions: React.FC = () => {

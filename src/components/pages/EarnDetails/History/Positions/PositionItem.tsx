@@ -22,7 +22,7 @@ import {
 } from "../../../../../utils/Numoen/lendgineMath";
 import { AsyncButton } from "../../../../common/AsyncButton";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
-import { useEarnDetails } from "../..";
+import { useEarnDetails } from "../../EarnDetailsInner";
 
 type Props<L extends Lendgine = Lendgine> = {
   lendgine: L;

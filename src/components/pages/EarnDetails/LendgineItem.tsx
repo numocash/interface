@@ -13,7 +13,7 @@ import {
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../common/VerticalItem";
-import { useEarnDetails } from ".";
+import { useEarnDetails } from "./EarnDetailsInner";
 
 type Props<L extends Lendgine = Lendgine> = {
   lendgine: L;

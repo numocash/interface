@@ -8,12 +8,9 @@ import {
   pickLongLendgines,
   pickShortLendgines,
 } from "../../../utils/lendgines";
-import { BoundSelection } from "./BoundSelection";
-import { History } from "./History/History";
-import { Positions } from "./History/Positions/Positions";
-import { Lendgines } from "./Lendgines";
-import { Market } from "./Market";
-import { TradeColumn } from "./TradeColumn/TradeColumn";
+import { Times } from "./Chart/TimeSelector";
+import { MainView } from "./MainView";
+import { TradeColumn, TradeType } from "./TradeColumn/TradeColumn";
 
 interface Props {
   base: WrappedTokenInfo;
@@ -21,9 +18,15 @@ interface Props {
   lendgines: readonly Lendgine[];
 }
 
-interface IEarnDetails {
+interface ITradeDetails {
   base: WrappedTokenInfo;
   quote: WrappedTokenInfo;
+
+  timeframe: Times;
+  setTimeframe: (val: Times) => void;
+
+  trade: TradeType;
+  setTrade: (val: TradeType) => void;
 
   selectedLendgine: Lendgine;
   setSelectedLendgine: (val: Lendgine) => void;
@@ -34,12 +37,18 @@ interface IEarnDetails {
   lendgines: readonly Lendgine[];
 }
 
-const useEarnDetailsInternal = ({
+const useTradeDetailsInternal = ({
   base,
   quote,
   lendgines,
-}: Partial<Props> = {}): IEarnDetails => {
+}: {
+  base?: WrappedTokenInfo;
+  quote?: WrappedTokenInfo;
+  lendgines?: readonly Lendgine[];
+} = {}): ITradeDetails => {
   invariant(base && quote && lendgines);
+  const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
+  const [trade, setTrade] = useState<TradeType>(TradeType.Long);
   const [close, setClose] = useState(false);
 
   const longLendgine = pickLongLendgines(lendgines, base);
@@ -53,41 +62,41 @@ const useEarnDetailsInternal = ({
   return {
     base,
     quote,
-    lendgines,
+
+    timeframe,
+    setTimeframe,
+
     selectedLendgine,
     setSelectedLendgine,
+
+    trade,
+    setTrade,
+
     close,
     setClose,
+
+    lendgines,
   };
 };
 
-export const { Provider: EarnDetailsProvider, useContainer: useEarnDetails } =
-  createContainer(useEarnDetailsInternal);
+export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =
+  createContainer(useTradeDetailsInternal);
 
-export const EarnDetailsInner: React.FC<Props> = ({
+export const TradeDetailsInner: React.FC<Props> = ({
   base,
   quote,
   lendgines,
 }: Props) => {
   return (
     <div tw="w-full grid grid-cols-3">
-      <EarnDetailsProvider initialState={{ base, quote, lendgines }}>
-        <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2">
-          <Market />
-          <p tw="text-sm font-semibold">Select a pool</p>
-          <Lendgines />
-          <BoundSelection />
-          <div tw="border-b-2 border-gray-200" />
-
-          <History />
-          <Positions />
-        </div>
+      <TradeDetailsProvider initialState={{ base, quote, lendgines }}>
+        <MainView />
         <div tw="flex max-w-sm justify-self-end">
           {/* TODO: stick to the right side */}
           <div tw="border-l-2 border-gray-200 sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
           <TradeColumn tw="" />
         </div>
-      </EarnDetailsProvider>
+      </TradeDetailsProvider>
     </div>
   );
 };

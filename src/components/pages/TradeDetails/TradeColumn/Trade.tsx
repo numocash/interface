@@ -1,4 +1,4 @@
-import { useTradeDetails } from "..";
+import { useTradeDetails } from "../TradeDetailsInner";
 import { Buy } from "./Buy";
 import { Close } from "./Close";
 

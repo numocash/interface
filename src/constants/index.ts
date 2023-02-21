@@ -1,10 +1,8 @@
 import type { Address } from "wagmi";
-import type { foundry } from "wagmi/chains";
 
 import type { chains } from "../AppWithProviders";
 import type { WrappedTokenInfo } from "../hooks/useTokens2";
 import { foundryConfig } from "./foundry";
-import type { Lendgine } from "./types";
 
 export type SupportedChainIDs = (typeof chains)[number]["id"];
 
@@ -31,9 +29,6 @@ export const config: {
   [chain in SupportedChainIDs]: {
     interface: NumoenInterfaceConfig;
     base: NumoenBaseConfig;
-    lendgines: chain extends (typeof foundry)["id"]
-      ? readonly Lendgine[]
-      : never; // include a lendgine property for testnet chains
   };
 } = {
   1: foundryConfig,

@@ -2,7 +2,7 @@ import tw, { styled } from "twin.macro";
 
 import { useLendgines } from "../../../hooks/useLendgine";
 import { LoadingSpinner } from "../../common/LoadingSpinner";
-import { useEarnDetails } from ".";
+import { useEarnDetails } from "./EarnDetailsInner";
 import { LendgineItem } from "./LendgineItem";
 
 export const Lendgines: React.FC = () => {

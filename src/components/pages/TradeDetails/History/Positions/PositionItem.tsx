@@ -7,7 +7,7 @@ import {
   liquidityPerShare,
 } from "../../../../../utils/Numoen/lendgineMath";
 import { numoenPrice } from "../../../../../utils/Numoen/price";
-import { useTradeDetails } from "../..";
+import { useTradeDetails } from "../../TradeDetailsInner";
 
 type Props<L extends Lendgine = Lendgine> = {
   balance: CurrencyAmount<Token>;

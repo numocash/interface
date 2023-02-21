@@ -1,67 +1,64 @@
 import { getAddress } from "@ethersproject/address";
-import { Price, Token } from "@uniswap/sdk-core";
 
-import { WrappedTokenInfo } from "../hooks/useTokens2";
 import { Stable, WrappedNative } from "./tokens";
-import type { Lendgine } from "./types";
 
-export const wethLendgine = {
-  token0: Stable[1],
-  token1: WrappedNative[1],
-  lendgine: new Token(1, "0x58248259ce18195E31979B8E0a5316194C19850d", 18),
-  bound: new Price(
-    Stable[1],
-    WrappedNative[1],
-    "1000000000000000000",
-    "3000000000000000000000"
-  ),
-  token0Exp: Stable[1].decimals,
-  token1Exp: WrappedNative[1].decimals,
+// export const wethLendgine = {
+//   token0: Stable[1],
+//   token1: WrappedNative[1],
+//   lendgine: new Token(1, "0x58248259ce18195E31979B8E0a5316194C19850d", 18),
+//   bound: new Price(
+//     Stable[1],
+//     WrappedNative[1],
+//     "1000000000000000000",
+//     "3000000000000000000000"
+//   ),
+//   token0Exp: Stable[1].decimals,
+//   token1Exp: WrappedNative[1].decimals,
 
-  address: "0x58248259ce18195E31979B8E0a5316194C19850d",
-} as const satisfies Lendgine;
+//   address: "0x58248259ce18195E31979B8E0a5316194C19850d",
+// } as const satisfies Lendgine;
 
-const Illuvium = new WrappedTokenInfo({
-  chainId: 1,
-  address: "0x767FE9EDC9E0dF98E07454847909b5E959D7ca0E",
-  decimals: 18,
-  symbol: "ILV",
-  name: "Illuvium",
-});
+// const Illuvium = new WrappedTokenInfo({
+//   chainId: 1,
+//   address: "0x767FE9EDC9E0dF98E07454847909b5E959D7ca0E",
+//   decimals: 18,
+//   symbol: "ILV",
+//   name: "Illuvium",
+// });
 
-export const illuviumLendgine = {
-  token0: WrappedNative[1],
-  token1: Illuvium,
-  lendgine: new Token(1, "0xd383f7A12eeB342428787a51fcA2589F17CcDEe3", 18),
-  bound: new Price(
-    WrappedNative[1],
-    Illuvium,
-    "1000000000000000000",
-    "150000000000000000"
-  ),
+// export const illuviumLendgine = {
+//   token0: WrappedNative[1],
+//   token1: Illuvium,
+//   lendgine: new Token(1, "0xd383f7A12eeB342428787a51fcA2589F17CcDEe3", 18),
+//   bound: new Price(
+//     WrappedNative[1],
+//     Illuvium,
+//     "1000000000000000000",
+//     "150000000000000000"
+//   ),
 
-  token0Exp: WrappedNative[1].decimals,
-  token1Exp: Illuvium.decimals,
+//   token0Exp: WrappedNative[1].decimals,
+//   token1Exp: Illuvium.decimals,
 
-  address: "0xd383f7A12eeB342428787a51fcA2589F17CcDEe3",
-} as const satisfies Lendgine;
+//   address: "0xd383f7A12eeB342428787a51fcA2589F17CcDEe3",
+// } as const satisfies Lendgine;
 
-export const inverseIlluviumLendgine = {
-  token0: Illuvium,
-  token1: WrappedNative[1],
-  lendgine: new Token(1, "0xDe61C307f2c442d4Bf7820fe57D79A3C8efbdD4f", 18),
-  bound: new Price(
-    Illuvium,
-    WrappedNative[1],
-    "1000000000000000000",
-    "60000000000000000000"
-  ),
+// export const inverseIlluviumLendgine = {
+//   token0: Illuvium,
+//   token1: WrappedNative[1],
+//   lendgine: new Token(1, "0xDe61C307f2c442d4Bf7820fe57D79A3C8efbdD4f", 18),
+//   bound: new Price(
+//     Illuvium,
+//     WrappedNative[1],
+//     "1000000000000000000",
+//     "60000000000000000000"
+//   ),
 
-  token0Exp: Illuvium.decimals,
-  token1Exp: WrappedNative[1].decimals,
+//   token0Exp: Illuvium.decimals,
+//   token1Exp: WrappedNative[1].decimals,
 
-  address: "0xDe61C307f2c442d4Bf7820fe57D79A3C8efbdD4f",
-} as const satisfies Lendgine;
+//   address: "0xDe61C307f2c442d4Bf7820fe57D79A3C8efbdD4f",
+// } as const satisfies Lendgine;
 
 export const foundryConfig = {
   base: {
@@ -83,7 +80,7 @@ export const foundryConfig = {
     ],
     defaultInactiveLists: [],
   },
-  lendgines: [wethLendgine, illuviumLendgine, inverseIlluviumLendgine] as const,
+  // lendgines: [wethLendgine, illuviumLendgine, inverseIlluviumLendgine] as const,
 } as const;
 
 // uniswapV2subgraph:

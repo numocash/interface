@@ -40,7 +40,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
     );
 
     const tvl = lendgineInfosQuery.data.reduce((acc, cur, i) => {
-      const lendgine = lendgines[i];
+      const lendgine = lendgines?.[i];
       invariant(lendgine);
       // token0 / token1
       const price = numoenPrice(lendgine, cur);

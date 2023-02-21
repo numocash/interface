@@ -9,7 +9,7 @@ import {
 } from "../../../../utils/Numoen/lendgineMath";
 import { numoenPrice } from "../../../../utils/Numoen/price";
 import { VerticalItem } from "../../../common/VerticalItem";
-import { useTradeDetails } from "..";
+import { useTradeDetails } from "../TradeDetailsInner";
 
 export const TotalStats: React.FC = () => {
   const { base, lendgines } = useTradeDetails();

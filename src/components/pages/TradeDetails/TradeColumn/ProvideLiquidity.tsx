@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-import { useTradeDetails } from "..";
+import { useTradeDetails } from "../TradeDetailsInner";
 
 export const ProvideLiquidity: React.FC = () => {
   const { base, quote } = useTradeDetails();

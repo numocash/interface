@@ -48,7 +48,6 @@ export const pricePerLiquidity = <L extends Lendgine>(
   lendgineInfo: LendgineInfo<L>
 ) => {
   const price = numoenPrice(lendgine, lendgineInfo);
-  console.log("price", price.toSignificant(5));
 
   const f = lendgine.bound.asFraction
     .multiply(price)

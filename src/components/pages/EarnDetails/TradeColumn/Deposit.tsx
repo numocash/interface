@@ -23,7 +23,7 @@ import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
-import { useEarnDetails } from "..";
+import { useEarnDetails } from "../EarnDetailsInner";
 
 export const Deposit: React.FC = () => {
   const { address } = useAccount();

@@ -32,7 +32,7 @@ import {
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
-import { useTradeDetails } from "..";
+import { useTradeDetails } from "../TradeDetailsInner";
 import { BuyStats } from "./BuyStats";
 
 export const Buy: React.FC = () => {

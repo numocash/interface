@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-import { useEarnDetails } from "..";
+import { useEarnDetails } from "../EarnDetailsInner";
 
 export const Trade: React.FC = () => {
   const { base, quote } = useEarnDetails();

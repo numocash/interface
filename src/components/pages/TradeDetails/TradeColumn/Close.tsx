@@ -31,7 +31,7 @@ import { AsyncButton } from "../../../common/AsyncButton";
 import { LoadingSpinner } from "../../../common/LoadingSpinner";
 import { RowBetween } from "../../../common/RowBetween";
 import { VerticalItem } from "../../../common/VerticalItem";
-import { useTradeDetails } from "..";
+import { useTradeDetails } from "../TradeDetailsInner";
 
 export const Close: React.FC = () => {
   const { setClose, quote, selectedLendgine } = useTradeDetails();

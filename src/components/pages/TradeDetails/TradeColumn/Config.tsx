@@ -4,7 +4,7 @@ import { useMostLiquidMarket } from "../../../../hooks/useExternalExchange";
 import { AddressLink } from "../../../../utils/beet";
 import { LoadingSpinner } from "../../../common/LoadingSpinner";
 import { RowBetween } from "../../../common/RowBetween";
-import { useTradeDetails } from "..";
+import { useTradeDetails } from "../TradeDetailsInner";
 
 export const Config: React.FC = () => {
   const { base: denom, quote: other, lendgines } = useTradeDetails();
@@ -42,7 +42,7 @@ export const Config: React.FC = () => {
         <p tw="text-sm">Lendgines:</p>
 
         <div tw="flex flex-col gap-4">
-          {lendgines.map((l) => (
+          {lendgines?.map((l) => (
             <AddressLink
               key={l.address}
               address={l.address}

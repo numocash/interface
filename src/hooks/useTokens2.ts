@@ -6,6 +6,7 @@ import axios from "axios";
 import { useCallback } from "react";
 
 import { useEnvironment } from "../contexts/environment2";
+import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
 
 export const dedupeTokens = <T extends Token | TokenInfo>(
@@ -116,9 +117,10 @@ export const useDefaultTokenList = () => {
 };
 
 export const useSortDenomTokens = (
-  tokens: readonly [WrappedTokenInfo, WrappedTokenInfo]
+  tokens: HookArg<readonly [WrappedTokenInfo, WrappedTokenInfo]>
 ) => {
   const environment = useEnvironment();
+  if (!tokens) return null;
   if (
     tokens[0].equals(environment.interface.stablecoin) ||
     tokens[1].equals(environment.interface.stablecoin)

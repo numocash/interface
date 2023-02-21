@@ -24,7 +24,7 @@ import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { PercentageSlider } from "../../../common/inputs/PercentageSlider";
-import { useEarnDetails } from "..";
+import { useEarnDetails } from "../EarnDetailsInner";
 
 export const Withdraw: React.FC = () => {
   const { setClose, base, quote, selectedLendgine } = useEarnDetails();

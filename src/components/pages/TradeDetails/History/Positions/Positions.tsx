@@ -4,14 +4,14 @@ import { useAccount } from "wagmi";
 import { useBalances } from "../../../../../hooks/useBalance";
 import { useLendgines } from "../../../../../hooks/useLendgine";
 import { EmptyPosition } from "../../../../common/EmptyPosition";
-import { useTradeDetails } from "../..";
+import { useTradeDetails } from "../../TradeDetailsInner";
 import { PositionItem } from "./PositionItem";
 
 export const Positions: React.FC = () => {
   const { lendgines } = useTradeDetails();
   const { address } = useAccount();
   const balances = useBalances(
-    lendgines.map((l) => l.lendgine),
+    lendgines?.map((l) => l.lendgine),
     address
   );
   const lendgineInfos = useLendgines(lendgines);
@@ -32,7 +32,7 @@ export const Positions: React.FC = () => {
       </div>
       {balances.data?.map((d, i) => {
         if (d.equalTo(0)) return null;
-        const lendgine = lendgines[i];
+        const lendgine = lendgines?.[i];
         const lendgineInfo = lendgineInfos.data?.[i];
         invariant(lendgine && lendgineInfo);
         return (

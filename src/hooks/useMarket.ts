@@ -2,6 +2,7 @@ import { useCallback } from "react";
 
 import type { Lendgine } from "../constants/types";
 import { useEnvironment } from "../contexts/environment2";
+import { useAllLendgines } from "./useLendgine";
 import type { WrappedTokenInfo } from "./useTokens2";
 
 export type Market = readonly [WrappedTokenInfo, WrappedTokenInfo];
@@ -31,10 +32,14 @@ export const useGetLendgineToMarket = () => {
   );
 };
 
-export const useMarketToLendgines = (market: Market): readonly Lendgine[] => {
-  const { lendgines } = useEnvironment();
-  return lendgines.filter(
-    (l) => market.includes(l.token0) && market.includes(l.token1)
+export const useMarketToLendgines = (
+  market: Market
+): readonly Lendgine[] | null => {
+  const lendgines = useAllLendgines();
+  return (
+    lendgines?.filter(
+      (l) => market.includes(l.token0) && market.includes(l.token1)
+    ) ?? null
   );
 };
 

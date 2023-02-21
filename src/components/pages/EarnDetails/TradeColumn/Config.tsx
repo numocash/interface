@@ -2,7 +2,7 @@ import { getAddress } from "@ethersproject/address";
 
 import { AddressLink } from "../../../../utils/beet";
 import { RowBetween } from "../../../common/RowBetween";
-import { useEarnDetails } from "..";
+import { useEarnDetails } from "../EarnDetailsInner";
 
 export const Config: React.FC = () => {
   const { base: denom, quote: other, lendgines } = useEarnDetails();

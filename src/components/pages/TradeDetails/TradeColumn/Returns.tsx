@@ -13,7 +13,7 @@ import invariant from "tiny-invariant";
 
 import { isLongLendgine } from "../../../../utils/lendgines";
 import { RowBetween } from "../../../common/RowBetween";
-import { useTradeDetails } from "..";
+import { useTradeDetails } from "../TradeDetailsInner";
 
 export const Returns: React.FC = () => {
   const { quote, base, selectedLendgine } = useTradeDetails();

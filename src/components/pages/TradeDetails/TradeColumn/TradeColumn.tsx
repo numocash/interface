@@ -6,7 +6,7 @@ import {
   pickLongLendgines,
   pickShortLendgines,
 } from "../../../../utils/lendgines";
-import { useTradeDetails } from "..";
+import { useTradeDetails } from "../TradeDetailsInner";
 import { Config } from "./Config";
 import { ProvideLiquidity } from "./ProvideLiquidity";
 import { Returns } from "./Returns";

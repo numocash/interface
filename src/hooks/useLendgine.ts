@@ -1,6 +1,6 @@
 import type { BigNumber } from "@ethersproject/bignumber";
 import { useQuery } from "@tanstack/react-query";
-import { CurrencyAmount, Price } from "@uniswap/sdk-core";
+import { CurrencyAmount, Price, Token } from "@uniswap/sdk-core";
 import { chunk } from "lodash";
 import { useCallback, useMemo } from "react";
 import invariant from "tiny-invariant";
@@ -23,6 +23,7 @@ import type { RawLendgine } from "../services/graphql/numoen";
 import { parseLendgines } from "../services/graphql/numoen";
 import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./useBalance";
+import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 import { useGetAddressToToken } from "./useTokens";
 import type { WrappedTokenInfo } from "./useTokens2";
@@ -30,16 +31,16 @@ import type { WrappedTokenInfo } from "./useTokens2";
 export const useLendginesForTokens = (
   tokens: HookArg<readonly [WrappedTokenInfo, WrappedTokenInfo]>
 ) => {
-  const environment = useEnvironment();
+  const lendgines = useAllLendgines();
 
   return useMemo(() => {
-    if (!tokens) return null;
-    return environment.lendgines.filter(
+    if (!tokens || !lendgines) return null;
+    return lendgines.filter(
       (l) =>
         (l.token0.equals(tokens[0]) && l.token1.equals(tokens[1])) ||
         (l.token0.equals(tokens[1]) && l.token1.equals(tokens[0]))
     );
-  }, [environment.lendgines, tokens]);
+  }, [lendgines, tokens]);
 };
 
 export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
@@ -414,11 +415,12 @@ export const useExistingLendginesQuery = () => {
 export const useAllLendgines = () => {
   const addressToToken = useGetAddressToToken();
   const lendginesQuery = useExistingLendginesQuery();
+  const chainID = useChain();
   return useMemo(() => {
     if (lendginesQuery.isLoading || !lendginesQuery.data) return null;
 
     return lendginesQuery.data
-      .map((ld) => {
+      .map((ld): Lendgine | undefined => {
         const token0 = addressToToken(ld.token0);
         const token1 = addressToToken(ld.token1);
         return !!token0 && !!token1
@@ -433,9 +435,11 @@ export const useAllLendgines = () => {
                 ld.upperBound.denominator,
                 ld.upperBound.numerator
               ),
+              lendgine: new Token(chainID, ld.address, 18),
+              address: ld.address,
             }
           : undefined;
       })
       .filter((f): f is Lendgine => !!f);
-  }, [addressToToken, lendginesQuery.data, lendginesQuery.isLoading]);
+  }, [addressToToken, chainID, lendginesQuery.data, lendginesQuery.isLoading]);
 };
