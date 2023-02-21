@@ -9,8 +9,10 @@ export const useClient = () => {
     () => ({
       uniswapV2: new GraphQLClient(environment.interface.uniswapV2subgraph),
       uniswapV3: new GraphQLClient(environment.interface.uniswapV3subgraph),
+      numoen: new GraphQLClient(environment.interface.numoenSubgraph),
     }),
     [
+      environment.interface.numoenSubgraph,
       environment.interface.uniswapV2subgraph,
       environment.interface.uniswapV3subgraph,
     ]

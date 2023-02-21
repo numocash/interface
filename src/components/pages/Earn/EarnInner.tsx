@@ -13,7 +13,7 @@ export const EarnInner: React.FC = () => {
   return (
     <div tw="grid w-full max-w-4xl flex-col gap-4">
       <Explain />
-      <Display numMarkets={markets.length} />
+      <Display numMarkets={markets?.length} />
       <div tw="flex w-full justify-between gap-4">
         <Filter assets={assets} setAssets={setAssets} />
         {/* <Sort /> */}

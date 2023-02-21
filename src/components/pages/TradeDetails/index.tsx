@@ -6,11 +6,9 @@ import { createContainer } from "unstated-next";
 
 import type { Lendgine } from "../../../constants/types";
 import { useLendginesForTokens } from "../../../hooks/useLendgine";
-import {
-  useAddressToToken,
-  useSortDenomTokens,
-} from "../../../hooks/useTokens";
+import { useAddressToToken } from "../../../hooks/useTokens";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import { useSortDenomTokens } from "../../../hooks/useTokens2";
 import { pickLongLendgines } from "../../../utils/lendgines";
 import { Times } from "./Chart/TimeSelector";
 import { MainView } from "./MainView";

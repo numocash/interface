@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createContainer } from "unstated-next";
 
-import { useEnvironment } from "../../../contexts/environment2";
+import { useAllLendgines } from "../../../hooks/useLendgine";
 import type { Market } from "../../../hooks/useMarket";
 import {
   dedupeMarkets,
@@ -18,19 +18,19 @@ interface ITrade {
   sort: keyof typeof Sorts;
   setSort: (val: keyof typeof Sorts) => void;
 
-  markets: readonly Market[];
+  markets: readonly Market[] | null;
 }
 
 const useTradeInternal = (): ITrade => {
   const [assets, setAssets] = useState<readonly WrappedTokenInfo[]>([]);
   const [sort, setSort] = useState<keyof typeof Sorts>("default");
 
-  const environment = useEnvironment();
-  const lendgines = environment.lendgines;
+  const lendgines = useAllLendgines();
 
   const getLendgineToMarket = useGetLendgineToMarket();
 
   const markets = useMemo(() => {
+    if (lendgines === null) return null;
     const markets = lendgines.map((l) => getLendgineToMarket(l));
 
     const dedupedMarkets = dedupeMarkets(markets);

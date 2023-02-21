@@ -6,23 +6,23 @@ import { Stable, WrappedNative } from "./tokens";
 import type { Lendgine } from "./types";
 
 export const wethLendgine = {
-  token0: Stable[31337],
-  token1: WrappedNative[31337],
-  lendgine: new Token(31337, "0x58248259ce18195E31979B8E0a5316194C19850d", 18),
+  token0: Stable[1],
+  token1: WrappedNative[1],
+  lendgine: new Token(1, "0x58248259ce18195E31979B8E0a5316194C19850d", 18),
   bound: new Price(
-    Stable[31337],
-    WrappedNative[31337],
+    Stable[1],
+    WrappedNative[1],
     "1000000000000000000",
     "3000000000000000000000"
   ),
-  token0Exp: Stable[31337].decimals,
-  token1Exp: WrappedNative[31337].decimals,
+  token0Exp: Stable[1].decimals,
+  token1Exp: WrappedNative[1].decimals,
 
   address: "0x58248259ce18195E31979B8E0a5316194C19850d",
 } as const satisfies Lendgine;
 
 const Illuvium = new WrappedTokenInfo({
-  chainId: 31337,
+  chainId: 1,
   address: "0x767FE9EDC9E0dF98E07454847909b5E959D7ca0E",
   decimals: 18,
   symbol: "ILV",
@@ -30,17 +30,17 @@ const Illuvium = new WrappedTokenInfo({
 });
 
 export const illuviumLendgine = {
-  token0: WrappedNative[31337],
+  token0: WrappedNative[1],
   token1: Illuvium,
-  lendgine: new Token(31337, "0xd383f7A12eeB342428787a51fcA2589F17CcDEe3", 18),
+  lendgine: new Token(1, "0xd383f7A12eeB342428787a51fcA2589F17CcDEe3", 18),
   bound: new Price(
-    WrappedNative[31337],
+    WrappedNative[1],
     Illuvium,
     "1000000000000000000",
     "150000000000000000"
   ),
 
-  token0Exp: WrappedNative[31337].decimals,
+  token0Exp: WrappedNative[1].decimals,
   token1Exp: Illuvium.decimals,
 
   address: "0xd383f7A12eeB342428787a51fcA2589F17CcDEe3",
@@ -48,17 +48,17 @@ export const illuviumLendgine = {
 
 export const inverseIlluviumLendgine = {
   token0: Illuvium,
-  token1: WrappedNative[31337],
-  lendgine: new Token(31337, "0xDe61C307f2c442d4Bf7820fe57D79A3C8efbdD4f", 18),
+  token1: WrappedNative[1],
+  lendgine: new Token(1, "0xDe61C307f2c442d4Bf7820fe57D79A3C8efbdD4f", 18),
   bound: new Price(
     Illuvium,
-    WrappedNative[31337],
+    WrappedNative[1],
     "1000000000000000000",
     "60000000000000000000"
   ),
 
   token0Exp: Illuvium.decimals,
-  token1Exp: WrappedNative[31337].decimals,
+  token1Exp: WrappedNative[1].decimals,
 
   address: "0xDe61C307f2c442d4Bf7820fe57D79A3C8efbdD4f",
 } as const satisfies Lendgine;
@@ -74,8 +74,9 @@ export const foundryConfig = {
       "https://api.thegraph.com/subgraphs/name/sushiswap/exchange",
     uniswapV3subgraph:
       "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
-    wrappedNative: WrappedNative[31337],
-    stablecoin: Stable[31337],
+    numoenSubgraph: "http://localhost:8000/subgraphs/name/kyscott/numoen",
+    wrappedNative: WrappedNative[1],
+    stablecoin: Stable[1],
     defaultActiveLists: [
       "https://tokens.uniswap.org", // TODO: this is not returning very fast
       // "https://celo-org.github.io/celo-token-list/celo.tokenlist.json",

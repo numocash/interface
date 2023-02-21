@@ -3,7 +3,7 @@ import { FiCheck, FiX } from "react-icons/fi";
 import { IoIosArrowDown } from "react-icons/io";
 import tw, { styled } from "twin.macro";
 
-import { useToken0s, useToken1s } from "../../hooks/useTokens";
+import { useAllLendgines } from "../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { dedupeTokens } from "../../hooks/useTokens2";
 import { Modal } from "./Modal";
@@ -18,16 +18,16 @@ interface Props {
 export const Filter: React.FC<Props> = ({ assets, setAssets }: Props) => {
   const [show, setShow] = useState(false);
 
-  const token0s = useToken0s();
-  const token1s = useToken1s();
-
-  const allTokensDedupe = useMemo(
-    () => dedupeTokens(token0s.concat(token1s)),
-    [token0s, token1s]
-  );
+  const lendgines = useAllLendgines();
+  const allDedupeTokens = useMemo(() => {
+    if (!lendgines) return null;
+    return dedupeTokens(lendgines.flatMap((l) => [l.token0, l.token1]));
+  }, [lendgines]);
 
   // TODO: close drop on click
-  return (
+  return !allDedupeTokens ? (
+    <div tw="rounded-lg animate-pulse bg-gray-200 h-[40px] w-[94px]" />
+  ) : (
     <>
       <Modal onDismiss={() => setShow(false)} isOpen={show}>
         <Module tw="flex flex-col p-1 gap-1 w-full">
@@ -37,7 +37,7 @@ export const Filter: React.FC<Props> = ({ assets, setAssets }: Props) => {
               <X />
             </button>
           </div>
-          {allTokensDedupe.map((t) => (
+          {allDedupeTokens.map((t) => (
             <FilterItem
               key={t.address}
               selected={assets.includes(t)}

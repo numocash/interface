@@ -19,6 +19,7 @@ export type NumoenBaseConfig = {
 export type NumoenInterfaceConfig = {
   uniswapV2subgraph: string;
   uniswapV3subgraph: string;
+  numoenSubgraph: string;
   wrappedNative: WrappedTokenInfo;
   stablecoin: WrappedTokenInfo;
   defaultActiveLists: readonly string[];
@@ -35,5 +36,5 @@ export const config: {
       : never; // include a lendgine property for testnet chains
   };
 } = {
-  31337: foundryConfig,
+  1: foundryConfig,
 };

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createContainer } from "unstated-next";
 
-import { useEnvironment } from "../../../contexts/environment2";
+import { useAllLendgines } from "../../../hooks/useLendgine";
 import type { Market } from "../../../hooks/useMarket";
 import {
   dedupeMarkets,
@@ -14,18 +14,18 @@ interface IEarn {
   assets: readonly WrappedTokenInfo[];
   setAssets: (val: readonly WrappedTokenInfo[]) => void;
 
-  markets: readonly Market[];
+  markets: readonly Market[] | null;
 }
 
 const useEarnInternal = (): IEarn => {
   const [assets, setAssets] = useState<readonly WrappedTokenInfo[]>([]);
 
-  const environment = useEnvironment();
-  const lendgines = environment.lendgines;
+  const lendgines = useAllLendgines();
 
   const getLendgineToMarket = useGetLendgineToMarket();
 
   const markets = useMemo(() => {
+    if (!lendgines) return null;
     const markets = lendgines.map((l) => getLendgineToMarket(l));
 
     const dedupedMarkets = dedupeMarkets(markets);

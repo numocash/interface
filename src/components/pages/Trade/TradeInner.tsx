@@ -9,7 +9,7 @@ export const TradeInner: React.FC = () => {
   return (
     <div tw="flex flex-col gap-4 w-full max-w-3xl">
       <Explain />
-      <Display numMarkets={markets.length} />
+      <Display numMarkets={markets?.length} />
       <div tw="flex gap-4">
         <Filter assets={assets} setAssets={setAssets} />
         {/* <Sort /> */}

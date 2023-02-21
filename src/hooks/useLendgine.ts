@@ -1,7 +1,8 @@
 import type { BigNumber } from "@ethersproject/bignumber";
+import { useQuery } from "@tanstack/react-query";
 import { CurrencyAmount, Price } from "@uniswap/sdk-core";
 import { chunk } from "lodash";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 import { useContractReads } from "wagmi";
@@ -17,8 +18,13 @@ import {
   liquidityManagerABI,
   useLiquidityManagerPositions,
 } from "../generated";
+import { LendginesDocument } from "../gql/numoen/graphql";
+import type { RawLendgine } from "../services/graphql/numoen";
+import { parseLendgines } from "../services/graphql/numoen";
 import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./useBalance";
+import { useClient } from "./useClient";
+import { useGetAddressToToken } from "./useTokens";
 import type { WrappedTokenInfo } from "./useTokens2";
 
 export const useLendginesForTokens = (
@@ -386,4 +392,50 @@ export const useLendginesPosition = <L extends Lendgine>(
   };
 
   return updatedQuery;
+};
+
+export const useExistingLendginesQueryKey = () =>
+  ["existing lendgines"] as const;
+
+export const useExistingLendginesQueryFn = () => {
+  const client = useClient();
+  return useCallback(async () => {
+    const lendginesRes = await client.numoen.request(LendginesDocument);
+    return parseLendgines(lendginesRes);
+  }, [client.numoen]);
+};
+
+export const useExistingLendginesQuery = () => {
+  const queryKey = useExistingLendginesQueryKey();
+  const queryFn = useExistingLendginesQueryFn();
+  return useQuery<RawLendgine[]>(queryKey, queryFn, { staleTime: Infinity });
+};
+
+export const useAllLendgines = () => {
+  const addressToToken = useGetAddressToToken();
+  const lendginesQuery = useExistingLendginesQuery();
+  return useMemo(() => {
+    if (lendginesQuery.isLoading || !lendginesQuery.data) return null;
+
+    return lendginesQuery.data
+      .map((ld) => {
+        const token0 = addressToToken(ld.token0);
+        const token1 = addressToToken(ld.token1);
+        return !!token0 && !!token1
+          ? {
+              token0,
+              token1,
+              token0Exp: ld.token0Exp,
+              token1Exp: ld.token1Exp,
+              bound: new Price(
+                token0,
+                token1,
+                ld.upperBound.denominator,
+                ld.upperBound.numerator
+              ),
+            }
+          : undefined;
+      })
+      .filter((f): f is Lendgine => !!f);
+  }, [addressToToken, lendginesQuery.data, lendginesQuery.isLoading]);
 };

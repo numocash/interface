@@ -1,6 +1,9 @@
-query LendgineQuery($id: ID!) {
-  lendgine(id: $id) {
+query Lendgines {
+  lendgines(subgraphError: allow) {
     token0
     token1
+    token0Exp
+    token1Exp
+    upperBound
   }
 }

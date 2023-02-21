@@ -6,7 +6,7 @@ export const Markets: React.FC = () => {
 
   return (
     <div tw="grid grid-cols-3 gap-4">
-      {markets.map((m) => (
+      {markets?.map((m) => (
         <MarketItem market={m} key={`${m[0].address}/${m[1].address}`} />
       ))}
     </div>
