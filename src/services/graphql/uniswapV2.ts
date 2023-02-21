@@ -30,7 +30,7 @@ export const parsePriceV2 = (priceV2Query: PriceV2Query): Fraction | null =>
 export const parsePairV2 = (
   pairV2Query: PairV2Query,
   tokens: readonly [Token, Token]
-): { pool: UniswapV2Pool; totalLiquidity: number } | null =>
+): { pool: UniswapV2Pool; totalLiquidity: number; price: Fraction } | null =>
   pairV2Query.pairs[0]
     ? {
         pool: {
@@ -39,6 +39,7 @@ export const parsePairV2 = (
           address: getAddress(pairV2Query.pairs[0].id),
         },
         totalLiquidity: parseFloat(pairV2Query.pairs[0].reserve0) * 2,
+        price: parsePriceHelper(parseFloat(pairV2Query.pairs[0].token0Price)),
       }
     : null;
 

@@ -412,6 +412,7 @@ export const useExistingLendginesQuery = () => {
   return useQuery<RawLendgine[]>(queryKey, queryFn, { staleTime: Infinity });
 };
 
+// TODO: impose rules that one must be a stable or wrapped native and bound that is an exponent of 2
 export const useAllLendgines = () => {
   const addressToToken = useGetAddressToToken();
   const lendginesQuery = useExistingLendginesQuery();
@@ -423,6 +424,7 @@ export const useAllLendgines = () => {
       .map((ld): Lendgine | undefined => {
         const token0 = addressToToken(ld.token0);
         const token1 = addressToToken(ld.token1);
+
         return !!token0 && !!token1
           ? {
               token0,

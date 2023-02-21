@@ -12,7 +12,6 @@ import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
 import {
-  useCurrentPrice,
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../../hooks/useExternalExchange";
@@ -28,7 +27,7 @@ export const Chart: React.FC = () => {
   const invertPriceQuery = quote.sortsBefore(base);
 
   const priceHistoryQuery = usePriceHistory(
-    referenceMarketQuery.data,
+    referenceMarketQuery.data?.pool,
     timeframe
   );
 
@@ -42,14 +41,12 @@ export const Chart: React.FC = () => {
       : priceHistoryQuery.data;
   }, [invertPriceQuery, priceHistoryQuery.data]);
 
-  const currentPriceQuery = useCurrentPrice(referenceMarketQuery.data);
-
   const currentPrice = useMemo(() => {
-    if (!currentPriceQuery.data) return null;
+    if (!referenceMarketQuery.data) return null;
     return invertPriceQuery
-      ? currentPriceQuery.data.invert()
-      : currentPriceQuery.data;
-  }, [currentPriceQuery.data, invertPriceQuery]);
+      ? referenceMarketQuery.data.price.invert()
+      : referenceMarketQuery.data.price;
+  }, [invertPriceQuery, referenceMarketQuery.data]);
 
   const [crosshair, setCrosshair] = useState<number | null>(null);
   const [displayPrice, setDisplayPrice] = useState<PricePoint | null>(null);

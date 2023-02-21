@@ -7,13 +7,11 @@ import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
 import type {
   PriceHistoryDayV2Query,
   PriceHistoryHourV2Query,
-  PriceV2Query,
 } from "../gql/uniswapV2/graphql";
 import {
   PairV2Document,
   PriceHistoryDayV2Document,
   PriceHistoryHourV2Document,
-  PriceV2Document,
 } from "../gql/uniswapV2/graphql";
 import type {
   PriceHistoryDayV3Query,
@@ -23,65 +21,28 @@ import {
   MostLiquidV3Document,
   PriceHistoryDayV3Document,
   PriceHistoryHourV3Document,
-  PriceV3Document,
 } from "../gql/uniswapV3/graphql";
 import type { PricePoint, UniswapV2Pool } from "../services/graphql/uniswapV2";
 import {
   parsePairV2,
   parsePriceHistoryDayV2,
   parsePriceHistoryHourV2,
-  parsePriceV2,
 } from "../services/graphql/uniswapV2";
 import type { UniswapV3Pool } from "../services/graphql/uniswapV3";
 import {
   parseMostLiquidV3,
   parsePriceHistoryDayV3,
   parsePriceHistoryHourV3,
-  parsePriceV3,
 } from "../services/graphql/uniswapV3";
 import type { HookArg } from "./useBalance";
 import { useClient } from "./useClient";
 
-const isV3 = (
-  t: NonNullable<Parameters<typeof useCurrentPrice>[0]>
-): t is UniswapV3Pool => "feeTier" in t;
-
-export const useCurrentPrice = (
-  externalExchange: HookArg<UniswapV2Pool | UniswapV3Pool>
-): UseQueryResult<Fraction | null> => {
-  const client = useClient();
-  return useQuery<Fraction | null>(
-    ["current price", externalExchange],
-    async () => {
-      if (!externalExchange) return null;
-
-      const id = externalExchange.address.toLowerCase();
-
-      const priceRes = isV3(externalExchange)
-        ? await client.uniswapV3.request(PriceV3Document, {
-            id,
-          })
-        : await client.uniswapV2.request(PriceV2Document, {
-            id,
-          });
-
-      const isV2 = (t: typeof priceRes): t is PriceV2Query => "pair" in t;
-
-      const tokenPrice = isV2(priceRes)
-        ? parsePriceV2(priceRes)
-        : parsePriceV3(priceRes);
-
-      return tokenPrice ? tokenPrice : null;
-    },
-    {
-      staleTime: Infinity,
-    }
-  );
-};
+const isV3 = (t: UniswapV2Pool | UniswapV3Pool): t is UniswapV3Pool =>
+  "feeTier" in t;
 
 export const useMostLiquidMarket = (
   tokens: readonly [HookArg<Token>, HookArg<Token>]
-): UseQueryResult<UniswapV2Pool | UniswapV3Pool | null> => {
+) => {
   const client = useClient();
   const sortedTokens =
     tokens[0] && tokens[1]
@@ -90,7 +51,10 @@ export const useMostLiquidMarket = (
         : ([tokens[1], tokens[0]] as const)
       : null;
 
-  return useQuery<UniswapV2Pool | UniswapV3Pool | null>(
+  return useQuery<{
+    pool: UniswapV2Pool | UniswapV3Pool;
+    price: Fraction;
+  } | null>(
     ["query liquidity", sortedTokens],
     async () => {
       if (!sortedTokens) return null;
@@ -112,17 +76,24 @@ export const useMostLiquidMarket = (
 
       if (!v3data) {
         invariant(v2data);
-        return v2data.pool;
+        return { pool: v2data.pool, price: v2data.price };
       }
 
       if (!v2data) {
         invariant(v3data);
-        return v3data.pool;
+        return { pool: v3data.pool, price: v3data.price };
       }
 
-      return v2data.totalLiquidity > v3data.totalLiquidity
-        ? v2data.pool
-        : v3data.pool;
+      return {
+        pool:
+          v2data.totalLiquidity > v3data.totalLiquidity
+            ? v2data.pool
+            : v3data.pool,
+        price:
+          v2data.totalLiquidity > v3data.totalLiquidity
+            ? v2data.price
+            : v3data.price,
+      };
     },
     {
       staleTime: Infinity,

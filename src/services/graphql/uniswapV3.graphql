@@ -8,6 +8,7 @@ query MostLiquidV3($token0: String, $token1: String) {
     id
     feeTier
     totalValueLockedToken0
+    token0Price
   }
 }
 

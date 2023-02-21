@@ -16,10 +16,7 @@ import {
   useFactoryGetLendgine,
   usePrepareFactoryCreateLendgine,
 } from "../../../generated";
-import {
-  useCurrentPrice,
-  useMostLiquidMarket,
-} from "../../../hooks/useExternalExchange";
+import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { useDefaultTokenList } from "../../../hooks/useTokens2";
 import { useBeet } from "../../../utils/beet";
@@ -50,14 +47,13 @@ export const Create: React.FC = () => {
     specToken && baseToken ? specToken.sortsBefore(baseToken) : null;
 
   const mostLiquidQuery = useMostLiquidMarket([specToken, baseToken] as const);
-  const currentPriceQuery = useCurrentPrice(mostLiquidQuery.data);
 
   const currentPrice = useMemo(() => {
-    if (!currentPriceQuery.data) return null;
+    if (!mostLiquidQuery.data) return null;
     return invertPriceQuery
-      ? currentPriceQuery.data.invert()
-      : currentPriceQuery.data;
-  }, [currentPriceQuery.data, invertPriceQuery]);
+      ? mostLiquidQuery.data.price.invert()
+      : mostLiquidQuery.data.price;
+  }, [invertPriceQuery, mostLiquidQuery.data]);
 
   const removeBase = useMemo(
     () =>

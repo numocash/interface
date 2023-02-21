@@ -31,7 +31,7 @@ export const Config: React.FC = () => {
 
         {referenceMarketQuery.data ? (
           <AddressLink
-            address={referenceMarketQuery.data.address}
+            address={referenceMarketQuery.data.pool.address}
             tw="text-sm underline"
           />
         ) : (

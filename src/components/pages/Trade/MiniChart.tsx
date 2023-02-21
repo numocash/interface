@@ -1,3 +1,4 @@
+import type { Fraction } from "@uniswap/sdk-core";
 import { curveNatural } from "@visx/curve";
 import { Group } from "@visx/group";
 import { scaleLinear } from "@visx/scale";
@@ -6,14 +7,11 @@ import { extent } from "d3-array";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import type {
-  useCurrentPrice,
-  usePriceHistory,
-} from "../../../hooks/useExternalExchange";
+import type { usePriceHistory } from "../../../hooks/useExternalExchange";
 
 interface Props {
   priceHistory: NonNullable<ReturnType<typeof usePriceHistory>["data"]>;
-  currentPrice: NonNullable<ReturnType<typeof useCurrentPrice>["data"]>;
+  currentPrice: Fraction;
 }
 
 export const MiniChart: React.FC<Props> = ({

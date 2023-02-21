@@ -4,7 +4,6 @@ import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 
 import {
-  useCurrentPrice,
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../hooks/useExternalExchange";
@@ -23,7 +22,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
   const invertPriceQuery = tokens[1].sortsBefore(tokens[0]);
 
   const priceHistoryQuery = usePriceHistory(
-    referenceMarketQuery.data,
+    referenceMarketQuery.data?.pool,
     Times.ONE_DAY
   );
 
@@ -37,14 +36,12 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
       : priceHistoryQuery.data;
   }, [invertPriceQuery, priceHistoryQuery.data]);
 
-  const currentPriceQuery = useCurrentPrice(referenceMarketQuery.data);
-
   const currentPrice = useMemo(() => {
-    if (!currentPriceQuery.data) return null;
+    if (!referenceMarketQuery.data) return null;
     return invertPriceQuery
-      ? currentPriceQuery.data.invert()
-      : currentPriceQuery.data;
-  }, [currentPriceQuery.data, invertPriceQuery]);
+      ? referenceMarketQuery.data.price.invert()
+      : referenceMarketQuery.data.price;
+  }, [invertPriceQuery, referenceMarketQuery.data]);
 
   const priceChange = useMemo(() => {
     if (!currentPrice || !priceHistory) return null;

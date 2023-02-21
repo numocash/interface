@@ -28,7 +28,7 @@ export const parsePriceV3 = (priceV3Query: PriceV3Query): Fraction | null =>
 export const parseMostLiquidV3 = (
   mostLiquidV3Query: MostLiquidV3Query,
   tokens: readonly [Token, Token]
-): { pool: UniswapV3Pool; totalLiquidity: number } | null =>
+): { pool: UniswapV3Pool; totalLiquidity: number; price: Fraction } | null =>
   mostLiquidV3Query.pools[0]
     ? {
         pool: {
@@ -40,6 +40,9 @@ export const parseMostLiquidV3 = (
         },
         totalLiquidity: parseFloat(
           mostLiquidV3Query.pools[0].totalValueLockedToken0
+        ),
+        price: parsePriceHelper(
+          parseFloat(mostLiquidV3Query.pools[0].token0Price)
         ),
       }
     : null;

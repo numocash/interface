@@ -9,6 +9,7 @@ import type { Market } from "../../../hooks/useMarket";
 import { useMarketToLendgines } from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
+import { convertPositionToLiquidity } from "../../../utils/Numoen/lendgineMath";
 import { numoenPrice, pricePerLiquidity } from "../../../utils/Numoen/price";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
@@ -22,11 +23,39 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
   const lendgines = useMarketToLendgines(market);
   const { address } = useAccount();
 
-  useLendginesPosition(lendgines, address);
-
-  // TODO: calculate position values
-
+  const positions = useLendginesPosition(lendgines, address);
   const lendgineInfosQuery = useLendgines(lendgines);
+
+  const positionValue = useMemo(() => {
+    if (
+      positions.isLoading ||
+      lendgineInfosQuery.isLoading ||
+      !positions.data ||
+      !lendgineInfosQuery.data ||
+      !lendgines
+    )
+      return null;
+
+    return positions.data.reduce((acc, cur, i) => {
+      const lendgine = lendgines[i];
+      const lendgineInfo = lendgineInfosQuery.data?.[i];
+      invariant(lendgine && lendgineInfo);
+      const price = numoenPrice(lendgine, lendgineInfo);
+      const liquidityPrice = pricePerLiquidity(lendgine, lendgineInfo);
+      const liquidity = convertPositionToLiquidity(cur, lendgineInfo);
+      const value = liquidityPrice.quote(liquidity);
+      return acc.add(
+        market[0].equals(lendgine.token0) ? value : price.invert().quote(value)
+      );
+    }, CurrencyAmount.fromRawAmount(market[0], 0));
+  }, [
+    lendgineInfosQuery.data,
+    lendgineInfosQuery.isLoading,
+    lendgines,
+    market,
+    positions.data,
+    positions.isLoading,
+  ]);
 
   const { bestSupplyRate, tvl } = useMemo(() => {
     if (!lendgineInfosQuery.data || lendgineInfosQuery.isLoading) return {};
@@ -73,7 +102,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       tw=""
       to={`/earn/details/${market[0].address}/${market[1].address}`}
     >
-      <Wrapper positionValue={CurrencyAmount.fromRawAmount(market[0], 0)}>
+      <Wrapper positionValue={positionValue}>
         <div tw="flex items-center gap-3 col-span-2">
           <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
             <TokenIcon token={market[1]} size={32} />
@@ -113,7 +142,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
 };
 
 interface WrapperProps {
-  positionValue: CurrencyAmount<WrappedTokenInfo>;
+  positionValue: CurrencyAmount<WrappedTokenInfo> | null;
 
   children?: React.ReactNode;
 }
@@ -122,7 +151,7 @@ const Wrapper: React.FC<WrapperProps> = ({
   positionValue,
   children,
 }: WrapperProps) => {
-  return positionValue.greaterThan(0) ? (
+  return positionValue?.greaterThan(0) ? (
     <div tw="rounded-xl w-full border-2 transform ease-in-out hover:scale-110 duration-300 bg-gray-200">
       <div tw="py-2 px-4 gap-4 flex flex-col bg-white rounded-t-xl">
         {children}
@@ -130,7 +159,7 @@ const Wrapper: React.FC<WrapperProps> = ({
       <div tw="w-full overflow-hidden">
         <RowBetween tw="items-center bg-transparent">
           <p>Your position</p>
-          <p>--</p>
+          <TokenAmountDisplay amount={positionValue} showSymbol />
         </RowBetween>
       </div>
     </div>
