@@ -8,7 +8,7 @@ import type { Lendgine } from "./types";
 export const wethLendgine = {
   token0: Stable[31337],
   token1: WrappedNative[31337],
-  lendgine: new Token(31337, "0x66F62E3d661e82B4191B9ED8F5795ac57a65C246", 18),
+  lendgine: new Token(31337, "0x58248259ce18195E31979B8E0a5316194C19850d", 18),
   bound: new Price(
     Stable[31337],
     WrappedNative[31337],
@@ -18,7 +18,7 @@ export const wethLendgine = {
   token0Exp: Stable[31337].decimals,
   token1Exp: WrappedNative[31337].decimals,
 
-  address: "0x66F62E3d661e82B4191B9ED8F5795ac57a65C246",
+  address: "0x58248259ce18195E31979B8E0a5316194C19850d",
 } as const satisfies Lendgine;
 
 const Illuvium = new WrappedTokenInfo({
@@ -32,7 +32,7 @@ const Illuvium = new WrappedTokenInfo({
 export const illuviumLendgine = {
   token0: WrappedNative[31337],
   token1: Illuvium,
-  lendgine: new Token(31337, "0x35988a69DdF99f522c7AA6E0ad80D52813BF2069", 18),
+  lendgine: new Token(31337, "0xd383f7A12eeB342428787a51fcA2589F17CcDEe3", 18),
   bound: new Price(
     WrappedNative[31337],
     Illuvium,
@@ -43,13 +43,13 @@ export const illuviumLendgine = {
   token0Exp: WrappedNative[31337].decimals,
   token1Exp: Illuvium.decimals,
 
-  address: "0x35988a69DdF99f522c7AA6E0ad80D52813BF2069",
+  address: "0xd383f7A12eeB342428787a51fcA2589F17CcDEe3",
 } as const satisfies Lendgine;
 
 export const inverseIlluviumLendgine = {
   token0: Illuvium,
   token1: WrappedNative[31337],
-  lendgine: new Token(31337, "0xEf921A20A2eA86Dea5C3a572633f867d3c01AA33", 18),
+  lendgine: new Token(31337, "0xDe61C307f2c442d4Bf7820fe57D79A3C8efbdD4f", 18),
   bound: new Price(
     Illuvium,
     WrappedNative[31337],
@@ -60,14 +60,14 @@ export const inverseIlluviumLendgine = {
   token0Exp: Illuvium.decimals,
   token1Exp: WrappedNative[31337].decimals,
 
-  address: "0xEf921A20A2eA86Dea5C3a572633f867d3c01AA33",
+  address: "0xDe61C307f2c442d4Bf7820fe57D79A3C8efbdD4f",
 } as const satisfies Lendgine;
 
 export const foundryConfig = {
   base: {
-    factory: getAddress("0x09c1133669cb9b49704dc27ae0b523be74467f2a"),
-    liquidityManager: getAddress("0x0d0932b07aca7ea902d2432e70e054de8b12a834"),
-    lendgineRouter: getAddress("0xb9afd5588d683aabd56538b555d2e17c7559b0b8"),
+    factory: getAddress("0x5986047C9B1F09b7870dF430C2d0D972e6b79aF5"),
+    liquidityManager: getAddress("0xB04686AAD663224BE427427F4c9626960cef6925"),
+    lendgineRouter: getAddress("0x056540C0392D2218C0C8d5633A146F46aAB1Ad7d"),
   },
   interface: {
     uniswapV2subgraph:
