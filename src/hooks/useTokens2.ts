@@ -102,8 +102,10 @@ export const useDefaultTokenListQueryFn = () => {
       )
     );
     return dedupeTokens(
-      lists.flatMap((l) => l.data.tokens).filter((t) => t.chainId === chain)
-    ).map((t) => new WrappedTokenInfo(t));
+      lists
+        .flatMap((l) => l.data.tokens)
+        .filter((t) => t.chainId === (chain === 31337 ? 1 : chain))
+    ).map((t) => new WrappedTokenInfo({ ...t, chainId: chain }));
   }, [chain, environment.interface.defaultActiveLists]);
 };
 

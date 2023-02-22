@@ -96,15 +96,13 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
     allowFailure: false,
     watch: true,
     staleTime: Infinity,
-    enabled: !!lendgine,
+    enabled: !!contracts,
   });
 
   const parseReturn = (
     lendgineInfo: (typeof query)["data"]
   ): LendgineInfo<L> | undefined => {
-    if (!lendgineInfo) return undefined;
-
-    invariant(!!lendgine);
+    if (!lendgineInfo || !lendgine) return undefined;
 
     return {
       totalPositionSize: CurrencyAmount.fromRawAmount(
@@ -428,7 +426,6 @@ export const useAllLendgines = () => {
         const token1 = addressToToken(ld.token1);
 
         if (!token0 || !token1) return undefined; // tokens must be in token list
-
         // one of the tokens must be wrapped native or stable asset
         if (
           ![token0, token1].find((t) =>
