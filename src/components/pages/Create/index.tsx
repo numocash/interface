@@ -46,7 +46,9 @@ export const Create: React.FC = () => {
   const invertPriceQuery =
     specToken && baseToken ? specToken.sortsBefore(baseToken) : null;
 
-  const mostLiquidQuery = useMostLiquidMarket([specToken, baseToken] as const);
+  const mostLiquidQuery = useMostLiquidMarket(
+    !!specToken && !!baseToken ? ([specToken, baseToken] as const) : null
+  );
 
   const currentPrice = useMemo(() => {
     if (!mostLiquidQuery.data) return null;

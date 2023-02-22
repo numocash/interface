@@ -1,3 +1,4 @@
+import type { Fraction } from "@uniswap/sdk-core";
 import { useState } from "react";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
@@ -8,6 +9,10 @@ import {
   pickLongLendgines,
   pickShortLendgines,
 } from "../../../utils/lendgines";
+import {
+  nextHighestLendgine,
+  nextLowestLendgine,
+} from "../../../utils/Numoen/price";
 import { Times } from "./Chart/TimeSelector";
 import { MainView } from "./MainView";
 import { TradeColumn, TradeType } from "./TradeColumn/TradeColumn";
@@ -15,7 +20,8 @@ import { TradeColumn, TradeType } from "./TradeColumn/TradeColumn";
 interface Props {
   base: WrappedTokenInfo;
   quote: WrappedTokenInfo;
-  lendgines: readonly Lendgine[];
+  lendgines: Lendgine[];
+  price: Fraction;
 }
 
 interface ITradeDetails {
@@ -35,26 +41,49 @@ interface ITradeDetails {
   setClose: (val: boolean) => void;
 
   lendgines: readonly Lendgine[];
+  price: Fraction;
 }
 
 const useTradeDetailsInternal = ({
   base,
   quote,
   lendgines,
+  price,
 }: {
   base?: WrappedTokenInfo;
   quote?: WrappedTokenInfo;
-  lendgines?: readonly Lendgine[];
+  lendgines?: Lendgine[];
+  price?: Fraction;
 } = {}): ITradeDetails => {
-  invariant(base && quote && lendgines);
+  invariant(base && quote && lendgines && price);
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
   const [trade, setTrade] = useState<TradeType>(TradeType.Long);
   const [close, setClose] = useState(false);
 
-  const longLendgine = pickLongLendgines(lendgines, base);
-  const shortLendgine = pickShortLendgines(lendgines, base);
+  const longLendgines = pickLongLendgines(lendgines, base);
+  const shortLendgines = pickShortLendgines(lendgines, base);
+  const nextLongLendgine = nextHighestLendgine({
+    price,
+    lendgines: longLendgines,
+  });
+  const nextShortLendgine = nextHighestLendgine({
+    price: price.invert(),
+    lendgines: shortLendgines,
+  });
+  const secondLongLendgine = nextLowestLendgine({
+    price,
+    lendgines: longLendgines,
+  });
+  const secondShortLendgine = nextLowestLendgine({
+    price: price.invert(),
+    lendgines: shortLendgines,
+  });
 
-  const lendgine = longLendgine[0] ? longLendgine[0] : shortLendgine[0];
+  const lendgine =
+    nextLongLendgine ??
+    secondLongLendgine ??
+    nextShortLendgine ??
+    secondShortLendgine;
   invariant(lendgine);
 
   const [selectedLendgine, setSelectedLendgine] = useState<Lendgine>(lendgine);
@@ -76,6 +105,7 @@ const useTradeDetailsInternal = ({
     setClose,
 
     lendgines,
+    price,
   };
 };
 
@@ -86,10 +116,11 @@ export const TradeDetailsInner: React.FC<Props> = ({
   base,
   quote,
   lendgines,
+  price,
 }: Props) => {
   return (
     <div tw="w-full grid grid-cols-3">
-      <TradeDetailsProvider initialState={{ base, quote, lendgines }}>
+      <TradeDetailsProvider initialState={{ base, quote, lendgines, price }}>
         <MainView />
         <div tw="flex max-w-sm justify-self-end">
           {/* TODO: stick to the right side */}

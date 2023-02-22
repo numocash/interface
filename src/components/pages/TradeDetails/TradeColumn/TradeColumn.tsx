@@ -6,6 +6,10 @@ import {
   pickLongLendgines,
   pickShortLendgines,
 } from "../../../../utils/lendgines";
+import {
+  nextHighestLendgine,
+  nextLowestLendgine,
+} from "../../../../utils/Numoen/price";
 import { useTradeDetails } from "../TradeDetailsInner";
 import { Config } from "./Config";
 import { ProvideLiquidity } from "./ProvideLiquidity";
@@ -27,17 +31,35 @@ export const TradeColumn: React.FC = () => {
     setSelectedLendgine,
     selectedLendgine,
     close,
+    price,
   } = useTradeDetails();
 
-  const shortLendgine = useMemo(
-    () => pickShortLendgines(lendgines, base)[0],
-    [base, lendgines]
-  );
+  const { longLendgine, shortLendgine } = useMemo(() => {
+    const longLendgines = pickLongLendgines(lendgines, base);
+    const shortLendgines = pickShortLendgines(lendgines, base);
+    const nextLongLendgine = nextHighestLendgine({
+      price,
+      lendgines: longLendgines,
+    });
+    const nextShortLendgine = nextHighestLendgine({
+      price: price.invert(),
+      lendgines: shortLendgines,
+    });
+    const secondLongLendgine = nextLowestLendgine({
+      price,
+      lendgines: longLendgines,
+    });
+    const secondShortLendgine = nextLowestLendgine({
+      price: price.invert(),
+      lendgines: shortLendgines,
+    });
 
-  const longLendgine = useMemo(
-    () => pickLongLendgines(lendgines, base)[0],
-    [base, lendgines]
-  );
+    return {
+      longLendgine: nextLongLendgine ?? secondLongLendgine,
+      shortLendgine: nextShortLendgine ?? secondShortLendgine,
+    };
+  }, [base, lendgines, price]);
+
   const selectedLong = isLongLendgine(selectedLendgine, base);
 
   const Tabs = (

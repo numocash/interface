@@ -90,3 +90,53 @@ export const lvrCoef = (
     .subtract(numerator);
   return numerator.divide(denominator);
 };
+
+export const nextHighestLendgine = <L extends Lendgine>(
+  props: (
+    | {
+        price: Fraction;
+      }
+    | {
+        lendgine: L;
+      }
+  ) & {
+    lendgines: Lendgine[];
+  }
+) => {
+  const sortedLendgines = props.lendgines.sort((a, b) =>
+    a.bound.greaterThan(b.bound) ? 1 : -1
+  );
+
+  const price = "lendgine" in props ? props.lendgine.bound : props.price;
+
+  return sortedLendgines.reduce(
+    (acc: Lendgine | null, cur) =>
+      acc === null && cur.bound.greaterThan(price) ? cur : acc,
+    null
+  );
+};
+
+export const nextLowestLendgine = <L extends Lendgine>(
+  props: (
+    | {
+        price: Fraction;
+      }
+    | {
+        lendgine: L;
+      }
+  ) & {
+    lendgines: Lendgine[];
+  }
+) => {
+  const sortedLendgines = props.lendgines.sort((a, b) =>
+    a.bound.greaterThan(b.bound) ? 1 : -1
+  );
+
+  const price = "lendgine" in props ? props.lendgine.bound : props.price;
+
+  return sortedLendgines.reduce(
+    (acc: Lendgine | null, cur) =>
+      acc === null && cur.bound.lessThan(price) ? cur : acc,
+    null
+  );
+};

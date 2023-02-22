@@ -199,11 +199,7 @@ export const Buy: React.FC = () => {
         }}
       />
 
-      <BuyStats
-        bound={selectedLendgine.bound}
-        borrowRate={bRate}
-        isInverse={!isLong}
-      />
+      <BuyStats borrowRate={bRate} />
 
       <AsyncButton
         variant="primary"
@@ -243,6 +239,3 @@ export const Buy: React.FC = () => {
     </>
   );
 };
-
-// 17gwei etherscan
-// 27320201259

@@ -1,29 +1,80 @@
-import type { Percent, Price } from "@uniswap/sdk-core";
+import type { Percent } from "@uniswap/sdk-core";
+import { useMemo } from "react";
+import invariant from "tiny-invariant";
 
-import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
+import {
+  isLongLendgine,
+  pickLongLendgines,
+  pickShortLendgines,
+} from "../../../../utils/lendgines";
+import {
+  nextHighestLendgine,
+  nextLowestLendgine,
+} from "../../../../utils/Numoen/price";
 import { LoadingSpinner } from "../../../common/LoadingSpinner";
+import { Plus } from "../../../common/Plus";
 import { RowBetween } from "../../../common/RowBetween";
+import { useTradeDetails } from "../TradeDetailsInner";
 
 interface Props {
-  bound: Price<WrappedTokenInfo, WrappedTokenInfo>;
   borrowRate: Percent | null;
-  isInverse: boolean;
 }
 
-export const BuyStats: React.FC<Props> = ({
-  bound,
-  borrowRate,
-  isInverse,
-}: Props) => {
+export const BuyStats: React.FC<Props> = ({ borrowRate }: Props) => {
+  const { base, selectedLendgine, lendgines, setSelectedLendgine } =
+    useTradeDetails();
+  const isInverse = !isLongLendgine(selectedLendgine, base);
+
+  const { nextLendgine, lowerLendgine } = useMemo(() => {
+    const similarLendgines = isInverse
+      ? pickShortLendgines(lendgines, base)
+      : pickLongLendgines(lendgines, base);
+
+    const nextLendgine = nextHighestLendgine({
+      lendgine: selectedLendgine,
+      lendgines: similarLendgines,
+    });
+
+    const lowerLendgine = nextLowestLendgine({
+      lendgine: selectedLendgine,
+      lendgines: similarLendgines,
+    });
+
+    return { nextLendgine, lowerLendgine };
+  }, [base, isInverse, lendgines, selectedLendgine]);
+
   return (
     <div tw="flex flex-col w-full">
       <RowBetween tw="p-0">
         <p>Bound</p>
-        <p>
-          {(isInverse ? bound.invert() : bound).asFraction.toSignificant(5, {
+        <div tw="flex items-center gap-1">
+          {(isInverse ? !!nextLendgine : !!lowerLendgine) && (
+            <Plus
+              icon="minus"
+              onClick={() => {
+                const lendgine = isInverse ? nextLendgine : lowerLendgine;
+                invariant(lendgine);
+                setSelectedLendgine(lendgine);
+              }}
+            />
+          )}
+          {(isInverse ? !!lowerLendgine : !!nextLendgine) && (
+            <Plus
+              icon="plus"
+              onClick={() => {
+                const lendgine = isInverse ? lowerLendgine : nextLendgine;
+                invariant(lendgine);
+                setSelectedLendgine(lendgine);
+              }}
+            />
+          )}
+          {(isInverse
+            ? selectedLendgine.bound.invert()
+            : selectedLendgine.bound
+          ).asFraction.toSignificant(5, {
             groupSeparator: ",",
           })}
-        </p>
+        </div>
       </RowBetween>
       <RowBetween tw="p-0">
         <p>Funding APR</p>
