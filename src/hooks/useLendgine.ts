@@ -289,7 +289,7 @@ export const useLendginePosition = <L extends Lendgine>(
     position: (typeof positionQuery)["data"]
   ): LendginePosition<L> | undefined => {
     if (!position) return undefined;
-    invariant(lendgine && address); // if a balance is returned then the data passed must be valid
+    invariant(lendgine); // if a balance is returned then the data passed must be valid
     return {
       size: CurrencyAmount.fromRawAmount(
         lendgine.lendgine,
@@ -356,7 +356,7 @@ export const useLendginesPosition = <L extends Lendgine>(
     positions: (typeof positionsQuery)["data"]
   ): LendginePosition<L>[] | undefined => {
     if (!positions) return undefined;
-    invariant(lendgines && address); // if a balance is returned then the data passed must be valid
+    invariant(lendgines); // if a balance is returned then the data passed must be valid
     return positions.map((p, i) => {
       const lendgine = lendgines[i];
       invariant(lendgine);

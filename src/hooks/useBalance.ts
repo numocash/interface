@@ -77,7 +77,7 @@ export const useBalances = <T extends Token>(
 
   const parseReturn = (balances: (typeof balanceQuery)["data"]) => {
     if (!balances) return undefined;
-    invariant(tokens && address); // if a balance is returned then the data passed must be valid
+    invariant(tokens); // if a balance is returned then the data passed must be valid
     return balances.map((b, i) => {
       const token = tokens[i];
       invariant(token);
