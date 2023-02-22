@@ -60,13 +60,13 @@ export const Withdraw: React.FC = () => {
     const amount0 = updatedLendgineInfo.reserve0
       .multiply(liquidity)
       .multiply(withdrawPercent)
-      .divide(updatedLendgineInfo.totalSupply)
+      .divide(updatedLendgineInfo.totalLiquidity)
       .divide(100);
 
     const amount1 = updatedLendgineInfo.reserve1
       .multiply(liquidity)
       .multiply(withdrawPercent)
-      .divide(updatedLendgineInfo.totalSupply)
+      .divide(updatedLendgineInfo.totalLiquidity)
       .divide(100);
 
     return {

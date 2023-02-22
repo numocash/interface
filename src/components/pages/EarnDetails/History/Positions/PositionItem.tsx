@@ -54,7 +54,7 @@ export const PositionItem: React.FC<Props> = ({
   );
 
   const { amount0, amount1 } = useMemo(() => {
-    if (updatedLendgineInfo.totalSupply.equalTo(0))
+    if (updatedLendgineInfo.totalLiquidity.equalTo(0))
       return {
         amount0: CurrencyAmount.fromRawAmount(lendgine.token0, 0),
         amount1: CurrencyAmount.fromRawAmount(lendgine.token1, 0),
@@ -62,11 +62,11 @@ export const PositionItem: React.FC<Props> = ({
 
     const amount0 = updatedLendgineInfo.reserve0
       .multiply(convertPositionToLiquidity(position, updatedLendgineInfo))
-      .divide(updatedLendgineInfo.totalSupply);
+      .divide(updatedLendgineInfo.totalLiquidity);
 
     const amount1 = updatedLendgineInfo.reserve1
       .multiply(convertPositionToLiquidity(position, updatedLendgineInfo))
-      .divide(updatedLendgineInfo.totalSupply);
+      .divide(updatedLendgineInfo.totalLiquidity);
 
     return { amount0, amount1 };
   }, [lendgine.token0, lendgine.token1, position, updatedLendgineInfo]);
