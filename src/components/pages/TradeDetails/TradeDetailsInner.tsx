@@ -49,12 +49,7 @@ const useTradeDetailsInternal = ({
   quote,
   lendgines,
   price,
-}: {
-  base?: WrappedTokenInfo;
-  quote?: WrappedTokenInfo;
-  lendgines?: Lendgine[];
-  price?: Fraction;
-} = {}): ITradeDetails => {
+}: Partial<Props> = {}): ITradeDetails => {
   invariant(base && quote && lendgines && price);
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
   const [trade, setTrade] = useState<TradeType>(TradeType.Long);

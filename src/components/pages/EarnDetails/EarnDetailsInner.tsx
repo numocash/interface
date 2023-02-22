@@ -1,3 +1,4 @@
+import type { Fraction } from "@uniswap/sdk-core";
 import { useState } from "react";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
@@ -8,7 +9,10 @@ import {
   pickLongLendgines,
   pickShortLendgines,
 } from "../../../utils/lendgines";
-import { BoundSelection } from "./BoundSelection";
+import {
+  nextHighestLendgine,
+  nextLowestLendgine,
+} from "../../../utils/Numoen/price";
 import { History } from "./History/History";
 import { Positions } from "./History/Positions/Positions";
 import { Lendgines } from "./Lendgines";
@@ -18,7 +22,8 @@ import { TradeColumn } from "./TradeColumn/TradeColumn";
 interface Props {
   base: WrappedTokenInfo;
   quote: WrappedTokenInfo;
-  lendgines: readonly Lendgine[];
+  lendgines: Lendgine[];
+  price: Fraction;
 }
 
 interface IEarnDetails {
@@ -32,20 +37,42 @@ interface IEarnDetails {
   setClose: (val: boolean) => void;
 
   lendgines: readonly Lendgine[];
+  price: Fraction;
 }
 
 const useEarnDetailsInternal = ({
   base,
   quote,
   lendgines,
+  price,
 }: Partial<Props> = {}): IEarnDetails => {
-  invariant(base && quote && lendgines);
+  invariant(base && quote && lendgines && price);
   const [close, setClose] = useState(false);
 
-  const longLendgine = pickLongLendgines(lendgines, base);
-  const shortLendgine = pickShortLendgines(lendgines, base);
+  const longLendgines = pickLongLendgines(lendgines, base);
+  const shortLendgines = pickShortLendgines(lendgines, base);
+  const nextLongLendgine = nextHighestLendgine({
+    price,
+    lendgines: longLendgines,
+  });
+  const nextShortLendgine = nextHighestLendgine({
+    price: price.invert(),
+    lendgines: shortLendgines,
+  });
+  const secondLongLendgine = nextLowestLendgine({
+    price,
+    lendgines: longLendgines,
+  });
+  const secondShortLendgine = nextLowestLendgine({
+    price: price.invert(),
+    lendgines: shortLendgines,
+  });
 
-  const lendgine = longLendgine[0] ? longLendgine[0] : shortLendgine[0];
+  const lendgine =
+    nextLongLendgine ??
+    secondLongLendgine ??
+    nextShortLendgine ??
+    secondShortLendgine;
   invariant(lendgine);
 
   const [selectedLendgine, setSelectedLendgine] = useState<Lendgine>(lendgine);
@@ -58,6 +85,7 @@ const useEarnDetailsInternal = ({
     setSelectedLendgine,
     close,
     setClose,
+    price,
   };
 };
 
@@ -68,15 +96,15 @@ export const EarnDetailsInner: React.FC<Props> = ({
   base,
   quote,
   lendgines,
+  price,
 }: Props) => {
   return (
     <div tw="w-full grid grid-cols-3">
-      <EarnDetailsProvider initialState={{ base, quote, lendgines }}>
+      <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
         <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2">
           <Market />
           <p tw="text-sm font-semibold">Select a pool</p>
           <Lendgines />
-          <BoundSelection />
           <div tw="border-b-2 border-gray-200" />
 
           <History />
