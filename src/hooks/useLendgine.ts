@@ -1,6 +1,7 @@
 import type { BigNumber } from "@ethersproject/bignumber";
 import { useQuery } from "@tanstack/react-query";
 import { CurrencyAmount, Price, Token } from "@uniswap/sdk-core";
+import JSBI from "jsbi";
 import { chunk } from "lodash";
 import { useCallback, useMemo } from "react";
 import invariant from "tiny-invariant";
@@ -414,6 +415,7 @@ export const useExistingLendginesQuery = () => {
 
 // TODO: impose rules that one must be a stable or wrapped native and bound that is an exponent of 2
 export const useAllLendgines = () => {
+  const environment = useEnvironment();
   const addressToToken = useGetAddressToToken();
   const lendginesQuery = useExistingLendginesQuery();
   const chainID = useChain();
@@ -425,23 +427,48 @@ export const useAllLendgines = () => {
         const token0 = addressToToken(ld.token0);
         const token1 = addressToToken(ld.token1);
 
-        return !!token0 && !!token1
-          ? {
-              token0,
-              token1,
-              token0Exp: ld.token0Exp,
-              token1Exp: ld.token1Exp,
-              bound: new Price(
-                token0,
-                token1,
-                ld.upperBound.denominator,
-                ld.upperBound.numerator
-              ),
-              lendgine: new Token(chainID, ld.address, 18),
-              address: ld.address,
-            }
-          : undefined;
+        if (!token0 || !token1) return undefined; // tokens must be in token list
+
+        // one of the tokens must be wrapped native or stable asset
+        if (
+          ![token0, token1].find((t) =>
+            t.equals(environment.interface.wrappedNative)
+          ) &&
+          ![token0, token1].find((t) =>
+            t.equals(environment.interface.stablecoin)
+          )
+        )
+          return undefined;
+
+        // bound must be a power of 2
+        const quotient = ld.upperBound.greaterThan(1)
+          ? ld.upperBound.quotient
+          : ld.upperBound.invert().quotient;
+        if (!JSBI.bitwiseAnd(quotient, JSBI.subtract(quotient, JSBI.BigInt(1))))
+          return undefined;
+
+        return {
+          token0,
+          token1,
+          token0Exp: ld.token0Exp,
+          token1Exp: ld.token1Exp,
+          bound: new Price(
+            token0,
+            token1,
+            ld.upperBound.denominator,
+            ld.upperBound.numerator
+          ),
+          lendgine: new Token(chainID, ld.address, 18),
+          address: ld.address,
+        };
       })
       .filter((f): f is Lendgine => !!f);
-  }, [addressToToken, chainID, lendginesQuery.data, lendginesQuery.isLoading]);
+  }, [
+    addressToToken,
+    chainID,
+    environment.interface.stablecoin,
+    environment.interface.wrappedNative,
+    lendginesQuery.data,
+    lendginesQuery.isLoading,
+  ]);
 };
