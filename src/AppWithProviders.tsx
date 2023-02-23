@@ -12,7 +12,7 @@ import { SettingsProvider } from "./contexts/settings";
 import { theme } from "./theme";
 
 const foundry = {
-  id: 31337,
+  id: 1,
   name: "Foundry",
   network: "foundry",
   nativeCurrency: {

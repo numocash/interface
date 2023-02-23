@@ -1,9 +1,6 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
-import { parseUnits } from "@ethersproject/units";
-import { Fraction } from "@uniswap/sdk-core";
-import JSBI from "jsbi";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import type { usePrepareContractWrite } from "wagmi";
@@ -20,8 +17,9 @@ import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { useDefaultTokenList } from "../../../hooks/useTokens2";
 import { useBeet } from "../../../utils/beet";
+import { scale } from "../../../utils/Numoen/trade";
 import { AsyncButton } from "../../common/AsyncButton";
-import { BigNumericInput } from "../../common/inputs/BigNumericInput";
+import { Plus } from "../../common/Plus";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenSelection } from "../../common/TokenSelection";
 
@@ -33,7 +31,7 @@ export const Create: React.FC = () => {
   const [baseToken, setBaseToken] = useState<WrappedTokenInfo | undefined>(
     undefined
   );
-  const [boundInput, setBoundInput] = useState("");
+  const [boundMultiple, setBoundMultiple] = useState(2);
   const tokens = useDefaultTokenList();
   const environment = useEnvironment();
   const signer = useSigner();
@@ -69,46 +67,38 @@ export const Create: React.FC = () => {
     [specToken, tokens.data]
   );
 
-  const bound = useMemo(() => {
-    try {
-      const parsed = parseUnits(boundInput);
-      return new Fraction(JSBI.BigInt(parsed));
-    } catch (err) {
-      console.error(err);
-    }
-    return undefined;
-  }, [boundInput]);
+  console.log(removeSpec);
 
   const lendgine = useFactoryGetLendgine({
     args:
-      baseToken && specToken && bound
+      baseToken && specToken
         ? ([
             getAddress(baseToken.address),
             getAddress(specToken.address),
             BigNumber.from(baseToken.decimals),
             BigNumber.from(specToken.decimals),
-            BigNumber.from(bound.quotient.toString()),
+            BigNumber.from(scale.toString()).mul(boundMultiple),
           ] as const)
         : undefined,
     address: environment.base.factory,
-    enabled: !!baseToken && !!specToken && !!bound,
+    enabled: !!baseToken && !!specToken,
     watch: true,
     staleTime: Infinity,
   });
 
   const prepare = usePrepareFactoryCreateLendgine({
     args:
-      baseToken && specToken && bound
+      baseToken && specToken
         ? [
             getAddress(baseToken.address),
             getAddress(specToken.address),
             baseToken.decimals,
             specToken.decimals,
-            BigNumber.from(bound.quotient.toString()),
+            BigNumber.from(scale.toString()).mul(boundMultiple),
           ]
         : undefined,
     address: environment.base.factory,
-    enabled: !!baseToken && !!specToken && !!bound,
+    enabled: !!baseToken && !!specToken,
   });
   const write = useFactoryCreateLendgine(prepare.data);
 
@@ -116,8 +106,6 @@ export const Create: React.FC = () => {
     () =>
       !specToken || !baseToken
         ? "Select a token"
-        : boundInput === ""
-        ? "Enter an amount"
         : !tokens ||
           !currentPrice ||
           !factoryContract ||
@@ -133,13 +121,9 @@ export const Create: React.FC = () => {
         ? `One token must be ${
             environment.interface.wrappedNative.symbol ?? ""
           } or ${environment.interface.stablecoin.symbol ?? ""}`
-        : !bound || bound.equalTo(0)
-        ? "Invalid amount"
         : null,
     [
       baseToken,
-      bound,
-      boundInput,
       currentPrice,
       environment.interface.stablecoin,
       environment.interface.wrappedNative,
@@ -180,15 +164,19 @@ export const Create: React.FC = () => {
         </RowBetween>
         <RowBetween tw="items-center p-0">
           <p>Bound</p>
-          <BigNumericInput
-            tw="text-right text-lg border-2 border-blue"
-            inputMode="numeric"
-            placeholder="0"
-            autoComplete="off"
-            disabled={false}
-            value={boundInput}
-            onChange={(val: string) => setBoundInput(val)}
-          />
+          <div tw="flex items-center gap-1">
+            <Plus
+              icon="minus"
+              onClick={() => setBoundMultiple(boundMultiple / 2)}
+            />
+
+            <Plus
+              icon="plus"
+              onClick={() => setBoundMultiple(boundMultiple * 2)}
+            />
+
+            <p>{boundMultiple}</p>
+          </div>
         </RowBetween>
         {currentPrice && (
           <div tw="w-full justify-end flex mt-[-1rem]">
@@ -206,7 +194,7 @@ export const Create: React.FC = () => {
         tw="h-12 text-lg"
         disabled={!!disableReason}
         onClick={async () => {
-          invariant(specToken && baseToken && bound && factoryContract);
+          invariant(specToken && baseToken && factoryContract);
           await Beet([
             {
               stageTitle: `New ${specToken.symbol ?? ""} + ${
@@ -230,7 +218,7 @@ export const Create: React.FC = () => {
 
           setSpecToken(undefined);
           setBaseToken(undefined);
-          setBoundInput("");
+          setBoundMultiple(1);
         }}
       >
         {disableReason ?? "Create new market"}

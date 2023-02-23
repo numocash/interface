@@ -31,5 +31,5 @@ export const config: {
     base: NumoenBaseConfig;
   };
 } = {
-  31337: foundryConfig,
+  1: foundryConfig,
 };

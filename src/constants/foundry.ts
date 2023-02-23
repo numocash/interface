@@ -72,8 +72,8 @@ export const foundryConfig = {
     uniswapV3subgraph:
       "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
     numoenSubgraph: "http://localhost:8000/subgraphs/name/kyscott/numoen",
-    wrappedNative: WrappedNative[31337],
-    stablecoin: Stable[31337],
+    wrappedNative: WrappedNative[1],
+    stablecoin: Stable[1],
     defaultActiveLists: [
       "https://tokens.uniswap.org", // TODO: this is not returning very fast
       // "https://celo-org.github.io/celo-token-list/celo.tokenlist.json",
