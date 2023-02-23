@@ -2,7 +2,7 @@ import type { Address } from "wagmi";
 
 import type { chains } from "../AppWithProviders";
 import type { WrappedTokenInfo } from "../hooks/useTokens2";
-import { foundryConfig } from "./foundry";
+import { arbitrumConfig } from "./arbitrum";
 
 export type SupportedChainIDs = (typeof chains)[number]["id"];
 
@@ -31,5 +31,5 @@ export const config: {
     base: NumoenBaseConfig;
   };
 } = {
-  1: foundryConfig,
+  42161: arbitrumConfig,
 };

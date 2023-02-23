@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { arbitrum } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 
 import { App } from "./App";
@@ -11,27 +12,26 @@ import { EnvironmentProvider } from "./contexts/environment2";
 import { SettingsProvider } from "./contexts/settings";
 import { theme } from "./theme";
 
-const foundry = {
-  id: 1,
-  name: "Foundry",
-  network: "foundry",
-  nativeCurrency: {
-    decimals: 18,
-    name: "Ether",
-    symbol: "ETH",
-  },
-  rpcUrls: {
-    default: {
-      http: ["http://127.0.0.1:8545"],
-    },
-    public: {
-      http: ["http://127.0.0.1:8545"],
-    },
-  },
-} as const;
+// const foundry = {
+//   id: 1,
+//   name: "Foundry",
+//   network: "foundry",
+//   nativeCurrency: {
+//     decimals: 18,
+//     name: "Ether",
+//     symbol: "ETH",
+//   },
+//   rpcUrls: {
+//     default: {
+//       http: ["http://127.0.0.1:8545"],
+//     },
+//     public: {
+//       http: ["http://127.0.0.1:8545"],
+//     },
+//   },
+// } as const;
 
-// todo add new celo chain with quicknode provider and env var for key
-const { chains, provider } = configureChains([foundry], [publicProvider()]);
+const { chains, provider } = configureChains([arbitrum], [publicProvider()]);
 
 export { chains };
 
