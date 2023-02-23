@@ -80,7 +80,7 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
   const fuse = useMemo(
     () =>
       new Fuse(tokens ?? [], {
-        keys: ["token.address", "token.name", "token.symbol"],
+        keys: ["address", "name", "symbol"],
       }),
     [tokens]
   );

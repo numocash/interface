@@ -1,6 +1,5 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
-import { AddressZero } from "@ethersproject/constants";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import type { usePrepareContractWrite } from "wagmi";
@@ -10,10 +9,10 @@ import { useEnvironment } from "../../../contexts/environment2";
 import {
   useFactory,
   useFactoryCreateLendgine,
-  useFactoryGetLendgine,
   usePrepareFactoryCreateLendgine,
 } from "../../../generated";
 import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
+import { useAllLendgines } from "../../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { useDefaultTokenList } from "../../../hooks/useTokens2";
 import { useBeet } from "../../../utils/beet";
@@ -39,6 +38,7 @@ export const Create: React.FC = () => {
     address: environment.base.factory,
     signerOrProvider: signer.data,
   });
+  const lendgines = useAllLendgines();
 
   // price is in terms of base / speculative
   const invertPriceQuery =
@@ -67,25 +67,6 @@ export const Create: React.FC = () => {
     [specToken, tokens.data]
   );
 
-  console.log(removeSpec);
-
-  const lendgine = useFactoryGetLendgine({
-    args:
-      baseToken && specToken
-        ? ([
-            getAddress(baseToken.address),
-            getAddress(specToken.address),
-            BigNumber.from(baseToken.decimals),
-            BigNumber.from(specToken.decimals),
-            BigNumber.from(scale.toString()).mul(boundMultiple),
-          ] as const)
-        : undefined,
-    address: environment.base.factory,
-    enabled: !!baseToken && !!specToken,
-    watch: true,
-    staleTime: Infinity,
-  });
-
   const prepare = usePrepareFactoryCreateLendgine({
     args:
       baseToken && specToken
@@ -109,11 +90,9 @@ export const Create: React.FC = () => {
         : !tokens ||
           !currentPrice ||
           !factoryContract ||
-          !lendgine.data ||
+          lendgines === null ||
           !prepare.config
         ? "Loading"
-        : lendgine.data !== AddressZero
-        ? " Market already exists"
         : !baseToken.equals(environment.interface.wrappedNative) &&
           !baseToken.equals(environment.interface.stablecoin) &&
           !specToken.equals(environment.interface.wrappedNative) &&
@@ -121,14 +100,24 @@ export const Create: React.FC = () => {
         ? `One token must be ${
             environment.interface.wrappedNative.symbol ?? ""
           } or ${environment.interface.stablecoin.symbol ?? ""}`
+        : currentPrice.greaterThan(boundMultiple)
+        ? "Bound can't be below current price"
+        : lendgines.find(
+            (l) =>
+              l.token0.equals(baseToken) &&
+              l.token1.equals(specToken) &&
+              l.bound.equalTo(boundMultiple)
+          )
+        ? " Market already exists"
         : null,
     [
       baseToken,
+      boundMultiple,
       currentPrice,
       environment.interface.stablecoin,
       environment.interface.wrappedNative,
       factoryContract,
-      lendgine.data,
+      lendgines,
       prepare.config,
       specToken,
       tokens,
