@@ -21,7 +21,7 @@ const Wrapper = styled.div<{ disabled?: boolean }>(({ disabled }) => [
 interface Props {
   onClick?: () => void;
   token: WrappedTokenInfo;
-  amount: CurrencyAmount<WrappedTokenInfo>;
+  amount?: CurrencyAmount<WrappedTokenInfo>;
   style?: CSSProperties;
   isSelected?: boolean;
 }
@@ -38,7 +38,7 @@ export const TokenItem: React.FC<Props> = ({
       <TokenOption>
         <TokenInfo iconSize={24} small token={token} />
 
-        {!amount.equalTo("0") && (
+        {!!amount && !amount.equalTo("0") && (
           <Balance>{amount.toSignificant(4, { groupSeparator: "," })}</Balance>
         )}
       </TokenOption>

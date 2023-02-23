@@ -1,12 +1,7 @@
-import { CurrencyAmount } from "@uniswap/sdk-core";
 import Fuse from "fuse.js";
-import { zip } from "lodash";
 import React, { useEffect, useMemo, useState } from "react";
-import invariant from "tiny-invariant";
 import { useDebounce } from "use-debounce";
-import { useAccount } from "wagmi";
 
-import { useBalances } from "../../../hooks/useBalance";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { SearchInput } from "./SearchInput";
@@ -28,7 +23,7 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
   selectedToken,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { address } = useAccount();
+  // const { address } = useAccount();
 
   const [searchQueryDebounced] = useDebounce(searchQuery, 200, {
     leading: true,
@@ -36,67 +31,67 @@ export const TokenSearch: React.FC<TokenSearchProps> = ({
   // const debouncedQueryKey = getAddress(searchQueryDebounced);
   // const searchToken = useToken2(debouncedQueryKey);
 
-  const userTokenBalances = useBalances(tokens, address);
+  // const userTokenBalances = useBalances(tokens, address);
 
-  const tokensWithBalances = useMemo(
-    () =>
-      !tokens
-        ? []
-        : userTokenBalances.data
-        ? zip(userTokenBalances.data, tokens)
-            .map(([tokenBalance, t]) => {
-              invariant(t, "token");
+  // const tokensWithBalances = useMemo(
+  //   () =>
+  //     !tokens
+  //       ? []
+  //       : userTokenBalances.data
+  //       ? zip(userTokenBalances.data, tokens)
+  //           .map(([tokenBalance, t]) => {
+  //             invariant(t, "token");
 
-              const balance = tokenBalance;
-              if (balance) {
-                return { token: t, balance, hasBalance: !balance.equalTo("0") };
-              }
-              return {
-                token: t,
-                balance: CurrencyAmount.fromRawAmount(t, 0),
-                hasBalance: false,
-              };
-            })
-            .sort((a, b) => {
-              if (!a.hasBalance && b.hasBalance) {
-                return 1;
-              } else if (a.hasBalance && !b.hasBalance) {
-                return -1;
-              } else if (a.hasBalance && b.hasBalance) {
-                return a.balance.greaterThan(b.balance) ? -1 : 1;
-              } else {
-                if (a.token.symbol > b.token.symbol) {
-                  return 1;
-                } else {
-                  return -1;
-                }
-              }
-            })
-        : address === null
-        ? tokens.map((t) => ({
-            token: t,
-            balance: CurrencyAmount.fromRawAmount(t, 0),
-            hasBalance: false,
-          }))
-        : [],
-    [userTokenBalances, tokens, address]
-  );
+  //             const balance = tokenBalance;
+  //             if (balance) {
+  //               return { token: t, balance, hasBalance: !balance.equalTo("0") };
+  //             }
+  //             return {
+  //               token: t,
+  //               balance: CurrencyAmount.fromRawAmount(t, 0),
+  //               hasBalance: false,
+  //             };
+  //           })
+  //           .sort((a, b) => {
+  //             if (!a.hasBalance && b.hasBalance) {
+  //               return 1;
+  //             } else if (a.hasBalance && !b.hasBalance) {
+  //               return -1;
+  //             } else if (a.hasBalance && b.hasBalance) {
+  //               return a.balance.greaterThan(b.balance) ? -1 : 1;
+  //             } else {
+  //               if (a.token.symbol > b.token.symbol) {
+  //                 return 1;
+  //               } else {
+  //                 return -1;
+  //               }
+  //             }
+  //           })
+  //       : address === null
+  //       ? tokens.map((t) => ({
+  //           token: t,
+  //           balance: CurrencyAmount.fromRawAmount(t, 0),
+  //           hasBalance: false,
+  //         }))
+  //       : [],
+  //   [userTokenBalances, tokens, address]
+  // );
 
   const fuse = useMemo(
     () =>
-      new Fuse(tokensWithBalances, {
+      new Fuse(tokens ?? [], {
         keys: ["token.address", "token.name", "token.symbol"],
       }),
-    [tokensWithBalances]
+    [tokens]
   );
 
   const { results } = useMemo(() => {
     const searchResults = fuse.search(searchQueryDebounced).map((r) => r.item);
 
     return searchQuery.length === 0
-      ? { results: tokensWithBalances }
+      ? { results: tokens ?? [] }
       : { results: searchResults };
-  }, [searchQuery, fuse, searchQueryDebounced, tokensWithBalances]);
+  }, [fuse, searchQueryDebounced, searchQuery.length, tokens]);
 
   // clear the input on open
   useEffect(() => {

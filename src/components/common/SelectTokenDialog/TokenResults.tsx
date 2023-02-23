@@ -1,18 +1,17 @@
-import type { CurrencyAmount } from "@uniswap/sdk-core";
-import { partition } from "lodash";
 import type { CSSProperties } from "react";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { useVirtual } from "react-virtual";
 
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { TokenItem } from "./TokenItem";
 
 interface Props {
-  results: readonly {
-    token: WrappedTokenInfo;
-    balance: CurrencyAmount<WrappedTokenInfo>;
-    hasBalance: boolean;
-  }[];
+  // results: readonly {
+  //   token: WrappedTokenInfo;
+  //   balance: CurrencyAmount<WrappedTokenInfo>;
+  //   hasBalance: boolean;
+  // }[];
+  results: readonly WrappedTokenInfo[];
   selectedToken?: WrappedTokenInfo;
   onSelect?: (token: WrappedTokenInfo) => void;
 }
@@ -24,15 +23,15 @@ export const TokenResults: React.FC<Props> = ({
 }) => {
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const sortedResults = useMemo(() => {
-    const [hasBalance, hasNoBalance] = partition(results, (r) => r.hasBalance);
-    return hasBalance.concat(hasNoBalance);
-  }, [results]);
+  // const sortedResults = useMemo(() => {
+  //   const [hasBalance, hasNoBalance] = partition(results, (r) => r.hasBalance);
+  //   return hasBalance.concat(hasNoBalance);
+  // }, [results]);
 
   const rowVirtualizer = useVirtual({
     paddingStart: 8,
     paddingEnd: 8,
-    size: sortedResults.length,
+    size: results.length,
     parentRef,
     estimateSize: useCallback(() => 56, []),
     overscan: 5,
@@ -40,28 +39,19 @@ export const TokenResults: React.FC<Props> = ({
 
   const Row = useCallback(
     ({
-      data,
+      token,
       // index,
       style,
     }: {
-      data:
-        | {
-            token: WrappedTokenInfo;
-            balance: CurrencyAmount<WrappedTokenInfo>;
-            hasBalance: boolean;
-          }
-        | undefined;
+      token: WrappedTokenInfo | undefined;
       index: number;
       style: CSSProperties;
     }) => {
-      if (!data) return null;
-
-      const { balance, token } = data;
+      if (!token) return null;
 
       return (
         <TokenItem
           style={style}
-          amount={balance}
           onClick={() => onSelect?.(token)}
           token={token}
           isSelected={selectedToken && token.equals(selectedToken)}
@@ -84,7 +74,7 @@ export const TokenResults: React.FC<Props> = ({
           <Row
             index={virtualRow.index}
             key={virtualRow.index}
-            data={sortedResults[virtualRow.index]}
+            token={results[virtualRow.index]}
             style={{
               position: "absolute",
               top: 0,
