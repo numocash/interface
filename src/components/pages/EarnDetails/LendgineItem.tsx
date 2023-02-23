@@ -75,7 +75,9 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
     >
       <RowBetween tw="px-0">
         <p tw="text-xl">APR</p>
-        <p tw="text-xl font-semibold">{apr.toFixed(2)}%</p>
+        <p tw="text-xl font-semibold">
+          {apr.equalTo(0) ? "0" : apr.toFixed(2)}%
+        </p>
       </RowBetween>
       <RowBetween tw="justify-around">
         <VerticalItem
@@ -89,12 +91,12 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
       </RowBetween>
       <RowBetween tw="mt-2 px-0 items-center">
         <p tw="text-sm">Impermanent loss vs. Uni V2</p>
-        <p>{il.toFixed(2)}x</p>
+        <p>{il.equalTo(0) ? "0" : il.toFixed(2)}x</p>
       </RowBetween>
       <div tw="w-full border-b-2 border-gray-200" />
       <RowBetween tw="p-0 mt-2">
         <p tw="text-sm items-center">Implied vol.</p>
-        <p>{iv.toFixed(2)}%</p>
+        <p>{iv.equalTo(0) ? "0" : iv.toFixed(2)}%</p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p tw="text-sm items-center">Delta</p>

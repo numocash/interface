@@ -6,8 +6,8 @@ import { Stable, WrappedNative } from "./tokens";
 export const arbitrumConfig = {
   base: {
     factory: getAddress("0x5986047C9B1F09b7870dF430C2d0D972e6b79aF5"),
-    lendgineRouter: getAddress("0x99206b0070187E5e362c3058414d036968332d25"),
-    liquidityManager: getAddress("0xc8a7eA3A6BcaEFfF6B5Fb808F8E66d247bFE02B5"),
+    lendgineRouter: getAddress("0xc8a7eA3A6BcaEFfF6B5Fb808F8E66d247bFE02B5"),
+    liquidityManager: getAddress("0x99206b0070187E5e362c3058414d036968332d25"),
   },
   interface: {
     uniswapV2subgraph:

@@ -1,5 +1,7 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
+import { Price } from "@uniswap/sdk-core";
+import JSBI from "jsbi";
 import { useCallback, useMemo, useState } from "react";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
@@ -19,6 +21,7 @@ import {
   accruedLendgineInfo,
   convertLiquidityToPosition,
 } from "../../../../utils/Numoen/lendgineMath";
+import { priceToReserves } from "../../../../utils/Numoen/price";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
@@ -30,7 +33,7 @@ export const Deposit: React.FC = () => {
   const environment = useEnvironment();
   const Beet = useBeet();
   const settings = useSettings();
-  const { selectedLendgine, base, quote } = useEarnDetails();
+  const { selectedLendgine, base, quote, price } = useEarnDetails();
   const balances = useBalances([base, quote], address);
   const lendgineInfo = useLendgine(selectedLendgine);
 
@@ -45,6 +48,7 @@ export const Deposit: React.FC = () => {
           quoteInputAmount: tryParseCurrencyAmount(quoteInput, quote),
         };
       }
+
       const inverse = base.equals(selectedLendgine.token1);
       const parsedAmount =
         tryParseCurrencyAmount(baseInput, base) ??
@@ -55,6 +59,42 @@ export const Deposit: React.FC = () => {
         selectedLendgine,
         lendgineInfo.data
       );
+
+      if (lendgineInfo.data.totalLiquidity.equalTo(0)) {
+        const { token0Amount, token1Amount } = priceToReserves(
+          selectedLendgine,
+          new Price(
+            selectedLendgine.token1,
+            selectedLendgine.token0,
+            price.denominator,
+            price.numerator
+          )
+        );
+
+        const liquidity = parsedAmount.currency.equals(selectedLendgine.token0)
+          ? token0Amount.invert().quote(parsedAmount)
+          : token1Amount.invert().quote(parsedAmount);
+
+        const positionSize = convertLiquidityToPosition(
+          liquidity,
+          selectedLendgine,
+          updatedInfo
+        );
+
+        const baseInputAmount = inverse
+          ? token1Amount.quote(liquidity)
+          : token0Amount.quote(liquidity);
+        const quoteInputAmount = inverse
+          ? token0Amount.quote(liquidity)
+          : token1Amount.quote(liquidity);
+
+        return {
+          liquidity,
+          positionSize,
+          baseInputAmount,
+          quoteInputAmount,
+        };
+      }
 
       const [baseAmount, quoteAmount] = inverse
         ? [updatedInfo.reserve1, updatedInfo.reserve0]
@@ -84,6 +124,8 @@ export const Deposit: React.FC = () => {
       base,
       baseInput,
       lendgineInfo.data,
+      price.denominator,
+      price.numerator,
       quote,
       quoteInput,
       selectedLendgine,
@@ -114,7 +156,11 @@ export const Deposit: React.FC = () => {
 
   const args = useMemo(
     () =>
-      !!baseInputAmount && !!quoteInputAmount && !!address && !!liquidity
+      !!baseInputAmount &&
+      !!quoteInputAmount &&
+      !!address &&
+      !!liquidity &&
+      !!lendgineInfo.data
         ? ([
             {
               token0: getAddress(selectedLendgine.token0.address),
@@ -126,14 +172,20 @@ export const Deposit: React.FC = () => {
                   .multiply(scale)
                   .quotient.toString()
               ),
-              liquidity: BigNumber.from(liquidity.quotient.toString()),
+              liquidity: BigNumber.from(
+                JSBI.subtract(liquidity.quotient, JSBI.BigInt(10)).toString()
+              ),
               amount0Min: BigNumber.from(
                 (base.equals(selectedLendgine.token0)
                   ? baseInputAmount
                   : quoteInputAmount
                 )
                   .multiply(
-                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+                    lendgineInfo.data.totalLiquidity.equalTo(0)
+                      ? 1
+                      : ONE_HUNDRED_PERCENT.subtract(
+                          settings.maxSlippagePercent
+                        )
                   )
                   .quotient.toString()
               ),
@@ -143,7 +195,11 @@ export const Deposit: React.FC = () => {
                   : baseInputAmount
                 )
                   .multiply(
-                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+                    lendgineInfo.data.totalLiquidity.equalTo(0)
+                      ? 1
+                      : ONE_HUNDRED_PERCENT.subtract(
+                          settings.maxSlippagePercent
+                        )
                   )
                   .quotient.toString()
               ),
@@ -153,7 +209,7 @@ export const Deposit: React.FC = () => {
                     ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
                   )
                   .quotient.toString()
-              ), // TODO: fix
+              ),
 
               recipient: address,
               deadline: BigNumber.from(
@@ -166,6 +222,7 @@ export const Deposit: React.FC = () => {
       address,
       base,
       baseInputAmount,
+      lendgineInfo.data,
       liquidity,
       positionSize,
       quoteInputAmount,
@@ -190,7 +247,9 @@ export const Deposit: React.FC = () => {
     () =>
       lendgineInfo.isLoading
         ? "Loading"
-        : !baseInputAmount || !quoteInputAmount
+        : // : lendgineInfo.data?.totalLiquidity.equalTo(0)
+        // ? "No liquidity in pair"
+        !baseInputAmount || !quoteInputAmount
         ? "Enter an amount"
         : balances.isLoading ||
           approveBase.allowanceQuery.isLoading ||

@@ -140,3 +140,44 @@ export const nextLowestLendgine = <L extends Lendgine>(
     null
   );
 };
+
+export const priceToReserves = <L extends Lendgine>(
+  lendgine: L,
+  price: Price<L["token1"], L["token0"]>
+): {
+  token0Amount: Price<L["lendgine"], L["token0"]>;
+  token1Amount: Price<L["lendgine"], L["token1"]>;
+} => {
+  const token0AmountFraction = price.asFraction
+    .multiply(price)
+    .divide(
+      JSBI.exponentiate(
+        JSBI.BigInt(10),
+        JSBI.BigInt(18 - lendgine.token0.decimals)
+      )
+    );
+  const token0Amount = new Price(
+    lendgine.lendgine,
+    lendgine.token0,
+    token0AmountFraction.denominator,
+    token0AmountFraction.numerator
+  );
+
+  const token1AmountFraction = lendgine.bound
+    .subtract(price)
+    .multiply(2)
+    .divide(
+      JSBI.exponentiate(
+        JSBI.BigInt(10),
+        JSBI.BigInt(18 - lendgine.token1.decimals)
+      )
+    );
+  const token1Amount = new Price(
+    lendgine.lendgine,
+    lendgine.token1,
+    token1AmountFraction.denominator,
+    token1AmountFraction.numerator
+  );
+
+  return { token0Amount, token1Amount };
+};

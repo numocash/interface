@@ -1,5 +1,6 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
+import { Fraction } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import type { usePrepareContractWrite } from "wagmi";
@@ -30,7 +31,7 @@ export const Create: React.FC = () => {
   const [baseToken, setBaseToken] = useState<WrappedTokenInfo | undefined>(
     undefined
   );
-  const [boundMultiple, setBoundMultiple] = useState(2);
+  const [bound, setBound] = useState(new Fraction(1));
   const tokens = useDefaultTokenList();
   const environment = useEnvironment();
   const signer = useSigner();
@@ -75,7 +76,7 @@ export const Create: React.FC = () => {
             getAddress(specToken.address),
             baseToken.decimals,
             specToken.decimals,
-            BigNumber.from(scale.toString()).mul(boundMultiple),
+            BigNumber.from(bound.multiply(scale).quotient.toString()),
           ]
         : undefined,
     address: environment.base.factory,
@@ -100,19 +101,19 @@ export const Create: React.FC = () => {
         ? `One token must be ${
             environment.interface.wrappedNative.symbol ?? ""
           } or ${environment.interface.stablecoin.symbol ?? ""}`
-        : currentPrice.greaterThan(boundMultiple)
+        : currentPrice.greaterThan(bound)
         ? "Bound can't be below current price"
         : lendgines.find(
             (l) =>
               l.token0.equals(baseToken) &&
               l.token1.equals(specToken) &&
-              l.bound.equalTo(boundMultiple)
+              l.bound.equalTo(bound)
           )
         ? " Market already exists"
         : null,
     [
       baseToken,
-      boundMultiple,
+      bound,
       currentPrice,
       environment.interface.stablecoin,
       environment.interface.wrappedNative,
@@ -154,17 +155,11 @@ export const Create: React.FC = () => {
         <RowBetween tw="items-center p-0">
           <p>Bound</p>
           <div tw="flex items-center gap-1">
-            <Plus
-              icon="minus"
-              onClick={() => setBoundMultiple(boundMultiple / 2)}
-            />
+            <Plus icon="minus" onClick={() => setBound(bound.divide(2))} />
 
-            <Plus
-              icon="plus"
-              onClick={() => setBoundMultiple(boundMultiple * 2)}
-            />
+            <Plus icon="plus" onClick={() => setBound(bound.multiply(2))} />
 
-            <p>{boundMultiple}</p>
+            <p>{bound.toSignificant(5)}</p>
           </div>
         </RowBetween>
         {currentPrice && (
@@ -207,7 +202,7 @@ export const Create: React.FC = () => {
 
           setSpecToken(undefined);
           setBaseToken(undefined);
-          setBoundMultiple(1);
+          setBound(new Fraction(1));
         }}
       >
         {disableReason ?? "Create new market"}

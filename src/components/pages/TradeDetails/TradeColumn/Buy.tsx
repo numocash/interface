@@ -55,6 +55,7 @@ export const Buy: React.FC = () => {
   const approve = useApprove(parsedAmount, environment.base.lendgineRouter);
   // TODO: short funding rate is wrong
   const { borrowAmount, liquidity, shares, bRate } = useMemo(() => {
+    if (selectedLendgineInfo.data?.totalLiquidity.equalTo(0)) return {};
     const price = selectedLendgineInfo.data
       ? numoenPrice(selectedLendgine, selectedLendgineInfo.data)
       : null;
@@ -167,10 +168,11 @@ export const Buy: React.FC = () => {
         ? "Enter an amount"
         : !parsedAmount
         ? "Invalid amount"
-        : !selectedLendgineInfo.data ||
-          !liquidity ||
-          !shares ||
-          !approve.allowanceQuery.data
+        : !selectedLendgineInfo.data
+        ? "Loading"
+        : selectedLendgineInfo.data.totalLiquidity.equalTo(0)
+        ? "Insufficient liquidity"
+        : !liquidity || !shares || !approve.allowanceQuery.data
         ? "Loading"
         : liquidity.greaterThan(selectedLendgineInfo.data.totalLiquidity)
         ? "Insufficient liquidity"
@@ -199,7 +201,7 @@ export const Buy: React.FC = () => {
         }}
       />
 
-      <BuyStats borrowRate={bRate} />
+      <BuyStats borrowRate={bRate ?? null} />
 
       <AsyncButton
         variant="primary"
