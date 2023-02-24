@@ -1,3 +1,4 @@
+import type { Token } from "@uniswap/sdk-core";
 import { Fraction, Price } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
@@ -17,19 +18,11 @@ export const numoenPrice = <L extends Lendgine>(
     lendgineInfo.totalLiquidity
   );
 
-  const priceFraction = lendgine.bound.asFraction.subtract(
+  const priceFraction = priceToFraction(lendgine.bound).subtract(
     scale1.asFraction.divide(2)
   );
 
-  return new Price(
-    lendgine.token1,
-    lendgine.token0,
-    JSBI.multiply(
-      priceFraction.denominator,
-      lendgineInfo.reserve1.decimalScale
-    ),
-    JSBI.multiply(priceFraction.numerator, lendgineInfo.reserve0.decimalScale)
-  );
+  return fractionToPrice(priceFraction, lendgine.token1, lendgine.token0);
 };
 
 // The value of one nondiluted share of collateral in terms of token0
@@ -44,22 +37,23 @@ export const pricePerCollateral = <L extends Lendgine>(
 
 // The value of one nondiluted share of liquidity in terms of token0
 export const pricePerLiquidity = <L extends Lendgine>(
-  lendgine: L,
-  lendgineInfo: LendgineInfo<L>
+  args: (
+    | { lendgineInfo: LendgineInfo<L> }
+    | { price: Price<L["token1"], L["token0"]> }
+  ) & { lendgine: L }
 ) => {
-  const price = numoenPrice(lendgine, lendgineInfo);
+  const price = priceToFraction(
+    "lendgineInfo" in args
+      ? numoenPrice(args.lendgine, args.lendgineInfo)
+      : args.price
+  );
 
-  const f = lendgine.bound.asFraction
+  const f = priceToFraction(args.lendgine.bound)
     .multiply(price)
     .multiply(2)
-    .subtract(price.asFraction.multiply(price));
+    .subtract(price.multiply(price));
 
-  return new Price(
-    lendgine.lendgine,
-    lendgine.token0,
-    f.denominator,
-    f.numerator
-  );
+  return fractionToPrice(f, args.lendgine.lendgine, args.lendgine.token0);
 };
 
 // The value of one nondiluted share in terms of token0
@@ -68,14 +62,9 @@ export const pricePerShare = <L extends Lendgine>(
   lendgineInfo: LendgineInfo<L>
 ) => {
   const f = pricePerCollateral(lendgine, lendgineInfo).subtract(
-    pricePerLiquidity(lendgine, lendgineInfo)
+    pricePerLiquidity({ lendgine, lendgineInfo })
   );
-  return new Price(
-    lendgine.lendgine,
-    lendgine.token0,
-    f.denominator,
-    f.numerator
-  );
+  return fractionToPrice(f, lendgine.lendgine, lendgine.token0);
 };
 
 export const lvrCoef = (
@@ -148,36 +137,60 @@ export const priceToReserves = <L extends Lendgine>(
   token0Amount: Price<L["lendgine"], L["token0"]>;
   token1Amount: Price<L["lendgine"], L["token1"]>;
 } => {
-  const token0AmountFraction = price.asFraction
-    .multiply(price)
-    .divide(
-      JSBI.exponentiate(
-        JSBI.BigInt(10),
-        JSBI.BigInt(18 - lendgine.token0.decimals)
-      )
-    );
-  const token0Amount = new Price(
+  const token0AmountFraction = priceToFraction(price).multiply(
+    priceToFraction(price)
+  );
+  const token0Amount = fractionToPrice(
+    token0AmountFraction,
     lendgine.lendgine,
-    lendgine.token0,
-    token0AmountFraction.denominator,
-    token0AmountFraction.numerator
+    lendgine.token0
   );
 
-  const token1AmountFraction = lendgine.bound
-    .subtract(price)
-    .multiply(2)
-    .divide(
-      JSBI.exponentiate(
-        JSBI.BigInt(10),
-        JSBI.BigInt(18 - lendgine.token1.decimals)
-      )
-    );
-  const token1Amount = new Price(
+  const token1AmountFraction = priceToFraction(lendgine.bound)
+    .subtract(priceToFraction(price))
+    .multiply(2);
+  const token1Amount = fractionToPrice(
+    token1AmountFraction,
     lendgine.lendgine,
-    lendgine.token1,
-    token1AmountFraction.denominator,
-    token1AmountFraction.numerator
+    lendgine.token1
   );
 
   return { token0Amount, token1Amount };
+};
+
+export const fractionToPrice = <TBase extends Token, TQuote extends Token>(
+  price: Fraction,
+  base: TBase,
+  quote: TQuote
+) => {
+  return new Price(
+    base,
+    quote,
+    JSBI.multiply(
+      price.denominator,
+      JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(base.decimals))
+    ),
+    JSBI.multiply(
+      price.numerator,
+      JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(quote.decimals))
+    )
+  );
+};
+
+export const priceToFraction = (
+  price: Price<WrappedTokenInfo, WrappedTokenInfo>
+) => {
+  return price.asFraction
+    .multiply(
+      JSBI.exponentiate(
+        JSBI.BigInt(10),
+        JSBI.BigInt(price.baseCurrency.decimals)
+      )
+    )
+    .divide(
+      JSBI.exponentiate(
+        JSBI.BigInt(10),
+        JSBI.BigInt(price.quoteCurrency.decimals)
+      )
+    );
 };

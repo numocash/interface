@@ -18,7 +18,7 @@ import {
 import { useBeet } from "../../../../utils/beet";
 import {
   accruedLendgineInfo,
-  convertPositionToLiquidity,
+  liquidityPerPosition,
 } from "../../../../utils/Numoen/lendgineMath";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import { AssetSelection } from "../../../common/AssetSelection";
@@ -54,8 +54,13 @@ export const Withdraw: React.FC = () => {
       lendgineInfoQuery.data
     );
 
+    const liqPerPosition = liquidityPerPosition(
+      selectedLendgine,
+      updatedLendgineInfo
+    );
+
     const size = position.data.size.multiply(withdrawPercent).divide(100);
-    const liquidity = convertPositionToLiquidity({ size }, updatedLendgineInfo);
+    const liquidity = liqPerPosition.quote(size);
 
     const amount0 = updatedLendgineInfo.reserve0
       .multiply(liquidity)

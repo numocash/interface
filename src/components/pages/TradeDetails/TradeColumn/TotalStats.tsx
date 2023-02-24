@@ -3,11 +3,8 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
 import { useLendgines } from "../../../../hooks/useLendgine";
-import {
-  convertLiquidityToCollateral,
-  liquidityPerCollateral,
-} from "../../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../../utils/Numoen/price";
+import { liquidityPerCollateral } from "../../../../utils/Numoen/lendgineMath";
+import { numoenPrice, pricePerLiquidity } from "../../../../utils/Numoen/price";
 import { VerticalItem } from "../../../common/VerticalItem";
 import { useTradeDetails } from "../TradeDetailsInner";
 
@@ -25,11 +22,8 @@ export const TotalStats: React.FC = () => {
       // token0 / token1
       const price = numoenPrice(lendgine, cur);
 
-      // liq / token1
-      const liqPerCol = liquidityPerCollateral(lendgine);
-
       // token0 / liq
-      const liquidityPrice = liqPerCol.invert().multiply(price);
+      const liquidityPrice = pricePerLiquidity({ lendgine, price });
 
       const liquidity = cur.totalLiquidityBorrowed;
 
@@ -52,13 +46,10 @@ export const TotalStats: React.FC = () => {
       const liqPerCol = liquidityPerCollateral(lendgine);
 
       // token0 / liq
-      const liquidityPrice = liqPerCol.invert().multiply(price);
+      const liquidityPrice = pricePerLiquidity({ lendgine, price });
 
       // token1
-      const collateral = convertLiquidityToCollateral(
-        cur.totalLiquidityBorrowed,
-        lendgine
-      );
+      const collateral = liqPerCol.invert().quote(cur.totalLiquidityBorrowed);
 
       const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);
 

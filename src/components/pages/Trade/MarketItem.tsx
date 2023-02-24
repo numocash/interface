@@ -8,6 +8,7 @@ import {
   usePriceHistory,
 } from "../../../hooks/useExternalExchange";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import { priceToFraction } from "../../../utils/Numoen/price";
 import { TokenIcon } from "../../common/TokenIcon";
 import { Times } from "../TradeDetails/Chart/TimeSelector";
 import { MiniChart } from "./MiniChart";
@@ -49,7 +50,9 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
-    const f = currentPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice);
+    const f = priceToFraction(currentPrice)
+      .subtract(oneDayOldPrice)
+      .divide(oneDayOldPrice);
 
     return new Percent(f.numerator, f.denominator);
   }, [currentPrice, priceHistory]);

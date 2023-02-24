@@ -18,7 +18,7 @@ import { useBeet } from "../../../../../utils/beet";
 import {
   accruedLendgineInfo,
   accruedLendginePositionInfo,
-  convertPositionToLiquidity,
+  liquidityPerPosition,
 } from "../../../../../utils/Numoen/lendgineMath";
 import { AsyncButton } from "../../../../common/AsyncButton";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
@@ -60,16 +60,18 @@ export const PositionItem: React.FC<Props> = ({
         amount1: CurrencyAmount.fromRawAmount(lendgine.token1, 0),
       };
 
+    const liqPerPosition = liquidityPerPosition(lendgine, updatedLendgineInfo);
+
     const amount0 = updatedLendgineInfo.reserve0
-      .multiply(convertPositionToLiquidity(position, updatedLendgineInfo))
+      .multiply(liqPerPosition.quote(position.size))
       .divide(updatedLendgineInfo.totalLiquidity);
 
     const amount1 = updatedLendgineInfo.reserve1
-      .multiply(convertPositionToLiquidity(position, updatedLendgineInfo))
+      .multiply(liqPerPosition.quote(position.size))
       .divide(updatedLendgineInfo.totalLiquidity);
 
     return { amount0, amount1 };
-  }, [lendgine.token0, lendgine.token1, position, updatedLendgineInfo]);
+  }, [lendgine, position.size, updatedLendgineInfo]);
 
   const prepareCollect = usePrepareLiquidityManagerCollect({
     enabled: !!address,

@@ -1,13 +1,15 @@
 import { getAddress } from "@ethersproject/address";
-import type { Fraction, Token } from "@uniswap/sdk-core";
+import type { Price, Token } from "@uniswap/sdk-core";
+import { Fraction } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
 import type {
   MostLiquidV3Query,
   PriceHistoryDayV3Query,
   PriceHistoryHourV3Query,
-  PriceV3Query,
 } from "../../gql/uniswapV3/graphql";
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+import { fractionToPrice } from "../../utils/Numoen/price";
 import type { PricePoint } from "./uniswapV2";
 import { parsePriceHelper } from "./uniswapV2";
 
@@ -18,17 +20,15 @@ export type UniswapV3Pool = {
   feeTier: "100" | "500" | "3000" | "10000";
 };
 
-// returns null if the id used to query was not valid
-export const parsePriceV3 = (priceV3Query: PriceV3Query): Fraction | null =>
-  priceV3Query.pool
-    ? parsePriceHelper(parseFloat(priceV3Query.pool.token0Price))
-    : null;
-
 // TODO: is this sorting by how much token0 is locked or tvl in terms of token0
 export const parseMostLiquidV3 = (
   mostLiquidV3Query: MostLiquidV3Query,
-  tokens: readonly [Token, Token]
-): { pool: UniswapV3Pool; totalLiquidity: number; price: Fraction } | null =>
+  tokens: readonly [WrappedTokenInfo, WrappedTokenInfo]
+): {
+  pool: UniswapV3Pool;
+  totalLiquidity: number;
+  price: Price<WrappedTokenInfo, WrappedTokenInfo>;
+} | null =>
   mostLiquidV3Query.pools[0]
     ? {
         pool: {
@@ -41,8 +41,10 @@ export const parseMostLiquidV3 = (
         totalLiquidity: parseFloat(
           mostLiquidV3Query.pools[0].totalValueLockedToken0
         ),
-        price: parsePriceHelper(
-          parseFloat(mostLiquidV3Query.pools[0].token0Price)
+        price: fractionToPrice(
+          parsePriceHelper(parseFloat(mostLiquidV3Query.pools[0].token0Price)),
+          tokens[1],
+          tokens[0]
         ),
       }
     : null;
@@ -54,7 +56,10 @@ export const parsePriceHistoryHourV3 = (
   priceHistoryHourV3Query.pool
     ? priceHistoryHourV3Query.pool.poolHourData.map((d) => ({
         timestamp: d.periodStartUnix,
-        price: parsePriceHelper(parseFloat(d.token0Price)),
+        price: new Fraction(
+          Math.floor(parseFloat(d.token0Price) * 10 ** 9),
+          10 ** 9
+        ),
       }))
     : null;
 
@@ -65,6 +70,9 @@ export const parsePriceHistoryDayV3 = (
   priceHistoryDayV3Query.pool
     ? priceHistoryDayV3Query.pool.poolDayData.map((d) => ({
         timestamp: d.date,
-        price: parsePriceHelper(parseFloat(d.token0Price)),
+        price: new Fraction(
+          Math.floor(parseFloat(d.token0Price) * 10 ** 9),
+          10 ** 9
+        ),
       }))
     : null;

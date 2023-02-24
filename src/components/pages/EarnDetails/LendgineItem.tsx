@@ -32,7 +32,10 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
 
   const { apr, tvl, borrowValue, il, iv } = useMemo(() => {
     // token0 / liq
-    const liquidityPrice = pricePerLiquidity(lendgine, updatedInfo);
+    const liquidityPrice = pricePerLiquidity({
+      lendgine,
+      lendgineInfo: updatedInfo,
+    });
 
     // col / liq
     const collateralPrice = pricePerCollateral(lendgine, updatedInfo);

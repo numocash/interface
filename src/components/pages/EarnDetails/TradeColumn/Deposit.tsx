@@ -1,6 +1,5 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
-import { Price } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import { useCallback, useMemo, useState } from "react";
 import type { usePrepareContractWrite } from "wagmi";
@@ -19,9 +18,12 @@ import type { BeetStage } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
 import {
   accruedLendgineInfo,
-  convertLiquidityToPosition,
+  liquidityPerPosition,
 } from "../../../../utils/Numoen/lendgineMath";
-import { priceToReserves } from "../../../../utils/Numoen/price";
+import {
+  priceToFraction,
+  priceToReserves,
+} from "../../../../utils/Numoen/price";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
@@ -60,26 +62,22 @@ export const Deposit: React.FC = () => {
         lendgineInfo.data
       );
 
+      const liqPerPosition = liquidityPerPosition(
+        selectedLendgine,
+        updatedInfo
+      );
+
       if (lendgineInfo.data.totalLiquidity.equalTo(0)) {
         const { token0Amount, token1Amount } = priceToReserves(
           selectedLendgine,
-          new Price(
-            selectedLendgine.token1,
-            selectedLendgine.token0,
-            price.denominator,
-            price.numerator
-          )
+          price
         );
 
         const liquidity = parsedAmount.currency.equals(selectedLendgine.token0)
           ? token0Amount.invert().quote(parsedAmount)
           : token1Amount.invert().quote(parsedAmount);
 
-        const positionSize = convertLiquidityToPosition(
-          liquidity,
-          selectedLendgine,
-          updatedInfo
-        );
+        const positionSize = liqPerPosition.invert().quote(liquidity);
 
         const baseInputAmount = inverse
           ? token1Amount.quote(liquidity)
@@ -107,11 +105,7 @@ export const Deposit: React.FC = () => {
 
       const liquidity = updatedInfo.totalLiquidity.multiply(share);
 
-      const positionSize = convertLiquidityToPosition(
-        liquidity,
-        selectedLendgine,
-        updatedInfo
-      );
+      const positionSize = liqPerPosition.invert().quote(liquidity);
 
       // TODO: make sure the tokens are correct
       return {
@@ -124,8 +118,7 @@ export const Deposit: React.FC = () => {
       base,
       baseInput,
       lendgineInfo.data,
-      price.denominator,
-      price.numerator,
+      price,
       quote,
       quoteInput,
       selectedLendgine,
@@ -168,7 +161,7 @@ export const Deposit: React.FC = () => {
               token0Exp: BigNumber.from(selectedLendgine.token0.decimals),
               token1Exp: BigNumber.from(selectedLendgine.token1.decimals),
               upperBound: BigNumber.from(
-                selectedLendgine.bound.asFraction
+                priceToFraction(selectedLendgine.bound)
                   .multiply(scale)
                   .quotient.toString()
               ),
@@ -226,7 +219,7 @@ export const Deposit: React.FC = () => {
       liquidity,
       positionSize,
       quoteInputAmount,
-      selectedLendgine.bound.asFraction,
+      selectedLendgine.bound,
       selectedLendgine.token0,
       selectedLendgine.token1.address,
       selectedLendgine.token1.decimals,

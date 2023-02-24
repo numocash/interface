@@ -9,7 +9,7 @@ import type { Market } from "../../../hooks/useMarket";
 import { useMarketToLendgines } from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
-import { convertPositionToLiquidity } from "../../../utils/Numoen/lendgineMath";
+import { liquidityPerPosition } from "../../../utils/Numoen/lendgineMath";
 import { numoenPrice, pricePerLiquidity } from "../../../utils/Numoen/price";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
@@ -41,8 +41,11 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       const lendgineInfo = lendgineInfosQuery.data?.[i];
       invariant(lendgine && lendgineInfo);
       const price = numoenPrice(lendgine, lendgineInfo);
-      const liquidityPrice = pricePerLiquidity(lendgine, lendgineInfo);
-      const liquidity = convertPositionToLiquidity(cur, lendgineInfo);
+      const liquidityPrice = pricePerLiquidity({ lendgine, lendgineInfo });
+
+      const liqPerPosition = liquidityPerPosition(lendgine, lendgineInfo);
+
+      const liquidity = liqPerPosition.quote(cur.size);
       const value = liquidityPrice.quote(liquidity);
       return acc.add(
         market[0].equals(lendgine.token0) ? value : price.invert().quote(value)
@@ -75,7 +78,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       const price = numoenPrice(lendgine, cur);
 
       // token0 / liq
-      const liquidityPrice = pricePerLiquidity(lendgine, cur);
+      const liquidityPrice = pricePerLiquidity({ lendgine, lendgineInfo: cur });
 
       // liq
       const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);

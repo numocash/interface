@@ -1,4 +1,4 @@
-import type { Fraction } from "@uniswap/sdk-core";
+import type { Price } from "@uniswap/sdk-core";
 import { useState } from "react";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
@@ -23,7 +23,7 @@ interface Props {
   base: WrappedTokenInfo;
   quote: WrappedTokenInfo;
   lendgines: Lendgine[];
-  price: Fraction;
+  price: Price<WrappedTokenInfo, WrappedTokenInfo>;
 }
 
 interface IEarnDetails {
@@ -37,7 +37,7 @@ interface IEarnDetails {
   setClose: (val: boolean) => void;
 
   lendgines: readonly Lendgine[];
-  price: Fraction;
+  price: Price<WrappedTokenInfo, WrappedTokenInfo>;
 }
 
 const useEarnDetailsInternal = ({

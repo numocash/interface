@@ -21,11 +21,11 @@ export const Lendgines: React.FC = () => {
       const longLendgines = pickLongLendgines(lendgines, base);
       const shortLendgines = pickShortLendgines(lendgines, base);
       const longLendgine = nextHighestLendgine({
-        price: price.multiply(boundMultiple / 2),
+        price: price.asFraction.multiply(boundMultiple / 2),
         lendgines: longLendgines,
       });
       const shortLendgine = nextHighestLendgine({
-        price: price.invert().multiply(boundMultiple / 2),
+        price: price.invert().asFraction.multiply(boundMultiple / 2),
         lendgines: shortLendgines,
       });
 

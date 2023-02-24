@@ -20,10 +20,10 @@ import { useBeet } from "../../../../utils/beet";
 import { isLongLendgine } from "../../../../utils/lendgines";
 import { borrowRate } from "../../../../utils/Numoen/jumprate";
 import {
-  convertCollateralToLiquidity,
-  convertLiquidityToShare,
+  liquidityPerCollateral,
+  liquidityPerShare,
 } from "../../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../../utils/Numoen/price";
+import { numoenPrice, priceToFraction } from "../../../../utils/Numoen/price";
 import {
   determineBorrowAmount,
   ONE_HUNDRED_PERCENT,
@@ -36,7 +36,12 @@ import { useTradeDetails } from "../TradeDetailsInner";
 import { BuyStats } from "./BuyStats";
 
 export const Buy: React.FC = () => {
-  const { quote, base, selectedLendgine } = useTradeDetails();
+  const {
+    quote,
+    base,
+    selectedLendgine,
+    price: referencePrice,
+  } = useTradeDetails();
   const isLong = isLongLendgine(selectedLendgine, base);
   const Beet = useBeet();
   const { address } = useAccount();
@@ -56,52 +61,44 @@ export const Buy: React.FC = () => {
   // TODO: short funding rate is wrong
   const { borrowAmount, liquidity, shares, bRate } = useMemo(() => {
     if (selectedLendgineInfo.data?.totalLiquidity.equalTo(0)) return {};
-    const price = selectedLendgineInfo.data
-      ? numoenPrice(selectedLendgine, selectedLendgineInfo.data)
-      : null;
-    const borrowAmount =
-      price && parsedAmount
-        ? determineBorrowAmount(
-            parsedAmount,
-            selectedLendgine,
-            price,
-            settings.maxSlippagePercent
-          )
-        : null;
-    const liquidity =
-      borrowAmount && parsedAmount
-        ? convertCollateralToLiquidity(
-            borrowAmount.add(parsedAmount),
-            selectedLendgine
-          )
-        : null;
-    const shares =
-      liquidity && selectedLendgineInfo.data
-        ? convertLiquidityToShare(
-            liquidity,
-            selectedLendgine,
-            selectedLendgineInfo.data
-          )
-        : null;
+    if (!selectedLendgineInfo.data || !parsedAmount) return {};
 
-    const bRate = selectedLendgineInfo.data
-      ? borrowRate({
-          totalLiquidity: selectedLendgineInfo.data.totalLiquidity.subtract(
-            liquidity
-              ? liquidity
-              : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
-          ),
-          totalLiquidityBorrowed:
-            selectedLendgineInfo.data.totalLiquidityBorrowed.add(
-              liquidity
-                ? liquidity
-                : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
-            ),
-        })
-      : null;
+    const price = numoenPrice(selectedLendgine, selectedLendgineInfo.data);
+    const liqPerShare = liquidityPerShare(
+      selectedLendgine,
+      selectedLendgineInfo.data
+    );
+    const liqPerCol = liquidityPerCollateral(selectedLendgine);
+
+    const borrowAmount = determineBorrowAmount(
+      parsedAmount,
+      selectedLendgine,
+      selectedLendgineInfo.data,
+      referencePrice,
+      settings.maxSlippagePercent
+    );
+
+    const liquidity = liqPerCol.quote(borrowAmount.add(parsedAmount));
+
+    const shares = liqPerShare.invert().quote(liquidity);
+
+    const bRate = borrowRate({
+      totalLiquidity: selectedLendgineInfo.data.totalLiquidity.subtract(
+        liquidity
+          ? liquidity
+          : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
+      ),
+      totalLiquidityBorrowed:
+        selectedLendgineInfo.data.totalLiquidityBorrowed.add(
+          liquidity
+            ? liquidity
+            : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
+        ),
+    });
     return { price, borrowAmount, liquidity, shares, bRate };
   }, [
     parsedAmount,
+    referencePrice,
     selectedLendgine,
     selectedLendgineInfo.data,
     settings.maxSlippagePercent,
@@ -117,7 +114,7 @@ export const Buy: React.FC = () => {
               token0Exp: BigNumber.from(selectedLendgine.token0.decimals),
               token1Exp: BigNumber.from(selectedLendgine.token1.decimals),
               upperBound: BigNumber.from(
-                selectedLendgine.bound.asFraction
+                priceToFraction(selectedLendgine.bound)
                   .multiply(scale)
                   .quotient.toString()
               ),
@@ -130,8 +127,8 @@ export const Buy: React.FC = () => {
                   )
                   .quotient.toString()
               ),
-              swapType: 0,
-              swapExtraData: AddressZero,
+              swapType: 0, // TODO: use reference price
+              swapExtraData: AddressZero, // TODO: use reference price
               recipient: address,
               deadline: BigNumber.from(
                 Math.round(Date.now() / 1000) + settings.timeout * 60
@@ -143,7 +140,7 @@ export const Buy: React.FC = () => {
       address,
       borrowAmount,
       parsedAmount,
-      selectedLendgine.bound.asFraction,
+      selectedLendgine.bound,
       selectedLendgine.token0.address,
       selectedLendgine.token0.decimals,
       selectedLendgine.token1.address,

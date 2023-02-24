@@ -19,7 +19,6 @@ import { useLendgine } from "../../../../hooks/useLendgine";
 import type { BeetStage } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
 import {
-  convertShareToLiquidity,
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../utils/Numoen/lendgineMath";
@@ -98,10 +97,7 @@ export const Close: React.FC = () => {
       1
     );
 
-    const liquidityMinted = convertShareToLiquidity(
-      shares,
-      lendgineInfoQuery.data
-    );
+    const liquidityMinted = liqPerShare.quote(shares);
 
     const amount0 = liquidityMinted
       .multiply(lendgineInfoQuery.data.reserve0)

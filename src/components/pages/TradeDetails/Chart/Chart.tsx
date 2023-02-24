@@ -16,6 +16,7 @@ import {
   usePriceHistory,
 } from "../../../../hooks/useExternalExchange";
 import type { PricePoint } from "../../../../services/graphql/uniswapV2";
+import { priceToFraction } from "../../../../utils/Numoen/price";
 import { useTradeDetails } from "../TradeDetailsInner";
 import { EmptyChart } from "./EmptyChart";
 
@@ -52,7 +53,9 @@ export const Chart: React.FC = () => {
   const [displayPrice, setDisplayPrice] = useState<PricePoint | null>(null);
 
   const priceChange = useMemo(() => {
-    const secondPrice = displayPrice?.price ?? currentPrice;
+    const secondPrice =
+      displayPrice?.price ??
+      (currentPrice ? priceToFraction(currentPrice) : null);
     if (!secondPrice || !priceHistory) return null;
 
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;

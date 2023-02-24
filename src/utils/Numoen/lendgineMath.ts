@@ -1,4 +1,4 @@
-import { CurrencyAmount, Price } from "@uniswap/sdk-core";
+import { CurrencyAmount, Fraction, Price } from "@uniswap/sdk-core";
 
 import type {
   Lendgine,
@@ -6,108 +6,42 @@ import type {
   LendginePosition,
 } from "../../constants/types";
 import { borrowRate } from "./jumprate";
-
-export const convertLiquidityToShare = <L extends Lendgine>(
-  liquidity: CurrencyAmount<L["lendgine"]>,
-  lendgine: L,
-  lendgineInfo: LendgineInfo<L>
-) => {
-  if (lendgineInfo.totalLiquidityBorrowed.equalTo(0))
-    return CurrencyAmount.fromRawAmount(lendgine.lendgine, 0);
-  return liquidity.multiply(
-    lendgineInfo.totalSupply.divide(lendgineInfo.totalLiquidityBorrowed)
-  );
-};
-
-export const convertShareToLiquidity = <L extends Lendgine>(
-  shares: CurrencyAmount<L["lendgine"]>,
-  lendgineInfo: LendgineInfo<L>
-) => {
-  return lendgineInfo.totalLiquidityBorrowed
-    .multiply(shares)
-    .divide(lendgineInfo.totalSupply);
-};
-
-export const convertCollateralToLiquidity = <L extends Lendgine>(
-  collateral: CurrencyAmount<L["token1"]>,
-  lendgine: L
-) => {
-  const f = collateral.divide(lendgine.bound.asFraction.multiply(2));
-  return CurrencyAmount.fromFractionalAmount(
-    lendgine.lendgine,
-    f.numerator,
-    f.denominator
-  );
-};
-
-export const convertLiquidityToCollateral = <L extends Lendgine>(
-  liquidity: CurrencyAmount<L["lendgine"]>,
-  lendgine: L
-) => {
-  const f = liquidity.multiply(lendgine.bound.asFraction.multiply(2));
-  return CurrencyAmount.fromFractionalAmount(
-    lendgine.token1,
-    f.numerator,
-    f.denominator
-  );
-};
-
-export const convertLiquidityToPosition = <L extends Lendgine>(
-  liquidity: CurrencyAmount<L["lendgine"]>,
-  lendgine: L,
-  lendgineInfo: LendgineInfo<L>
-): CurrencyAmount<L["lendgine"]> => {
-  const totalLiquiditySupplied = lendgineInfo.totalLiquidityBorrowed.add(
-    lendgineInfo.totalLiquidity
-  );
-  if (totalLiquiditySupplied.equalTo(0))
-    return CurrencyAmount.fromRawAmount(lendgine.lendgine, 0);
-  return lendgineInfo.totalPositionSize
-    .multiply(liquidity)
-    .divide(totalLiquiditySupplied);
-};
-
-export const convertPositionToLiquidity = <L extends Lendgine>(
-  position: Pick<LendginePosition<L>, "size">,
-  lendgineInfo: LendgineInfo<L>
-) => {
-  const totalLiquiditySupplied = lendgineInfo.totalLiquidityBorrowed.add(
-    lendgineInfo.totalLiquidity
-  );
-  return totalLiquiditySupplied
-    .multiply(position.size)
-    .divide(lendgineInfo.totalPositionSize);
-};
+import { fractionToPrice, priceToFraction } from "./price";
 
 export const liquidityPerShare = <L extends Lendgine>(
   lendgine: L,
   lendgineInfo: LendgineInfo<L>
 ) => {
-  const share = CurrencyAmount.fromRawAmount(lendgine.lendgine, 1);
-  const liquidity = convertShareToLiquidity(share, lendgineInfo);
-
-  return new Price({ baseAmount: share, quoteAmount: liquidity });
+  if (lendgineInfo.totalSupply.equalTo(0))
+    return fractionToPrice(
+      new Fraction(1, 1),
+      lendgine.lendgine,
+      lendgine.lendgine
+    );
+  const f = lendgineInfo.totalLiquidity.divide(lendgineInfo.totalSupply);
+  return fractionToPrice(f, lendgine.lendgine, lendgine.lendgine);
 };
 
 export const liquidityPerCollateral = <L extends Lendgine>(lendgine: L) => {
-  const collateral = CurrencyAmount.fromRawAmount(lendgine.token1, 1);
-  const liquidity = convertCollateralToLiquidity(collateral, lendgine);
-
-  return new Price({ baseAmount: collateral, quoteAmount: liquidity });
+  const f = new Fraction(1).divide(priceToFraction(lendgine.bound).multiply(2));
+  return fractionToPrice(f, lendgine.token1, lendgine.lendgine);
 };
 
 export const liquidityPerPosition = <L extends Lendgine>(
   lendgine: L,
   lendgineInfo: LendgineInfo<L>
 ) => {
-  const position = CurrencyAmount.fromRawAmount(lendgine.lendgine, 1);
-
-  const liquidity = convertPositionToLiquidity(
-    { size: position },
-    lendgineInfo
+  const totalLiquiditySupplied = lendgineInfo.totalLiquidityBorrowed.add(
+    lendgineInfo.totalLiquidity
   );
-
-  return new Price({ baseAmount: position, quoteAmount: liquidity });
+  if (lendgineInfo.totalPositionSize.equalTo(0))
+    return fractionToPrice(
+      new Fraction(1, 1),
+      lendgine.lendgine,
+      lendgine.lendgine
+    );
+  const f = totalLiquiditySupplied.divide(lendgineInfo.totalPositionSize);
+  return fractionToPrice(f, lendgine.lendgine, lendgine.lendgine);
 };
 
 export const accruedLendgineInfo = <L extends Lendgine>(
@@ -134,7 +68,9 @@ export const accruedLendgineInfo = <L extends Lendgine>(
     ? lendgineInfo.totalLiquidityBorrowed
     : dilutionLPRequested;
 
-  const dilutionToken1 = convertLiquidityToCollateral(dilutionLP, lendgine);
+  const liqPerCol = liquidityPerCollateral(lendgine);
+
+  const dilutionToken1 = liqPerCol.invert().quote(dilutionLP);
 
   const f = lendgineInfo.rewardPerPositionStored.add(
     dilutionToken1.divide(lendgineInfo.totalPositionSize)

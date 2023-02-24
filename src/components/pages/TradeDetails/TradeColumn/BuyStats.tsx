@@ -71,7 +71,7 @@ export const BuyStats: React.FC<Props> = ({ borrowRate }: Props) => {
           {(isInverse
             ? selectedLendgine.bound.invert()
             : selectedLendgine.bound
-          ).asFraction.toSignificant(5, {
+          ).toSignificant(5, {
             groupSeparator: ",",
           })}
         </div>

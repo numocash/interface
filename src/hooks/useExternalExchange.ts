@@ -1,6 +1,6 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
-import type { Fraction } from "@uniswap/sdk-core";
+import type { Price } from "@uniswap/sdk-core";
 import invariant from "tiny-invariant";
 
 import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
@@ -37,6 +37,7 @@ import {
 import type { HookArg } from "./useBalance";
 import { useClient } from "./useClient";
 import type { Market } from "./useMarket";
+import type { WrappedTokenInfo } from "./useTokens2";
 
 const isV3 = (t: UniswapV2Pool | UniswapV3Pool): t is UniswapV3Pool =>
   "feeTier" in t;
@@ -51,7 +52,7 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
 
   return useQuery<{
     pool: UniswapV2Pool | UniswapV3Pool;
-    price: Fraction;
+    price: Price<WrappedTokenInfo, WrappedTokenInfo>;
   } | null>(
     ["query liquidity", sortedTokens],
     async () => {

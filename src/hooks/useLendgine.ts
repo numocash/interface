@@ -22,6 +22,7 @@ import {
 import { LendginesDocument } from "../gql/numoen/graphql";
 import type { RawLendgine } from "../services/graphql/numoen";
 import { parseLendgines } from "../services/graphql/numoen";
+import { fractionToPrice } from "../utils/Numoen/price";
 import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
@@ -449,12 +450,7 @@ export const useAllLendgines = () => {
           token1,
           token0Exp: ld.token0Exp,
           token1Exp: ld.token1Exp,
-          bound: new Price(
-            token0,
-            token1,
-            ld.upperBound.denominator,
-            ld.upperBound.numerator
-          ),
+          bound: fractionToPrice(ld.upperBound, token1, token0),
           lendgine: new Token(chainID, ld.address, 18),
           address: ld.address,
         };
