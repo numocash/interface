@@ -113,7 +113,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
     >
       <Wrapper positionValue={positionValue}>
         <div tw="flex items-center gap-3 col-span-2">
-          <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-gray-200 px-2 py-1">
+          <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-secondary px-2 py-1">
             <TokenIcon token={market[1]} size={32} />
             <TokenIcon token={market[0]} size={32} />
           </div>
@@ -130,7 +130,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
             {bestSupplyRate ? (
               formatPercent(bestSupplyRate)
             ) : (
-              <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-12" />
+              <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-secondary h-6 w-12" />
             )}
           </p>
         </div>
@@ -141,7 +141,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
             {tvl ? (
               <TokenAmountDisplay amount={tvl} showSymbol />
             ) : (
-              <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-20" />
+              <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-secondary h-6 w-20" />
             )}
           </p>
         </div>
@@ -161,8 +161,8 @@ const Wrapper: React.FC<WrapperProps> = ({
   children,
 }: WrapperProps) => {
   return positionValue?.greaterThan(0) ? (
-    <div tw="rounded-xl w-full border-2 transform ease-in-out hover:scale-110 duration-300 bg-gray-200">
-      <div tw="py-2 px-4 gap-4 flex flex-col bg-white rounded-t-xl">
+    <div tw="rounded-xl w-full border-2  border-secondary  ease-in-out hover:scale-110 duration-300 bg-secondary">
+      <div tw="py-2 px-4 gap-4 flex flex-col bg-background rounded-t-xl">
         {children}
       </div>
       <div tw="w-full overflow-hidden">
@@ -173,7 +173,7 @@ const Wrapper: React.FC<WrapperProps> = ({
       </div>
     </div>
   ) : (
-    <div tw="rounded-xl w-full border-2 transform ease-in-out hover:scale-110 duration-300 flex py-2 px-4 gap-4 flex-col">
+    <div tw="rounded-xl w-full border-2 border-secondary transform ease-in-out hover:scale-110 duration-300 flex py-2 px-4 gap-4 flex-col">
       {children}
     </div>
   );

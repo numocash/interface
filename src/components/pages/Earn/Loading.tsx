@@ -2,14 +2,14 @@ import tw, { styled } from "twin.macro";
 
 export const Loading: React.FC = () => {
   return (
-    <div tw="grid grid-cols-3 gap-4 w-full">
-      {[...Array(20).keys()].map((i) => (
+    <>
+      {[...Array(10).keys()].map((i) => (
         <Item key={i} />
       ))}
-    </div>
+    </>
   );
 };
 
 const Item = styled.div(() => [
-  tw`flex bg-gray-200 rounded-xl h-[180px] w-[288px] animate-pulse `,
+  tw` rounded-xl bg-secondary transform ease-in-out hover:scale-110 duration-300 flex py-2 px-4 gap-4 flex-col  h-[180px] w-[288px] animate-pulse `,
 ]);
