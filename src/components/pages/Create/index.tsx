@@ -1,5 +1,6 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
+import { useQueryClient } from "@tanstack/react-query";
 import { Fraction } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
@@ -17,6 +18,7 @@ import { useAllLendgines } from "../../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { useDefaultTokenList } from "../../../hooks/useTokens2";
 import { useBeet } from "../../../utils/beet";
+import { priceToFraction } from "../../../utils/Numoen/price";
 import { scale } from "../../../utils/Numoen/trade";
 import { AsyncButton } from "../../common/AsyncButton";
 import { Plus } from "../../common/Plus";
@@ -25,6 +27,7 @@ import { TokenSelection } from "../../common/TokenSelection";
 
 export const Create: React.FC = () => {
   const Beet = useBeet();
+  const queryClient = useQueryClient();
   const [specToken, setSpecToken] = useState<WrappedTokenInfo | undefined>(
     undefined
   );
@@ -101,7 +104,7 @@ export const Create: React.FC = () => {
         ? `One token must be ${
             environment.interface.wrappedNative.symbol ?? ""
           } or ${environment.interface.stablecoin.symbol ?? ""}`
-        : currentPrice.greaterThan(bound)
+        : priceToFraction(currentPrice).greaterThan(bound)
         ? "Bound can't be below current price"
         : lendgines.find(
             (l) =>
@@ -203,6 +206,7 @@ export const Create: React.FC = () => {
           setSpecToken(undefined);
           setBaseToken(undefined);
           setBound(new Fraction(1));
+          await queryClient.invalidateQueries(["exisiting lendgines"]); // lendgines will be refetched, hopefully with our new one
         }}
       >
         {disableReason ?? "Create new market"}

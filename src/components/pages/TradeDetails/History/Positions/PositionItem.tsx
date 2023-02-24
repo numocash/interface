@@ -6,7 +6,11 @@ import {
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../../../utils/Numoen/price";
+import {
+  invert,
+  numoenPrice,
+  pricePerLiquidity,
+} from "../../../../../utils/Numoen/price";
 import { useTradeDetails } from "../../TradeDetailsInner";
 
 type Props<L extends Lendgine = Lendgine> = {
@@ -28,19 +32,28 @@ export const PositionItem: React.FC<Props> = ({
     // token0 / token1
     const price = numoenPrice(lendgine, lendgineInfo);
 
-    // liq / token1
-    const liqPerCol = liquidityPerCollateral(lendgine);
+    // token0 / liq
+    const liquidityPrice = pricePerLiquidity({ lendgine, price });
 
     // liq / share
     const liqPerShare = liquidityPerShare(lendgine, lendgineInfo);
 
-    // token0 / share
-    const sharePrice = liqPerShare.multiply(liqPerCol.invert().multiply(price));
+    // liq
+    const liquidity = liqPerShare.quote(balance);
 
     // token0
-    const value = sharePrice.quote(balance);
+    const liquidityDebt = liquidityPrice.quote(liquidity);
 
-    return isInverse ? value.divide(price) : value;
+    // liq / token1
+    const liqPerCol = liquidityPerCollateral(lendgine);
+
+    // token0
+    const collateralValue = price.quote(liqPerCol.invert().quote(liquidity));
+
+    // token0
+    const value = collateralValue.subtract(liquidityDebt);
+
+    return isInverse ? invert(price).quote(value) : value;
   }, [balance, isInverse, lendgine, lendgineInfo]);
   return (
     <div
@@ -49,10 +62,9 @@ export const PositionItem: React.FC<Props> = ({
     >
       <p tw="font-semibold pl-4 col-span-2">{symbol}</p>
       <p tw="justify-self-start col-span-2">
-        {(isInverse
-          ? lendgine.bound.asFraction.invert()
-          : lendgine.bound.asFraction
-        ).toSignificant(5)}
+        {(isInverse ? lendgine.bound.invert() : lendgine.bound).toSignificant(
+          5
+        )}
       </p>
 
       <p tw="justify-self-start col-span-2">

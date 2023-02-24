@@ -194,3 +194,11 @@ export const priceToFraction = (
       )
     );
 };
+
+export const invert = <TBase extends Token, TQuote extends Token>(
+  price: Price<TBase, TQuote>
+) => {
+  if (price.equalTo(0))
+    return new Price(price.quoteCurrency, price.baseCurrency, 1, 0);
+  return price.invert();
+};

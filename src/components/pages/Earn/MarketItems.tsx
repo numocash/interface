@@ -10,7 +10,11 @@ import { useMarketToLendgines } from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
 import { liquidityPerPosition } from "../../../utils/Numoen/lendgineMath";
-import { numoenPrice, pricePerLiquidity } from "../../../utils/Numoen/price";
+import {
+  invert,
+  numoenPrice,
+  pricePerLiquidity,
+} from "../../../utils/Numoen/price";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
 import { TokenIcon } from "../../common/TokenIcon";
@@ -48,7 +52,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       const liquidity = liqPerPosition.quote(cur.size);
       const value = liquidityPrice.quote(liquidity);
       return acc.add(
-        market[0].equals(lendgine.token0) ? value : price.invert().quote(value)
+        market[0].equals(lendgine.token0) ? value : invert(price).quote(value)
       );
     }, CurrencyAmount.fromRawAmount(market[0], 0));
   }, [
@@ -74,14 +78,15 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
     const tvl = lendgineInfosQuery.data.reduce((acc, cur, i) => {
       const lendgine = lendgines?.[i];
       invariant(lendgine);
+
+      // liq
+      const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);
+
       // token0 / token1
       const price = numoenPrice(lendgine, cur);
 
       // token0 / liq
       const liquidityPrice = pricePerLiquidity({ lendgine, lendgineInfo: cur });
-
-      // liq
-      const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);
 
       // token0
       const liquidityValue = liquidityPrice.quote(liquidity);
@@ -89,7 +94,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       return (
         lendgine.token0.equals(market[0])
           ? liquidityValue
-          : price.invert().quote(liquidityValue)
+          : invert(price).quote(liquidityValue)
       ).add(acc);
     }, CurrencyAmount.fromRawAmount(market[0], 0));
     return { bestSupplyRate, tvl };

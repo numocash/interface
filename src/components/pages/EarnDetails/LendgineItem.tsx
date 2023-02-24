@@ -5,6 +5,7 @@ import type { Lendgine, LendgineInfo } from "../../../constants/types";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
 import { accruedLendgineInfo } from "../../../utils/Numoen/lendgineMath";
 import {
+  invert,
   lvrCoef,
   numoenPrice,
   pricePerCollateral,
@@ -62,8 +63,8 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
     const iv = apr.divide(lvr);
     return {
       apr,
-      tvl: inverse ? price.invert().quote(tvl) : tvl,
-      borrowValue: inverse ? price.invert().quote(borrowValue) : borrowValue,
+      tvl: inverse ? invert(price).quote(tvl) : tvl,
+      borrowValue: inverse ? invert(price).quote(borrowValue) : borrowValue,
       il,
       iv,
     };

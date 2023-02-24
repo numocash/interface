@@ -23,7 +23,11 @@ import {
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../utils/Numoen/lendgineMath";
-import { numoenPrice, priceToFraction } from "../../../../utils/Numoen/price";
+import {
+  invert,
+  numoenPrice,
+  priceToFraction,
+} from "../../../../utils/Numoen/price";
 import {
   determineBorrowAmount,
   ONE_HUNDRED_PERCENT,
@@ -61,7 +65,7 @@ export const Buy: React.FC = () => {
   // TODO: short funding rate is wrong
   const { borrowAmount, liquidity, shares, bRate } = useMemo(() => {
     if (selectedLendgineInfo.data?.totalLiquidity.equalTo(0)) return {};
-    if (!selectedLendgineInfo.data || !parsedAmount) return {};
+    if (!selectedLendgineInfo.data) return {};
 
     const price = numoenPrice(selectedLendgine, selectedLendgineInfo.data);
     const liqPerShare = liquidityPerShare(
@@ -70,17 +74,28 @@ export const Buy: React.FC = () => {
     );
     const liqPerCol = liquidityPerCollateral(selectedLendgine);
 
-    const borrowAmount = determineBorrowAmount(
-      parsedAmount,
-      selectedLendgine,
-      selectedLendgineInfo.data,
-      referencePrice,
-      settings.maxSlippagePercent
-    );
+    const borrowAmount = parsedAmount
+      ? determineBorrowAmount(
+          parsedAmount,
+          selectedLendgine,
+          selectedLendgineInfo.data,
+          base.equals(selectedLendgine.token0)
+            ? referencePrice
+            : invert(referencePrice),
+          settings.maxSlippagePercent
+        )
+      : undefined;
 
-    const liquidity = liqPerCol.quote(borrowAmount.add(parsedAmount));
+    const liquidity =
+      borrowAmount && parsedAmount
+        ? liqPerCol.quote(borrowAmount.add(parsedAmount))
+        : undefined;
 
-    const shares = liqPerShare.invert().quote(liquidity);
+    const shares = liquidity
+      ? liqPerShare.invert().quote(liquidity)
+      : undefined;
+
+    console.log("yq", borrowAmount?.toSignificant(5));
 
     const bRate = borrowRate({
       totalLiquidity: selectedLendgineInfo.data.totalLiquidity.subtract(
@@ -95,8 +110,10 @@ export const Buy: React.FC = () => {
             : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
         ),
     });
+
     return { price, borrowAmount, liquidity, shares, bRate };
   }, [
+    base,
     parsedAmount,
     referencePrice,
     selectedLendgine,

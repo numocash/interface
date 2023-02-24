@@ -28,12 +28,15 @@ export const determineBorrowAmount = (
     .invert()
     .quote(token0Amount.quote(userLiquidity))
     .multiply(ONE_HUNDRED_PERCENT.subtract(slippageBps));
+  // TODO: problem here on inverse markets
 
   const userLiquidityValue = userAmount.subtract(
     token1Amount.quote(userLiquidity).add(expectedSwapOutput)
   );
 
-  const multiple = userAmount.divide(userLiquidityValue).asFraction.subtract(1);
+  const multiple = userAmount.divide(
+    userAmount.subtract(userLiquidityValue)
+  ).asFraction;
 
   return userAmount.multiply(multiple);
 };

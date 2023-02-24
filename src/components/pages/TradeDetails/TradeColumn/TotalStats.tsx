@@ -4,7 +4,11 @@ import invariant from "tiny-invariant";
 
 import { useLendgines } from "../../../../hooks/useLendgine";
 import { liquidityPerCollateral } from "../../../../utils/Numoen/lendgineMath";
-import { numoenPrice, pricePerLiquidity } from "../../../../utils/Numoen/price";
+import {
+  invert,
+  numoenPrice,
+  pricePerLiquidity,
+} from "../../../../utils/Numoen/price";
 import { VerticalItem } from "../../../common/VerticalItem";
 import { useTradeDetails } from "../TradeDetailsInner";
 
@@ -33,7 +37,7 @@ export const TotalStats: React.FC = () => {
       return (
         lendgine.token0.equals(base)
           ? liquidityValue
-          : price.invert().quote(liquidityValue)
+          : invert(price).quote(liquidityValue)
       ).add(acc);
     }, CurrencyAmount.fromRawAmount(base, 0));
 
@@ -59,7 +63,7 @@ export const TotalStats: React.FC = () => {
       return (
         lendgine.token0.equals(base)
           ? liquidityValue.add(collateralValue)
-          : price.invert().quote(liquidityValue.add(collateralValue))
+          : invert(price).quote(liquidityValue.add(collateralValue))
       ).add(acc);
     }, CurrencyAmount.fromRawAmount(base, 0));
 

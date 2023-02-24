@@ -20,6 +20,7 @@ import {
   accruedLendgineInfo,
   liquidityPerPosition,
 } from "../../../../utils/Numoen/lendgineMath";
+import { priceToFraction } from "../../../../utils/Numoen/price";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
@@ -100,7 +101,7 @@ export const Withdraw: React.FC = () => {
               token0Exp: BigNumber.from(selectedLendgine.token0.decimals),
               token1Exp: BigNumber.from(selectedLendgine.token1.decimals),
               upperBound: BigNumber.from(
-                selectedLendgine.bound.asFraction
+                priceToFraction(selectedLendgine.bound)
                   .multiply(scale)
                   .quotient.toString()
               ),
@@ -140,7 +141,7 @@ export const Withdraw: React.FC = () => {
       base,
       baseAmount,
       quoteAmount,
-      selectedLendgine.bound.asFraction,
+      selectedLendgine.bound,
       selectedLendgine.token0,
       selectedLendgine.token1.address,
       selectedLendgine.token1.decimals,

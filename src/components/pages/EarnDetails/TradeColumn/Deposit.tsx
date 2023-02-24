@@ -1,6 +1,5 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
-import JSBI from "jsbi";
 import { useCallback, useMemo, useState } from "react";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
@@ -21,6 +20,7 @@ import {
   liquidityPerPosition,
 } from "../../../../utils/Numoen/lendgineMath";
 import {
+  invert,
   priceToFraction,
   priceToReserves,
 } from "../../../../utils/Numoen/price";
@@ -70,7 +70,7 @@ export const Deposit: React.FC = () => {
       if (lendgineInfo.data.totalLiquidity.equalTo(0)) {
         const { token0Amount, token1Amount } = priceToReserves(
           selectedLendgine,
-          price
+          inverse ? invert(price) : price
         );
 
         const liquidity = parsedAmount.currency.equals(selectedLendgine.token0)
@@ -78,6 +78,7 @@ export const Deposit: React.FC = () => {
           : token1Amount.invert().quote(parsedAmount);
 
         const positionSize = liqPerPosition.invert().quote(liquidity);
+        console.log("yq", positionSize.toSignificant(5));
 
         const baseInputAmount = inverse
           ? token1Amount.quote(liquidity)
@@ -106,6 +107,7 @@ export const Deposit: React.FC = () => {
       const liquidity = updatedInfo.totalLiquidity.multiply(share);
 
       const positionSize = liqPerPosition.invert().quote(liquidity);
+      console.log("yq", positionSize.toSignificant(5));
 
       // TODO: make sure the tokens are correct
       return {
@@ -166,7 +168,7 @@ export const Deposit: React.FC = () => {
                   .quotient.toString()
               ),
               liquidity: BigNumber.from(
-                JSBI.subtract(liquidity.quotient, JSBI.BigInt(10)).toString()
+                liquidity.multiply(999999).divide(1000000).quotient.toString()
               ),
               amount0Min: BigNumber.from(
                 (base.equals(selectedLendgine.token0)

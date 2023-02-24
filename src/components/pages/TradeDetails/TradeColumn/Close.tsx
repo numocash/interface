@@ -22,7 +22,12 @@ import {
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../../utils/Numoen/price";
+import {
+  invert,
+  numoenPrice,
+  pricePerLiquidity,
+  priceToFraction,
+} from "../../../../utils/Numoen/price";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
@@ -70,8 +75,10 @@ export const Close: React.FC = () => {
     // token0 / token1
     const price = numoenPrice(selectedLendgine, lendgineInfoQuery.data);
 
-    // liq / token1
-    const liqPerCol = liquidityPerCollateral(selectedLendgine);
+    const liquidityPrice = pricePerLiquidity({
+      lendgine: selectedLendgine,
+      price,
+    });
 
     // liq / share
     const liqPerShare = liquidityPerShare(
@@ -79,17 +86,25 @@ export const Close: React.FC = () => {
       lendgineInfoQuery.data
     );
 
-    // token0 / share
-    const sharePrice = liqPerShare.multiply(liqPerCol.invert().multiply(price));
+    // liq / token1
+    const liqPerCol = liquidityPerCollateral(selectedLendgine);
 
-    const sharePriceToken1 = sharePrice.multiply(price.invert());
+    const liquidity = liqPerShare.quote(balanceQuery.data);
 
     // token0
-    const value = sharePrice.quote(balanceQuery.data);
+    const liquidityDebt = liquidityPrice.quote(liquidity);
+
+    // token0
+    const collateralValue = price.quote(liqPerCol.invert().quote(liquidity));
+
+    // token1
+    const value = invert(price).quote(collateralValue.subtract(liquidityDebt));
 
     if (!parsedAmount) return { value };
 
-    const sharesFraction = parsedAmount.divide(sharePriceToken1);
+    const sharesFraction = parsedAmount
+      .multiply(balanceQuery.data)
+      .divide(value);
 
     const shares = CurrencyAmount.fromFractionalAmount(
       selectedLendgine.lendgine,
@@ -130,7 +145,7 @@ export const Close: React.FC = () => {
               token0Exp: BigNumber.from(selectedLendgine.token0.decimals),
               token1Exp: BigNumber.from(selectedLendgine.token1.decimals),
               upperBound: BigNumber.from(
-                selectedLendgine.bound.asFraction
+                priceToFraction(selectedLendgine.bound)
                   .multiply(scale)
                   .quotient.toString()
               ),
@@ -170,7 +185,7 @@ export const Close: React.FC = () => {
       amount0,
       amount1,
       parsedAmount,
-      selectedLendgine.bound.asFraction,
+      selectedLendgine.bound,
       selectedLendgine.token0.address,
       selectedLendgine.token0.decimals,
       selectedLendgine.token1.address,
