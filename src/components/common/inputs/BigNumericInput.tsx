@@ -59,21 +59,28 @@ const StyledInput = styled.input<{
   hasBackground?: boolean;
   disabled?: boolean;
 }>`
-  ${tw`border text-default`}
-  // color: ${({ theme }) => theme.colors.text.bold};
+  outline: none;
+  &::active {
+    border: none;
+    outline: none;
+  }
+  border: none;
+  width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+
+  ${tw` text-default`}
+
   font-weight: 400;
   font-size: 24px;
-  &:disabled {
-    color: ${({ theme }) => theme.colors.text.default};
-  }
+
   &::placeholder {
     color: #888;
   }
-  padding-right: 8px;
-  padding-left: 2px;
-  &:focus {
-    outline: none;
-  }
+
+  padding: 0px;
 
   ${(props) => !!props.disabled && tw`bg-gray-100 `}
 

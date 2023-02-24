@@ -72,9 +72,9 @@ export const TradeColumn: React.FC = () => {
           <div key={s.address}>
             <button
               css={css`
-                ${tw`text-xl font-semibold text-secondary`}
-                ${tw`hover:(text-default) transform duration-300 ease-in-out`}
-                ${isLong === selectedLong && tw`text-default`}
+                ${tw`text-xl font-semibold rounded-lg text-secondary `}
+                ${tw`hover:(text-headline) transform duration-300 ease-in-out`}
+                ${isLong === selectedLong && tw`text-headline`}
               `}
               onClick={() => {
                 setSelectedLendgine(s);
@@ -94,13 +94,13 @@ export const TradeColumn: React.FC = () => {
       <ProvideLiquidity />
       {!close && (
         <>
-          <div tw="w-full border-b-2 border-gray-200" />
+          <div tw="w-full border-b-2 border-stroke" />
           <Returns />
         </>
       )}
-      <div tw="w-full border-b-2 border-gray-200" />
+      <div tw="w-full border-b-2 border-stroke" />
       <TotalStats />
-      <div tw="w-full border-b-2 border-gray-200" />
+      <div tw="w-full border-b-2 border-stroke" />
       <Config />
     </div>
   );

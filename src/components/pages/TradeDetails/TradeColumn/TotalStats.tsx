@@ -9,6 +9,7 @@ import {
   numoenPrice,
   pricePerLiquidity,
 } from "../../../../utils/Numoen/price";
+import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../common/VerticalItem";
 import { useTradeDetails } from "../TradeDetailsInner";
 
@@ -77,12 +78,9 @@ export const TotalStats: React.FC = () => {
         label="Open interest"
         item={
           !openInterest ? (
-            <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-8 w-20" />
+            <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-secondary h-8 w-20" />
           ) : (
-            <>
-              {openInterest.toSignificant(5)}{" "}
-              <span tw="text-xs font-normal">{base.symbol}</span>
-            </>
+            <TokenAmountDisplay amount={openInterest} showSymbol />
           )
         }
       />
@@ -91,12 +89,9 @@ export const TotalStats: React.FC = () => {
         label="Total value locked"
         item={
           !tvl ? (
-            <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-8 w-20" />
+            <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-secondary h-8 w-20" />
           ) : (
-            <>
-              {tvl.toSignificant(5)}{" "}
-              <span tw="text-xs font-normal">{base.symbol}</span>
-            </>
+            <TokenAmountDisplay amount={tvl} showSymbol />
           )
         }
       />

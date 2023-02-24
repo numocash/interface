@@ -104,7 +104,7 @@ export const AssetSelection = ({
                     }
                   >
                     <TokenAmountDisplay
-                      tw="text-default "
+                      tw="text-paragraph "
                       amount={
                         currentAmount.amount ??
                         CurrencyAmount.fromRawAmount(selectedValue, 0)

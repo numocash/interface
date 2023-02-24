@@ -21,8 +21,8 @@ export const TimeSelector: React.FC = () => {
               <button
                 css={css`
                   ${tw`grid font-semibold rounded justify-items-center text-secondary`}
-                  ${tw`hover:(text-default) transform duration-300 ease-in-out`}
-            ${timeframe === s && tw`text-default`}
+                  ${tw`hover:(text-headline) transform duration-300 ease-in-out`}
+            ${timeframe === s && tw`text-headline`}
                 `}
                 onClick={() => setTimeframe(s)}
               >

@@ -8,6 +8,7 @@ import { useLendgines, useLendginesPosition } from "../../../hooks/useLendgine";
 import type { Market } from "../../../hooks/useMarket";
 import { useMarketToLendgines } from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import { formatPercent } from "../../../utils/format";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
 import { liquidityPerPosition } from "../../../utils/Numoen/lendgineMath";
 import {
@@ -127,7 +128,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
           <p tw="text-sm text-secondary">Best APR</p>
           <p tw="text-default font-bold">
             {bestSupplyRate ? (
-              bestSupplyRate.toFixed(1) + "%"
+              formatPercent(bestSupplyRate)
             ) : (
               <div tw="rounded-lg transform ease-in-out duration-300 animate-pulse bg-gray-100 h-6 w-12" />
             )}

@@ -1,14 +1,18 @@
+import tw, { styled } from "twin.macro";
+
 export const Loading: React.FC = () => {
   return (
     <>
       {[...Array(20).keys()].map((i) => (
-        <div key={i} tw="gap-2 flex flex-col">
-          {i !== 0 && (
-            <div tw="w-full flex justify-self-center border-b-2 border-gray-200" />
-          )}
-          <div tw="w-full h-14 duration-300 animate-pulse bg-gray-300 rounded-xl" />
+        <div key={i} tw="gap-2 flex flex-col w-full">
+          {i !== 0 && <Divider />}
+          <div tw="w-full h-14 duration-300 animate-pulse bg-secondary rounded-xl" />
         </div>
       ))}
     </>
   );
 };
+
+export const Divider = styled.div(() => [
+  tw`flex mx-6 border-b-2 border-stroke`,
+]);

@@ -2,6 +2,7 @@ import type { Percent } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
+import { formatPercent, formatPrice } from "../../../../utils/format";
 import {
   isLongLendgine,
   pickLongLendgines,
@@ -46,7 +47,7 @@ export const BuyStats: React.FC<Props> = ({ borrowRate }: Props) => {
   return (
     <div tw="flex flex-col w-full">
       <RowBetween tw="p-0">
-        <p>Bound</p>
+        <p tw="text-secondary">Bound</p>
         <div tw="flex items-center gap-1">
           {(isInverse ? !!nextLendgine : !!lowerLendgine) && (
             <Plus
@@ -68,34 +69,25 @@ export const BuyStats: React.FC<Props> = ({ borrowRate }: Props) => {
               }}
             />
           )}
-          {(isInverse
-            ? selectedLendgine.bound.invert()
-            : selectedLendgine.bound
-          ).toSignificant(5, {
-            groupSeparator: ",",
-          })}
+          {formatPrice(
+            isInverse ? selectedLendgine.bound.invert() : selectedLendgine.bound
+          )}
         </div>
       </RowBetween>
       <RowBetween tw="p-0">
-        <p>Funding APR</p>
-        <p>
-          {borrowRate ? (
-            borrowRate.toFixed(2, { groupSeparator: "," }) + "%"
-          ) : (
-            <LoadingSpinner />
-          )}
-        </p>
+        <p tw="text-secondary">Funding APR</p>
+        <p>{borrowRate ? formatPercent(borrowRate) : <LoadingSpinner />}</p>
       </RowBetween>
       <RowBetween tw="p-0">
-        <p>Leverage</p>
+        <p tw="text-secondary">Leverage</p>
         <p>{isInverse ? "1/x" : "x²"}</p>
       </RowBetween>
       <RowBetween tw="p-0">
-        <p>Liquidation price</p>
+        <p tw="text-secondary">Liquidation price</p>
         <p>{isInverse ? "∞" : 0}</p>
       </RowBetween>
       <RowBetween tw="p-0">
-        <p>Fees</p>
+        <p tw="text-secondary">Fees</p>
         <p>0</p>
       </RowBetween>
     </div>

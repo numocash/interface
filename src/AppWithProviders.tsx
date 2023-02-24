@@ -1,4 +1,3 @@
-import { ThemeProvider } from "@emotion/react";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -10,7 +9,6 @@ import { publicProvider } from "wagmi/providers/public";
 import { App } from "./App";
 import { EnvironmentProvider } from "./contexts/environment2";
 import { SettingsProvider } from "./contexts/settings";
-import { theme } from "./theme";
 
 // const foundry = {
 //   id: 1,
@@ -54,20 +52,18 @@ const queryClient = new QueryClient();
 export const AppWithProviders: React.FC = () => {
   return (
     <React.StrictMode>
-      <ThemeProvider theme={theme}>
-        <WagmiConfig client={wagmiClient}>
-          <RainbowKitProvider coolMode chains={chains}>
-            <QueryClientProvider client={queryClient}>
-              <ReactQueryDevtools initialIsOpen={false} />
-              <EnvironmentProvider>
-                <SettingsProvider>
-                  <App />
-                </SettingsProvider>
-              </EnvironmentProvider>
-            </QueryClientProvider>
-          </RainbowKitProvider>
-        </WagmiConfig>
-      </ThemeProvider>
+      <WagmiConfig client={wagmiClient}>
+        <RainbowKitProvider coolMode chains={chains}>
+          <QueryClientProvider client={queryClient}>
+            <ReactQueryDevtools initialIsOpen={false} />
+            <EnvironmentProvider>
+              <SettingsProvider>
+                <App />
+              </SettingsProvider>
+            </EnvironmentProvider>
+          </QueryClientProvider>
+        </RainbowKitProvider>
+      </WagmiConfig>
     </React.StrictMode>
   );
 };

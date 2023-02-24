@@ -10,7 +10,7 @@ import { Settings } from "./Settings";
 export const Header: React.FC = () => {
   return (
     <div
-      tw="z-10 fixed bottom-0 md:(top-0 bottom-auto justify-between border-b-2 border-gray-100) w-full flex items-center px-4 py-2 pb-1"
+      tw="z-10 fixed bottom-0 md:(top-0 bottom-auto justify-between border-b-2 border-stroke) w-full flex items-center px-4 py-2 pb-1"
       // from ribbon interface
       css={css`
         backdrop-filter: blur(40px);

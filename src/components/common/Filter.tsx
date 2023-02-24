@@ -26,12 +26,12 @@ export const Filter: React.FC<Props> = ({ assets, setAssets }: Props) => {
 
   // TODO: close drop on click
   return !allDedupeTokens ? (
-    <div tw="rounded-lg animate-pulse bg-gray-200 h-[40px] w-[94px]" />
+    <div tw="rounded-lg animate-pulse bg-secondary h-[40px] w-[94px]" />
   ) : (
     <>
       <Modal onDismiss={() => setShow(false)} isOpen={show}>
         <Module tw="flex flex-col p-1 gap-1 w-full">
-          <div tw="flex items-center gap-2 px-4 py-2 bg-gray-200 rounded-t-lg text-xl font-semibold w-full justify-between">
+          <div tw="flex items-center gap-2 px-4 py-2 bg-secondary rounded-t-lg text-xl font-semibold w-full justify-between">
             <p>Select asset</p>
             <button onClick={() => setShow(false)}>
               <X />
@@ -58,7 +58,7 @@ export const Filter: React.FC<Props> = ({ assets, setAssets }: Props) => {
       </Modal>
       <FilterButton onClick={() => !show && setShow(true)}>
         <p>Asset{assets.length > 0 && `  (${assets.length})`}</p>
-        <RotateArrow open={show} />
+        <IoIosArrowDown />
       </FilterButton>
     </>
   );
@@ -66,9 +66,9 @@ export const Filter: React.FC<Props> = ({ assets, setAssets }: Props) => {
 
 export const FilterItem = styled.button<{ selected: boolean }>(
   ({ selected }) => [
-    tw`flex items-center justify-between w-full px-4 py-2 duration-300 ease-in-out transform border-2 border-transparent rounded-lg hover:bg-gray-200`,
-    !selected && tw`hover:bg-gray-200`,
-    selected && tw`border-gray-200`,
+    tw`flex items-center justify-between w-full px-4 py-2 duration-300 ease-in-out transform border-2 border-transparent rounded-lg hover:bg-secondary`,
+    !selected && tw`hover:bg-secondary`,
+    selected && tw`border-secondary`,
   ]
 );
 
@@ -77,17 +77,10 @@ export const Check = styled(FiCheck)<{ show: boolean }>(({ show }) => [
   show && tw`opacity-100`,
 ]);
 
-export const RotateArrow = styled(IoIosArrowDown)<{ open: boolean }>(
-  ({ open }) => [
-    tw`transition duration-300 ease-in-out`,
-    open && tw`-rotate-180`,
-  ]
-);
-
 export const X = styled(FiX)(() => [
   tw`w-6 h-6 transition duration-300 ease-in-out hover:opacity-70 active:scale-90`,
 ]);
 
 export const FilterButton = styled.button`
-  ${tw`flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200`}
+  ${tw`flex items-center gap-2 px-4 py-2 duration-300 ease-in-out transform rounded-lg bg-secondary hover:(bg-button text-button)`}
 `;

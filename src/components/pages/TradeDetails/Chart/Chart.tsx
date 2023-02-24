@@ -16,6 +16,12 @@ import {
   usePriceHistory,
 } from "../../../../hooks/useExternalExchange";
 import type { PricePoint } from "../../../../services/graphql/uniswapV2";
+import {
+  formatDisplayWithSoftLimit,
+  formatPercent,
+  formatPrice,
+  fractionToFloat,
+} from "../../../../utils/format";
 import { priceToFraction } from "../../../../utils/Numoen/price";
 import { useTradeDetails } from "../TradeDetailsInner";
 import { EmptyChart } from "./EmptyChart";
@@ -24,7 +30,6 @@ export const Chart: React.FC = () => {
   const { base, quote, timeframe } = useTradeDetails();
   const referenceMarketQuery = useMostLiquidMarket([base, quote]);
 
-  // TODO: bug with inverting
   const invertPriceQuery = quote.sortsBefore(base);
 
   const priceHistoryQuery = usePriceHistory(
@@ -127,7 +132,6 @@ export const Chart: React.FC = () => {
     setDisplayPrice(null);
   }, [setCrosshair]);
 
-  // return null;
   const loading = !priceHistory || !currentPrice || !priceChange;
 
   return (
@@ -135,21 +139,28 @@ export const Chart: React.FC = () => {
       <div tw="flex w-full">
         <div tw="flex gap-2 items-center">
           {loading ? (
-            <div tw="bg-gray-200 animate-pulse h-8 w-20 rounded" />
+            <div tw="bg-secondary animate-pulse h-8 w-20 rounded" />
           ) : (
-            <p tw=" text-2xl">
-              {displayPrice?.price.toSignificant(5, { groupSeparator: "," }) ??
-                currentPrice.toSignificant(5, {
-                  groupSeparator: ",",
-                })}
+            <p tw="text-2xl">
+              {displayPrice
+                ? formatDisplayWithSoftLimit(
+                    fractionToFloat(displayPrice.price),
+                    4,
+                    6,
+                    {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 4,
+                    }
+                  )
+                : formatPrice(currentPrice)}
             </p>
           )}
           {loading ? (
-            <div tw="bg-gray-200 animate-pulse h-5 w-12 rounded" />
+            <div tw="bg-secondary animate-pulse h-5 w-12 rounded" />
           ) : priceChange.greaterThan(0) ? (
-            <p tw="text-green-500">+{priceChange.toFixed(2)}%</p>
+            <p tw="text-green">+{formatPercent(priceChange)}</p>
           ) : (
-            <p tw="text-red">{priceChange.toFixed(2)}%</p>
+            <p tw="text-red">{formatPercent(priceChange)}</p>
           )}
         </div>
       </div>
@@ -178,7 +189,7 @@ export const Chart: React.FC = () => {
                     }
                     x={(d) => xScale(getX(d)) ?? 0}
                     y={(d) => yScale(getY(d)) ?? 0}
-                    stroke={"#333"}
+                    stroke={"#6246ea"}
                     strokeWidth={2}
                     strokeOpacity={1}
                   />
@@ -187,7 +198,7 @@ export const Chart: React.FC = () => {
                   <Line
                     from={{ x: xScale(crosshair), y: 0 }}
                     to={{ x: xScale(crosshair), y: 208 }}
-                    stroke={"#333"}
+                    stroke={"#d1d1e9"}
                     strokeWidth={1}
                     pointerEvents="none"
                     strokeDasharray="4,4"
@@ -198,8 +209,8 @@ export const Chart: React.FC = () => {
                     left={xScale(crosshair)}
                     top={yScale(getY(displayPrice)) + marginTop}
                     size={50}
-                    fill={"#E5E5EA"}
-                    stroke={"#E5E5EA"}
+                    fill={"#6246ea"}
+                    stroke={"#6246ea"}
                     strokeWidth={0.5}
                   />
                 )}

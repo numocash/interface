@@ -2,6 +2,7 @@ import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
 import type { Lendgine, LendgineInfo } from "../../../../../constants/types";
+import { formatPrice } from "../../../../../utils/format";
 import {
   liquidityPerCollateral,
   liquidityPerShare,
@@ -11,6 +12,7 @@ import {
   numoenPrice,
   pricePerLiquidity,
 } from "../../../../../utils/Numoen/price";
+import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
 import { useTradeDetails } from "../../TradeDetailsInner";
 
 type Props<L extends Lendgine = Lendgine> = {
@@ -62,18 +64,18 @@ export const PositionItem: React.FC<Props> = ({
     >
       <p tw="font-semibold pl-4 col-span-2">{symbol}</p>
       <p tw="justify-self-start col-span-2">
-        {(isInverse ? lendgine.bound.invert() : lendgine.bound).toSignificant(
-          5
-        )}
+        {formatPrice(isInverse ? lendgine.bound.invert() : lendgine.bound)}
       </p>
 
-      <p tw="justify-self-start col-span-2">
-        {value.toSignificant(4)} {base.symbol}
-      </p>
+      <TokenAmountDisplay
+        amount={value}
+        showSymbol
+        tw="col-span-2 justify-self-start"
+      />
       <p tw="justify-self-start col-span-2">N/A</p>
 
       <button
-        tw="text-red text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90"
+        tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90"
         onClick={() => {
           setClose(true);
           setSelectedLendgine(lendgine);

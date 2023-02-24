@@ -70,7 +70,9 @@ export const ConnectButton: React.FC = () => {
                   <button onClick={openAccountModal}>
                     <HeaderItem
                       item={
-                        <p tw="font-bold text-default">{account.displayName}</p>
+                        <p tw="font-bold text-headline">
+                          {account.displayName}
+                        </p>
                       }
                       label="Account"
                     />

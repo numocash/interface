@@ -4,6 +4,7 @@ import { styled } from "twin.macro";
 
 import { useSettings } from "../../../contexts/settings";
 import { ReactComponent as SettingsIcon } from "../../../icons/settings.svg";
+import { X } from "../../common/Filter";
 import { BigNumericInput } from "../../common/inputs/BigNumericInput";
 import { Switch } from "../../common/inputs/Switch";
 import { Modal } from "../../common/Modal";
@@ -33,16 +34,16 @@ export const Settings: React.FC = () => {
   return (
     <>
       <Modal onDismiss={onDismiss} isOpen={show}>
-        <div tw="p-3 rounded-lg border border-gray-400 bg-white  w-full">
+        <div tw="p-3 rounded-lg border-2 border-stroke w-full">
           <div tw="flex justify-between items-center">
             <div tw="font-semibold text-lg">Settings</div>
-            <ToastExitButton onClick={onDismiss}>×</ToastExitButton>
+            <X onClick={onDismiss} />
           </div>
-          <div tw="flex flex-col bg-white  rounded-xl p-2 gap-1">
+          <div tw="flex  rounded-xl p-2 gap-1 w-full items-center justify-between">
             <div tw="flex justify-start">Transaction Deadline</div>
             <div tw="flex items-center gap-1">
               <BigNumericInput
-                tw="text-right text-lg"
+                tw="text-right text-lg w-20"
                 placeholder={settings.timeout.toString()}
                 inputMode="numeric"
                 autoComplete="off"
@@ -50,14 +51,14 @@ export const Settings: React.FC = () => {
                 value={inputDeadline}
                 onChange={(val: string) => setInputDeadline(val)}
               />
-              <div tw="text-secondary text-sm">Minutes</div>
+              <div tw="text-paragraph text-sm">Minutes</div>
             </div>
           </div>
-          <div tw="flex flex-col  p-2 gap-1">
+          <div tw="flex p-2 gap-1 w-full items-center justify-between">
             <div tw="flex justify-start">Allowed Slippage</div>
             <div tw="flex items-center gap-1">
               <BigNumericInput
-                tw="text-right text-lg text-default"
+                tw="text-right text-lg text-default w-32"
                 placeholder={settings.maxSlippagePercent.toFixed(2)}
                 inputMode="numeric"
                 autoComplete="off"
@@ -65,7 +66,7 @@ export const Settings: React.FC = () => {
                 value={inputSlippage}
                 onChange={(val: string) => setInputSlippage(val)}
               />
-              <div tw="text-secondary text-sm">%</div>
+              <div tw="text-paragraph text-sm">%</div>
             </div>
           </div>
           <div tw="flex  p-2 gap-1 justify-between items-center">

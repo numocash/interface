@@ -1,13 +1,8 @@
 import { useState } from "react";
+import { IoIosArrowDown } from "react-icons/io";
 import { objectKeys } from "ts-extras";
 
-import {
-  Check,
-  FilterButton,
-  FilterItem,
-  RotateArrow,
-  X,
-} from "../../common/Filter";
+import { Check, FilterButton, FilterItem, X } from "../../common/Filter";
 import { Modal } from "../../common/Modal";
 import { Module } from "../../common/Module";
 import { useTrade } from ".";
@@ -49,7 +44,7 @@ export const Sort: React.FC = () => {
       </Modal>
       <FilterButton onClick={() => setShow(!show)}>
         <p>{sort === "default" ? "Sort by" : Sorts[sort]}</p>
-        <RotateArrow open={show} />
+        <IoIosArrowDown />
       </FilterButton>
     </>
   );

@@ -21,7 +21,7 @@ export const MoreInfo: React.FC = () => {
         target={targetRef}
         placement={"auto"}
       >
-        <Module tw="p-1 border-2 border-gray-200">
+        <Module tw="p-1 border-2 border-stroke">
           <a
             href="https://numoen.gitbook.io/numoen/"
             target="_blank"
@@ -64,5 +64,5 @@ export const MoreInfo: React.FC = () => {
 };
 
 const InfoItem = styled.div`
-  ${tw`flex items-center gap-2 px-4 py-2 duration-300 ease-in-out transform rounded text-default hover:bg-gray-100`}
+  ${tw`flex items-center gap-2 px-4 py-2 duration-300 ease-in-out transform rounded text-default hover:bg-secondary`}
 `;

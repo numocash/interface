@@ -19,5 +19,5 @@ const BGLayer = styled.div`
 
 const Gradient = styled(BGLayer)`
   z-index: -2;
-  ${tw`bg-white`}
+  ${tw`bg-background`}
 `;

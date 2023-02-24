@@ -177,8 +177,8 @@ export const fractionToPrice = <TBase extends Token, TQuote extends Token>(
   );
 };
 
-export const priceToFraction = (
-  price: Price<WrappedTokenInfo, WrappedTokenInfo>
+export const priceToFraction = <TBase extends Token, TQuote extends Token>(
+  price: Price<TBase, TQuote>
 ) => {
   return price.asFraction
     .multiply(

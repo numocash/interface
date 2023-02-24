@@ -36,7 +36,7 @@ export const TokenAmountDisplay: React.FC<IProps> = ({
         />
       )}
 
-      {formatDisplayWithSoftLimit(Number(amount.toFixed(2)), 2, 10)}
+      {formatDisplayWithSoftLimit(Number(amount.toFixed(6)), 4, 10)}
 
       {showSymbol && (
         <span>

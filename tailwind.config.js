@@ -1,38 +1,29 @@
 const colors = require("tailwindcss/colors");
 
 const brandColors = {
-  DEFAULT: "#808799",
-  50: "#EA8ECF",
-  100: "#E77CC8",
-  200: "#E05ABA",
-  300: "#DA38AB",
-  400: "#888D9B",
-  500: "#A21E7C",
-  600: "#731558",
-  700: "#430C34",
-  800: "#14040F",
-  900: "#000000",
-};
-
-const grays = {
-  100: "#F2F2F7",
-  200: "#E5E5EA",
-  300: "#D1D1D6",
-  350: "#C7C7CC",
-  400: "#AEAEB2",
-  500: "#8E8E93",
+  DEFAULT: "#6246ea",
 };
 
 const custom = {
-  action: "#FFFFFF",
-  red: "#FF4941",
-  blue: "#0e76fd",
+  red: "rgb(255,59,48)",
+  blue: "rgb(0,122,255)",
+  green: "rgb(52,199,89)",
+  background: "#fffffe",
+  button: "#6246ea",
+  highlight: "#6246ea",
+  secondary: "#d1d1e9",
+  tertiary: "#e45858",
+  stroke: "#2b2c34",
+  main: "#fffffe",
 };
 
 const textColor = {
   DEFAULT: "#000000",
   default: "#000000",
-  secondary: grays[400],
+  headline: "#2b2c34",
+  paragraph: "#2b2c34",
+  button: "#fffffe",
+  secondary: "rgba(43, 44, 52, 0.5)",
 };
 
 module.exports = {
@@ -53,8 +44,6 @@ module.exports = {
         ...colors,
         ...custom,
         brand: brandColors,
-        gray: grays,
-        primary: brandColors,
       },
       textColor,
       scale: {

@@ -119,7 +119,7 @@ export const TradeDetailsInner: React.FC<Props> = ({
         <MainView />
         <div tw="flex max-w-sm justify-self-end">
           {/* TODO: stick to the right side */}
-          <div tw="border-l-2 border-gray-200 sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
+          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
           <TradeColumn tw="" />
         </div>
       </TradeDetailsProvider>

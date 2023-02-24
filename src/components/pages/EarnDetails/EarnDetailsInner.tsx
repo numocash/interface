@@ -101,7 +101,7 @@ export const EarnDetailsInner: React.FC<Props> = ({
   return (
     <div tw="w-full grid grid-cols-3">
       <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
-        <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2">
+        <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2 justify-self-center">
           <Market />
           <p tw="text-sm font-semibold">Select a pool</p>
           <Lendgines />

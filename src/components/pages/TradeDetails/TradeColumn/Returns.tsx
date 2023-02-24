@@ -11,6 +11,7 @@ import { bisect } from "d3-array";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
+import { formatPercent } from "../../../../utils/format";
 import { isLongLendgine } from "../../../../utils/lendgines";
 import { RowBetween } from "../../../common/RowBetween";
 import { useTradeDetails } from "../TradeDetailsInner";
@@ -102,13 +103,9 @@ export const Returns: React.FC = () => {
       <RowBetween tw="items-center">
         <p tw="text-sm">Expected Profit and Loss</p>
         {derivReturns.lessThan(0) ? (
-          <p tw="font-semibold text-red">
-            {derivReturns.toFixed(2, { groupSeparator: "," })}%
-          </p>
+          <p tw="font-semibold text-red">{formatPercent(derivReturns)}</p>
         ) : (
-          <p tw="font-semibold text-green-500">
-            +{derivReturns.toFixed(2, { groupSeparator: "," })}%
-          </p>
+          <p tw="font-semibold text-green">+{formatPercent(derivReturns)}</p>
         )}
       </RowBetween>
 
@@ -187,12 +184,12 @@ export const Returns: React.FC = () => {
       </ParentSize>
       <RowBetween tw="text-sm">
         <p tw="">
-          {quote.symbol} / {base.symbol} Price
+          {quote.symbol} / {base.symbol} price
         </p>
         {underlyingReturns.lessThan(0) ? (
-          <p tw="">{underlyingReturns.toFixed(2, { groupSeparator: "," })}%</p>
+          <p tw="">{formatPercent(underlyingReturns)}</p>
         ) : (
-          <p tw="">+{underlyingReturns.toFixed(2, { groupSeparator: "," })}%</p>
+          <p tw="">+{formatPercent(underlyingReturns)}</p>
         )}
       </RowBetween>
     </>

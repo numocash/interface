@@ -34,6 +34,7 @@ import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { LoadingSpinner } from "../../../common/LoadingSpinner";
 import { RowBetween } from "../../../common/RowBetween";
+import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../common/VerticalItem";
 import { useTradeDetails } from "../TradeDetailsInner";
 
@@ -233,25 +234,22 @@ export const Close: React.FC = () => {
   );
 
   return (
-    <div tw="flex flex-col gap-2 w-full">
+    <div tw="flex flex-col gap-4 w-full">
       <button onClick={() => setClose(false)} tw="items-center flex">
         <div tw="text-xs flex gap-1 items-center">
           <FaChevronLeft />
           Back
         </div>
       </button>
-      <RowBetween tw="items-center p-0">
-        <div tw="rounded-lg bg-gray-200 px-2 py-1 text-lg font-semibold">
+      <RowBetween tw="items-center p-0 pb-2">
+        <div tw="rounded-lg bg-secondary px-2 py-1 text-lg font-semibold">
           {symbol}
         </div>
         {positionValue ? (
           <VerticalItem
             label="Position value"
             item={
-              <div tw="mb-[-6px]">
-                {positionValue.toSignificant(5)}
-                <span tw="text-sm "> {selectedLendgine.token1.symbol}</span>
-              </div>
+              <TokenAmountDisplay amount={positionValue} showSymbol tw="" />
             }
             tw="items-center"
           />
@@ -260,7 +258,7 @@ export const Close: React.FC = () => {
         )}
       </RowBetween>
       <AssetSelection
-        tw="border-2 border-gray-200 rounded-lg "
+        tw="border-2 border-[#2b2c34] rounded-lg "
         inputValue={input}
         selectedValue={selectedLendgine.token1}
         label={<span>Receive</span>}

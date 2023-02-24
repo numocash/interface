@@ -1,5 +1,5 @@
 import { useTrade } from ".";
-import { Loading } from "./Loading";
+import { Divider, Loading } from "./Loading";
 import { MarketItem } from "./MarketItem";
 
 export const Markets: React.FC = () => {
@@ -9,9 +9,7 @@ export const Markets: React.FC = () => {
     <div tw="flex flex-col gap-2">
       {markets?.map((m, i) => (
         <div key={m[0].address + m[1].address} tw="gap-2 flex flex-col">
-          {i !== 0 && (
-            <div tw="w-full flex justify-self-center border-b-2 border-gray-200" />
-          )}
+          {i !== 0 && <Divider />}
           <MarketItem tokens={m} />
         </div>
       )) ?? <Loading />}

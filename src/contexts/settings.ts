@@ -34,11 +34,11 @@ const useSettingsInternal = (): ISettings => {
   const [maxSlippagePercent, setMaxSlippagePercent] = useState<Percent>(
     storedSlip
       ? new Percent(storedSlip.maxSlippagePercent, 10000)
-      : new Percent(100, 10_000)
+      : new Percent(30, 10_000)
   );
   // TOOD: allow for lower slippage
   const [timeout, setTimeout] = useState<number>(
-    storedSlip ? storedSlip.timeout : 30
+    storedSlip ? storedSlip.timeout : 2
   );
   const [infiniteApprove, setInfiniteApprove] = useState(
     storedSlip ? storedSlip.infiniteApprove : false

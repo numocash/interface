@@ -204,7 +204,7 @@ export const Buy: React.FC = () => {
   return (
     <>
       <AssetSelection
-        tw="border-2 border-gray-200 rounded-lg "
+        tw="border-2 border-stroke rounded-lg "
         label={<span>Pay</span>}
         selectedValue={selectedLendgine.token1}
         inputValue={input}
