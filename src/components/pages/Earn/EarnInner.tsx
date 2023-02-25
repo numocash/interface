@@ -4,7 +4,7 @@ import { Button } from "../../common/Button";
 import { Display } from "../../common/Display";
 import { Filter } from "../../common/Filter";
 import { useEarn } from ".";
-import { Explain } from "./Explain";
+import { Explain } from "./Explain/Explain";
 import { Markets } from "./Markets";
 
 export const EarnInner: React.FC = () => {

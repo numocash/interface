@@ -47,7 +47,11 @@ export const MiniChart: React.FC<Props> = ({
   yScale.range([40, 0]);
 
   return (
-    <svg width={100} height={50} tw="justify-self-center col-span-2">
+    <svg
+      width={100}
+      height={50}
+      tw="justify-self-center hidden md:(flex col-span-2)"
+    >
       <Group top={5}>
         <LinePath<Props["priceHistory"][number]>
           curve={curveNatural}

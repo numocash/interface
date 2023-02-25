@@ -63,7 +63,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
       tw=""
       to={`/trade/details/${tokens[0].address}/${tokens[1].address}`}
     >
-      <div tw="w-full rounded-xl hover:scale-110 transform ease-in-out duration-300 grid grid-cols-5  h-14 items-center justify-between ">
+      <div tw="w-full rounded-xl hover:scale-105 transform ease-in-out duration-300 grid grid-cols-3 md:grid-cols-5  h-14 items-center justify-between ">
         <div tw="flex items-center gap-3 col-span-2">
           <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-secondary px-2 py-1">
             <TokenIcon token={tokens[1]} size={32} />
@@ -79,7 +79,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
         {!!priceHistory && !!currentPrice ? (
           <MiniChart priceHistory={priceHistory} currentPrice={currentPrice} />
         ) : (
-          <div tw="rounded-lg h-10 w-32 animate-pulse transform ease-in-out duration-300 bg-secondary justify-self-center col-span-2" />
+          <div tw="rounded-lg h-10 w-32 animate-pulse transform ease-in-out duration-300 bg-secondary justify-self-center hidden md:(flex col-span-2)" />
         )}
 
         {priceChange ? (
@@ -91,7 +91,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
             )}
           </div>
         ) : (
-          <div tw=" justify-self-end h-6 rounded-lg bg-secondary w-16 transform animate-pulse ease-in-out duration-300" />
+          <div tw="justify-self-end h-6 rounded-lg bg-secondary w-16 transform animate-pulse ease-in-out duration-300" />
         )}
       </div>
     </NavLink>

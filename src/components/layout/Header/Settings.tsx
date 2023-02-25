@@ -10,7 +10,11 @@ import { Switch } from "../../common/inputs/Switch";
 import { Modal } from "../../common/Modal";
 import { HeaderItem } from "./Nav";
 
-export const Settings: React.FC = () => {
+interface Props {
+  className?: string;
+}
+
+export const Settings: React.FC<Props> = ({ className }: Props) => {
   const settings = useSettings();
   const [show, setShow] = useState(false);
   // const [targetRef, setTargetRef] = useState<HTMLElement | null>(null);
@@ -34,16 +38,16 @@ export const Settings: React.FC = () => {
   return (
     <>
       <Modal onDismiss={onDismiss} isOpen={show}>
-        <div tw="p-3 rounded-lg border-2 border-stroke w-full">
+        <div tw="px-6 py-3 rounded-lg w-full">
           <div tw="flex justify-between items-center">
             <div tw="font-semibold text-lg">Settings</div>
             <X onClick={onDismiss} />
           </div>
-          <div tw="flex  rounded-xl p-2 gap-1 w-full items-center justify-between">
+          <div tw="flex rounded-xl py-2 gap-1 w-full items-center justify-between">
             <div tw="flex justify-start">Transaction Deadline</div>
             <div tw="flex items-center gap-1">
               <BigNumericInput
-                tw="text-right text-lg w-20"
+                tw="text-right text-lg w-20 rounded-lg bg-secondary px-1"
                 placeholder={settings.timeout.toString()}
                 inputMode="numeric"
                 autoComplete="off"
@@ -54,11 +58,11 @@ export const Settings: React.FC = () => {
               <div tw="text-paragraph text-sm">Minutes</div>
             </div>
           </div>
-          <div tw="flex p-2 gap-1 w-full items-center justify-between">
+          <div tw="flex py-2 gap-1 w-full items-center justify-between">
             <div tw="flex justify-start">Allowed Slippage</div>
             <div tw="flex items-center gap-1">
               <BigNumericInput
-                tw="text-right text-lg text-default w-32"
+                tw="text-right text-lg text-paragraph w-32 rounded-lg bg-secondary px-1"
                 placeholder={settings.maxSlippagePercent.toFixed(2)}
                 inputMode="numeric"
                 autoComplete="off"
@@ -69,7 +73,7 @@ export const Settings: React.FC = () => {
               <div tw="text-paragraph text-sm">%</div>
             </div>
           </div>
-          <div tw="flex  p-2 gap-1 justify-between items-center">
+          <div tw="flex py-2 gap-1 justify-between items-center">
             <div tw="">Infinite Approval</div>
             <div tw="">
               <Switch
@@ -80,7 +84,7 @@ export const Settings: React.FC = () => {
           </div>
         </div>
       </Modal>
-      <button tw="" onClick={() => setShow(true)}>
+      <button className={className} tw="" onClick={() => setShow(true)}>
         <HeaderItem
           item={
             <SettingsIcon tw="transform hover:rotate-90 duration-300 ease-in-out h-6" />

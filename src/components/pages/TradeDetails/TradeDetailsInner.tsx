@@ -114,12 +114,12 @@ export const TradeDetailsInner: React.FC<Props> = ({
   price,
 }: Props) => {
   return (
-    <div tw="w-full grid grid-cols-3">
+    <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
       <TradeDetailsProvider initialState={{ base, quote, lendgines, price }}>
         <MainView />
         <div tw="flex max-w-sm justify-self-end">
           {/* TODO: stick to the right side */}
-          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
+          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-1rem] hidden xl:flex" />
           <TradeColumn tw="" />
         </div>
       </TradeDetailsProvider>

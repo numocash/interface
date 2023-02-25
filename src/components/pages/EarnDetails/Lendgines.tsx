@@ -37,7 +37,7 @@ export const Lendgines: React.FC = () => {
 
   return (
     <>
-      <div tw="flex gap-4 w-full justify-around">
+      <div tw="flex flex-col items-center md:flex-row gap-4 w-full justify-around">
         {!longLendgine ? null : longInfo.isLoading || !longInfo.data ? (
           <Loading />
         ) : (

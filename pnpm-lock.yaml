@@ -36,6 +36,7 @@ specifiers:
   '@reach/dialog': ^0.18.0
   '@reach/slider': ^0.18.0
   '@react-spring/web': ^9.6.1
+  '@rive-app/react-canvas': ^3.0.36
   '@saberhq/eslint-config-react': 2.1.0
   '@saberhq/tsconfig': ^2.1.0
   '@simbathesailor/babel-plugin-use-what-changed': ^2.1.0
@@ -156,6 +157,7 @@ dependencies:
   '@reach/dialog': 0.18.0_zula6vjvt3wdocc4mwcxqa6nzi
   '@reach/slider': 0.18.0_biqbaboplfbrettd7655fr4n2y
   '@react-spring/web': 9.6.1_biqbaboplfbrettd7655fr4n2y
+  '@rive-app/react-canvas': 3.0.36_react@18.2.0
   '@tanstack/react-query': 4.24.9_biqbaboplfbrettd7655fr4n2y
   '@tanstack/react-query-devtools': 4.24.9_bzphmdwvicyhtx5eo3azinrh54
   '@types/d3-array': 3.0.4
@@ -3631,6 +3633,19 @@ packages:
   /@repeaterjs/repeater/3.0.4:
     resolution: {integrity: sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==}
     dev: true
+
+  /@rive-app/canvas/1.0.100:
+    resolution: {integrity: sha512-22L0ikCeLtUhoBYTEQaGlGxm560ZHW8L1WteQO69QJOL4bgrjQbmLFLZnNqSSDTQQACx6RJ1Y2auJmrkh9+DlQ==}
+    dev: false
+
+  /@rive-app/react-canvas/3.0.36_react@18.2.0:
+    resolution: {integrity: sha512-ILz9Ak4x9xSq8eRApZEe+cYM41NemuR/KOhBdh+eTWUp+f37zzA+8l1kN/3BWVcdlHCe4UcbamerQI4ZczLnVA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@rive-app/canvas': 1.0.100
+      react: 18.2.0
+    dev: false
 
   /@rollup/plugin-babel/5.3.1_amfvvdgysepq4yvmhbhhzfmmsa:
     resolution: {integrity: sha512-WFfdLWU/xVWKeRQnKmIAQULUI7Il0gZnBIH/ZFO069wYIfPu+8zrfp/KMW0atmELoRDq8FbiP3VCss9MhCut7Q==}

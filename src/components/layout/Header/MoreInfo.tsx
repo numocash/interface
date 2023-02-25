@@ -10,7 +10,11 @@ import { HeaderItem } from "./Nav";
 
 const size = 20;
 
-export const MoreInfo: React.FC = () => {
+interface Props {
+  className?: string;
+}
+
+export const MoreInfo: React.FC<Props> = ({ className }: Props) => {
   const [targetRef, setTargetRef] = useState<HTMLElement | null>(null);
   const [show, setShow] = useState(false);
   return (
@@ -56,7 +60,11 @@ export const MoreInfo: React.FC = () => {
           </a>
         </Module>
       </Drop>
-      <button onClick={() => setShow(true)} ref={setTargetRef}>
+      <button
+        className={className}
+        onClick={() => setShow(true)}
+        ref={setTargetRef}
+      >
         <HeaderItem item={<MoreIcon tw="h-6" />} label="More" />
       </button>
     </>

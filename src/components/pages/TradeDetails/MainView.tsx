@@ -16,7 +16,7 @@ export const MainView: React.FC = () => {
               <TokenIcon token={other} size={32} />
               <TokenIcon token={denom} size={32} />
             </div>
-            <div tw="flex gap-1 font-semibold text-lg text-default ">
+            <div tw="flex gap-1 font-semibold text-lg text-paragraph ">
               <p tw="border-b-2 border-b-green">{other.symbol}</p>
               <p>/</p>
               <p tw="border-b-2 border-b-red">{denom.symbol}</p>

@@ -1,7 +1,7 @@
 import { Display } from "../../common/Display";
 import { Filter } from "../../common/Filter";
 import { useTrade } from ".";
-import { Explain } from "./Explain";
+import { Explain } from "./Explain/Explain";
 import { Markets } from "./Markets";
 
 export const TradeInner: React.FC = () => {

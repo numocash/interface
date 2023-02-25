@@ -5,11 +5,25 @@ import tw, { styled } from "twin.macro";
 import { ReactComponent as EarnIcon } from "../../../icons/banknote.svg";
 import { ReactComponent as TradeIcon } from "../../../icons/coins.svg";
 
-export const Nav: React.FC = () => {
+interface Props {
+  className?: string;
+}
+
+export const Nav: React.FC<Props> = ({ className }: Props) => {
   return (
     <>
-      <NavLink name="Trade" icon={<TradeIcon tw="h-6" />} to="/trade" />
-      <NavLink name="Earn" icon={<EarnIcon tw="h-6" />} to="/earn" />
+      <NavLink
+        name="Trade"
+        icon={<TradeIcon tw="h-6" />}
+        to="/trade"
+        className={className}
+      />
+      <NavLink
+        name="Earn"
+        icon={<EarnIcon tw="h-6" />}
+        to="/earn"
+        className={className}
+      />
     </>
   );
 };
@@ -19,14 +33,15 @@ const NavLink: React.FC<{
   icon: React.ReactNode;
   to: string;
   activeRoutes?: string[];
-}> = ({ name, icon, to, activeRoutes = [to] }) => {
+  className?: string;
+}> = ({ name, icon, to, activeRoutes = [to], className }) => {
   const location = useLocation();
   const loc = location.pathname.split("/")[1] ?? "";
   const active =
     activeRoutes.filter((a) => loc === a.split("/")[1]?.toLowerCase()).length >
     0;
   return (
-    <Link to={to}>
+    <Link to={to} className={className}>
       <HeaderItem active={active} item={icon} label={name} />
     </Link>
   );

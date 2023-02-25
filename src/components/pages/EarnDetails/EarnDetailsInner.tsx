@@ -99,7 +99,7 @@ export const EarnDetailsInner: React.FC<Props> = ({
   price,
 }: Props) => {
   return (
-    <div tw="w-full grid grid-cols-3">
+    <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
       <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
         <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2 justify-self-center">
           <Market />
@@ -112,7 +112,7 @@ export const EarnDetailsInner: React.FC<Props> = ({
         </div>
         <div tw="flex max-w-sm justify-self-end">
           {/* TODO: stick to the right side */}
-          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
+          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-1rem] hidden xl:flex" />
           <TradeColumn tw="" />
         </div>
       </EarnDetailsProvider>
