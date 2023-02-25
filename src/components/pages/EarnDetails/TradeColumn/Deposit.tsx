@@ -28,6 +28,7 @@ import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
+import { CenterSwitch } from "../../../common/CenterSwitch";
 import { useEarnDetails } from "../EarnDetailsInner";
 
 export const Deposit: React.FC = () => {
@@ -271,33 +272,33 @@ export const Deposit: React.FC = () => {
 
   return (
     <>
-      <div tw="flex flex-col rounded-lg bg-gray-100">
-        <div tw=" flex flex-col bg-white">
-          <AssetSelection
-            tw="pb-6"
-            label={<span>Input</span>}
-            selectedValue={base}
-            inputValue={
-              baseInput === ""
-                ? baseInputAmount?.toSignificant(5) ?? ""
-                : baseInput
-            }
-            inputOnChange={(value) => {
-              onInput(value, "base");
-            }}
-            currentAmount={{
-              amount: balances.data?.[0],
-              allowSelect: true,
-            }}
-          />
-        </div>
-        <div tw="flex items-center justify-center self-center">
-          <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-white w-0" />
-          <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-gray-100 w-0 mt-[-30px]  " />
-        </div>
+      <div tw="flex flex-col rounded-lg border-2 border-stroke">
+        <AssetSelection
+          tw=""
+          label={<span>Input</span>}
+          selectedValue={base}
+          inputValue={
+            baseInput === ""
+              ? baseInputAmount?.toSignificant(5) ?? ""
+              : baseInput
+          }
+          inputOnChange={(value) => {
+            onInput(value, "base");
+          }}
+          currentAmount={{
+            amount: balances.data?.[0],
+            allowSelect: true,
+          }}
+        />
+        {/* <div tw="flex items-center justify-center self-center">
+          <div tw=" justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-stroke w-0" />
+          <div tw="justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-stroke w-0 mt-[-30px]  " />
+        </div> */}
+        <div tw=" border-b-2 w-full border-stroke" />
+        <CenterSwitch icon="plus" />
         <AssetSelection
           label={<span>Input</span>}
-          tw=""
+          tw="pt-2"
           selectedValue={quote}
           inputValue={
             quoteInput === ""

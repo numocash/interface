@@ -180,7 +180,7 @@ export const AssetSelection = ({
         {!hideInput && (
           <div tw="flex grow flex-1">
             <BigNumericInput
-              tw="text-right text-default w-full py-1"
+              tw="text-right text-paragraph w-full py-1"
               disabled={inputDisabled}
               value={inputValue}
               onChange={inputOnChange}

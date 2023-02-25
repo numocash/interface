@@ -71,7 +71,7 @@ const StyledInput = styled.input<{
   text-overflow: ellipsis;
   width: 100%;
 
-  ${tw` text-default`}
+  ${tw` text-paragraph`}
 
   font-weight: 400;
   font-size: 24px;
@@ -81,8 +81,6 @@ const StyledInput = styled.input<{
   }
 
   padding: 0px;
-
-  ${(props) => !!props.disabled && tw`bg-gray-100 `}
 
   ${breakpoints.mobile} {
     font-size: 20px;

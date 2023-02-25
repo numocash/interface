@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import tw, { styled } from "twin.macro";
 
 import type { Lendgine, LendgineInfo } from "../../../constants/types";
+import { formatPercent } from "../../../utils/format";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
 import { accruedLendgineInfo } from "../../../utils/Numoen/lendgineMath";
 import {
@@ -78,10 +79,8 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
       }}
     >
       <RowBetween tw="px-0">
-        <p tw="text-xl">APR</p>
-        <p tw="text-xl font-semibold">
-          {apr.equalTo(0) ? "0" : apr.toFixed(2)}%
-        </p>
+        <p tw="text-xl text-secondary">APR</p>
+        <p tw="text-xl font-semibold">{formatPercent(apr)}</p>
       </RowBetween>
       <RowBetween tw="justify-around">
         <VerticalItem
@@ -97,17 +96,17 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
         <p tw="text-sm">Impermanent loss vs. Uni V2</p>
         <p>{il.equalTo(0) ? "0" : il.toFixed(2)}x</p>
       </RowBetween>
-      <div tw="w-full border-b-2 border-gray-200" />
+      <div tw="w-full border-b-2 border-stroke" />
       <RowBetween tw="p-0 mt-2">
-        <p tw="text-sm items-center">Implied vol.</p>
+        <p tw="text-sm items-center text-secondary">Implied vol.</p>
         <p>{iv.equalTo(0) ? "0" : iv.toFixed(2)}%</p>
       </RowBetween>
       <RowBetween tw="p-0">
-        <p tw="text-sm items-center">Delta</p>
+        <p tw="text-sm items-center text-secondary">Delta</p>
         <p>{lendgine.bound.asFraction.toSignificant(5)}</p>
       </RowBetween>
       <RowBetween tw="p-0">
-        <p tw="text-sm items-center">Gamma</p>
+        <p tw="text-sm items-center text-secondary">Gamma</p>
         <p>{lendgine.bound.asFraction.toSignificant(5)}</p>
       </RowBetween>
     </Wrapper>
@@ -115,6 +114,6 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
 };
 
 const Wrapper = styled.button<{ selected: boolean }>(({ selected }) => [
-  tw`flex flex-col w-full max-w-sm px-4 py-2 duration-300 ease-in-out transform border-2 border-transparent rounded-xl hover:bg-gray-200`,
-  selected && tw`border-gray-200`,
+  tw`flex flex-col w-full max-w-sm px-4 py-2 duration-300 ease-in-out transform border-2 border-transparent rounded-xl hover:bg-secondary`,
+  selected && tw`border-stroke`,
 ]);

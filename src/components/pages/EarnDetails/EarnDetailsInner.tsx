@@ -103,16 +103,16 @@ export const EarnDetailsInner: React.FC<Props> = ({
       <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
         <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2 justify-self-center">
           <Market />
-          <p tw="text-sm font-semibold">Select a pool</p>
+          <p tw="text-sm font-semibold text-headline">Select a pool</p>
           <Lendgines />
-          <div tw="border-b-2 border-gray-200" />
+          <div tw="border-b-2 border-stroke" />
 
           <History />
           <Positions />
         </div>
         <div tw="flex max-w-sm justify-self-end">
           {/* TODO: stick to the right side */}
-          <div tw="border-l-2 border-gray-200 sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
+          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-1rem]" />
           <TradeColumn tw="" />
         </div>
       </EarnDetailsProvider>

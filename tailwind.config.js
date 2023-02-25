@@ -23,7 +23,7 @@ const textColor = {
   headline: "#2b2c34",
   paragraph: "#2b2c34",
   button: "#fffffe",
-  secondary: "rgba(43, 44, 52, 0.5)",
+  secondary: "rgba(43, 44, 52, 0.6)",
 };
 
 module.exports = {

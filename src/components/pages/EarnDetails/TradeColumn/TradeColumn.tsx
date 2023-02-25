@@ -10,7 +10,7 @@ export const TradeColumn: React.FC = () => {
       <p tw="text-xl font-bold">{!close && "Deposit"}</p>
       <DepositWithdraw />
       <Trade />
-      <div tw="w-full border-b-2 border-gray-200" />
+      <div tw="w-full border-b-2 border-stroke" />
       <Config />
     </div>
   );

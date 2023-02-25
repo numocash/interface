@@ -57,7 +57,7 @@ export const Lendgines: React.FC = () => {
               lendgines: shortLendgines,
             }) && (
               <button
-                tw="bg-gray-200 p-1 rounded-lg items-center justify-center"
+                tw="bg-secondary p-1 rounded-lg items-center justify-center"
                 onClick={() => setBoundMultiple(boundMultiple / 2)}
               >
                 <IoIosArrowDown tw="rotate-90" />
@@ -73,7 +73,7 @@ export const Lendgines: React.FC = () => {
               lendgine: longLendgine,
               lendgines: longLendgines,
             }) && (
-              <button tw="bg-gray-200 p-1 rounded-lg items-center justify-center">
+              <button tw="bg-secondary p-1 rounded-lg items-center justify-center">
                 <IoIosArrowDown
                   tw="-rotate-90"
                   onClick={() => setBoundMultiple(boundMultiple * 2)}

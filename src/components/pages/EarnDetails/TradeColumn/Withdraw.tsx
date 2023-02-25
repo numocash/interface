@@ -24,6 +24,7 @@ import { priceToFraction } from "../../../../utils/Numoen/price";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
+import { CenterSwitch } from "../../../common/CenterSwitch";
 import { PercentageSlider } from "../../../common/inputs/PercentageSlider";
 import { useEarnDetails } from "../EarnDetailsInner";
 
@@ -196,17 +197,16 @@ export const Withdraw: React.FC = () => {
         </div>
       </button>
 
-      <div tw="flex flex-col rounded-lg bg-gray-100">
-        <div tw=" pb-3 gap-2 flex flex-col bg-white w-full">
+      <div tw="flex flex-col rounded-lg border-2 border-stroke">
+        <div tw=" px-2 py-1 gap-2 flex flex-col w-full">
           <PercentageSlider
             disabled={false}
             input={withdrawPercent}
             onChange={setWithdrawPercent}
           />
         </div>
-        <div tw="flex items-center justify-center self-center">
-          <div tw="text-secondary  justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-white w-0" />
-        </div>
+        <div tw=" border-b-2 w-full border-stroke" />
+        <CenterSwitch icon="arrow" />
         <div tw="flex flex-col gap-2 pt-3">
           <AssetSelection
             tw=""
