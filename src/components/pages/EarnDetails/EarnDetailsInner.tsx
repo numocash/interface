@@ -13,6 +13,7 @@ import {
   nextHighestLendgine,
   nextLowestLendgine,
 } from "../../../utils/Numoen/price";
+import { PageMargin } from "../../layout";
 import { History } from "./History/History";
 import { Positions } from "./History/Positions/Positions";
 import { Lendgines } from "./Lendgines";
@@ -99,23 +100,25 @@ export const EarnDetailsInner: React.FC<Props> = ({
   price,
 }: Props) => {
   return (
-    <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
-      <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
-        <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2 justify-self-center">
-          <Market />
-          <p tw="text-sm font-semibold text-headline">Select a pool</p>
-          <Lendgines />
-          <div tw="border-b-2 border-stroke" />
+    <PageMargin tw="w-full pt-8">
+      <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
+        <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
+          <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2 justify-self-center">
+            <Market />
+            <p tw="text-sm font-semibold text-headline">Select a pool</p>
+            <Lendgines />
+            <div tw="border-b-2 border-stroke" />
 
-          <History />
-          <Positions />
-        </div>
-        <div tw="flex max-w-sm justify-self-end">
-          {/* TODO: stick to the right side */}
-          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-1rem] hidden xl:flex" />
-          <TradeColumn tw="" />
-        </div>
-      </EarnDetailsProvider>
-    </div>
+            <History />
+            <Positions />
+          </div>
+          <div tw="flex max-w-sm justify-self-end">
+            {/* TODO: stick to the right side */}
+            <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-44px] hidden xl:flex" />
+            <TradeColumn tw="" />
+          </div>
+        </EarnDetailsProvider>
+      </div>
+    </PageMargin>
   );
 };

@@ -79,7 +79,6 @@ export const Deposit: React.FC = () => {
           : token1Amount.invert().quote(parsedAmount);
 
         const positionSize = liqPerPosition.invert().quote(liquidity);
-        console.log("yq", positionSize.toSignificant(5));
 
         const baseInputAmount = inverse
           ? token1Amount.quote(liquidity)

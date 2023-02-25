@@ -13,6 +13,7 @@ import {
   nextHighestLendgine,
   nextLowestLendgine,
 } from "../../../utils/Numoen/price";
+import { PageMargin } from "../../layout";
 import { Times } from "./Chart/TimeSelector";
 import { MainView } from "./MainView";
 import { TradeColumn, TradeType } from "./TradeColumn/TradeColumn";
@@ -114,15 +115,17 @@ export const TradeDetailsInner: React.FC<Props> = ({
   price,
 }: Props) => {
   return (
-    <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
-      <TradeDetailsProvider initialState={{ base, quote, lendgines, price }}>
-        <MainView />
-        <div tw="flex max-w-sm justify-self-end">
-          {/* TODO: stick to the right side */}
-          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-1rem] hidden xl:flex" />
-          <TradeColumn tw="" />
-        </div>
-      </TradeDetailsProvider>
-    </div>
+    <PageMargin tw="w-full pt-8">
+      <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
+        <TradeDetailsProvider initialState={{ base, quote, lendgines, price }}>
+          <MainView />
+          <div tw="flex max-w-sm justify-self-end">
+            {/* TODO: stick to the right side */}
+            <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-44px] hidden xl:flex" />
+            <TradeColumn tw="" />
+          </div>
+        </TradeDetailsProvider>
+      </div>
+    </PageMargin>
   );
 };

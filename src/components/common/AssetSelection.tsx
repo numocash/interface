@@ -12,11 +12,11 @@ import { TokenIcon } from "./TokenIcon";
 
 export const AssetSelectButton = styled.button(
   ({ noAsset }: { noAsset?: boolean }) => [
-    tw`relative flex items-center justify-between flex-none text-left text-black `,
+    tw`relative flex items-center justify-between flex-none px-2 text-left text-paragraph`,
     tw`text-base appearance-none cursor-pointer`,
     tw`whitespace-nowrap`,
     tw`shadow-none`,
-    noAsset && tw`text-black bg-brand `,
+    noAsset && tw`rounded-lg text-paragraph bg-brand`,
   ]
 );
 
