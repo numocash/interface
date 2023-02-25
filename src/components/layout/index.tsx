@@ -9,8 +9,6 @@ import { Header } from "./Header";
 import { PageLayout } from "./PageLayout";
 
 interface IProps {
-  sideNav?: React.ReactNode;
-  hideOptions?: boolean;
   children: ReactNode | ReactNode[];
 }
 
@@ -39,5 +37,9 @@ export const Layout: React.FC<IProps> = ({ children }: IProps) => {
 };
 
 const PageWrapper = styled.div`
-  ${tw`relative px-8 lg:px-10 xl:px-12 mx-auto md:(mb-12 mt-20) transform ease-in-out duration-300`}
+  ${tw`relative duration-300 ease-in-out transform`}
 `;
+
+export const PageMargin = styled.div(() => [
+  tw`px-8 lg:px-10 xl:px-12 mx-auto md:(mb-12 mt-20) mt-20`,
+]);

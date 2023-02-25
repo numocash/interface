@@ -161,7 +161,7 @@ const Wrapper: React.FC<WrapperProps> = ({
   children,
 }: WrapperProps) => {
   return positionValue?.greaterThan(0) ? (
-    <div tw="rounded-xl w-full border-2  border-secondary  ease-in-out hover:scale-110 duration-300 bg-secondary">
+    <div tw="rounded-xl w-full border-2  border-secondary  ease-in-out hover:scale-105 duration-300 bg-secondary">
       <div tw="py-2 px-4 gap-4 flex flex-col bg-background rounded-t-xl">
         {children}
       </div>

@@ -29,5 +29,5 @@ const ErrorMessage = styled.p`
 `;
 
 const PageContainer = styled.div`
-  ${tw`flex flex-col items-center mt-20 md:mt-12`}
+  ${tw`flex flex-col items-center `}
 `;

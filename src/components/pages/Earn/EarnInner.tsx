@@ -11,19 +11,22 @@ export const EarnInner: React.FC = () => {
   const { markets, assets, setAssets } = useEarn();
 
   return (
-    <div tw="grid w-full max-w-4xl flex-col gap-4">
+    <>
       <Explain />
-      <Display numMarkets={markets?.length} />
-      <div tw="flex w-full justify-between gap-4">
-        <Filter assets={assets} setAssets={setAssets} />
-        {/* <Sort /> */}
-        <NavLink to="/create/">
-          <Button tw="py-2 px-4 rounded-lg text-lg" variant="primary">
-            Create new market
-          </Button>
-        </NavLink>
+      <div tw="border-b-2 border-stroke h-72 relative mt-[-288px] bg-secondary -z-10 w-full" />
+      <div tw="grid w-full max-w-3xl flex-col gap-4 pt-8">
+        <Display numMarkets={markets?.length} />
+        <div tw="flex w-full justify-between gap-4">
+          <Filter assets={assets} setAssets={setAssets} />
+          {/* <Sort /> */}
+          <NavLink to="/create/">
+            <Button tw="py-2 px-4 rounded-lg text-lg" variant="primary">
+              Create new market
+            </Button>
+          </NavLink>
+        </div>
+        <Markets />
       </div>
-      <Markets />
-    </div>
+    </>
   );
 };

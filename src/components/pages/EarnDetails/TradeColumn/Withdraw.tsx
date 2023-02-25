@@ -169,9 +169,7 @@ export const Withdraw: React.FC = () => {
           !baseAmount ||
           !size ||
           !liquidity ||
-          lendgineInfoQuery.isLoading ||
-          !lendgineInfoQuery.data ||
-          prepareRemove.isLoading
+          !lendgineInfoQuery.data
         ? "Loading"
         : liquidity.greaterThan(lendgineInfoQuery.data.totalLiquidity)
         ? "Insufficient liquidity"
@@ -179,9 +177,7 @@ export const Withdraw: React.FC = () => {
     [
       baseAmount,
       lendgineInfoQuery.data,
-      lendgineInfoQuery.isLoading,
       liquidity,
-      prepareRemove.isLoading,
       quoteAmount,
       size,
       withdrawPercent,

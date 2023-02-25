@@ -1,5 +1,7 @@
 import { useRive } from "@rive-app/react-canvas";
 
+import { PageMargin } from "../../../layout";
+
 export const Explain: React.FC = () => {
   const rive = useRive({
     src: "safe.riv",
@@ -7,13 +9,15 @@ export const Explain: React.FC = () => {
     animations: ["Example"],
   });
   return (
-    <div tw="w-full flex rounded-xl justify-between gap-4 items-center mt-[-1rem] mb-[-4rem] h-64">
-      <ExplainItem
-        title="Provide liquidity"
-        description="Power tokens maintain constant leverage, through a novel mechanism of borrowing AMM shares."
-      />
-      <rive.RiveComponent tw="w-64 h-64" />
-    </div>
+    <PageMargin>
+      <div tw="w-full flex rounded-xl justify-between gap-4 items-center mt-[-1rem] mb-[-4rem] h-64 max-w-3xl">
+        <ExplainItem
+          title="Provide liquidity"
+          description="Power tokens maintain constant leverage, through a novel mechanism of borrowing AMM shares."
+        />
+        <rive.RiveComponent tw="w-64 h-64" />
+      </div>
+    </PageMargin>
   );
 };
 

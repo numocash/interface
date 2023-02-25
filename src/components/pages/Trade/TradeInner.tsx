@@ -7,14 +7,18 @@ import { Markets } from "./Markets";
 export const TradeInner: React.FC = () => {
   const { markets, assets, setAssets } = useTrade();
   return (
-    <div tw="flex flex-col gap-4 w-full max-w-3xl">
+    <>
       <Explain />
-      <Display numMarkets={markets?.length} />
-      <div tw="flex gap-4">
-        <Filter assets={assets} setAssets={setAssets} />
-        {/* <Sort /> */}
+      <div tw="border-b-2 border-stroke h-72 relative mt-[-288px] bg-secondary -z-10 w-full" />
+
+      <div tw="flex flex-col gap-4 w-full max-w-3xl justify-center pt-8">
+        <Display numMarkets={markets?.length} />
+        <div tw="flex gap-4">
+          <Filter assets={assets} setAssets={setAssets} />
+          {/* <Sort /> */}
+        </div>
+        <Markets />
       </div>
-      <Markets />
-    </div>
+    </>
   );
 };
