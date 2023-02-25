@@ -1,6 +1,6 @@
 import type { BigNumber } from "@ethersproject/bignumber";
 import { useQuery } from "@tanstack/react-query";
-import { CurrencyAmount, Price, Token } from "@uniswap/sdk-core";
+import { CurrencyAmount, Fraction, Token } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import { chunk } from "lodash";
 import { useCallback, useMemo } from "react";
@@ -23,6 +23,7 @@ import { LendginesDocument } from "../gql/numoen/graphql";
 import type { RawLendgine } from "../services/graphql/numoen";
 import { parseLendgines } from "../services/graphql/numoen";
 import { fractionToPrice } from "../utils/Numoen/price";
+import { scale } from "../utils/Numoen/trade";
 import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
@@ -114,11 +115,10 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
         lendgine.lendgine,
         lendgineInfo[1].toString()
       ),
-      rewardPerPositionStored: new Price(
+      rewardPerPositionStored: fractionToPrice(
+        new Fraction(lendgineInfo[2].toString(), scale),
         lendgine.lendgine,
-        lendgine.token1,
-        1,
-        lendgineInfo[2].toString()
+        lendgine.token1
       ),
       lastUpdate: +lendgineInfo[3].toString(),
       totalSupply: CurrencyAmount.fromRawAmount(
@@ -231,11 +231,10 @@ export const useLendgines = <L extends Lendgine>(
           lendgine.lendgine,
           lendgineInfo[1].toString()
         ),
-        rewardPerPositionStored: new Price(
+        rewardPerPositionStored: fractionToPrice(
+          new Fraction(lendgineInfo[2].toString(), scale),
           lendgine.lendgine,
-          lendgine.token1,
-          1,
-          lendgineInfo[2].toString()
+          lendgine.token1
         ),
         lastUpdate: +lendgineInfo[3].toString(),
         totalSupply: CurrencyAmount.fromRawAmount(
@@ -295,11 +294,10 @@ export const useLendginePosition = <L extends Lendgine>(
         lendgine.lendgine,
         position.size.toString()
       ),
-      rewardPerPositionPaid: new Price(
+      rewardPerPositionPaid: fractionToPrice(
+        new Fraction(position.rewardPerPositionPaid.toString()),
         lendgine.lendgine,
-        lendgine.token1,
-        1,
-        position.rewardPerPositionPaid.toString()
+        lendgine.token1
       ),
       tokensOwed: CurrencyAmount.fromRawAmount(
         lendgine.token1,
@@ -365,11 +363,10 @@ export const useLendginesPosition = <L extends Lendgine>(
           lendgine.lendgine,
           p.size.toString()
         ),
-        rewardPerPositionPaid: new Price(
+        rewardPerPositionPaid: fractionToPrice(
+          new Fraction(p.rewardPerPositionPaid.toString(), scale),
           lendgine.lendgine,
-          lendgine.token1,
-          1,
-          p.rewardPerPositionPaid.toString()
+          lendgine.token1
         ),
         tokensOwed: CurrencyAmount.fromRawAmount(
           lendgine.token1,

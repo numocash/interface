@@ -1,4 +1,4 @@
-import { CurrencyAmount, Fraction, Price } from "@uniswap/sdk-core";
+import { Fraction } from "@uniswap/sdk-core";
 
 import type {
   Lendgine,
@@ -72,41 +72,35 @@ export const accruedLendgineInfo = <L extends Lendgine>(
 
   const dilutionToken1 = liqPerCol.invert().quote(dilutionLP);
 
-  const f = lendgineInfo.rewardPerPositionStored.add(
-    dilutionToken1.divide(lendgineInfo.totalPositionSize)
+  const f = priceToFraction(lendgineInfo.rewardPerPositionStored).add(
+    dilutionToken1.asFraction.divide(lendgineInfo.totalPositionSize.asFraction)
   );
 
   return {
     ...lendgineInfo,
     totalLiquidityBorrowed:
       lendgineInfo.totalLiquidityBorrowed.subtract(dilutionLP),
-    rewardPerPositionStored: new Price(
+    rewardPerPositionStored: fractionToPrice(
+      f,
       lendgine.lendgine,
-      lendgine.token1,
-      f.denominator,
-      f.numerator
+      lendgine.token1
     ),
   };
 };
 
 export const accruedLendginePositionInfo = <L extends Lendgine>(
-  lendgine: L,
   lendgineInfo: LendgineInfo<L>,
   lendginePosition: LendginePosition<L>
 ): LendginePosition<L> => {
-  const f = lendginePosition.size.multiply(
-    lendgineInfo.rewardPerPositionStored.subtract(
-      lendginePosition.rewardPerPositionPaid
-    )
-  );
+  const newTokensOwed = lendgineInfo.rewardPerPositionStored
+    .quote(lendginePosition.size)
+    .subtract(
+      lendginePosition.rewardPerPositionPaid.quote(lendginePosition.size)
+    );
+
   return {
     ...lendginePosition,
-    tokensOwed: lendginePosition.tokensOwed.add(
-      CurrencyAmount.fromFractionalAmount(
-        lendgine.token1,
-        f.numerator,
-        f.denominator
-      )
-    ),
+    tokensOwed: lendginePosition.tokensOwed.add(newTokensOwed),
+    rewardPerPositionPaid: lendgineInfo.rewardPerPositionStored,
   };
 };

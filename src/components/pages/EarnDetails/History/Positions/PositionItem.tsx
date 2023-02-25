@@ -45,7 +45,6 @@ export const PositionItem: React.FC<Props> = ({
     () => ({
       updatedLendgineInfo: accruedLendgineInfo(lendgine, lendgineInfo),
       updatedPositionInfo: accruedLendginePositionInfo(
-        lendgine,
         accruedLendgineInfo(lendgine, lendgineInfo),
         position
       ),
@@ -116,10 +115,7 @@ export const PositionItem: React.FC<Props> = ({
         <AsyncButton
           variant="primary"
           tw="w-min px-1 py-0.5"
-          disabled={
-            prepareCollect.isLoading ||
-            updatedPositionInfo.tokensOwed.equalTo(0)
-          }
+          disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
           onClick={async () => {
             await Beet([
               {
