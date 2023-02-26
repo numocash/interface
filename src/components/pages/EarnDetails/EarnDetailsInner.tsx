@@ -107,7 +107,7 @@ export const EarnDetailsInner: React.FC<Props> = ({
   price,
 }: Props) => {
   return (
-    <PageMargin tw="w-full pt-8">
+    <PageMargin tw="w-full ">
       <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
         <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
           <TradeModal />

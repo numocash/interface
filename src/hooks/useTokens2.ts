@@ -87,6 +87,11 @@ export class WrappedTokenInfo implements Token {
   }
 }
 
+// export const useTokenSymbol = (token: WrappedTokenInfo): string => {
+//   const environment = useEnvironment();
+// return token.equals(environment.interface.wrappedNative)
+// }
+
 export const useDefaultTokenListQueryKey = () => {
   const environment = useEnvironment();
   return ["token list", environment.interface.defaultActiveLists] as const;

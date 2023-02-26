@@ -18,7 +18,9 @@ export const liquidityPerShare = <L extends Lendgine>(
       lendgine.lendgine,
       lendgine.lendgine
     );
-  const f = lendgineInfo.totalLiquidity.divide(lendgineInfo.totalSupply);
+  const f = lendgineInfo.totalLiquidityBorrowed.divide(
+    lendgineInfo.totalSupply
+  );
   return fractionToPrice(f, lendgine.lendgine, lendgine.lendgine);
 };
 

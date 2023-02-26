@@ -1,4 +1,4 @@
-import type { Fraction } from "@uniswap/sdk-core";
+import type { Price } from "@uniswap/sdk-core";
 import { curveNatural } from "@visx/curve";
 import { Group } from "@visx/group";
 import { scaleLinear } from "@visx/scale";
@@ -8,10 +8,12 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
 import type { usePriceHistory } from "../../../hooks/useExternalExchange";
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import { fractionToPrice } from "../../../utils/Numoen/price";
 
 interface Props {
   priceHistory: NonNullable<ReturnType<typeof usePriceHistory>["data"]>;
-  currentPrice: Fraction;
+  currentPrice: Price<WrappedTokenInfo, WrappedTokenInfo>;
 }
 
 export const MiniChart: React.FC<Props> = ({
@@ -22,7 +24,13 @@ export const MiniChart: React.FC<Props> = ({
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
-    return currentPrice.greaterThan(oneDayOldPrice);
+    return currentPrice.greaterThan(
+      fractionToPrice(
+        oneDayOldPrice,
+        currentPrice.baseCurrency,
+        currentPrice.quoteCurrency
+      )
+    );
   }, [currentPrice, priceHistory]);
 
   const getX = useMemo(

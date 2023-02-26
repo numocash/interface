@@ -3,17 +3,9 @@ import { useMemo } from "react";
 
 import type { Lendgine, LendgineInfo } from "../../../../../constants/types";
 import { formatPrice } from "../../../../../utils/format";
-import {
-  liquidityPerCollateral,
-  liquidityPerShare,
-} from "../../../../../utils/Numoen/lendgineMath";
-import {
-  invert,
-  numoenPrice,
-  pricePerLiquidity,
-} from "../../../../../utils/Numoen/price";
+import { numoenPrice } from "../../../../../utils/Numoen/price";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
-import { useTradeDetails } from "../../TradeDetailsInner";
+import { usePositionValue, useTradeDetails } from "../../TradeDetailsInner";
 
 type Props<L extends Lendgine = Lendgine> = {
   balance: CurrencyAmount<Token>;
@@ -31,33 +23,16 @@ export const PositionItem: React.FC<Props> = ({
   const symbol = quote.symbol + (lendgine.token1.equals(quote) ? "+" : "-");
   const isInverse = base.equals(lendgine.token1);
 
+  const positionValue = usePositionValue(lendgine);
+
   const value = useMemo(() => {
+    if (!positionValue) return undefined;
     // token0 / token1
     const price = numoenPrice(lendgine, lendgineInfo);
 
-    // token0 / liq
-    const liquidityPrice = pricePerLiquidity({ lendgine, price });
+    return isInverse ? positionValue : price.quote(positionValue);
+  }, [isInverse, lendgine, lendgineInfo, positionValue]);
 
-    // liq / share
-    const liqPerShare = liquidityPerShare(lendgine, lendgineInfo);
-
-    // liq
-    const liquidity = liqPerShare.quote(balance);
-
-    // token0
-    const liquidityDebt = liquidityPrice.quote(liquidity);
-
-    // liq / token1
-    const liqPerCol = liquidityPerCollateral(lendgine);
-
-    // token0
-    const collateralValue = price.quote(liqPerCol.invert().quote(liquidity));
-
-    // token0
-    const value = collateralValue.subtract(liquidityDebt);
-
-    return isInverse ? invert(price).quote(value) : value;
-  }, [balance, isInverse, lendgine, lendgineInfo]);
   return (
     <div
       tw="w-full justify-between  grid grid-cols-9  h-12 items-center"
@@ -68,11 +43,15 @@ export const PositionItem: React.FC<Props> = ({
         {formatPrice(isInverse ? lendgine.bound.invert() : lendgine.bound)}
       </p>
 
-      <TokenAmountDisplay
-        amount={value}
-        showSymbol
-        tw="col-span-2 justify-self-start"
-      />
+      {value ? (
+        <TokenAmountDisplay
+          amount={value}
+          showSymbol
+          tw="col-span-2 justify-self-start"
+        />
+      ) : (
+        ""
+      )}
       <p tw="justify-self-start col-span-2">N/A</p>
 
       <button

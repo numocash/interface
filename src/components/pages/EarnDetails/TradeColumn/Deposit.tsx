@@ -107,7 +107,6 @@ export const Deposit: React.FC = () => {
       const liquidity = updatedInfo.totalLiquidity.multiply(share);
 
       const positionSize = liqPerPosition.invert().quote(liquidity);
-      console.log("yq", positionSize.toSignificant(5));
 
       // TODO: make sure the tokens are correct
       return {

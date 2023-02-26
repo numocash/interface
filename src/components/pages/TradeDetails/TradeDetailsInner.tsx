@@ -2,14 +2,23 @@ import type { Price } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
+import { useAccount } from "wagmi";
 
 import type { Lendgine } from "../../../constants/types";
+import { useBalance } from "../../../hooks/useBalance";
+import { useLendgine } from "../../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import {
   isLongLendgine,
+  isShortLendgine,
   pickLongLendgines,
   pickShortLendgines,
 } from "../../../utils/lendgines";
+import {
+  accruedLendgineInfo,
+  liquidityPerCollateral,
+  liquidityPerShare,
+} from "../../../utils/Numoen/lendgineMath";
 import {
   nextHighestLendgine,
   nextLowestLendgine,
@@ -146,6 +155,62 @@ export const useNextLendgines = () => {
 export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =
   createContainer(useTradeDetailsInternal);
 
+export const usePositionValue = (lendgine: Lendgine) => {
+  const { address } = useAccount();
+  const { price: referencePrice, base } = useTradeDetails();
+
+  const balanceQuery = useBalance(lendgine.lendgine, address);
+  const lendgineInfoQuery = useLendgine(lendgine);
+
+  const { value } = useMemo(() => {
+    if (!balanceQuery.data || !lendgineInfoQuery.data) return {};
+
+    const updatedLendgineInfo = accruedLendgineInfo(
+      lendgine,
+      lendgineInfoQuery.data
+    );
+
+    // liq
+    const liquidity = liquidityPerShare(lendgine, updatedLendgineInfo).quote(
+      balanceQuery.data
+    );
+
+    // token1
+    const collateral = liquidityPerCollateral(lendgine)
+      .invert()
+      .quote(liquidity);
+
+    const token0Amount = updatedLendgineInfo.reserve0
+      .multiply(liquidity)
+      .divide(updatedLendgineInfo.totalLiquidity);
+    const token1Amount = updatedLendgineInfo.reserve1
+      .multiply(liquidity)
+      .divide(updatedLendgineInfo.totalLiquidity);
+
+    // token0 / token1
+    const referencePriceAdjusted = isShortLendgine(lendgine, base)
+      ? referencePrice.invert()
+      : referencePrice;
+
+    // token1
+    const debtValue = token1Amount.add(
+      referencePriceAdjusted.invert().quote(token0Amount)
+    );
+
+    const value = collateral.subtract(debtValue);
+
+    return { value };
+  }, [
+    balanceQuery.data,
+    base,
+    lendgine,
+    lendgineInfoQuery.data,
+    referencePrice,
+  ]);
+
+  return value;
+};
+
 export const TradeDetailsInner: React.FC<Props> = ({
   base,
   quote,
@@ -188,7 +253,7 @@ const TradeDetailsInnerInner: React.FC = () => {
   );
   return (
     <>
-      <PageMargin tw="w-full  pb-12 sm:pb-0">
+      <PageMargin tw="w-full pb-12 sm:pb-0">
         <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
           <MainView />
           <div tw="flex max-w-sm justify-self-end">

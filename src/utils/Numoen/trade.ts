@@ -5,13 +5,11 @@ import JSBI from "jsbi";
 import type { Lendgine, LendgineInfo } from "../../constants/types";
 import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { liquidityPerCollateral } from "./lendgineMath";
-import { numoenPrice, priceToReserves } from "./price";
 
 export const ONE_HUNDRED_PERCENT = new Fraction(1);
 
 export const scale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18));
 
-// TODO: decimal error here
 export const determineBorrowAmount = (
   userAmount: CurrencyAmount<WrappedTokenInfo>,
   lendgine: Lendgine,
@@ -21,22 +19,27 @@ export const determineBorrowAmount = (
 ) => {
   const liqPerCol = liquidityPerCollateral(lendgine);
   const userLiquidity = liqPerCol.quote(userAmount);
-  const price = numoenPrice(lendgine, lendgineInfo);
 
-  const { token0Amount, token1Amount } = priceToReserves(lendgine, price);
+  const token0Amount = lendgineInfo.reserve0
+    .multiply(userLiquidity)
+    .divide(lendgineInfo.totalLiquidity);
+
+  const token1Amount = lendgineInfo.reserve1
+    .multiply(userLiquidity)
+    .divide(lendgineInfo.totalLiquidity);
+
   const expectedSwapOutput = referencePrice
     .invert()
-    .quote(token0Amount.quote(userLiquidity))
+    .quote(token0Amount)
     .multiply(ONE_HUNDRED_PERCENT.subtract(slippageBps));
-  // TODO: problem here on inverse markets
 
   const userLiquidityValue = userAmount.subtract(
-    token1Amount.quote(userLiquidity).add(expectedSwapOutput)
+    token1Amount.add(expectedSwapOutput)
   );
 
   const multiple = userAmount.divide(
     userAmount.subtract(userLiquidityValue)
   ).asFraction;
 
-  return userAmount.multiply(multiple);
+  return userAmount.multiply(multiple.subtract(1));
 };

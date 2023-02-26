@@ -20,6 +20,7 @@ import { useBeet } from "../../../../utils/beet";
 import { isLongLendgine } from "../../../../utils/lendgines";
 import { borrowRate } from "../../../../utils/Numoen/jumprate";
 import {
+  accruedLendgineInfo,
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../utils/Numoen/lendgineMath";
@@ -62,15 +63,18 @@ export const Buy: React.FC = () => {
     [input, selectedLendgine.token1]
   );
   const approve = useApprove(parsedAmount, environment.base.lendgineRouter);
-  // TODO: short funding rate is wrong
   const { borrowAmount, liquidity, shares, bRate } = useMemo(() => {
     if (selectedLendgineInfo.data?.totalLiquidity.equalTo(0)) return {};
     if (!selectedLendgineInfo.data) return {};
-
-    const price = numoenPrice(selectedLendgine, selectedLendgineInfo.data);
-    const liqPerShare = liquidityPerShare(
+    const updatedLendgineInfo = accruedLendgineInfo(
       selectedLendgine,
       selectedLendgineInfo.data
+    );
+
+    const price = numoenPrice(selectedLendgine, updatedLendgineInfo);
+    const liqPerShare = liquidityPerShare(
+      selectedLendgine,
+      updatedLendgineInfo
     );
     const liqPerCol = liquidityPerCollateral(selectedLendgine);
 
@@ -78,8 +82,8 @@ export const Buy: React.FC = () => {
       ? determineBorrowAmount(
           parsedAmount,
           selectedLendgine,
-          selectedLendgineInfo.data,
-          base.equals(selectedLendgine.token0)
+          updatedLendgineInfo,
+          isLongLendgine(selectedLendgine, base)
             ? referencePrice
             : invert(referencePrice),
           settings.maxSlippagePercent
@@ -96,17 +100,16 @@ export const Buy: React.FC = () => {
       : undefined;
 
     const bRate = borrowRate({
-      totalLiquidity: selectedLendgineInfo.data.totalLiquidity.subtract(
+      totalLiquidity: updatedLendgineInfo.totalLiquidity.subtract(
         liquidity
           ? liquidity
           : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
       ),
-      totalLiquidityBorrowed:
-        selectedLendgineInfo.data.totalLiquidityBorrowed.add(
-          liquidity
-            ? liquidity
-            : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
-        ),
+      totalLiquidityBorrowed: updatedLendgineInfo.totalLiquidityBorrowed.add(
+        liquidity
+          ? liquidity
+          : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
+      ),
     });
 
     return { price, borrowAmount, liquidity, shares, bRate };

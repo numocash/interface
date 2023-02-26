@@ -39,7 +39,7 @@ import { useClient } from "./useClient";
 import type { Market } from "./useMarket";
 import type { WrappedTokenInfo } from "./useTokens2";
 
-const isV3 = (t: UniswapV2Pool | UniswapV3Pool): t is UniswapV3Pool =>
+export const isV3 = (t: UniswapV2Pool | UniswapV3Pool): t is UniswapV3Pool =>
   "feeTier" in t;
 
 export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
@@ -95,7 +95,7 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
       };
     },
     {
-      staleTime: Infinity,
+      staleTime: 1000,
     }
   );
 };

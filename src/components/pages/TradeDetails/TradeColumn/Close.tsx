@@ -1,10 +1,10 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
-import { CurrencyAmount } from "@uniswap/sdk-core";
+import { defaultAbiCoder } from "ethers/lib/utils.js";
 import { useMemo, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
-import type { usePrepareContractWrite } from "wagmi";
+import type { Address, usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../../contexts/environment2";
@@ -15,19 +15,20 @@ import {
 } from "../../../../generated";
 import { useApprove } from "../../../../hooks/useApproval";
 import { useBalance } from "../../../../hooks/useBalance";
+import {
+  isV3,
+  useMostLiquidMarket,
+} from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import type { BeetStage } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
+import { isShortLendgine } from "../../../../utils/lendgines";
 import {
+  accruedLendgineInfo,
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../utils/Numoen/lendgineMath";
-import {
-  invert,
-  numoenPrice,
-  pricePerLiquidity,
-  priceToFraction,
-} from "../../../../utils/Numoen/price";
+import { invert, priceToFraction } from "../../../../utils/Numoen/price";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
@@ -36,104 +37,82 @@ import { LoadingSpinner } from "../../../common/LoadingSpinner";
 import { RowBetween } from "../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../common/VerticalItem";
-import { useTradeDetails } from "../TradeDetailsInner";
+import { usePositionValue, useTradeDetails } from "../TradeDetailsInner";
 
 interface Props {
   modal: boolean;
 }
 
 export const Close: React.FC<Props> = ({ modal }: Props) => {
-  const { setClose, quote, selectedLendgine } = useTradeDetails();
-
   const environment = useEnvironment();
+  const { address } = useAccount();
   const settings = useSettings();
   const Beet = useBeet();
-  const { address } = useAccount();
-  const isInverse = selectedLendgine.token1.equals(quote);
-  const symbol = quote.symbol + (isInverse ? "+" : "-");
 
-  const lendgineInfoQuery = useLendgine(selectedLendgine);
+  const { setClose, quote, selectedLendgine, price, base } = useTradeDetails();
+
+  const isInverse = isShortLendgine(selectedLendgine, base);
+  const mostLiquid = useMostLiquidMarket([base, quote]);
+
   const balanceQuery = useBalance(selectedLendgine.lendgine, address);
+  const lendgineInfoQuery = useLendgine(selectedLendgine);
 
   const [input, setInput] = useState("");
+
+  const symbol = quote.symbol + (isInverse ? "-" : "+");
 
   const parsedAmount = useMemo(
     () => tryParseCurrencyAmount(input, selectedLendgine.token1),
     [input, selectedLendgine.token1]
   );
 
-  // TODO: account for unaccrued interest
-  const {
-    value: positionValue,
-    shares,
-    amount0,
-    amount1,
-  } = useMemo(() => {
-    if (
-      !lendgineInfoQuery.data ||
-      lendgineInfoQuery.isLoading ||
-      !balanceQuery.data ||
-      balanceQuery.isLoading
-    )
-      return {};
+  const positionValue = usePositionValue(selectedLendgine);
 
-    // token0 / token1
-    const price = numoenPrice(selectedLendgine, lendgineInfoQuery.data);
+  const { shares, amount0, amount1 } = useMemo(() => {
+    if (!positionValue) return {};
 
-    const liquidityPrice = pricePerLiquidity({
-      lendgine: selectedLendgine,
-      price,
-    });
+    if (!parsedAmount || !balanceQuery.data || !lendgineInfoQuery.data)
+      return { positionValue };
 
-    // liq / share
-    const liqPerShare = liquidityPerShare(
+    const updateLendgineInfo = accruedLendgineInfo(
       selectedLendgine,
       lendgineInfoQuery.data
     );
 
-    // liq / token1
-    const liqPerCol = liquidityPerCollateral(selectedLendgine);
+    const shares = balanceQuery.data
+      .multiply(parsedAmount)
+      .divide(positionValue);
 
-    const liquidity = liqPerShare.quote(balanceQuery.data);
+    const liquidityMinted = liquidityPerShare(
+      selectedLendgine,
+      updateLendgineInfo
+    ).quote(shares);
 
-    // token0
-    const liquidityDebt = liquidityPrice.quote(liquidity);
+    const amount0 = updateLendgineInfo.reserve0
+      .multiply(liquidityMinted)
+      .divide(updateLendgineInfo.totalLiquidity);
 
-    // token0
-    const collateralValue = price.quote(liqPerCol.invert().quote(liquidity));
+    const amount1 = updateLendgineInfo.reserve1
+      .multiply(liquidityMinted)
+      .divide(updateLendgineInfo.totalLiquidity);
 
-    // token1
-    const value = invert(price).quote(collateralValue.subtract(liquidityDebt));
+    // token0 / token1
+    const referencePriceAdjusted = isInverse ? invert(price) : price;
 
-    if (!parsedAmount) return { value };
+    const collateral = liquidityPerCollateral(selectedLendgine)
+      .invert()
+      .quote(liquidityMinted)
+      .subtract(amount1)
+      .subtract(referencePriceAdjusted.invert().quote(amount0));
 
-    const sharesFraction = parsedAmount
-      .multiply(balanceQuery.data)
-      .divide(value);
-
-    const shares = CurrencyAmount.fromFractionalAmount(
-      selectedLendgine.lendgine,
-      sharesFraction.quotient,
-      1
-    );
-
-    const liquidityMinted = liqPerShare.quote(shares);
-
-    const amount0 = liquidityMinted
-      .multiply(lendgineInfoQuery.data.reserve0)
-      .divide(lendgineInfoQuery.data.totalLiquidity);
-
-    const amount1 = liquidityMinted
-      .multiply(lendgineInfoQuery.data.reserve1)
-      .divide(lendgineInfoQuery.data.totalLiquidity);
-
-    return { value, shares, amount0, amount1 };
+    return { shares, amount0, amount1, collateral };
   }, [
     balanceQuery.data,
-    balanceQuery.isLoading,
+    isInverse,
     lendgineInfoQuery.data,
-    lendgineInfoQuery.isLoading,
     parsedAmount,
+    positionValue,
+    price,
     selectedLendgine,
   ]);
 
@@ -142,7 +121,12 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
 
   const args = useMemo(
     () =>
-      !!shares && !!parsedAmount && !!address && !!amount0 && !!amount1
+      !!shares &&
+      !!parsedAmount &&
+      !!address &&
+      !!amount0 &&
+      !!amount1 &&
+      !!mostLiquid.data
         ? ([
             {
               token0: getAddress(selectedLendgine.token0.address),
@@ -176,8 +160,17 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
                   )
                   .quotient.toString()
               ),
-              swapType: 0,
-              swapExtraData: AddressZero,
+              swapType: isV3(mostLiquid.data.pool) ? 1 : 0,
+              swapExtraData: isV3(mostLiquid.data.pool)
+                ? (defaultAbiCoder.encode(
+                    ["tuple(uint24 fee)"],
+                    [
+                      {
+                        fee: mostLiquid.data.pool.feeTier,
+                      },
+                    ]
+                  ) as Address)
+                : AddressZero,
               recipient: address,
               deadline: BigNumber.from(
                 Math.round(Date.now() / 1000) + settings.timeout * 60
@@ -189,6 +182,7 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
       address,
       amount0,
       amount1,
+      mostLiquid.data,
       parsedAmount,
       selectedLendgine.bound,
       selectedLendgine.token0.address,
