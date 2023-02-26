@@ -72,5 +72,5 @@ export const HeaderItem: React.FC<HeaderItemProps> = ({
 };
 
 const ItemWrapper = styled.div`
-  ${tw`flex flex-col items-center gap-1 px-2 py-1 text-secondary rounded-lg hover:(bg-secondary text-headline) transform duration-300 ease-in-out`}
+  ${tw`flex flex-col items-center gap-1 px-2 py-1 text-secondary rounded-lg hover:(scale-110 text-headline) transform duration-300 ease-in-out`}
 `;

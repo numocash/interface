@@ -1,16 +1,7 @@
-import { useMemo } from "react";
 import tw, { css } from "twin.macro";
 
-import {
-  isLongLendgine,
-  pickLongLendgines,
-  pickShortLendgines,
-} from "../../../../utils/lendgines";
-import {
-  nextHighestLendgine,
-  nextLowestLendgine,
-} from "../../../../utils/Numoen/price";
-import { useTradeDetails } from "../TradeDetailsInner";
+import { isLongLendgine } from "../../../../utils/lendgines";
+import { useNextLendgines, useTradeDetails } from "../TradeDetailsInner";
 import { Config } from "./Config";
 import { ProvideLiquidity } from "./ProvideLiquidity";
 import { Returns } from "./Returns";
@@ -24,43 +15,10 @@ export enum TradeType {
 }
 
 export const TradeColumn: React.FC = () => {
-  const {
-    trade,
-    lendgines,
-    base,
-    setSelectedLendgine,
-    selectedLendgine,
-    close,
-    price,
-  } = useTradeDetails();
+  const { trade, base, setSelectedLendgine, selectedLendgine, close } =
+    useTradeDetails();
 
-  const { longLendgine, shortLendgine } = useMemo(() => {
-    const longLendgines = pickLongLendgines(lendgines, base);
-    const shortLendgines = pickShortLendgines(lendgines, base);
-    const nextLongLendgine = nextHighestLendgine({
-      price,
-      lendgines: longLendgines,
-    });
-    const nextShortLendgine = nextHighestLendgine({
-      price: price.invert(),
-      lendgines: shortLendgines,
-    });
-    const secondLongLendgine = nextLowestLendgine({
-      price,
-      lendgines: longLendgines,
-    });
-    const secondShortLendgine = nextLowestLendgine({
-      price: price.invert(),
-      lendgines: shortLendgines,
-    });
-
-    return {
-      longLendgine: nextLongLendgine ?? secondLongLendgine,
-      shortLendgine: nextShortLendgine ?? secondShortLendgine,
-    };
-  }, [base, lendgines, price]);
-
-  const selectedLong = isLongLendgine(selectedLendgine, base);
+  const { longLendgine, shortLendgine } = useNextLendgines();
 
   const Tabs = (
     <div tw="flex gap-4 text-sm items-center w-full col-start-2 col-span-5">
@@ -74,7 +32,7 @@ export const TradeColumn: React.FC = () => {
               css={css`
                 ${tw`text-xl font-semibold rounded-lg text-secondary `}
                 ${tw`hover:(text-headline) transform duration-300 ease-in-out`}
-                ${isLong === selectedLong && tw`text-headline`}
+                ${s === selectedLendgine && tw`text-headline`}
               `}
               onClick={() => {
                 setSelectedLendgine(s);

@@ -38,7 +38,11 @@ import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../common/VerticalItem";
 import { useTradeDetails } from "../TradeDetailsInner";
 
-export const Close: React.FC = () => {
+interface Props {
+  modal: boolean;
+}
+
+export const Close: React.FC<Props> = ({ modal }: Props) => {
   const { setClose, quote, selectedLendgine } = useTradeDetails();
 
   const environment = useEnvironment();
@@ -235,13 +239,15 @@ export const Close: React.FC = () => {
 
   return (
     <div tw="flex flex-col gap-4 w-full">
-      <button onClick={() => setClose(false)} tw="items-center flex">
-        <div tw="text-xs flex gap-1 items-center">
-          <FaChevronLeft />
-          Back
-        </div>
-      </button>
-      <RowBetween tw="items-center p-0 pb-2">
+      {!modal && (
+        <button onClick={() => setClose(false)} tw="items-center flex">
+          <div tw="text-xs flex gap-1 items-center">
+            <FaChevronLeft />
+            Back
+          </div>
+        </button>
+      )}
+      <RowBetween tw="items-center p-0 ">
         <div tw="rounded-lg bg-secondary px-2 py-1 text-lg font-semibold">
           {symbol}
         </div>

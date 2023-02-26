@@ -26,7 +26,8 @@ export const PositionItem: React.FC<Props> = ({
   lendgine,
   lendgineInfo,
 }: Props) => {
-  const { base, quote, setSelectedLendgine, setClose } = useTradeDetails();
+  const { base, quote, setSelectedLendgine, setClose, setModalOpen } =
+    useTradeDetails();
   const symbol = quote.symbol + (lendgine.token1.equals(quote) ? "+" : "-");
   const isInverse = base.equals(lendgine.token1);
 
@@ -75,9 +76,19 @@ export const PositionItem: React.FC<Props> = ({
       <p tw="justify-self-start col-span-2">N/A</p>
 
       <button
-        tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90"
+        tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 hidden xl:flex"
         onClick={() => {
           setClose(true);
+          setSelectedLendgine(lendgine);
+        }}
+      >
+        Close
+      </button>
+      <button
+        tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:hidden"
+        onClick={() => {
+          setClose(true);
+          setModalOpen(true);
           setSelectedLendgine(lendgine);
         }}
       >

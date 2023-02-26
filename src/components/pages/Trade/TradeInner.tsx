@@ -12,10 +12,10 @@ export const TradeInner: React.FC = () => {
       <Explain />
       <div tw="border-b-2 border-stroke h-72 relative mt-[-288px] bg-secondary -z-10 w-full" />
 
-      <PageMargin tw="mt-8 w-full max-w-4xl">
-        <div tw="flex flex-col gap-4 w-full justify-center">
+      <PageMargin tw="mt-8 w-full max-w-4xl ">
+        <div tw="flex flex-col gap-4 w-full ">
           <Display numMarkets={markets?.length} />
-          <div tw="flex gap-4">
+          <div tw="flex gap-4 items-center">
             <Filter assets={assets} setAssets={setAssets} />
             {/* <Sort /> */}
           </div>

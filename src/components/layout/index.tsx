@@ -37,7 +37,7 @@ export const Layout: React.FC<IProps> = ({ children }: IProps) => {
 };
 
 const PageWrapper = styled.div`
-  ${tw`relative duration-300 ease-in-out transform`}
+  ${tw`relative items-center duration-300 ease-in-out transform`}
 `;
 
 export const PageMargin = styled.div(() => [

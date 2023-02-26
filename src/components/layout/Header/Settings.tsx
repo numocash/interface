@@ -38,7 +38,7 @@ export const Settings: React.FC<Props> = ({ className }: Props) => {
   return (
     <>
       <Modal onDismiss={onDismiss} isOpen={show}>
-        <div tw="px-6 py-3 rounded-lg w-full">
+        <div tw="px-6 py-3 rounded-lg w-full bg-background">
           <div tw="flex justify-between items-center">
             <div tw="font-semibold text-lg">Settings</div>
             <X onClick={onDismiss} />

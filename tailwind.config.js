@@ -24,6 +24,9 @@ const textColor = {
   paragraph: "#2b2c34",
   button: "#fffffe",
   secondary: "rgba(43, 44, 52, 0.6)",
+  red: "rgb(255,59,48)",
+  blue: "rgb(0,122,255)",
+  green: "rgb(52,199,89)",
 };
 
 module.exports = {

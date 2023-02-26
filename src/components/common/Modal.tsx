@@ -16,6 +16,7 @@ export interface ModalProps {
   scrollBehavior?: "outside" | "inside";
   minHeight?: boolean | number;
   pinToTop?: boolean;
+  className?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -27,6 +28,7 @@ export const Modal: React.FC<ModalProps> = ({
   scrollBehavior,
   minHeight,
   maxHeight,
+  className,
 }: ModalProps) => {
   const fadeTransition = useTransition(isOpen, {
     config: { duration: 300 },
@@ -62,6 +64,7 @@ export const Modal: React.FC<ModalProps> = ({
           aria-label={"dialog overlay"}
           scrollBehavior={scrollBehavior}
           onDismiss={onDismiss}
+          className={className}
         >
           <ModalWrapper
             as="div"

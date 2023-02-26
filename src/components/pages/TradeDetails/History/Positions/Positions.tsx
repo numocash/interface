@@ -28,7 +28,7 @@ export const Positions: React.FC = () => {
       <div tw="w-full justify-between bg-secondary rounded-lg font-semibold h-12 items-center grid grid-cols-9">
         <p tw="col-start-3 col-span-2 justify-self-start">Bound</p>
         <p tw="col-start-5 col-span-2 justify-self-start">Value</p>
-        <p tw="col-start-7 col-span-2 justify-self-start">Return</p>
+        <p tw="col-start-7 col-span-2 justify-self-start">Funding APR</p>
       </div>
       {balances.data?.map((d, i) => {
         if (d.equalTo(0)) return null;

@@ -95,8 +95,6 @@ export const Buy: React.FC = () => {
       ? liqPerShare.invert().quote(liquidity)
       : undefined;
 
-    console.log("yq", borrowAmount?.toSignificant(5));
-
     const bRate = borrowRate({
       totalLiquidity: selectedLendgineInfo.data.totalLiquidity.subtract(
         liquidity

@@ -5,5 +5,5 @@ import { Close } from "./Close";
 export const Trade: React.FC = () => {
   const { close } = useTradeDetails();
 
-  return close ? <Close /> : <Buy />;
+  return close ? <Close modal={false} /> : <Buy />;
 };
