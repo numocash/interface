@@ -4,5 +4,5 @@ import { Withdraw } from "./Withdraw";
 
 export const DepositWithdraw: React.FC = () => {
   const { close } = useEarnDetails();
-  return close ? <Withdraw /> : <Deposit />;
+  return close ? <Withdraw modal={false} /> : <Deposit />;
 };

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import tw, { styled } from "twin.macro";
 
 import type { Lendgine, LendgineInfo } from "../../../constants/types";
-import { formatPercent } from "../../../utils/format";
+import { formatPercent, formatPrice } from "../../../utils/format";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
 import { accruedLendgineInfo } from "../../../utils/Numoen/lendgineMath";
 import {
@@ -71,7 +71,7 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
     };
   }, [updatedInfo, inverse, lendgine]);
   return (
-    <Wrapper
+    <W
       selected={selectedLendgine === lendgine}
       onClick={() => {
         setSelectedLendgine(lendgine);
@@ -103,13 +103,13 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
       </RowBetween>
       <RowBetween tw="p-0">
         <p tw="text-sm items-center text-secondary">Delta</p>
-        <p>{lendgine.bound.asFraction.toSignificant(5)}</p>
+        <p>{formatPrice(lendgine.bound)}</p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p tw="text-sm items-center text-secondary">Gamma</p>
-        <p>{lendgine.bound.asFraction.toSignificant(5)}</p>
+        <p>{formatPrice(lendgine.bound)}</p>
       </RowBetween>
-    </Wrapper>
+    </W>
   );
 };
 
@@ -117,3 +117,29 @@ const Wrapper = styled.button<{ selected: boolean }>(({ selected }) => [
   tw`flex flex-col w-full max-w-sm px-4 py-2 duration-300 ease-in-out transform border-2 border-transparent rounded-xl hover:bg-secondary`,
   selected && tw`border-stroke`,
 ]);
+
+interface WProps {
+  selected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+const W: React.FC<WProps> = ({ selected, onClick, children }: WProps) => {
+  const { setModalOpen } = useEarnDetails();
+  return (
+    <>
+      <Wrapper selected={selected} onClick={onClick} tw="hidden xl:flex">
+        {children}
+      </Wrapper>
+      <Wrapper
+        selected={false}
+        onClick={() => {
+          onClick();
+          setModalOpen(true);
+        }}
+        tw="border-0 xl:hidden"
+      >
+        {children}
+      </Wrapper>
+    </>
+  );
+};

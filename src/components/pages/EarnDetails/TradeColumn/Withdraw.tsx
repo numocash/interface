@@ -28,7 +28,11 @@ import { CenterSwitch } from "../../../common/CenterSwitch";
 import { PercentageSlider } from "../../../common/inputs/PercentageSlider";
 import { useEarnDetails } from "../EarnDetailsInner";
 
-export const Withdraw: React.FC = () => {
+interface Props {
+  modal: boolean;
+}
+
+export const Withdraw: React.FC<Props> = ({ modal }: Props) => {
   const { setClose, base, quote, selectedLendgine } = useEarnDetails();
   const { address } = useAccount();
 
@@ -186,12 +190,14 @@ export const Withdraw: React.FC = () => {
 
   return (
     <div tw="flex flex-col gap-4 w-full">
-      <button onClick={() => setClose(false)} tw="items-center flex">
-        <div tw="text-xs flex gap-1 items-center">
-          <FaChevronLeft />
-          Back
-        </div>
-      </button>
+      {!modal && (
+        <button onClick={() => setClose(false)} tw="items-center flex">
+          <div tw="text-xs flex gap-1 items-center">
+            <FaChevronLeft />
+            Back
+          </div>
+        </button>
+      )}
 
       <div tw="flex flex-col rounded-lg border-2 border-stroke">
         <div tw=" px-2 py-1 gap-2 flex flex-col w-full">

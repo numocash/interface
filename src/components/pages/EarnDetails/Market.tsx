@@ -4,7 +4,7 @@ import { useEarnDetails } from "./EarnDetailsInner";
 export const Market: React.FC = () => {
   const { base, quote } = useEarnDetails();
   return (
-    <div tw="flex w-full mb-4">
+    <div tw="flex w-full mb-4 ">
       <div tw="flex flex-col gap-2">
         <div tw="flex items-center gap-3">
           <div tw="flex items-center space-x-[-0.5rem] px-2 py-1 rounded-lg bg-secondary">

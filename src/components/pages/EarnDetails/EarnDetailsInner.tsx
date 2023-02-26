@@ -19,6 +19,7 @@ import { Positions } from "./History/Positions/Positions";
 import { Lendgines } from "./Lendgines";
 import { Market } from "./Market";
 import { TradeColumn } from "./TradeColumn/TradeColumn";
+import { TradeModal } from "./TradeModal";
 
 interface Props {
   base: WrappedTokenInfo;
@@ -39,6 +40,9 @@ interface IEarnDetails {
 
   lendgines: readonly Lendgine[];
   price: Price<WrappedTokenInfo, WrappedTokenInfo>;
+
+  modalOpen: boolean;
+  setModalOpen: (val: boolean) => void;
 }
 
 const useEarnDetailsInternal = ({
@@ -49,6 +53,7 @@ const useEarnDetailsInternal = ({
 }: Partial<Props> = {}): IEarnDetails => {
   invariant(base && quote && lendgines && price);
   const [close, setClose] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const longLendgines = pickLongLendgines(lendgines, base);
   const shortLendgines = pickShortLendgines(lendgines, base);
@@ -86,6 +91,8 @@ const useEarnDetailsInternal = ({
     setSelectedLendgine,
     close,
     setClose,
+    modalOpen,
+    setModalOpen,
     price,
   };
 };
@@ -103,6 +110,8 @@ export const EarnDetailsInner: React.FC<Props> = ({
     <PageMargin tw="w-full pt-8">
       <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
         <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
+          <TradeModal />
+
           <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2 justify-self-center">
             <Market />
             <p tw="text-sm font-semibold text-headline">Select a pool</p>
