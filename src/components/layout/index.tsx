@@ -30,8 +30,8 @@ export const Layout: React.FC<IProps> = ({ children }: IProps) => {
       <Header />
       <PageWrapper>
         <PageLayout>{children}</PageLayout>
-        <Toaster />
       </PageWrapper>
+      <Toaster />
     </>
   );
 };
@@ -41,5 +41,5 @@ const PageWrapper = styled.div`
 `;
 
 export const PageMargin = styled.div(() => [
-  tw`relative items-center px-8 mx-auto mt-20 mb-12 lg:px-10`,
+  tw`relative items-center px-8 mx-auto mt-6 mb-20 md:mt-20 lg:px-10`,
 ]);

@@ -10,7 +10,7 @@ export const History: React.FC = () => {
   const [history, setHistory] = useState<keyof typeof Histories>("position");
 
   return (
-    <div tw="flex gap-4 grid-flow-col  py-4">
+    <div tw="flex gap-4 grid-flow-col">
       {objectKeys(Histories).map((s) => {
         return (
           <div key={s}>

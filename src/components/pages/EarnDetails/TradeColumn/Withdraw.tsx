@@ -130,8 +130,6 @@ export const Withdraw: React.FC<Props> = ({ modal }: Props) => {
                   )
                   .quotient.toString()
               ),
-              // amount0Min: BigNumber.from(0),
-              // amount1Min: BigNumber.from(0),
               size: BigNumber.from(size.quotient.toString()),
 
               recipient: address,
@@ -200,7 +198,7 @@ export const Withdraw: React.FC<Props> = ({ modal }: Props) => {
       )}
 
       <div tw="flex flex-col rounded-lg border-2 border-stroke">
-        <div tw=" px-2 py-1 gap-2 flex flex-col w-full">
+        <div tw=" px-2 py-2 gap-2 flex flex-col w-full">
           <PercentageSlider
             disabled={false}
             input={withdrawPercent}

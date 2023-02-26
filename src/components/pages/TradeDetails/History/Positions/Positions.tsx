@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 import { useBalances } from "../../../../../hooks/useBalance";
 import { useLendgines } from "../../../../../hooks/useLendgine";
 import { EmptyPosition } from "../../../../common/EmptyPosition";
+import { Divider } from "../../../Trade/Loading";
 import { useTradeDetails } from "../../TradeDetailsInner";
 import { PositionItem } from "./PositionItem";
 
@@ -25,7 +26,7 @@ export const Positions: React.FC = () => {
     <EmptyPosition />
   ) : (
     <>
-      <div tw="w-full justify-between bg-secondary rounded-lg font-semibold h-12 items-center grid grid-cols-9">
+      <div tw="w-full justify-between bg-secondary rounded-lg font-semibold h-12 items-center grid-cols-9 hidden md:grid">
         <p tw="col-start-3 col-span-2 justify-self-start">Bound</p>
         <p tw="col-start-5 col-span-2 justify-self-start">Value</p>
         <p tw="col-start-7 col-span-2 justify-self-start">Funding APR</p>
@@ -36,12 +37,15 @@ export const Positions: React.FC = () => {
         const lendgineInfo = lendgineInfos.data?.[i];
         invariant(lendgine && lendgineInfo);
         return (
-          <PositionItem
-            key={lendgine.address}
-            balance={d}
-            lendgine={lendgine}
-            lendgineInfo={lendgineInfo}
-          />
+          <>
+            {i !== 0 && <Divider tw="mx-0" />}
+            <PositionItem
+              key={lendgine.address}
+              balance={d}
+              lendgine={lendgine}
+              lendgineInfo={lendgineInfo}
+            />
+          </>
         );
       })}
     </>

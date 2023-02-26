@@ -80,11 +80,11 @@ export const BuyStats: React.FC<Props> = ({ borrowRate }: Props) => {
       </RowBetween>
       <RowBetween tw="p-0">
         <p tw="text-secondary">Leverage</p>
-        <p>{isInverse ? "1/x" : "x²"}</p>
+        <p>squared</p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p tw="text-secondary">Liquidation price</p>
-        <p>{isInverse ? "∞" : 0}</p>
+        <p>None</p>
       </RowBetween>
       <RowBetween tw="p-0">
         <p tw="text-secondary">Fees</p>

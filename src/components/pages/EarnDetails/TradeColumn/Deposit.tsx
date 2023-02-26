@@ -68,7 +68,7 @@ export const Deposit: React.FC = () => {
         updatedInfo
       );
 
-      if (lendgineInfo.data.totalLiquidity.equalTo(0)) {
+      if (updatedInfo.totalLiquidity.equalTo(0)) {
         const { token0Amount, token1Amount } = priceToReserves(
           selectedLendgine,
           inverse ? invert(price) : price
@@ -288,10 +288,6 @@ export const Deposit: React.FC = () => {
             allowSelect: true,
           }}
         />
-        {/* <div tw="flex items-center justify-center self-center">
-          <div tw=" justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[15px] border-t-stroke w-0" />
-          <div tw="justify-center items-center flex text-sm border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-stroke w-0 mt-[-30px]  " />
-        </div> */}
         <div tw=" border-b-2 w-full border-stroke" />
         <CenterSwitch icon="plus" />
         <AssetSelection

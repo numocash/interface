@@ -437,16 +437,20 @@ export class DefaultToasterWrapper {
 export const AddressLink: React.FC<{
   address: Address;
   className?: string;
-}> = ({ address, className }) => (
-  <a
-    href={`https://arbiscan.io/address/${address}`}
-    rel="noopener noreferrer"
-    target="_blank"
-    className={className}
-  >
-    {address.slice(0, 6)}...{address.slice(address.length - 4)}
-  </a>
-);
+}> = ({ address, className }) => {
+  // const environment = useEnvironment();
+  // TODO: use chain explorer
+  return (
+    <a
+      href={`https://arbiscan.io/address/${address}`}
+      rel="noopener noreferrer"
+      target="_blank"
+      className={className}
+    >
+      {address.slice(0, 6)}...{address.slice(address.length - 4)}
+    </a>
+  );
+};
 
 const ToastContainer = styled.div`
   width: 290px;

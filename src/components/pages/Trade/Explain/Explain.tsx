@@ -24,7 +24,7 @@ const ExplainItem: React.FC<ExplainProps> = ({
   title,
   description,
 }: ExplainProps) => (
-  <div tw="flex flex-col gap-2 min-w-[9rem]">
+  <div tw="flex flex-col gap-2 min-w-[7rem]">
     <p tw="text-2xl font-semibold text-highlight">{title}</p>
     <p tw="text-paragraph">{description}</p>
   </div>

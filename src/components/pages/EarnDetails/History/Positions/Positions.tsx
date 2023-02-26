@@ -6,6 +6,7 @@ import {
   useLendginesPosition,
 } from "../../../../../hooks/useLendgine";
 import { EmptyPosition } from "../../../../common/EmptyPosition";
+import { Divider } from "../../../Trade/Loading";
 import { useEarnDetails } from "../../EarnDetailsInner";
 import { PositionItem } from "./PositionItem";
 
@@ -25,7 +26,7 @@ export const Positions: React.FC = () => {
     <EmptyPosition />
   ) : (
     <>
-      <div tw="w-full justify-between bg-secondary rounded-lg font-semibold h-12 items-center grid grid-cols-7">
+      <div tw="w-full justify-between bg-secondary rounded-lg font-semibold h-12 items-center grid-cols-7 hidden md:grid">
         <p tw="col-start-3 col-span-2 justify-self-start">Interest</p>
         <p tw="col-start-5 col-span-2 justify-self-start">Reward APR</p>
       </div>
@@ -36,12 +37,15 @@ export const Positions: React.FC = () => {
 
         invariant(lendgine && lendgineInfo);
         return (
-          <PositionItem
-            key={lendgine.address}
-            lendgine={lendgine}
-            lendgineInfo={lendgineInfo}
-            position={p}
-          />
+          <>
+            {i !== 0 && <Divider tw="mx-0" />}
+            <PositionItem
+              key={lendgine.address}
+              lendgine={lendgine}
+              lendgineInfo={lendgineInfo}
+              position={p}
+            />
+          </>
         );
       })}
     </>

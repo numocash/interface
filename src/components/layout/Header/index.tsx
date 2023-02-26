@@ -12,7 +12,7 @@ export const Header: React.FC = () => {
   return (
     <>
       <div
-        tw="z-10 fixed top-0 bottom-auto justify-between bg-background md:bg-transparent md:(border-b-2 border-stroke) w-full flex items-center px-4 py-2 pb-1"
+        tw="z-10 md:fixed top-0 bottom-auto justify-between bg-background md:bg-transparent md:(border-b-2 border-stroke) w-full flex items-center px-4 py-2 pb-1"
         // from ribbon interface
         css={css`
           @media (min-width: 768px) {

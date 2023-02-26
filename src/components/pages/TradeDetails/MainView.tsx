@@ -38,7 +38,7 @@ export const MainView: React.FC = () => {
   );
   return (
     <>
-      <div tw="col-span-2 w-full flex mt-2 flex-col gap-2 transform ease-in-out duration-300 max-w-3xl justify-self-center">
+      <div tw="col-span-2 w-full flex mt-2 flex-col gap-4 transform ease-in-out duration-300 max-w-3xl justify-self-center">
         <TradeModal />
 
         <div tw="flex w-full justify-between items-center">

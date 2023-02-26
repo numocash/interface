@@ -21,6 +21,7 @@ import {
   liquidityPerPosition,
 } from "../../../../../utils/Numoen/lendgineMath";
 import { AsyncButton } from "../../../../common/AsyncButton";
+import { RowBetween } from "../../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
 import { useEarnDetails } from "../../EarnDetailsInner";
 
@@ -92,30 +93,108 @@ export const PositionItem: React.FC<Props> = ({
   const sendCollect = useLiquidityManagerCollect(prepareCollect.config);
 
   return (
-    <div
-      tw="w-full justify-between grid grid-cols-7 h-12 items-center"
-      key={lendgine.address}
-    >
-      <div tw="  pl-4 col-span-2 flex flex-col gap-1">
-        {(isInverse ? [amount1, amount0] : [amount0, amount1]).map((a) => (
+    <>
+      <div
+        tw="w-full justify-between md:grid grid-cols-7 items-center hidden"
+        key={lendgine.address}
+      >
+        <div tw="  pl-4 col-span-2 flex flex-col gap-1">
+          {(isInverse ? [amount1, amount0] : [amount0, amount1]).map((a) => (
+            <TokenAmountDisplay
+              key={a.currency.address}
+              amount={a}
+              showIcon
+              showSymbol
+            />
+          ))}
+        </div>
+        <div tw="col-span-2 flex flex-col gap-1 justify-self-start">
           <TokenAmountDisplay
-            key={a.currency.address}
-            amount={a}
+            tw="col-span-2"
+            amount={updatedPositionInfo.tokensOwed}
             showIcon
             showSymbol
           />
-        ))}
+          <AsyncButton
+            variant="primary"
+            tw="w-min px-1 py-0.5"
+            disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
+            onClick={async () => {
+              await Beet([
+                {
+                  stageTitle: "Collect interest",
+                  parallelTransactions: [
+                    {
+                      title: `Collect interest`,
+                      tx: {
+                        prepare: prepareCollect as ReturnType<
+                          typeof usePrepareContractWrite
+                        >,
+                        send: sendCollect,
+                      },
+                    },
+                  ],
+                },
+              ]);
+            }}
+          >
+            Collect
+          </AsyncButton>
+        </div>
+
+        <p tw="justify-self-start col-span-2">N/A</p>
+
+        <button
+          tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:flex hidden"
+          onClick={() => {
+            setSelectedLendgine(lendgine);
+            setClose(true);
+          }}
+        >
+          Close
+        </button>
+
+        <button
+          tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:hidden"
+          onClick={() => {
+            setSelectedLendgine(lendgine);
+            setClose(true);
+            setModalOpen(true);
+          }}
+        >
+          Close
+        </button>
       </div>
-      <div tw="col-span-2 flex flex-col gap-1 justify-self-start">
-        <TokenAmountDisplay
-          tw="col-span-2"
-          amount={updatedPositionInfo.tokensOwed}
-          showIcon
-          showSymbol
-        />
+      <div
+        tw="w-full justify-between flex flex-col md:hidden gap-2"
+        key={lendgine.address}
+      >
+        <>
+          {(isInverse ? [amount1, amount0] : [amount0, amount1]).map((a) => (
+            <RowBetween key={a.currency.address} tw="p-0 items-center">
+              <p tw="text-secondary">{a.currency.symbol} amount</p>
+              <TokenAmountDisplay amount={a} showIcon showSymbol />
+            </RowBetween>
+          ))}
+        </>
+
+        <RowBetween tw="p-0 items-center">
+          <p tw="text-secondary">Interest</p>
+          <TokenAmountDisplay
+            tw="col-span-2"
+            amount={updatedPositionInfo.tokensOwed}
+            showIcon
+            showSymbol
+          />
+        </RowBetween>
+        <RowBetween tw="p-0 items-center">
+          <p tw="text-secondary">Reward APR</p>
+          <p>N/A</p>
+        </RowBetween>
+
         <AsyncButton
           variant="primary"
-          tw="w-min px-1 py-0.5"
+          tw="h-8 text-xl"
           disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
           onClick={async () => {
             await Beet([
@@ -138,30 +217,17 @@ export const PositionItem: React.FC<Props> = ({
         >
           Collect
         </AsyncButton>
+        <button
+          tw="text-button rounded-lg bg-tertiary  h-8 text-xl font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90"
+          onClick={() => {
+            setSelectedLendgine(lendgine);
+            setClose(true);
+            setModalOpen(true);
+          }}
+        >
+          Close
+        </button>
       </div>
-
-      <p tw="justify-self-start col-span-2">N/A</p>
-
-      <button
-        tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:flex hidden"
-        onClick={() => {
-          setSelectedLendgine(lendgine);
-          setClose(true);
-        }}
-      >
-        Close
-      </button>
-
-      <button
-        tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:hidden"
-        onClick={() => {
-          setSelectedLendgine(lendgine);
-          setClose(true);
-          setModalOpen(true);
-        }}
-      >
-        Close
-      </button>
-    </div>
+    </>
   );
 };
