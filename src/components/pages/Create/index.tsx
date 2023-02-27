@@ -14,6 +14,7 @@ import {
   useFactoryCreateLendgine,
   usePrepareFactoryCreateLendgine,
 } from "../../../generated";
+import { useApprove } from "../../../hooks/useApproval";
 import { useBalance } from "../../../hooks/useBalance";
 import { useChain } from "../../../hooks/useChain";
 import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
@@ -128,6 +129,15 @@ export const Create: React.FC = () => {
     [token1, tokens.data]
   );
 
+  const approveToken0 = useApprove(
+    token0InputAmount,
+    environment.base.liquidityManager
+  );
+  const approveToken1 = useApprove(
+    token1InputAmount,
+    environment.base.liquidityManager
+  );
+
   const prepare = usePrepareFactoryCreateLendgine({
     args:
       token0 && token1
@@ -148,7 +158,12 @@ export const Create: React.FC = () => {
     () =>
       !token0 || !token1
         ? "Select a token"
-        : !tokens || !currentPrice || lendgines === null || !prepare.config
+        : !tokens ||
+          !currentPrice ||
+          lendgines === null ||
+          !prepare.config ||
+          approveToken0.allowanceQuery.isLoading ||
+          approveToken1.allowanceQuery.isLoading
         ? "Loading"
         : !token0.equals(environment.interface.wrappedNative) &&
           !token0.equals(environment.interface.stablecoin) &&
@@ -175,6 +190,8 @@ export const Create: React.FC = () => {
         ? "Insufficient amount"
         : null,
     [
+      approveToken0.allowanceQuery.isLoading,
+      approveToken1.allowanceQuery.isLoading,
       bound,
       currentPrice,
       environment.interface.stablecoin,
