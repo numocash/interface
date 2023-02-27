@@ -82,5 +82,5 @@ export const X = styled(FiX)(() => [
 ]);
 
 export const FilterButton = styled.button`
-  ${tw`flex items-center gap-2 px-4 py-2 duration-300 ease-in-out transform rounded-lg bg-secondary hover:(bg-button text-button)`}
+  ${tw`flex items-center gap-2 px-4 py-2 h-min duration-300 ease-in-out transform rounded-lg bg-secondary hover:(bg-button text-button)`}
 `;

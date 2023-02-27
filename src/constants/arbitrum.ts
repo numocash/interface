@@ -19,7 +19,7 @@ export const arbitrumConfig = {
     wrappedNative: WrappedNative[chainID.arbitrum],
     stablecoin: Stable[chainID.arbitrum],
     defaultActiveLists: [
-      "https://tokens.uniswap.org",
+      // "https://tokens.uniswap.org",
       "https://bridge.arbitrum.io/token-list-42161.json",
     ],
     defaultInactiveLists: [],
