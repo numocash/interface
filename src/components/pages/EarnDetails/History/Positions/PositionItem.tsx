@@ -15,11 +15,17 @@ import {
   usePrepareLiquidityManagerCollect,
 } from "../../../../../generated";
 import { useBeet } from "../../../../../utils/beet";
+import { formatPercent } from "../../../../../utils/format";
+import { supplyRate } from "../../../../../utils/Numoen/jumprate";
 import {
   accruedLendgineInfo,
   accruedLendginePositionInfo,
   liquidityPerPosition,
 } from "../../../../../utils/Numoen/lendgineMath";
+import {
+  pricePerCollateral,
+  pricePerLiquidity,
+} from "../../../../../utils/Numoen/price";
 import { AsyncButton } from "../../../../common/AsyncButton";
 import { RowBetween } from "../../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
@@ -53,6 +59,23 @@ export const PositionItem: React.FC<Props> = ({
     }),
     [lendgine, lendgineInfo, position]
   );
+
+  const apr = useMemo(() => {
+    // token0 / liq
+    const liquidityPrice = pricePerLiquidity({
+      lendgine,
+      lendgineInfo: updatedLendgineInfo,
+    });
+
+    // col / liq
+    const collateralPrice = pricePerCollateral(lendgine, updatedLendgineInfo);
+
+    const interestPremium = collateralPrice
+      .subtract(liquidityPrice)
+      .divide(liquidityPrice);
+
+    return supplyRate(updatedLendgineInfo).multiply(interestPremium);
+  }, [lendgine, updatedLendgineInfo]);
 
   const { amount0, amount1 } = useMemo(() => {
     if (updatedLendgineInfo.totalLiquidity.equalTo(0))
@@ -142,7 +165,7 @@ export const PositionItem: React.FC<Props> = ({
           </AsyncButton>
         </div>
 
-        <p tw="justify-self-start col-span-2">N/A</p>
+        <p tw="justify-self-start col-span-2">{formatPercent(apr)}</p>
 
         <button
           tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:flex hidden"
@@ -189,7 +212,7 @@ export const PositionItem: React.FC<Props> = ({
         </RowBetween>
         <RowBetween tw="p-0 items-center">
           <p tw="text-secondary">Reward APR</p>
-          <p>N/A</p>
+          <p>{formatPercent(apr)}</p>
         </RowBetween>
 
         <AsyncButton
