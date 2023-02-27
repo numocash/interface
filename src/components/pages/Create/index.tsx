@@ -10,9 +10,12 @@ import { useAccount } from "wagmi";
 
 import type { Lendgine } from "../../../constants/types";
 import { useEnvironment } from "../../../contexts/environment2";
+import { useSettings } from "../../../contexts/settings";
 import {
   useFactoryCreateLendgine,
+  useLiquidityManagerAddLiquidity,
   usePrepareFactoryCreateLendgine,
+  usePrepareLiquidityManagerAddLiquidity,
 } from "../../../generated";
 import { useApprove } from "../../../hooks/useApproval";
 import { useBalance } from "../../../hooks/useBalance";
@@ -21,6 +24,7 @@ import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useAllLendgines } from "../../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { useDefaultTokenList } from "../../../hooks/useTokens2";
+import type { BeetStage } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
 import {
   formatDisplayWithSoftLimit,
@@ -32,7 +36,7 @@ import {
   priceToFraction,
   priceToReserves,
 } from "../../../utils/Numoen/price";
-import { scale } from "../../../utils/Numoen/trade";
+import { ONE_HUNDRED_PERCENT, scale } from "../../../utils/Numoen/trade";
 import tryParseCurrencyAmount from "../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
@@ -45,6 +49,7 @@ export const Create: React.FC = () => {
   const Beet = useBeet();
   const queryClient = useQueryClient();
   const environment = useEnvironment();
+  const settings = useSettings();
   const { address } = useAccount();
   const chainID = useChain();
 
@@ -76,43 +81,52 @@ export const Create: React.FC = () => {
       : mostLiquidQuery.data.price;
   }, [mostLiquidQuery.data, token0, token1]);
 
-  const { token0InputAmount, token1InputAmount } = useMemo(() => {
-    const parsedAmount =
-      tryParseCurrencyAmount(token0Input, token0) ??
-      tryParseCurrencyAmount(token1Input, token1);
-    if (!parsedAmount || !token0 || !token1 || !currentPrice) return {};
+  const { token0InputAmount, token1InputAmount, liquidity, positionSize } =
+    useMemo(() => {
+      const parsedAmount =
+        tryParseCurrencyAmount(token0Input, token0) ??
+        tryParseCurrencyAmount(token1Input, token1);
+      if (!parsedAmount || !token0 || !token1 || !currentPrice) return {};
 
-    const lendgine: Lendgine = {
+      const lendgine: Lendgine = {
+        token0,
+        token0Exp: token0.decimals,
+        token1,
+        token1Exp: token1.decimals,
+        lendgine: new Token(chainID, AddressZero, 18),
+        address: AddressZero,
+        bound: fractionToPrice(bound, token1, token0),
+      };
+
+      const { token0Amount, token1Amount } = priceToReserves(
+        lendgine,
+        currentPrice
+      );
+
+      const liquidity = parsedAmount.currency.equals(lendgine.token0)
+        ? token0Amount.invert().quote(parsedAmount)
+        : token1Amount.invert().quote(parsedAmount);
+
+      const positionSize = liquidity;
+
+      const token0InputAmount = token0Amount.quote(liquidity);
+      const token1InputAmount = token1Amount.quote(liquidity);
+
+      return {
+        liquidity,
+        positionSize,
+        token0InputAmount,
+        token1InputAmount,
+      };
+    }, [
+      bound,
+      chainID,
+      currentPrice,
       token0,
-      token0Exp: token0.decimals,
+      token0Input,
       token1,
-      token1Exp: token1.decimals,
-      lendgine: new Token(chainID, AddressZero, 18),
-      address: AddressZero,
-      bound: fractionToPrice(bound, token1, token0),
-    };
-
-    const { token0Amount, token1Amount } = priceToReserves(
-      lendgine,
-      currentPrice
-    );
-
-    const liquidity = parsedAmount.currency.equals(lendgine.token0)
-      ? token0Amount.invert().quote(parsedAmount)
-      : token1Amount.invert().quote(parsedAmount);
-
-    const positionSize = liquidity;
-
-    const token0InputAmount = token0Amount.quote(liquidity);
-    const token1InputAmount = token1Amount.quote(liquidity);
-
-    return {
-      liquidity,
-      positionSize,
-      token0InputAmount,
-      token1InputAmount,
-    };
-  }, [bound, chainID, currentPrice, token0, token0Input, token1, token1Input]);
+      token1Input,
+    ]);
 
   const onInput = useCallback((value: string, field: "token0" | "token1") => {
     field === "token0" ? setToken0Input(value) : setToken1Input(value);
@@ -120,13 +134,13 @@ export const Create: React.FC = () => {
   }, []);
 
   const removeToken0 = useMemo(
-    () => (tokens.data ? tokens.data.filter((t) => t !== token0) : undefined),
-    [token0, tokens.data]
+    () => tokens.filter((t) => t !== token0),
+    [token0, tokens]
   );
 
   const removeToken1 = useMemo(
-    () => (tokens.data ? tokens.data.filter((t) => t !== token1) : undefined),
-    [token1, tokens.data]
+    () => tokens.filter((t) => t !== token1),
+    [token1, tokens]
   );
 
   const approveToken0 = useApprove(
@@ -154,12 +168,70 @@ export const Create: React.FC = () => {
   });
   const write = useFactoryCreateLendgine(prepare.data);
 
+  const args = useMemo(
+    () =>
+      !!token0InputAmount &&
+      !!token1InputAmount &&
+      !!address &&
+      !!liquidity &&
+      !!token0 &&
+      !!token1
+        ? ([
+            {
+              token0: getAddress(token0.address),
+              token1: getAddress(token1.address),
+              token0Exp: BigNumber.from(token0.decimals),
+              token1Exp: BigNumber.from(token1.decimals),
+              upperBound: BigNumber.from(
+                bound.multiply(scale).quotient.toString()
+              ),
+              liquidity: BigNumber.from(
+                liquidity.multiply(999999).divide(1000000).quotient.toString()
+              ),
+              amount0Min: BigNumber.from(token0InputAmount.quotient.toString()),
+              amount1Min: BigNumber.from(token1InputAmount.quotient.toString()),
+              sizeMin: BigNumber.from(
+                positionSize
+                  .multiply(
+                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+                  )
+                  .quotient.toString()
+              ),
+
+              recipient: address,
+              deadline: BigNumber.from(
+                Math.round(Date.now() / 1000) + settings.timeout * 60
+              ),
+            },
+          ] as const)
+        : undefined,
+    [
+      address,
+      bound,
+      liquidity,
+      positionSize,
+      settings.maxSlippagePercent,
+      settings.timeout,
+      token0,
+      token0InputAmount,
+      token1,
+      token1InputAmount,
+    ]
+  );
+
+  const prepareAdd = usePrepareLiquidityManagerAddLiquidity({
+    address: environment.base.liquidityManager,
+    args: args,
+    enabled: !!args,
+  });
+
+  const sendAdd = useLiquidityManagerAddLiquidity(prepareAdd.config);
+
   const disableReason = useMemo(
     () =>
       !token0 || !token1
         ? "Select a token"
-        : !tokens ||
-          !currentPrice ||
+        : !currentPrice ||
           lendgines === null ||
           !prepare.config ||
           approveToken0.allowanceQuery.isLoading ||
@@ -204,7 +276,6 @@ export const Create: React.FC = () => {
       token1,
       token1Balance.data,
       token1InputAmount,
-      tokens,
     ]
   );
 
@@ -286,26 +357,44 @@ export const Create: React.FC = () => {
           disabled={!!disableReason}
           onClick={async () => {
             invariant(token0 && token1);
-            await Beet([
-              {
-                stageTitle: `New ${token1.symbol ?? ""} + ${
-                  token0.symbol ?? ""
-                } market`,
-                parallelTransactions: [
-                  {
-                    title: `New ${token1.symbol ?? ""} + ${
-                      token0.symbol ?? ""
-                    } market`,
-                    tx: {
-                      prepare: prepare as ReturnType<
-                        typeof usePrepareContractWrite
-                      >,
-                      send: write,
+            await Beet(
+              [
+                approveToken0.beetStage,
+                approveToken1.beetStage,
+                {
+                  stageTitle: `New ${token1.symbol ?? ""} + ${
+                    token0.symbol ?? ""
+                  } market`,
+                  parallelTransactions: [
+                    {
+                      title: `New ${token1.symbol ?? ""} + ${
+                        token0.symbol ?? ""
+                      } market`,
+                      tx: {
+                        prepare: prepare as ReturnType<
+                          typeof usePrepareContractWrite
+                        >,
+                        send: write,
+                      },
                     },
-                  },
-                ],
-              },
-            ]);
+                  ],
+                },
+                {
+                  stageTitle: `Add ${token1.symbol} / ${token0.symbol} liquidty`,
+                  parallelTransactions: [
+                    {
+                      title: `Add ${token1.symbol} / ${token0.symbol} liquidty`,
+                      tx: {
+                        prepare: prepareAdd as ReturnType<
+                          typeof usePrepareContractWrite
+                        >,
+                        send: sendAdd,
+                      },
+                    },
+                  ],
+                },
+              ].filter((s): s is BeetStage => !!s)
+            );
 
             setToken0(undefined);
             setToken1(undefined);

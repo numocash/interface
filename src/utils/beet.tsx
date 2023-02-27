@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import invariant from "tiny-invariant";
 import { styled } from "twin.macro";
 import type { Address, useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useNetwork } from "wagmi";
 import { writeContract } from "wagmi/actions";
 
 import { useAwaitTX } from "../hooks/useAwaitTX";
@@ -417,13 +418,7 @@ export class DefaultToasterWrapper {
           {hash ? (
             <div>
               View Transaction: {/* TODO: update the explorer based on chain */}
-              <a
-                href={`https://arbiscan.io/tx/${hash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {hash.slice(0, 6)}...{hash.slice(hash.length - 4)}
-              </a>
+              <AddressLink address={hash} data="tx" />
             </div>
           ) : (
             <div>{txDescription}</div>
@@ -435,14 +430,16 @@ export class DefaultToasterWrapper {
 }
 
 export const AddressLink: React.FC<{
-  address: Address;
+  address: Address | string;
+  data: "tx" | "address";
   className?: string;
-}> = ({ address, className }) => {
-  // const environment = useEnvironment();
-  // TODO: use chain explorer
+}> = ({ address, className, data }) => {
+  const { chain } = useNetwork();
   return (
     <a
-      href={`https://arbiscan.io/address/${address}`}
+      href={`${
+        chain?.blockExplorers?.default.url ?? "https://arbiscan.io"
+      }/${data}/${address}`}
       rel="noopener noreferrer"
       target="_blank"
       className={className}

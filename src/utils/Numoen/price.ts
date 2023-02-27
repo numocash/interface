@@ -97,7 +97,6 @@ export const nextHighestLendgine = <L extends Lendgine>(
   );
 
   const price = "price" in props ? props.price : props.lendgine.bound;
-  console.log("yw", price.toSignificant(5));
 
   return sortedLendgines.reduce(
     (acc: Lendgine | null, cur) =>

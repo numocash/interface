@@ -162,7 +162,6 @@ export const Withdraw: React.FC<Props> = ({ modal }: Props) => {
 
   const sendRemove = useLiquidityManagerRemoveLiquidity(prepareRemove.config);
 
-  // TODO: insufficient liquidity
   const disableReason = useMemo(
     () =>
       withdrawPercent === 0

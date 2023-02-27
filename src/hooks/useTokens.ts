@@ -9,17 +9,16 @@ export const useAddressToToken = (address: HookArg<string>) => {
 };
 
 export const useGetAddressToToken = () => {
-  const tokensQuery = useDefaultTokenList();
+  const tokens = useDefaultTokenList();
 
   return useCallback(
     (address: HookArg<string>) => {
-      if (!address || tokensQuery.isLoading || !tokensQuery.data) return null;
+      if (!address) return null;
       return (
-        tokensQuery.data.find(
-          (t) => getAddress(t.address) === getAddress(address)
-        ) ?? null
+        tokens.find((t) => getAddress(t.address) === getAddress(address)) ??
+        null
       );
     },
-    [tokensQuery.data, tokensQuery.isLoading]
+    [tokens]
   );
 };

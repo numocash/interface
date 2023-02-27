@@ -116,7 +116,6 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
     selectedLendgine,
   ]);
 
-  // TODO: approving slightly too little
   const approve = useApprove(shares, environment.base.lendgineRouter);
 
   const args = useMemo(

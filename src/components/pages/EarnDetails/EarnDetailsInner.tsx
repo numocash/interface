@@ -122,7 +122,6 @@ export const EarnDetailsInner: React.FC<Props> = ({
             <Positions />
           </div>
           <div tw="flex max-w-sm justify-self-end">
-            {/* TODO: stick to the right side */}
             <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-44px] hidden xl:flex" />
             <TradeColumn tw="" />
           </div>

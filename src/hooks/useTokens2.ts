@@ -1,10 +1,8 @@
 import { getAddress } from "@ethersproject/address";
-import { useQuery } from "@tanstack/react-query";
 import type { Currency, Token } from "@uniswap/sdk-core";
 import type { TokenInfo, TokenList } from "@uniswap/token-lists";
-import axios from "axios";
-import { useCallback } from "react";
 
+import UniswapTokens from "../constants/tokenList/uniswap.json";
 import { useEnvironment } from "../contexts/environment2";
 import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
@@ -92,33 +90,32 @@ export class WrappedTokenInfo implements Token {
 // return token.equals(environment.interface.wrappedNative)
 // }
 
-export const useDefaultTokenListQueryKey = () => {
-  const environment = useEnvironment();
-  return ["token list", environment.interface.defaultActiveLists] as const;
-};
+// export const useDefaultTokenListQueryKey = () => {
+//   const environment = useEnvironment();
+//   return ["token list", environment.interface.defaultActiveLists] as const;
+// };
 
-export const useDefaultTokenListQueryFn = () => {
-  const environment = useEnvironment();
-  const chain = useChain();
-  return useCallback(async () => {
-    const lists = await Promise.all(
-      environment.interface.defaultActiveLists.map((l) =>
-        axios.get<TokenList>(l)
-      )
-    );
-    return dedupeTokens(
-      lists.flatMap((l) => l.data.tokens).filter((t) => t.chainId === chain)
-    ).map((t) => new WrappedTokenInfo(t));
-  }, [chain, environment.interface.defaultActiveLists]);
-};
+// export const useDefaultTokenListQueryFn = () => {
+//   const environment = useEnvironment();
+//   const chain = useChain();
+//   return useCallback(async () => {
+//     const lists = await Promise.all(
+//       environment.interface.defaultActiveLists.map((l) =>
+//         axios.get<TokenList>(l)
+//       )
+//     );
+//     return dedupeTokens(
+//       lists.flatMap((l) => l.data.tokens).filter((t) => t.chainId === chain)
+//     ).map((t) => new WrappedTokenInfo(t));
+//   }, [chain, environment.interface.defaultActiveLists]);
+// };
 
 export const useDefaultTokenList = () => {
-  const queryKey = useDefaultTokenListQueryKey();
-  const queryFn = useDefaultTokenListQueryFn();
+  const chain = useChain();
 
-  return useQuery<readonly WrappedTokenInfo[]>(queryKey, queryFn, {
-    staleTime: Infinity,
-  });
+  return dedupeTokens(
+    (UniswapTokens.tokens as TokenInfo[]).filter((t) => t.chainId === chain)
+  ).map((t) => new WrappedTokenInfo(t));
 };
 
 export const useSortDenomTokens = (

@@ -18,10 +18,5 @@ export const arbitrumConfig = {
       "https://api.thegraph.com/subgraphs/name/kyscott18/numoen-arbitrum-test",
     wrappedNative: WrappedNative[chainID.arbitrum],
     stablecoin: Stable[chainID.arbitrum],
-    defaultActiveLists: [
-      // "https://tokens.uniswap.org",
-      "https://bridge.arbitrum.io/token-list-42161.json",
-    ],
-    defaultInactiveLists: [],
   },
 } as const;

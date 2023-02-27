@@ -32,6 +32,8 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
   const lendgines = useMarketToLendgines(market);
   const { address } = useAccount();
 
+  console.log(lendgines);
+
   const positions = useLendginesPosition(lendgines, address);
   const lendgineInfosQuery = useLendgines(lendgines);
 

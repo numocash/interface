@@ -409,7 +409,6 @@ export const useExistingLendginesQuery = () => {
   return useQuery<RawLendgine[]>(queryKey, queryFn, { staleTime: Infinity });
 };
 
-// TODO: impose rules that one must be a stable or wrapped native and bound that is an exponent of 2
 export const useAllLendgines = () => {
   const environment = useEnvironment();
   const addressToToken = useGetAddressToToken();

@@ -15,6 +15,7 @@ export const Config: React.FC = () => {
       <RowBetween tw="items-center">
         <p tw="text-sm text-secondary">Base token:</p>
         <AddressLink
+          data="address"
           address={getAddress(denom.address)}
           tw="text-sm underline"
         />
@@ -22,6 +23,7 @@ export const Config: React.FC = () => {
       <RowBetween tw="items-center">
         <p tw="text-sm text-secondary">Speculative token:</p>
         <AddressLink
+          data="address"
           address={getAddress(other.address)}
           tw="text-sm underline"
         />
@@ -31,6 +33,7 @@ export const Config: React.FC = () => {
 
         {referenceMarketQuery.data ? (
           <AddressLink
+            data="address"
             address={referenceMarketQuery.data.pool.address}
             tw="text-sm underline"
           />
@@ -44,6 +47,7 @@ export const Config: React.FC = () => {
         <div tw="flex flex-col gap-4">
           {lendgines?.map((l) => (
             <AddressLink
+              data="address"
               key={l.address}
               address={l.address}
               tw="text-sm underline"

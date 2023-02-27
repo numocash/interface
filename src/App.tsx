@@ -10,27 +10,23 @@ import {
   useExistingLendginesQueryFn,
   useExistingLendginesQueryKey,
 } from "./hooks/useLendgine";
-import {
-  useDefaultTokenListQueryFn,
-  useDefaultTokenListQueryKey,
-} from "./hooks/useTokens2";
 
 export const App: React.FC = () => {
   const queryClient = useQueryClient();
-  const tokenQueryKey = useDefaultTokenListQueryKey();
-  const tokenQueryFn = useDefaultTokenListQueryFn();
+  // const tokenQueryKey = useDefaultTokenListQueryKey();
+  // const tokenQueryFn = useDefaultTokenListQueryFn();
   const lendgineQueryKey = useExistingLendginesQueryKey();
   const lendgineQueryFn = useExistingLendginesQueryFn();
 
   // prefetch token lists and lendgines
   useEffect(() => {
-    async function p1() {
-      await queryClient.prefetchQuery({
-        queryKey: tokenQueryKey,
-        queryFn: tokenQueryFn,
-        staleTime: Infinity,
-      });
-    }
+    // async function p1() {
+    //   await queryClient.prefetchQuery({
+    //     queryKey: tokenQueryKey,
+    //     queryFn: tokenQueryFn,
+    //     staleTime: Infinity,
+    //   });
+    // }
 
     async function p2() {
       await queryClient.prefetchQuery({
@@ -39,14 +35,8 @@ export const App: React.FC = () => {
         staleTime: Infinity,
       });
     }
-    void Promise.all([p1(), p2()]);
-  }, [
-    lendgineQueryFn,
-    lendgineQueryKey,
-    queryClient,
-    tokenQueryFn,
-    tokenQueryKey,
-  ]);
+    void p2();
+  }, [lendgineQueryFn, lendgineQueryKey, queryClient]);
 
   return (
     <div className="App">

@@ -38,7 +38,9 @@ export const useMarketToLendgines = (
   const lendgines = useAllLendgines();
   return (
     lendgines?.filter(
-      (l) => market.includes(l.token0) && market.includes(l.token1)
+      (l) =>
+        !!market.find((m) => m.equals(l.token0)) &&
+        !!market.find((m) => m.equals(l.token1))
     ) ?? null
   );
 };

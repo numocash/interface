@@ -1,9 +1,10 @@
+import { defaultAbiCoder } from "@ethersproject/abi";
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
-import type { usePrepareContractWrite } from "wagmi";
+import type { Address, usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../../contexts/environment2";
@@ -14,6 +15,10 @@ import {
 } from "../../../../generated";
 import { useApprove } from "../../../../hooks/useApproval";
 import { useBalance } from "../../../../hooks/useBalance";
+import {
+  isV3,
+  useMostLiquidMarket,
+} from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import type { BeetStage } from "../../../../utils/beet";
 import { useBeet } from "../../../../utils/beet";
@@ -24,11 +29,7 @@ import {
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../utils/Numoen/lendgineMath";
-import {
-  invert,
-  numoenPrice,
-  priceToFraction,
-} from "../../../../utils/Numoen/price";
+import { numoenPrice, priceToFraction } from "../../../../utils/Numoen/price";
 import {
   determineBorrowAmount,
   ONE_HUNDRED_PERCENT,
@@ -41,12 +42,7 @@ import { useTradeDetails } from "../TradeDetailsInner";
 import { BuyStats } from "./BuyStats";
 
 export const Buy: React.FC = () => {
-  const {
-    quote,
-    base,
-    selectedLendgine,
-    price: referencePrice,
-  } = useTradeDetails();
+  const { quote, base, selectedLendgine } = useTradeDetails();
   const isLong = isLongLendgine(selectedLendgine, base);
   const Beet = useBeet();
   const { address } = useAccount();
@@ -54,6 +50,7 @@ export const Buy: React.FC = () => {
   const settings = useSettings();
 
   const selectedLendgineInfo = useLendgine(selectedLendgine);
+  const mostLiquid = useMostLiquidMarket([base, quote]);
 
   const [input, setInput] = useState("");
   const balance = useBalance(selectedLendgine.token1, address);
@@ -78,17 +75,17 @@ export const Buy: React.FC = () => {
     );
     const liqPerCol = liquidityPerCollateral(selectedLendgine);
 
-    const borrowAmount = parsedAmount
-      ? determineBorrowAmount(
-          parsedAmount,
-          selectedLendgine,
-          updatedLendgineInfo,
-          isLongLendgine(selectedLendgine, base)
-            ? referencePrice
-            : invert(referencePrice),
-          settings.maxSlippagePercent
-        )
-      : undefined;
+    const borrowAmount =
+      parsedAmount && !!mostLiquid.data
+        ? determineBorrowAmount(
+            parsedAmount,
+            selectedLendgine,
+            updatedLendgineInfo,
+            mostLiquid.data,
+            base,
+            settings.maxSlippagePercent
+          )
+        : undefined;
 
     const liquidity =
       borrowAmount && parsedAmount
@@ -115,16 +112,32 @@ export const Buy: React.FC = () => {
     return { price, borrowAmount, liquidity, shares, bRate };
   }, [
     base,
+    mostLiquid.data,
     parsedAmount,
-    referencePrice,
     selectedLendgine,
     selectedLendgineInfo.data,
     settings.maxSlippagePercent,
   ]);
 
+  console.log("yw", {
+    v3:
+      mostLiquid.data &&
+      isV3(mostLiquid.data.pool) &&
+      mostLiquid.data.pool.feeTier,
+    amountIn: parsedAmount?.quotient.toString(),
+    amountBorrow: borrowAmount?.quotient.toString(),
+    shares: shares
+      ?.multiply(ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent))
+      .quotient.toString(),
+  });
+
   const args = useMemo(
     () =>
-      !!borrowAmount && !!parsedAmount && !!address && !!shares
+      !!borrowAmount &&
+      !!parsedAmount &&
+      !!address &&
+      !!shares &&
+      !!mostLiquid.data
         ? ([
             {
               token0: getAddress(selectedLendgine.token0.address),
@@ -145,8 +158,17 @@ export const Buy: React.FC = () => {
                   )
                   .quotient.toString()
               ),
-              swapType: 0, // TODO: use reference price
-              swapExtraData: AddressZero, // TODO: use reference price
+              swapType: isV3(mostLiquid.data.pool) ? 1 : 0,
+              swapExtraData: isV3(mostLiquid.data.pool)
+                ? (defaultAbiCoder.encode(
+                    ["tuple(uint24 fee)"],
+                    [
+                      {
+                        fee: +mostLiquid.data.pool.feeTier,
+                      },
+                    ]
+                  ) as Address)
+                : AddressZero,
               recipient: address,
               deadline: BigNumber.from(
                 Math.round(Date.now() / 1000) + settings.timeout * 60
@@ -157,6 +179,7 @@ export const Buy: React.FC = () => {
     [
       address,
       borrowAmount,
+      mostLiquid.data,
       parsedAmount,
       selectedLendgine.bound,
       selectedLendgine.token0.address,

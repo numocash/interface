@@ -1,0 +1,60 @@
+{
+  "tokens": [
+    {
+      "name": "Wrapped Ether",
+      "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "symbol": "WETH",
+      "decimals": 18,
+      "chainId": 42161,
+      "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png"
+    },
+    {
+      "name": "USD Coin",
+      "address": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+      "symbol": "USDC",
+      "decimals": 6,
+      "chainId": 42161,
+      "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
+    },
+    {
+      "chainId": 42161,
+      "address": "0xd4d42F0b6DEF4CE0383636770eF773390d85c61A",
+      "name": "Sushi",
+      "symbol": "SUSHI",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/12271/thumb/512x512_Logo_no_chop.png?1606986688"
+    },
+    {
+      "chainId": 42161,
+      "name": "Stargate Finance",
+      "symbol": "STG",
+      "logoURI": "https://assets.coingecko.com/coins/images/24413/thumb/STG_LOGO.png?1647654518",
+      "address": "0xe018C7a3d175Fb0fE15D70Da2c874d3CA16313EC",
+      "decimals": 18
+    },
+    {
+      "chainId": 42161,
+      "name": "GMX",
+      "symbol": "GMX",
+      "address": "0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/18323/small/arbit.png?1631532468"
+    },
+    {
+      "address": "0x539bdE0d7Dbd336b79148AA742883198BBF60342",
+      "chainId": 42161,
+      "name": "Magic",
+      "symbol": "MAGIC",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/18623/small/magic.png?1656052146"
+    },
+    {
+      "address": "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55",
+      "chainId": 42161,
+      "name": "Dopex Token",
+      "symbol": "DPX",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/16652/small/DPX_%281%29.png?1624598630"
+    }
+  ]
+}
