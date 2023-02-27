@@ -1,4 +1,5 @@
 import type { Price } from "@uniswap/sdk-core";
+import { Percent } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
@@ -6,8 +7,11 @@ import { useAccount } from "wagmi";
 
 import type { Lendgine } from "../../../constants/types";
 import { useBalance } from "../../../hooks/useBalance";
+import { isV3 } from "../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import type { UniswapV2Pool } from "../../../services/graphql/uniswapV2";
+import type { UniswapV3Pool } from "../../../services/graphql/uniswapV3";
 import {
   isLongLendgine,
   isShortLendgine,
@@ -23,6 +27,7 @@ import {
   nextHighestLendgine,
   nextLowestLendgine,
 } from "../../../utils/Numoen/price";
+import { ONE_HUNDRED_PERCENT } from "../../../utils/Numoen/trade";
 import { Button } from "../../common/Button";
 import { PageMargin } from "../../layout";
 import { Times } from "./Chart/TimeSelector";
@@ -34,6 +39,7 @@ interface Props {
   quote: WrappedTokenInfo;
   lendgines: Lendgine[];
   price: Price<WrappedTokenInfo, WrappedTokenInfo>;
+  pool: UniswapV2Pool | UniswapV3Pool;
 }
 
 interface ITradeDetails {
@@ -54,6 +60,7 @@ interface ITradeDetails {
 
   lendgines: readonly Lendgine[];
   price: Price<WrappedTokenInfo, WrappedTokenInfo>;
+  pool: UniswapV2Pool | UniswapV3Pool;
 
   modalOpen: boolean;
   setModalOpen: (val: boolean) => void;
@@ -64,8 +71,9 @@ const useTradeDetailsInternal = ({
   quote,
   lendgines,
   price,
+  pool,
 }: Partial<Props> = {}): ITradeDetails => {
-  invariant(base && quote && lendgines && price);
+  invariant(base && quote && lendgines && price && pool);
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
   const [trade, setTrade] = useState<TradeType>(TradeType.Long);
   const [close, setClose] = useState(false);
@@ -117,6 +125,7 @@ const useTradeDetailsInternal = ({
 
     lendgines,
     price,
+    pool,
 
     modalOpen,
     setModalOpen,
@@ -157,7 +166,7 @@ export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =
 
 export const usePositionValue = (lendgine: Lendgine) => {
   const { address } = useAccount();
-  const { price: referencePrice, base } = useTradeDetails();
+  const { price: referencePrice, base, pool } = useTradeDetails();
 
   const balanceQuery = useBalance(lendgine.lendgine, address);
   const lendgineInfoQuery = useLendgine(lendgine);
@@ -192,9 +201,16 @@ export const usePositionValue = (lendgine: Lendgine) => {
       ? referencePrice.invert()
       : referencePrice;
 
+    const dexFee = isV3(pool)
+      ? new Percent(pool.feeTier, "1000000")
+      : new Percent("3000", "1000000");
+
     // token1
     const debtValue = token1Amount.add(
-      referencePriceAdjusted.invert().quote(token0Amount)
+      referencePriceAdjusted
+        .invert()
+        .quote(token0Amount)
+        .multiply(ONE_HUNDRED_PERCENT.add(dexFee))
     );
 
     const value = collateral.subtract(debtValue);
@@ -205,6 +221,7 @@ export const usePositionValue = (lendgine: Lendgine) => {
     base,
     lendgine,
     lendgineInfoQuery.data,
+    pool,
     referencePrice,
   ]);
 
@@ -216,9 +233,12 @@ export const TradeDetailsInner: React.FC<Props> = ({
   quote,
   lendgines,
   price,
+  pool,
 }: Props) => {
   return (
-    <TradeDetailsProvider initialState={{ base, quote, lendgines, price }}>
+    <TradeDetailsProvider
+      initialState={{ base, quote, lendgines, price, pool }}
+    >
       <TradeDetailsInnerInner />
     </TradeDetailsProvider>
   );

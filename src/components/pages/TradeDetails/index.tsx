@@ -47,12 +47,16 @@ export const TradeDetails: React.FC = () => {
       : mostLiquidQuery.data.price;
   }, [invertPriceQuery, mostLiquidQuery.data]);
 
-  return !!denomSortedTokens && !!lendgines && !!currentPrice ? (
+  return !!denomSortedTokens &&
+    !!lendgines &&
+    !!currentPrice &&
+    !!mostLiquidQuery.data?.pool ? (
     <TradeDetailsInner
       base={denomSortedTokens[0]}
       quote={denomSortedTokens[1]}
       lendgines={lendgines}
       price={currentPrice}
+      pool={mostLiquidQuery.data.pool}
     />
   ) : (
     <LoadingPage />
