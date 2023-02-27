@@ -10,7 +10,7 @@ export const TradeInner: React.FC = () => {
   return (
     <>
       <Explain />
-      <div tw="border-b-2 border-stroke h-72 relative mt-[-288px] bg-secondary -z-10 w-full" />
+      <div tw="border-b-2 border-stroke h-[296px] relative mt-[-296px] bg-secondary -z-10 w-full" />
 
       <PageMargin tw=" w-full max-w-4xl ">
         <div tw="flex flex-col gap-4 w-full ">
