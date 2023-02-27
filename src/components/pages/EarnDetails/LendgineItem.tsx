@@ -80,7 +80,9 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
     >
       <RowBetween tw="px-0">
         <p tw="text-xl text-secondary">APR</p>
-        <p tw="text-xl font-semibold">{formatPercent(apr)}</p>
+        <p tw="text-xl font-semibold">
+          {apr.equalTo(0) ? "0%" : formatPercent(apr)}
+        </p>
       </RowBetween>
       <RowBetween tw="justify-around">
         <VerticalItem

@@ -157,6 +157,8 @@ export const Create: React.FC = () => {
         ? `One token must be ${
             environment.interface.wrappedNative.symbol ?? ""
           } or ${environment.interface.stablecoin.symbol ?? ""}`
+        : !token0InputAmount || !token1InputAmount
+        ? "Enter an amount"
         : priceToFraction(currentPrice).greaterThan(bound)
         ? "Bound can't be below current price"
         : lendgines.find(
@@ -166,6 +168,11 @@ export const Create: React.FC = () => {
               l.bound.equalTo(fractionToPrice(bound, token1, token0))
           )
         ? " Market already exists"
+        : (token0Balance.data &&
+            token0InputAmount.greaterThan(token0Balance.data)) ||
+          (token1Balance.data &&
+            token1InputAmount.greaterThan(token1Balance.data))
+        ? "Insufficient amount"
         : null,
     [
       bound,
@@ -175,7 +182,11 @@ export const Create: React.FC = () => {
       lendgines,
       prepare.config,
       token0,
+      token0Balance.data,
+      token0InputAmount,
       token1,
+      token1Balance.data,
+      token1InputAmount,
       tokens,
     ]
   );

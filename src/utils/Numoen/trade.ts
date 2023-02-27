@@ -37,9 +37,7 @@ export const determineBorrowAmount = (
     token1Amount.add(expectedSwapOutput)
   );
 
-  const multiple = userAmount.divide(
-    userAmount.subtract(userLiquidityValue)
-  ).asFraction;
+  const multiple = userAmount.divide(userLiquidityValue).asFraction;
 
   return userAmount.multiply(multiple.subtract(1));
 };

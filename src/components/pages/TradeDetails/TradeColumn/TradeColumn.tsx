@@ -46,7 +46,7 @@ export const TradeColumn: React.FC = () => {
     </div>
   );
   return (
-    <div tw="pl-6 lg:pl-8 xl:pl-12 transform ease-in-out duration-300 py-2 flex-col gap-4 w-full hidden xl:flex">
+    <div tw="pl-8 lg:pl-10 transform ease-in-out duration-300 flex-col gap-4 w-full hidden xl:flex">
       {!close && Tabs}
       {(trade === TradeType.Long || trade === TradeType.Short) && <Trade />}
       <ProvideLiquidity />

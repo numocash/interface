@@ -38,13 +38,13 @@ export const Positions: React.FC = () => {
         invariant(lendgine && lendgineInfo);
         return (
           <>
-            {i !== 0 && <Divider tw="mx-0" />}
             <PositionItem
               key={lendgine.address}
               lendgine={lendgine}
               lendgineInfo={lendgineInfo}
               position={p}
             />
+            {i !== (positions.data?.length ?? 0) - 1 && <Divider tw="mx-0" />}
           </>
         );
       })}

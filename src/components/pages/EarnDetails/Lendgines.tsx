@@ -49,7 +49,7 @@ export const Lendgines: React.FC = () => {
           <LendgineItem lendgine={shortLendgine} info={shortInfo.data} />
         )}
       </div>
-      <div tw="w-full justify-center flex mt-4">
+      <div tw="w-full justify-center flex">
         <div tw="flex items-center gap-6">
           {shortLendgine &&
             nextHighestLendgine({
