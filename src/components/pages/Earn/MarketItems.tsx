@@ -10,10 +10,14 @@ import { useMarketToLendgines } from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { formatPercent } from "../../../utils/format";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
-import { liquidityPerPosition } from "../../../utils/Numoen/lendgineMath";
+import {
+  accruedLendgineInfo,
+  liquidityPerPosition,
+} from "../../../utils/Numoen/lendgineMath";
 import {
   invert,
   numoenPrice,
+  pricePerCollateral,
   pricePerLiquidity,
 } from "../../../utils/Numoen/price";
 import { RowBetween } from "../../common/RowBetween";
@@ -66,15 +70,30 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
   ]);
 
   const { bestSupplyRate, tvl } = useMemo(() => {
-    if (!lendgineInfosQuery.data || lendgineInfosQuery.isLoading) return {};
+    if (!lendgineInfosQuery.data || lendgineInfosQuery.isLoading || !lendgines)
+      return {};
 
-    const supplyRates = lendgineInfosQuery.data.map((l) => supplyRate(l));
+    const bestSupplyRate = lendgineInfosQuery.data.reduce((acc, cur, i) => {
+      const lendgine = lendgines[i];
+      invariant(lendgine);
+      const updatedInfo = accruedLendgineInfo(lendgine, cur);
 
-    // TODO: fix this to include the premium
-    const bestSupplyRate = supplyRates.reduce(
-      (acc, cur) => (cur.greaterThan(acc) ? cur : acc),
-      new Percent(0)
-    );
+      // token0 / liq
+      const liquidityPrice = pricePerLiquidity({
+        lendgine,
+        lendgineInfo: updatedInfo,
+      });
+
+      // col / liq
+      const collateralPrice = pricePerCollateral(lendgine, updatedInfo);
+
+      const interestPremium = collateralPrice
+        .subtract(liquidityPrice)
+        .divide(liquidityPrice);
+
+      const rate = supplyRate(updatedInfo).multiply(interestPremium);
+      return rate.greaterThan(acc) ? rate : acc;
+    }, new Percent(0));
 
     const tvl = lendgineInfosQuery.data.reduce((acc, cur, i) => {
       const lendgine = lendgines?.[i];
