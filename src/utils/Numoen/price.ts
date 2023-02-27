@@ -72,9 +72,9 @@ export const lvrCoef = (
   lendgine: Lendgine
 ) => {
   if (price.greaterThan(lendgine.bound)) return new Fraction(0);
-  const numerator = price.asFraction.multiply(price.asFraction);
-  const denominator = price.asFraction
-    .multiply(lendgine.bound.asFraction)
+  const numerator = priceToFraction(price).multiply(priceToFraction(price));
+  const denominator = priceToFraction(price)
+    .multiply(priceToFraction(lendgine.bound))
     .multiply(2)
     .subtract(numerator);
   return numerator.divide(denominator);
