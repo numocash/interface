@@ -263,6 +263,11 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
         selectedValue={selectedLendgine.token1}
         label={<span>Receive</span>}
         inputOnChange={(value) => setInput(value)}
+        currentAmount={{
+          amount: positionValue,
+          allowSelect: true,
+          label: "Value",
+        }}
       />
       <AsyncButton
         variant="primary"
