@@ -2,7 +2,9 @@ import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
 import type { Lendgine, LendgineInfo } from "../../../../../constants/types";
-import { formatPrice } from "../../../../../utils/format";
+import { formatPercent, formatPrice } from "../../../../../utils/format";
+import { borrowRate } from "../../../../../utils/Numoen/jumprate";
+import { accruedLendgineInfo } from "../../../../../utils/Numoen/lendgineMath";
 import { numoenPrice } from "../../../../../utils/Numoen/price";
 import { RowBetween } from "../../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
@@ -26,6 +28,11 @@ export const PositionItem: React.FC<Props> = ({
   const isInverse = base.equals(lendgine.token1);
 
   const positionValue = usePositionValue(lendgine);
+
+  const funding = useMemo(() => {
+    const updatedLendgineInfo = accruedLendgineInfo(lendgine, lendgineInfo);
+    return borrowRate(updatedLendgineInfo);
+  }, [lendgine, lendgineInfo]);
 
   const value = useMemo(() => {
     if (!positionValue) return undefined;
@@ -55,7 +62,7 @@ export const PositionItem: React.FC<Props> = ({
         ) : (
           ""
         )}
-        <p tw="justify-self-start col-span-2">N/A</p>
+        <p tw="justify-self-start col-span-2">{formatPercent(funding)}</p>
 
         <button
           tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 hidden xl:flex"
@@ -109,7 +116,7 @@ export const PositionItem: React.FC<Props> = ({
 
         <RowBetween tw="items-center p-0">
           <p tw="text-secondary">Funding Rate</p>
-          <p tw="justify-self-start col-span-2">N/A</p>
+          <p tw="justify-self-start col-span-2">{formatPercent(funding)}</p>
         </RowBetween>
 
         <button
