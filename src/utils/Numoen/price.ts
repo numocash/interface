@@ -83,7 +83,7 @@ export const lvrCoef = (
 export const nextHighestLendgine = <L extends Lendgine>(
   props: (
     | {
-        price: Fraction;
+        price: Price<WrappedTokenInfo, WrappedTokenInfo>;
       }
     | {
         lendgine: L;
@@ -96,7 +96,8 @@ export const nextHighestLendgine = <L extends Lendgine>(
     a.bound.greaterThan(b.bound) ? 1 : -1
   );
 
-  const price = "lendgine" in props ? props.lendgine.bound : props.price;
+  const price = "price" in props ? props.price : props.lendgine.bound;
+  console.log("yw", price.toSignificant(5));
 
   return sortedLendgines.reduce(
     (acc: Lendgine | null, cur) =>
@@ -108,7 +109,7 @@ export const nextHighestLendgine = <L extends Lendgine>(
 export const nextLowestLendgine = <L extends Lendgine>(
   props: (
     | {
-        price: Fraction;
+        price: Price<WrappedTokenInfo, WrappedTokenInfo>;
       }
     | {
         lendgine: L;

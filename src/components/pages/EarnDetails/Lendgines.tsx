@@ -7,7 +7,12 @@ import {
   pickLongLendgines,
   pickShortLendgines,
 } from "../../../utils/lendgines";
-import { nextHighestLendgine } from "../../../utils/Numoen/price";
+import {
+  fractionToPrice,
+  nextHighestLendgine,
+  nextLowestLendgine,
+  priceToFraction,
+} from "../../../utils/Numoen/price";
 import { useEarnDetails } from "./EarnDetailsInner";
 import { LendgineItem } from "./LendgineItem";
 
@@ -16,21 +21,71 @@ export const Lendgines: React.FC = () => {
 
   const [boundMultiple, setBoundMultiple] = useState(2);
 
-  const { longLendgine, shortLendgine, longLendgines, shortLendgines } =
-    useMemo(() => {
-      const longLendgines = pickLongLendgines(lendgines, base);
-      const shortLendgines = pickShortLendgines(lendgines, base);
-      const longLendgine = nextHighestLendgine({
-        price: price.asFraction.multiply(boundMultiple / 2),
+  const { longLendgine, shortLendgine, upEnable, downEnable } = useMemo(() => {
+    const longLendgines = pickLongLendgines(lendgines, base);
+    const shortLendgines = pickShortLendgines(lendgines, base);
+    const longLendgine = nextHighestLendgine({
+      price: fractionToPrice(
+        priceToFraction(price).multiply(boundMultiple / 2),
+        price.baseCurrency,
+        price.quoteCurrency
+      ),
+      lendgines: longLendgines,
+    });
+    const shortLendgine = nextHighestLendgine({
+      price: fractionToPrice(
+        priceToFraction(price.invert()).multiply(boundMultiple / 2),
+        price.quoteCurrency,
+        price.baseCurrency
+      ),
+      lendgines: shortLendgines,
+    });
+
+    const upEnable =
+      !!nextHighestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price).multiply(boundMultiple),
+          price.baseCurrency,
+          price.quoteCurrency
+        ),
         lendgines: longLendgines,
-      });
-      const shortLendgine = nextHighestLendgine({
-        price: price.invert().asFraction.multiply(boundMultiple / 2),
+      }) ||
+      !!nextHighestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price.invert()).multiply(boundMultiple),
+          price.quoteCurrency,
+          price.baseCurrency
+        ),
         lendgines: shortLendgines,
       });
 
-      return { longLendgine, shortLendgine, longLendgines, shortLendgines };
-    }, [base, boundMultiple, lendgines, price]);
+    const downEnable =
+      !!nextLowestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price).multiply(boundMultiple / 2),
+          price.baseCurrency,
+          price.quoteCurrency
+        ),
+        lendgines: longLendgines,
+      }) ||
+      !!nextLowestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price.invert()).multiply(boundMultiple / 2),
+          price.quoteCurrency,
+          price.baseCurrency
+        ),
+        lendgines: shortLendgines,
+      });
+
+    return {
+      longLendgine,
+      shortLendgine,
+      longLendgines,
+      shortLendgines,
+      upEnable,
+      downEnable,
+    };
+  }, [base, boundMultiple, lendgines, price]);
 
   const longInfo = useLendgine(longLendgine);
   const shortInfo = useLendgine(shortLendgine);
@@ -51,35 +106,27 @@ export const Lendgines: React.FC = () => {
       </div>
       <div tw="w-full justify-center flex">
         <div tw="flex items-center gap-6">
-          {shortLendgine &&
-            nextHighestLendgine({
-              lendgine: shortLendgine,
-              lendgines: shortLendgines,
-            }) && (
-              <button
-                tw="bg-secondary p-1 rounded-lg items-center justify-center"
-                onClick={() => setBoundMultiple(boundMultiple / 2)}
-              >
-                <IoIosArrowDown tw="rotate-90" />
-              </button>
-            )}
+          {downEnable && (
+            <button
+              tw="bg-secondary p-1 rounded-lg items-center justify-center"
+              onClick={() => setBoundMultiple(boundMultiple / 2)}
+            >
+              <IoIosArrowDown tw="rotate-90" />
+            </button>
+          )}
 
           <p tw="flex text-xl gap-1 w-32 justify-center">
             Bound:<span tw="font-semibold"> {boundMultiple}x</span>
           </p>
 
-          {longLendgine &&
-            nextHighestLendgine({
-              lendgine: longLendgine,
-              lendgines: longLendgines,
-            }) && (
-              <button tw="bg-secondary p-1 rounded-lg items-center justify-center">
-                <IoIosArrowDown
-                  tw="-rotate-90"
-                  onClick={() => setBoundMultiple(boundMultiple * 2)}
-                />
-              </button>
-            )}
+          {upEnable && (
+            <button tw="bg-secondary p-1 rounded-lg items-center justify-center">
+              <IoIosArrowDown
+                tw="-rotate-90"
+                onClick={() => setBoundMultiple(boundMultiple * 2)}
+              />
+            </button>
+          )}
         </div>
       </div>
     </>
