@@ -100,7 +100,7 @@ export const Returns: React.FC = () => {
 
   return (
     <>
-      <RowBetween tw="items-center">
+      <RowBetween tw="items-center px-0">
         <p tw="text-sm">Expected Profit and Loss</p>
         {derivReturns.lessThan(0) ? (
           <p tw="font-semibold text-red">{formatPercent(derivReturns)}</p>
@@ -182,7 +182,7 @@ export const Returns: React.FC = () => {
           );
         }}
       </ParentSize>
-      <RowBetween tw="text-sm">
+      <RowBetween tw="text-sm px-0">
         <p tw="">
           {quote.symbol} / {base.symbol} price
         </p>
