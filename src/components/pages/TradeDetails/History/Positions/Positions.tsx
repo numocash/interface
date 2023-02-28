@@ -17,10 +17,7 @@ export const Positions: React.FC = () => {
   );
   const lendgineInfos = useLendgines(lendgines);
 
-  return balances.isLoading ||
-    !balances.data ||
-    lendgineInfos.isLoading ||
-    !lendgineInfos.data ? (
+  return !balances.data || !lendgineInfos.data ? (
     <div tw="w-full rounded-lg bg-secondary flex animate-pulse transform ease-in-out duration-300 h-12" />
   ) : !address || balances.data.filter((b) => b.greaterThan(0)).length === 0 ? (
     <EmptyPosition />
@@ -39,7 +36,6 @@ export const Positions: React.FC = () => {
         return (
           <>
             <PositionItem
-              key={lendgine.address}
               balance={d}
               lendgine={lendgine}
               lendgineInfo={lendgineInfo}

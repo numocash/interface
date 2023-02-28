@@ -55,6 +55,46 @@
       "symbol": "DPX",
       "decimals": 18,
       "logoURI": "https://assets.coingecko.com/coins/images/16652/small/DPX_%281%29.png?1624598630"
+    },
+    {
+      "address": "0x471EcE3750Da237f93B8E339c536989b8978a438",
+      "chainId": 42220,
+      "name": "Celo Native Asset",
+      "symbol": "CELO",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/11090/small/InjXBNx9_400x400.jpg?1674707499"
+    },
+    {
+      "address": "0x765DE816845861e75A25fCA122bb6898B8B1282a",
+      "chainId": 42220,
+      "name": "Celo Dollar",
+      "symbol": "cUSD",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/13161/small/icon-celo-dollar-color-1000-circle-cropped.png?1605771134"
+    },
+    {
+      "address": "0x02De4766C272abc10Bc88c220D214A26960a7e92",
+      "chainId": 42220,
+      "name": "Nature Carbon Tonne",
+      "symbol": "NCT",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/24484/small/NCT-removebg-preview.png?1647836439"
+    },
+    {
+      "address": "0xD8763CBa276a3738E6DE85b4b3bF5FDed6D6cA73",
+      "chainId": 42220,
+      "name": "Celo Euro",
+      "symbol": "cEUR",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/16756/small/CEUR.png?1624947266"
+    },
+    {
+      "address": "0x46c9757C5497c5B1f2eb73aE79b6B67D119B0B58",
+      "chainId": 42220,
+      "name": "Impact Market",
+      "symbol": "PACT",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/21907/small/PACT_Token_Ticker_Blue_2x.png?1640236076"
     }
   ]
 }

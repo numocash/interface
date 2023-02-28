@@ -41,30 +41,29 @@ export const ConnectButton: React.FC = () => {
               return (
                 <>
                   <button onClick={openChainModal}>
-                    {chain.hasIcon && (
-                      <HeaderItem
-                        item={
-                          <div
-                            style={{
-                              background: chain.iconBackground,
-                              width: 24,
-                              height: 24,
-                              borderRadius: 999,
-                              overflow: "hidden",
-                            }}
-                          >
-                            {chain.iconUrl && (
-                              <img
-                                alt={chain.name ?? "Chain icon"}
-                                src={chain.iconUrl}
-                                style={{ width: 24, height: 24 }}
-                              />
-                            )}
-                          </div>
-                        }
-                        label="Chain"
-                      />
-                    )}
+                    <HeaderItem
+                      item={
+                        <div
+                          style={{
+                            background: chain.iconBackground,
+                            width: 24,
+                            height: 24,
+                            borderRadius: 999,
+                            overflow: "hidden",
+                          }}
+                        >
+                          <img
+                            alt={chain.name ?? "Chain icon"}
+                            src={
+                              chain.iconUrl ??
+                              "https://assets.coingecko.com/coins/images/11090/small/InjXBNx9_400x400.jpg?1674707499"
+                            }
+                            style={{ width: 24, height: 24 }}
+                          />
+                        </div>
+                      }
+                      label="Chain"
+                    />
                   </button>
 
                   <button onClick={openAccountModal}>

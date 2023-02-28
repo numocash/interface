@@ -42,7 +42,13 @@ import { useTradeDetails } from "../TradeDetailsInner";
 import { BuyStats } from "./BuyStats";
 
 export const Buy: React.FC = () => {
-  const { quote, base, selectedLendgine } = useTradeDetails();
+  const {
+    quote,
+    base,
+    selectedLendgine,
+    pool,
+    price: referencPrice,
+  } = useTradeDetails();
   const isLong = isLongLendgine(selectedLendgine, base);
   const Beet = useBeet();
   const { address } = useAccount();
@@ -75,17 +81,15 @@ export const Buy: React.FC = () => {
     );
     const liqPerCol = liquidityPerCollateral(selectedLendgine);
 
-    const borrowAmount =
-      parsedAmount && !!mostLiquid.data
-        ? determineBorrowAmount(
-            parsedAmount,
-            selectedLendgine,
-            updatedLendgineInfo,
-            mostLiquid.data,
-            base,
-            settings.maxSlippagePercent
-          )
-        : undefined;
+    const borrowAmount = parsedAmount
+      ? determineBorrowAmount(
+          parsedAmount,
+          selectedLendgine,
+          updatedLendgineInfo,
+          { pool, price: referencPrice },
+          settings.maxSlippagePercent
+        )
+      : undefined;
 
     const liquidity =
       borrowAmount && parsedAmount
@@ -111,25 +115,13 @@ export const Buy: React.FC = () => {
 
     return { price, borrowAmount, liquidity, shares, bRate };
   }, [
-    base,
-    mostLiquid.data,
     parsedAmount,
+    pool,
+    referencPrice,
     selectedLendgine,
     selectedLendgineInfo.data,
     settings.maxSlippagePercent,
   ]);
-
-  console.log("yw", {
-    v3:
-      mostLiquid.data &&
-      isV3(mostLiquid.data.pool) &&
-      mostLiquid.data.pool.feeTier,
-    amountIn: parsedAmount?.quotient.toString(),
-    amountBorrow: borrowAmount?.quotient.toString(),
-    shares: shares
-      ?.multiply(ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent))
-      .quotient.toString(),
-  });
 
   const args = useMemo(
     () =>

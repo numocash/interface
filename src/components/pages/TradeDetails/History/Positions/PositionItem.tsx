@@ -18,7 +18,6 @@ type Props<L extends Lendgine = Lendgine> = {
 };
 
 export const PositionItem: React.FC<Props> = ({
-  balance,
   lendgine,
   lendgineInfo,
 }: Props) => {
@@ -44,10 +43,7 @@ export const PositionItem: React.FC<Props> = ({
 
   return (
     <>
-      <div
-        tw="w-full justify-between hidden md:grid grid-cols-9 items-center"
-        key={balance.currency.address}
-      >
+      <div tw="w-full justify-between hidden md:grid grid-cols-9 items-center">
         <p tw="font-semibold pl-4 col-span-2">{symbol}</p>
         <p tw="justify-self-start col-span-2">
           {formatPrice(isInverse ? lendgine.bound.invert() : lendgine.bound)}
@@ -84,10 +80,7 @@ export const PositionItem: React.FC<Props> = ({
           Close
         </button>
       </div>
-      <div
-        tw="w-full justify-between flex flex-col  md:hidden gap-1"
-        key={balance.currency.address}
-      >
+      <div tw="w-full justify-between flex flex-col  md:hidden gap-1">
         <RowBetween tw="items-center p-0 mb-1">
           <p tw="font-semibold rounded-lg px-2 py-1 bg-secondary w-min">
             {symbol}

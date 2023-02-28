@@ -7,7 +7,6 @@ import { isV3 } from "../../hooks/useExternalExchange";
 import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import type { UniswapV2Pool } from "../../services/graphql/uniswapV2";
 import type { UniswapV3Pool } from "../../services/graphql/uniswapV3";
-import { isLongLendgine } from "../lendgines";
 import { liquidityPerCollateral } from "./lendgineMath";
 
 export const ONE_HUNDRED_PERCENT = new Fraction(1);
@@ -22,7 +21,6 @@ export const determineBorrowAmount = (
     pool: UniswapV2Pool | UniswapV3Pool;
     price: Price<WrappedTokenInfo, WrappedTokenInfo>;
   },
-  base: WrappedTokenInfo,
   slippageBps: Percent
 ) => {
   const liqPerCol = liquidityPerCollateral(lendgine);
@@ -36,7 +34,10 @@ export const determineBorrowAmount = (
     .multiply(userLiquidity)
     .divide(lendgineInfo.totalLiquidity);
 
-  const referencePrice = isLongLendgine(lendgine, base)
+  // token0 / token1
+  const referencePrice = lendgine.token0.equals(
+    referenceMarket.price.quoteCurrency
+  )
     ? referenceMarket.price
     : referenceMarket.price.invert();
 

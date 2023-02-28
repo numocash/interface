@@ -35,6 +35,7 @@ import {
   parsePriceHistoryHourV3,
 } from "../services/graphql/uniswapV3";
 import type { HookArg } from "./useBalance";
+import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 import type { Market } from "./useMarket";
 import type { WrappedTokenInfo } from "./useTokens2";
@@ -49,6 +50,8 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
       ? ([tokens[0], tokens[1]] as const)
       : ([tokens[1], tokens[0]] as const)
     : null;
+
+  const chain = useChain();
 
   return useQuery<{
     pool: UniswapV2Pool | UniswapV3Pool;
@@ -72,6 +75,18 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
       const v3data = parseMostLiquidV3(v3, sortedTokens);
 
       if (!v2data && !v3data) return null;
+
+      if (chain === 42220) {
+        if (!v3data) return null;
+        invariant(v2data);
+        return {
+          price:
+            v2data.totalLiquidity > v3data.totalLiquidity
+              ? v2data.price
+              : v3data.price,
+          pool: v3data.pool,
+        };
+      }
 
       if (!v3data) {
         invariant(v2data);

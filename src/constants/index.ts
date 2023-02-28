@@ -3,6 +3,7 @@ import type { Address } from "wagmi";
 import type { chains } from "../AppWithProviders";
 import type { WrappedTokenInfo } from "../hooks/useTokens2";
 import { arbitrumConfig } from "./arbitrum";
+import { celoConfig } from "./celo";
 
 export type SupportedChainIDs = (typeof chains)[number]["id"];
 
@@ -28,4 +29,5 @@ export const config: {
   };
 } = {
   42161: arbitrumConfig,
+  42220: celoConfig,
 };
