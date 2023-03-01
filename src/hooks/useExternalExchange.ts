@@ -120,9 +120,10 @@ export const usePriceHistory = (
   timeframe: Times
 ): UseQueryResult<readonly PricePoint[] | null> => {
   const client = useClient();
+  const chain = useChain();
 
   return useQuery<readonly PricePoint[] | null>(
-    ["price history", externalExchange, timeframe],
+    ["price history", externalExchange, timeframe, chain],
     async () => {
       if (!externalExchange) return null;
 

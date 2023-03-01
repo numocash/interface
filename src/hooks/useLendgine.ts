@@ -392,8 +392,11 @@ export const useLendginesPosition = <L extends Lendgine>(
   return updatedQuery;
 };
 
-export const useExistingLendginesQueryKey = () =>
-  ["existing lendgines"] as const;
+export const useExistingLendginesQueryKey = () => {
+  const chain = useChain();
+
+  return ["existing lendgines", chain] as const;
+};
 
 export const useExistingLendginesQueryFn = () => {
   const client = useClient();
