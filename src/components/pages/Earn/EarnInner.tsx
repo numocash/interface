@@ -18,11 +18,14 @@ export const EarnInner: React.FC = () => {
       <PageMargin tw="mt-8 max-w-4xl w-full">
         <div tw="flex w-full flex-col gap-4 ">
           <Display numMarkets={markets?.length} />
-          <div tw="flex w-full justify-between gap-4 items-center">
+          <div tw="flex w-full justify-end sm:justify-between gap-4 items-center">
             <Filter assets={assets} setAssets={setAssets} />
             {/* <Sort /> */}
-            <NavLink to="/create/">
-              <Button tw="py-2 px-4 rounded-lg text-lg" variant="primary">
+            <NavLink to="/create/" tw="w-full sm:w-auto">
+              <Button
+                tw="py-2 px-4 rounded-lg text-lg sm:w-auto w-full justify-self-end"
+                variant="primary"
+              >
                 Create new market
               </Button>
             </NavLink>

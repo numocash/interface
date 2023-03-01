@@ -284,11 +284,21 @@ export const Create: React.FC = () => {
       <div tw="flex flex-col lg:pt-12  gap-4">
         <h1 tw="text-xl font-semibold">Create a new market</h1>
         <p>
-          Numoen allows for the permissionless creation of markets. Read here to
-          learn more about the structure of a Numoen market.
+          Numoen allows for the permissionless creation of markets. Read{" "}
+          <span tw="underline">
+            <a
+              href="https://numoen.gitbook.io/numoen/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              here
+            </a>
+          </span>{" "}
+          to learn more about the structure of a Numoen market.
         </p>
         <div tw="flex flex-col rounded-lg border-2 border-stroke">
           <AssetSelection
+            tw="pb-4"
             onSelect={setToken1}
             tokens={removeToken0}
             selectedValue={token1 ?? null}
@@ -310,6 +320,7 @@ export const Create: React.FC = () => {
 
           <CenterSwitch icon="plus" />
           <AssetSelection
+            tw="pb-4"
             onSelect={setToken0}
             tokens={removeToken1}
             selectedValue={token0 ?? null}

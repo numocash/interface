@@ -63,7 +63,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
       tw=""
       to={`/trade/details/${tokens[0].address}/${tokens[1].address}`}
     >
-      <div tw="w-full rounded-xl hover:scale-105 transform ease-in-out duration-300 grid grid-cols-3 md:grid-cols-5  h-14 items-center justify-between ">
+      <div tw="w-full rounded-xl sm:hover:scale-105 transform ease-in-out duration-300 grid grid-cols-3 md:grid-cols-5  h-14 items-center justify-between ">
         <div tw="flex items-center gap-3 col-span-2">
           <div tw="flex items-center space-x-[-0.5rem] rounded-lg bg-secondary px-2 py-1">
             <TokenIcon token={tokens[1]} size={32} />

@@ -15,7 +15,7 @@ export const TradeInner: React.FC = () => {
       <PageMargin tw=" w-full max-w-4xl ">
         <div tw="flex flex-col gap-4 w-full ">
           <Display numMarkets={markets?.length} />
-          <div tw="flex gap-4 items-center">
+          <div tw=" gap-4 items-center ">
             <Filter assets={assets} setAssets={setAssets} />
             {/* <Sort /> */}
           </div>
