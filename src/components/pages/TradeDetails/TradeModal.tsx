@@ -1,3 +1,4 @@
+import { isLongLendgine } from "../../../utils/lendgines";
 import { X } from "../../common/Filter";
 import { Modal } from "../../common/Modal";
 import { Buy } from "./TradeColumn/Buy";
@@ -16,7 +17,7 @@ export const TradeModal: React.FC = () => {
     quote,
   } = useTradeDetails();
 
-  const isLong = selectedLendgine.token0 === base;
+  const isLong = isLongLendgine(selectedLendgine, base);
   return (
     <Modal
       isOpen={modalOpen}
