@@ -24,7 +24,8 @@ const codegenConfig: CodegenConfig = {
       plugins: [],
     },
     "./src/gql/numoen/": {
-      schema: "http://localhost:8000/subgraphs/name/kyscott/numoen",
+      schema:
+        "https://api.thegraph.com/subgraphs/name/kyscott18/numoen-arbitrum",
       documents: "src/services/graphql/numoen.graphql",
       preset: "client",
       config,
