@@ -117,10 +117,7 @@ export const PositionItem: React.FC<Props> = ({
 
   return (
     <>
-      <div
-        tw="w-full justify-between md:grid grid-cols-7 items-center hidden"
-        key={lendgine.address}
-      >
+      <div tw="w-full justify-between md:grid grid-cols-7 items-center hidden">
         <div tw="  pl-4 col-span-2 flex flex-col gap-1">
           {(isInverse ? [amount1, amount0] : [amount0, amount1]).map((a) => (
             <TokenAmountDisplay
@@ -188,10 +185,7 @@ export const PositionItem: React.FC<Props> = ({
           Close
         </button>
       </div>
-      <div
-        tw="w-full justify-between flex flex-col md:hidden gap-2"
-        key={lendgine.address}
-      >
+      <div tw="w-full justify-between flex flex-col md:hidden gap-2">
         <>
           {(isInverse ? [amount1, amount0] : [amount0, amount1]).map((a) => (
             <RowBetween key={a.currency.address} tw="p-0 items-center">
