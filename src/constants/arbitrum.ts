@@ -30,5 +30,6 @@ export const arbitrumConfig = {
       "https://api.thegraph.com/subgraphs/name/kyscott18/numoen-arbitrum",
     wrappedNative: WrappedNative[chainID.arbitrum],
     stablecoin: Stable[chainID.arbitrum],
+    blockFreq: 10,
   },
 } as const;

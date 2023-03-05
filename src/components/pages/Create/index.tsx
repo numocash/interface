@@ -1,12 +1,11 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
-import { useQueryClient } from "@tanstack/react-query";
 import { Fraction, Token } from "@uniswap/sdk-core";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import type { usePrepareContractWrite } from "wagmi";
-import { useAccount } from "wagmi";
+import { useAccount, useQueryClient } from "wagmi";
 
 import type { Lendgine } from "../../../constants/types";
 import { useEnvironment } from "../../../contexts/environment2";

@@ -1,12 +1,11 @@
 import type { BigNumber } from "@ethersproject/bignumber";
-import { useQuery } from "@tanstack/react-query";
 import { CurrencyAmount, Fraction, Token } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import { chunk } from "lodash";
 import { useCallback, useMemo } from "react";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
-import { useContractReads } from "wagmi";
+import { useContractReads, useQuery } from "wagmi";
 
 import type {
   Lendgine,
@@ -96,8 +95,7 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
     //  ^?
     contracts,
     allowFailure: false,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!contracts,
   });
 
@@ -211,8 +209,7 @@ export const useLendgines = <L extends Lendgine>(
     //  ^?
     contracts,
     allowFailure: false,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!lendgines,
   });
 
@@ -281,8 +278,7 @@ export const useLendginePosition = <L extends Lendgine>(
   const positionQuery = useLiquidityManagerPositions({
     address: environment.base.liquidityManager,
     args: address && lendgine ? [address, lendgine.address] : undefined,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!lendgine && !!address,
   });
 
@@ -349,8 +345,7 @@ export const useLendginesPosition = <L extends Lendgine>(
 
   const positionsQuery = useContractReads({
     contracts,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     allowFailure: false,
     enabled: !!contracts,
   });

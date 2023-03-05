@@ -24,8 +24,7 @@ export const useAllowance = <T extends Token>(
   const query = useErc20Allowance({
     address: token ? getAddress(token.address) : undefined,
     args: address && spender ? [address, spender] : undefined,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!token && !!address && !!spender,
   });
 

@@ -30,6 +30,7 @@ export type NumoenInterfaceConfig = {
   numoenSubgraph: string;
   wrappedNative: WrappedTokenInfo;
   stablecoin: WrappedTokenInfo;
+  blockFreq: number; // How many blocks should go by before updating
 };
 
 export const config: {

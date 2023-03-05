@@ -67,7 +67,7 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
   return useQuery<{
     pool: UniswapV2Pool | UniswapV3Pool;
   } | null>(
-    ["query liquidity", sortedTokens],
+    ["query liquidity", sortedTokens?.map((t) => t.address)],
     async () => {
       if (!sortedTokens) return null;
 
@@ -257,8 +257,7 @@ const useV2Price = (tokens: HookArg<Market>) => {
 
   const reservesQuery = useIUniswapV2PairGetReserves({
     address: (v2PairAddress as Address) ?? undefined,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!v2PairAddress,
   });
 
@@ -340,8 +339,7 @@ const useV3Prices = (tokens: HookArg<Market>) => {
   const slotsQuery = useContractReads({
     contracts,
     allowFailure: true,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!contracts,
   });
 

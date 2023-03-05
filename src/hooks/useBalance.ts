@@ -18,8 +18,7 @@ export const useBalance = <T extends Token>(
   const balanceQuery = useErc20BalanceOf({
     address: token ? getAddress(token.address) : undefined,
     args: address ? [address] : undefined,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!token && !!address,
   });
 
@@ -74,8 +73,7 @@ export const useBalances = <T extends Token>(
     //  ^?
     contracts,
     allowFailure: false,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!tokens && !!address,
   });
 

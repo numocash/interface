@@ -1,6 +1,6 @@
-import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
+import { useQueryClient } from "wagmi";
 
 import { AppRouter } from "./AppRouter";
 import { Layout } from "./components/layout/";

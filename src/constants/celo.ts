@@ -29,5 +29,6 @@ export const celoConfig = {
       "https://api.thegraph.com/subgraphs/name/kyscott18/numoen-celo",
     wrappedNative: WrappedNative[chainID.celo],
     stablecoin: Stable[chainID.celo],
+    blockFreq: 1,
   },
 };
