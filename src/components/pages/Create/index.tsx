@@ -20,7 +20,7 @@ import {
 import { useApprove } from "../../../hooks/useApproval";
 import { useBalance } from "../../../hooks/useBalance";
 import { useChain } from "../../../hooks/useChain";
-import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
+import { useCurrentPrice } from "../../../hooks/useExternalExchange";
 import { useAllLendgines } from "../../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { useDefaultTokenList } from "../../../hooks/useTokens2";
@@ -65,28 +65,16 @@ export const Create: React.FC = () => {
   const token0Balance = useBalance(token0, address);
   const token1Balance = useBalance(token1, address);
 
-  // price is in terms of quote / base
-
-  const mostLiquidQuery = useMostLiquidMarket(
+  const priceQuery = useCurrentPrice(
     !!token0 && !!token1 ? ([token0, token1] as const) : null
   );
-
-  const currentPrice = useMemo(() => {
-    const invertPriceQuery =
-      token0 && token1 ? token1.sortsBefore(token0) : null;
-
-    if (!mostLiquidQuery.data) return null;
-    return invertPriceQuery
-      ? mostLiquidQuery.data.price.invert()
-      : mostLiquidQuery.data.price;
-  }, [mostLiquidQuery.data, token0, token1]);
 
   const { token0InputAmount, token1InputAmount, liquidity, positionSize } =
     useMemo(() => {
       const parsedAmount =
         tryParseCurrencyAmount(token0Input, token0) ??
         tryParseCurrencyAmount(token1Input, token1);
-      if (!parsedAmount || !token0 || !token1 || !currentPrice) return {};
+      if (!parsedAmount || !token0 || !token1 || !priceQuery.data) return {};
 
       const lendgine: Lendgine = {
         token0,
@@ -100,7 +88,7 @@ export const Create: React.FC = () => {
 
       const { token0Amount, token1Amount } = priceToReserves(
         lendgine,
-        currentPrice
+        priceQuery.data
       );
 
       const liquidity = parsedAmount.currency.equals(lendgine.token0)
@@ -121,7 +109,7 @@ export const Create: React.FC = () => {
     }, [
       bound,
       chainID,
-      currentPrice,
+      priceQuery.data,
       token0,
       token0Input,
       token1,
@@ -231,7 +219,7 @@ export const Create: React.FC = () => {
     () =>
       !token0 || !token1
         ? "Select a token"
-        : !currentPrice ||
+        : !priceQuery.data ||
           lendgines === null ||
           !prepare.config ||
           approveToken0.allowanceQuery.isLoading ||
@@ -246,7 +234,7 @@ export const Create: React.FC = () => {
           } or ${environment.interface.stablecoin.symbol ?? ""}`
         : !token0InputAmount || !token1InputAmount
         ? "Enter an amount"
-        : priceToFraction(currentPrice).greaterThan(bound)
+        : priceToFraction(priceQuery.data).greaterThan(bound)
         ? "Bound can't be below current price"
         : lendgines.find(
             (l) =>
@@ -265,11 +253,11 @@ export const Create: React.FC = () => {
       approveToken0.allowanceQuery.isLoading,
       approveToken1.allowanceQuery.isLoading,
       bound,
-      currentPrice,
       environment.interface.stablecoin,
       environment.interface.wrappedNative,
       lendgines,
       prepare.config,
+      priceQuery.data,
       token0,
       token0Balance.data,
       token0InputAmount,
@@ -353,11 +341,11 @@ export const Create: React.FC = () => {
             <Plus icon="plus" onClick={() => setBound(bound.multiply(2))} />
           </div>
         </RowBetween>
-        {currentPrice && (
+        {priceQuery.data && (
           <div tw="w-full justify-end flex mt-[-1rem]">
             <p tw="text-xs">
               <span tw="text-secondary">Current price: </span>
-              {formatPrice(currentPrice)} {token0?.symbol} / {token1?.symbol}
+              {formatPrice(priceQuery.data)} {token0?.symbol} / {token1?.symbol}
             </p>
           </div>
         )}
