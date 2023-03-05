@@ -25,6 +25,7 @@ import { useBeet } from "../../../../utils/beet";
 import { isShortLendgine } from "../../../../utils/lendgines";
 import {
   accruedLendgineInfo,
+  getT,
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../utils/Numoen/lendgineMath";
@@ -60,6 +61,7 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
   const [input, setInput] = useState("");
 
   const symbol = quote.symbol + (isInverse ? "-" : "+");
+  const t = getT();
 
   const parsedAmount = useMemo(
     () => tryParseCurrencyAmount(input, selectedLendgine.token1),
@@ -76,7 +78,8 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
 
     const updateLendgineInfo = accruedLendgineInfo(
       selectedLendgine,
-      lendgineInfoQuery.data
+      lendgineInfoQuery.data,
+      t
     );
 
     const shares = balanceQuery.data
@@ -114,6 +117,7 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
     positionValue,
     price,
     selectedLendgine,
+    t,
   ]);
 
   const approve = useApprove(shares, environment.base.lendgineRouter);

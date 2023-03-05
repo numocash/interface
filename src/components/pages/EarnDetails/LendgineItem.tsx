@@ -4,7 +4,7 @@ import tw, { styled } from "twin.macro";
 import type { Lendgine, LendgineInfo } from "../../../constants/types";
 import { formatPercent } from "../../../utils/format";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
-import { accruedLendgineInfo } from "../../../utils/Numoen/lendgineMath";
+import { accruedLendgineInfo, getT } from "../../../utils/Numoen/lendgineMath";
 import {
   invert,
   lvrCoef,
@@ -26,10 +26,11 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
   const { base, selectedLendgine, setSelectedLendgine, setClose, close } =
     useEarnDetails();
   const inverse = base.equals(lendgine.token1);
+  const t = getT();
 
   const updatedInfo = useMemo(
-    () => accruedLendgineInfo(lendgine, info),
-    [info, lendgine]
+    () => accruedLendgineInfo(lendgine, info, t),
+    [info, lendgine, t]
   );
 
   const { apr, tvl, borrowValue, il, iv } = useMemo(() => {

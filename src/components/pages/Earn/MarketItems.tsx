@@ -12,6 +12,7 @@ import { formatPercent } from "../../../utils/format";
 import { supplyRate } from "../../../utils/Numoen/jumprate";
 import {
   accruedLendgineInfo,
+  getT,
   liquidityPerPosition,
 } from "../../../utils/Numoen/lendgineMath";
 import {
@@ -31,8 +32,7 @@ interface Props {
 export const MarketItem: React.FC<Props> = ({ market }: Props) => {
   const lendgines = useMarketToLendgines(market);
   const { address } = useAccount();
-
-  console.log(lendgines);
+  const t = getT();
 
   const positions = useLendginesPosition(lendgines, address);
   const lendgineInfosQuery = useLendgines(lendgines);
@@ -78,7 +78,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
     const bestSupplyRate = lendgineInfosQuery.data.reduce((acc, cur, i) => {
       const lendgine = lendgines[i];
       invariant(lendgine);
-      const updatedInfo = accruedLendgineInfo(lendgine, cur);
+      const updatedInfo = accruedLendgineInfo(lendgine, cur, t);
 
       // token0 / liq
       const liquidityPrice = pricePerLiquidity({
@@ -125,6 +125,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
     lendgineInfosQuery.isLoading,
     lendgines,
     market,
+    t,
   ]);
 
   return (

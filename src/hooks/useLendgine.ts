@@ -155,53 +155,57 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
 export const useLendgines = <L extends Lendgine>(
   lendgines: HookArg<readonly L[]>
 ) => {
-  const contracts = lendgines
-    ? lendgines.flatMap(
-        (lendgine) =>
-          [
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "totalPositionSize",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "totalLiquidityBorrowed",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "rewardPerPositionStored",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "lastUpdate",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "totalSupply",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "reserve0",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "reserve1",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "totalLiquidity",
-            },
-          ] as const
-      )
-    : undefined;
+  const contracts = useMemo(
+    () =>
+      lendgines
+        ? lendgines.flatMap(
+            (lendgine) =>
+              [
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "totalPositionSize",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "totalLiquidityBorrowed",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "rewardPerPositionStored",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "lastUpdate",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "totalSupply",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "reserve0",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "reserve1",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "totalLiquidity",
+                },
+              ] as const
+          )
+        : undefined,
+    [lendgines]
+  );
 
   const query = useContractReads({
     //  ^?
@@ -327,18 +331,21 @@ export const useLendginesPosition = <L extends Lendgine>(
   address: HookArg<Address>
 ) => {
   const environment = useEnvironment();
-  const contracts =
-    !!lendgines && !!address
-      ? lendgines.map(
-          (l) =>
-            ({
-              address: environment.base.liquidityManager,
-              abi: liquidityManagerABI,
-              functionName: "positions",
-              args: [address, l.address],
-            } as const)
-        )
-      : undefined;
+  const contracts = useMemo(
+    () =>
+      !!lendgines && !!address
+        ? lendgines.map(
+            (l) =>
+              ({
+                address: environment.base.liquidityManager,
+                abi: liquidityManagerABI,
+                functionName: "positions",
+                args: [address, l.address],
+              } as const)
+          )
+        : undefined,
+    [address, environment.base.liquidityManager, lendgines]
+  );
 
   const positionsQuery = useContractReads({
     contracts,

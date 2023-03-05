@@ -2,6 +2,7 @@ import { getAddress } from "@ethersproject/address";
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import type { Address } from "abitype";
+import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { erc20ABI, useContractReads } from "wagmi";
 
@@ -53,18 +54,21 @@ export const useBalances = <T extends Token>(
   tokens: HookArg<readonly T[]>,
   address: HookArg<Address>
 ) => {
-  const contracts =
-    address && tokens
-      ? tokens.map(
-          (t) =>
-            ({
-              address: getAddress(t.address),
-              abi: erc20ABI,
-              functionName: "balanceOf",
-              args: [address],
-            } as const)
-        )
-      : undefined;
+  const contracts = useMemo(
+    () =>
+      address && tokens
+        ? tokens.map(
+            (t) =>
+              ({
+                address: getAddress(t.address),
+                abi: erc20ABI,
+                functionName: "balanceOf",
+                args: [address],
+              } as const)
+          )
+        : undefined,
+    [address, tokens]
+  );
 
   const balanceQuery = useContractReads({
     //  ^?

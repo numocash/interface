@@ -26,6 +26,7 @@ import { isLongLendgine } from "../../../../utils/lendgines";
 import { borrowRate } from "../../../../utils/Numoen/jumprate";
 import {
   accruedLendgineInfo,
+  getT,
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../utils/Numoen/lendgineMath";
@@ -54,6 +55,7 @@ export const Buy: React.FC = () => {
   const { address } = useAccount();
   const environment = useEnvironment();
   const settings = useSettings();
+  const t = getT();
 
   const selectedLendgineInfo = useLendgine(selectedLendgine);
   const mostLiquid = useMostLiquidMarket([base, quote]);
@@ -71,7 +73,8 @@ export const Buy: React.FC = () => {
     if (!selectedLendgineInfo.data) return {};
     const updatedLendgineInfo = accruedLendgineInfo(
       selectedLendgine,
-      selectedLendgineInfo.data
+      selectedLendgineInfo.data,
+      t
     );
 
     const price = numoenPrice(selectedLendgine, updatedLendgineInfo);
@@ -121,6 +124,7 @@ export const Buy: React.FC = () => {
     selectedLendgine,
     selectedLendgineInfo.data,
     settings.maxSlippagePercent,
+    t,
   ]);
 
   const args = useMemo(

@@ -1,6 +1,7 @@
 import { getAddress } from "@ethersproject/address";
 import type { Price, Token } from "@uniswap/sdk-core";
 import { Fraction } from "@uniswap/sdk-core";
+import JSBI from "jsbi";
 import type { Address } from "wagmi";
 
 import type {
@@ -13,12 +14,22 @@ import { fractionToPrice } from "../../utils/Numoen/price";
 import type { PricePoint } from "./uniswapV2";
 import { parsePriceHelper } from "./uniswapV2";
 
+export const feeTiers = {
+  100: "100",
+  500: "500",
+  3000: "3000",
+  10000: "10000",
+} as const;
+
 export type UniswapV3Pool = {
   token0: Token;
   token1: Token;
   address: Address;
-  feeTier: "100" | "500" | "3000" | "10000";
+  feeTier: (typeof feeTiers)[keyof typeof feeTiers];
 };
+
+export const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
+export const Q192 = JSBI.exponentiate(Q96, JSBI.BigInt(2));
 
 // TODO: is this sorting by how much token0 is locked or tvl in terms of token0
 export const parseMostLiquidV3 = (

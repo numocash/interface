@@ -20,6 +20,7 @@ import {
 } from "../../../utils/lendgines";
 import {
   accruedLendgineInfo,
+  getT,
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../utils/Numoen/lendgineMath";
@@ -167,6 +168,7 @@ export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =
 export const usePositionValue = (lendgine: Lendgine) => {
   const { address } = useAccount();
   const { price: referencePrice, base, pool } = useTradeDetails();
+  const t = getT();
 
   const balanceQuery = useBalance(lendgine.lendgine, address);
   const lendgineInfoQuery = useLendgine(lendgine);
@@ -176,7 +178,8 @@ export const usePositionValue = (lendgine: Lendgine) => {
 
     const updatedLendgineInfo = accruedLendgineInfo(
       lendgine,
-      lendgineInfoQuery.data
+      lendgineInfoQuery.data,
+      t
     );
 
     // liq
@@ -223,6 +226,7 @@ export const usePositionValue = (lendgine: Lendgine) => {
     lendgineInfoQuery.data,
     pool,
     referencePrice,
+    t,
   ]);
 
   return value;

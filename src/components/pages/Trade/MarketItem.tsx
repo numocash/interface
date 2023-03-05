@@ -40,6 +40,11 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
 
   const currentPrice = useMemo(() => {
     if (!referenceMarketQuery.data) return null;
+    console.log(
+      "invertyq",
+      "invert" in referenceMarketQuery.data.price,
+      typeof referenceMarketQuery.data.price
+    );
     return invertPriceQuery
       ? referenceMarketQuery.data.price.invert()
       : referenceMarketQuery.data.price;

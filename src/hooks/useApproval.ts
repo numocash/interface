@@ -83,6 +83,7 @@ export const useApprove = <T extends Token>(
         : undefined,
     address: tokenAmount ? getAddress(tokenAmount.currency.address) : undefined,
     enabled: !!tokenAmount && !!spender,
+    staleTime: Infinity,
   });
 
   const write = useErc20Approve(prepare.config);

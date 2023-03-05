@@ -15,8 +15,18 @@ export type NumoenBaseConfig = {
 
 // TODO: CELO doesn't need to be used as a native token
 export type NumoenInterfaceConfig = {
-  uniswapV2subgraph: string;
-  uniswapV3subgraph: string;
+  uniswapV2: {
+    subgraph: string;
+    factoryAddress: string;
+    pairInitCodeHash: string;
+    routerAddress: string;
+  };
+  uniswapV3: {
+    subgraph: string;
+    factoryAddress: string;
+    pairInitCodeHash: string;
+    quoterAddress: string;
+  };
   numoenSubgraph: string;
   wrappedNative: WrappedTokenInfo;
   stablecoin: WrappedTokenInfo;
