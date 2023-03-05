@@ -66,7 +66,6 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
 
   return useQuery<{
     pool: UniswapV2Pool | UniswapV3Pool;
-    price: Price<WrappedTokenInfo, WrappedTokenInfo>;
   } | null>(
     ["query liquidity", sortedTokens],
     async () => {
@@ -91,22 +90,18 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
         if (!v3data) return null;
         invariant(v2data);
         return {
-          price:
-            v2data.totalLiquidity > v3data.totalLiquidity
-              ? v2data.price
-              : v3data.price,
           pool: v3data.pool,
         };
       }
 
       if (!v3data) {
         invariant(v2data);
-        return { pool: v2data.pool, price: v2data.price };
+        return { pool: v2data.pool };
       }
 
       if (!v2data) {
         invariant(v3data);
-        return { pool: v3data.pool, price: v3data.price };
+        return { pool: v3data.pool };
       }
 
       return {
@@ -114,10 +109,6 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
           v2data.totalLiquidity > v3data.totalLiquidity
             ? v2data.pool
             : v3data.pool,
-        price:
-          v2data.totalLiquidity > v3data.totalLiquidity
-            ? v2data.price
-            : v3data.price,
       };
     },
     {
@@ -134,7 +125,7 @@ export const usePriceHistory = (
   const chain = useChain();
 
   return useQuery<readonly PricePoint[] | null>(
-    ["price history", externalExchange, timeframe, chain],
+    ["price history", externalExchange?.address, timeframe, chain],
     async () => {
       if (!externalExchange) return null;
 
@@ -220,7 +211,7 @@ export const useCurrentPrice = (tokens: HookArg<Market>) => {
 
     const count =
       (v2PriceQuery.data ? 1 : 0) +
-      (v3PricesQuery.data ? v3PricesQuery.data.length : 0);
+      (v3PricesQuery.data ? v3PricesQuery.data.filter((d) => !!d).length : 0);
 
     const sum = (
       v3PricesQuery.data

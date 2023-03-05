@@ -156,13 +156,14 @@ export const useBuyAmounts = ({
 }: {
   amountIn: HookArg<CurrencyAmount<WrappedTokenInfo>>;
 }) => {
-  const { selectedLendgine, pool, price } = useTradeDetails();
+  const { selectedLendgine, price, base, quote } = useTradeDetails();
+  const mostLiquidQuery = useMostLiquidMarket([base, quote] as const);
   const selectedLendgineInfo = useLendgine(selectedLendgine);
   const t = getT();
   const settings = useSettings();
 
   return useMemo(() => {
-    if (!selectedLendgineInfo.data) return {};
+    if (!selectedLendgineInfo.data || !mostLiquidQuery.data) return {};
 
     const updatedLendgineInfo = accruedLendgineInfo(
       selectedLendgine,
@@ -181,7 +182,7 @@ export const useBuyAmounts = ({
           amountIn,
           selectedLendgine,
           updatedLendgineInfo,
-          { pool, price },
+          { pool: mostLiquidQuery.data.pool, price },
           settings.maxSlippagePercent
         )
       : undefined;
@@ -211,7 +212,7 @@ export const useBuyAmounts = ({
     return { borrowAmount, liquidity, shares, bRate };
   }, [
     amountIn,
-    pool,
+    mostLiquidQuery.data,
     price,
     selectedLendgine,
     selectedLendgineInfo.data,

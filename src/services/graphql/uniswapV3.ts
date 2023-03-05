@@ -1,5 +1,5 @@
 import { getAddress } from "@ethersproject/address";
-import type { Price, Token } from "@uniswap/sdk-core";
+import type { Token } from "@uniswap/sdk-core";
 import { Fraction } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import type { Address } from "wagmi";
@@ -10,9 +10,7 @@ import type {
   PriceHistoryHourV3Query,
 } from "../../gql/uniswapV3/graphql";
 import type { WrappedTokenInfo } from "../../hooks/useTokens2";
-import { fractionToPrice } from "../../utils/Numoen/price";
 import type { PricePoint } from "./uniswapV2";
-import { parsePriceHelper } from "./uniswapV2";
 
 export const feeTiers = {
   100: "100",
@@ -38,7 +36,6 @@ export const parseMostLiquidV3 = (
 ): {
   pool: UniswapV3Pool;
   totalLiquidity: number;
-  price: Price<WrappedTokenInfo, WrappedTokenInfo>;
 } | null =>
   mostLiquidV3Query.pools[0]
     ? {
@@ -51,11 +48,6 @@ export const parseMostLiquidV3 = (
         },
         totalLiquidity: parseFloat(
           mostLiquidV3Query.pools[0].totalValueLockedToken0
-        ),
-        price: fractionToPrice(
-          parsePriceHelper(parseFloat(mostLiquidV3Query.pools[0].token0Price)),
-          tokens[1],
-          tokens[0]
         ),
       }
     : null;
