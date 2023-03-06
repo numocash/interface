@@ -57,7 +57,7 @@ export const useCollect = ({
       },
     ] as const;
 
-    const unwrapArgs = [BigNumber.from(0), address]; // safe to be zero because the collect estimation will fail
+    const unwrapArgs = [BigNumber.from(0), address] as const; // safe to be zero because the collect estimation will fail
 
     return { args, native, unwrapArgs };
   }, [
@@ -78,7 +78,11 @@ export const useCollect = ({
   const sendCollect = useLiquidityManagerCollect(prepareCollect.config);
 
   const prepareMulticall = usePrepareLiquidityManagerMulticall({
-    enabled: !!native && !!unwrapArgs && !!prepareCollect.config.request,
+    enabled:
+      !!native &&
+      !!unwrapArgs &&
+      !!prepareCollect.config.request &&
+      !!liquidityManagerContract,
     address: environment.base.liquidityManager,
     staleTime: Infinity,
     args:

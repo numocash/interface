@@ -1,5 +1,6 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
+import { AddressZero } from "@ethersproject/constants";
 import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import type { usePrepareContractWrite } from "wagmi";
@@ -8,7 +9,10 @@ import { useAccount } from "wagmi";
 import { useEnvironment } from "../../../../contexts/environment2";
 import { useSettings } from "../../../../contexts/settings";
 import {
+  useLiquidityManager,
+  useLiquidityManagerMulticall,
   useLiquidityManagerRemoveLiquidity,
+  usePrepareLiquidityManagerMulticall,
   usePrepareLiquidityManagerRemoveLiquidity,
 } from "../../../../generated";
 import type { HookArg } from "../../../../hooks/useBalance";
@@ -42,8 +46,22 @@ export const useWithdraw = ({
   const environment = useEnvironment();
   const { address } = useAccount();
 
-  const { args } = useMemo(() => {
+  const liquidityManagerContract = useLiquidityManager({
+    address: environment.base.liquidityManager,
+  });
+
+  const { args, native, unwrapArgs, sweepArgs } = useMemo(() => {
     if (!size || !address || !amount0 || !amount1 || !liquidity) return {};
+
+    const native =
+      environment.interface.wrappedNative.equals(selectedLendgine.token1) ||
+      environment.interface.wrappedNative.equals(selectedLendgine.token0);
+
+    const nativePosition = environment.interface.wrappedNative.equals(
+      selectedLendgine.token0
+    )
+      ? 0
+      : 1;
 
     const args = [
       {
@@ -68,24 +86,32 @@ export const useWithdraw = ({
         ),
         size: BigNumber.from(size.quotient.toString()),
 
-        recipient: address,
+        recipient: native ? AddressZero : address,
         deadline: BigNumber.from(
           Math.round(Date.now() / 1000) + settings.timeout * 60
         ),
       },
     ] as const;
 
-    return { amount0, amount1, liquidity, args };
+    const unwrapArgs = [BigNumber.from(0), address] as const; // safe to be zero because the collect estimation will fail
+    const sweepArgs = [
+      nativePosition === 0
+        ? selectedLendgine.token1.address
+        : selectedLendgine.token0.address,
+      BigNumber.from(0),
+      address,
+    ] as const; // safe to be zero because the collect estimation will fail
+
+    return { args, unwrapArgs, sweepArgs, native };
   }, [
     address,
     amount0,
     amount1,
+    environment.interface.wrappedNative,
     liquidity,
     selectedLendgine.bound,
-    selectedLendgine.token0.address,
-    selectedLendgine.token0.decimals,
-    selectedLendgine.token1.address,
-    selectedLendgine.token1.decimals,
+    selectedLendgine.token0,
+    selectedLendgine.token1,
     settings.maxSlippagePercent,
     settings.timeout,
     size,
@@ -97,31 +123,80 @@ export const useWithdraw = ({
     enabled: !!args,
     staleTime: Infinity,
   });
-
   const sendRemove = useLiquidityManagerRemoveLiquidity(prepareRemove.config);
+
+  const prepareMulticall = usePrepareLiquidityManagerMulticall({
+    enabled:
+      !!prepareRemove.config.request &&
+      !!native &&
+      !!sweepArgs &&
+      !!unwrapArgs &&
+      !!liquidityManagerContract,
+    address: environment.base.liquidityManager,
+    staleTime: Infinity,
+    args:
+      prepareRemove.config.request &&
+      prepareRemove.config.request.data &&
+      liquidityManagerContract
+        ? [
+            [
+              prepareRemove.config.request.data,
+              liquidityManagerContract.interface.encodeFunctionData(
+                "unwrapWETH",
+                unwrapArgs
+              ),
+              liquidityManagerContract.interface.encodeFunctionData(
+                "sweepToken",
+                sweepArgs
+              ),
+            ] as `0x${string}`[],
+          ]
+        : undefined,
+  });
+  const sendMulticall = useLiquidityManagerMulticall(prepareMulticall.config);
 
   return useMemo(
     () =>
-      [
-        {
-          stageTitle: `Remove ${selectedLendgine.token0.symbol} / ${selectedLendgine.token1.symbol} liquidty`,
-          parallelTransactions: [
+      native
+        ? [
             {
-              title: `Remove ${selectedLendgine.token0.symbol} / ${selectedLendgine.token1.symbol} liquidty`,
-              tx: {
-                prepare: prepareRemove as ReturnType<
-                  typeof usePrepareContractWrite
-                >,
-                send: sendRemove,
-              },
+              stageTitle: `Remove ${selectedLendgine.token0.symbol} / ${selectedLendgine.token1.symbol} liquidty`,
+              parallelTransactions: [
+                {
+                  title: `Remove ${selectedLendgine.token0.symbol} / ${selectedLendgine.token1.symbol} liquidty`,
+                  tx: {
+                    prepare: prepareMulticall as ReturnType<
+                      typeof usePrepareContractWrite
+                    >,
+                    send: sendMulticall,
+                  },
+                },
+              ],
             },
-          ],
-        },
-      ] as const,
+          ]
+        : ([
+            {
+              stageTitle: `Remove ${selectedLendgine.token0.symbol} / ${selectedLendgine.token1.symbol} liquidty`,
+              parallelTransactions: [
+                {
+                  title: `Remove ${selectedLendgine.token0.symbol} / ${selectedLendgine.token1.symbol} liquidty`,
+                  tx: {
+                    prepare: prepareRemove as ReturnType<
+                      typeof usePrepareContractWrite
+                    >,
+                    send: sendRemove,
+                  },
+                },
+              ],
+            },
+          ] as const),
     [
+      native,
+      prepareMulticall,
       prepareRemove,
       selectedLendgine.token0.symbol,
       selectedLendgine.token1.symbol,
+      sendMulticall,
       sendRemove,
     ]
   );
