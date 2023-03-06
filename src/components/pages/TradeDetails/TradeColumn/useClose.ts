@@ -10,8 +10,11 @@ import { useAccount } from "wagmi";
 import { useEnvironment } from "../../../../contexts/environment2";
 import { useSettings } from "../../../../contexts/settings";
 import {
+  useLendgineRouter,
   useLendgineRouterBurn,
+  useLendgineRouterMulticall,
   usePrepareLendgineRouterBurn,
+  usePrepareLendgineRouterMulticall,
 } from "../../../../generated";
 import { useApprove } from "../../../../hooks/useApproval";
 import type { HookArg } from "../../../../hooks/useBalance";
@@ -47,7 +50,11 @@ export const useClose = ({
 
   const approve = useApprove(shares, environment.base.lendgineRouter);
 
-  const { args } = useMemo(() => {
+  const lendgineRouterContract = useLendgineRouter({
+    address: environment.base.lendgineRouter,
+  });
+
+  const { args, native, unwrapArgs } = useMemo(() => {
     if (
       !shares ||
       !amount0 ||
@@ -57,6 +64,10 @@ export const useClose = ({
       !address
     )
       return {};
+
+    const native = environment.interface.wrappedNative.equals(
+      amountOut.currency
+    );
     const args = [
       {
         token0: getAddress(selectedLendgine.token0.address),
@@ -95,19 +106,29 @@ export const useClose = ({
               ]
             ) as Address)
           : AddressZero,
-        recipient: address,
+        recipient: native ? AddressZero : address,
         deadline: BigNumber.from(
           Math.round(Date.now() / 1000) + settings.timeout * 60
         ),
       },
     ] as const;
 
-    return { args };
+    const unwrapArgs = [
+      BigNumber.from(
+        amountOut
+          .multiply(ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent))
+          .quotient.toString()
+      ),
+      address,
+    ] as const;
+
+    return { args, native, unwrapArgs };
   }, [
     address,
     amount0,
     amount1,
     amountOut,
+    environment.interface.wrappedNative,
     mostLiquid.data,
     selectedLendgine.bound,
     selectedLendgine.token0.address,
@@ -125,29 +146,76 @@ export const useClose = ({
     args: args,
     staleTime: Infinity,
   });
-
   const sendBurn = useLendgineRouterBurn(prepareBurn.config);
+
+  const prepareMulticall = usePrepareLendgineRouterMulticall({
+    enabled:
+      !!prepareBurn.config.request && !!native && !!lendgineRouterContract,
+    staleTime: Infinity,
+    address: environment.base.lendgineRouter,
+    args:
+      prepareBurn.config.request &&
+      prepareBurn.config.request.data &&
+      lendgineRouterContract
+        ? [
+            [
+              prepareBurn.config.request.data,
+              lendgineRouterContract.interface.encodeFunctionData(
+                "unwrapWETH",
+                unwrapArgs
+              ),
+            ] as `0x${string}`[],
+          ]
+        : undefined,
+  });
+  // TODO: wagmi should infer data as 0x and has mistyped prepare.config type
+  const sendMulticall = useLendgineRouterMulticall(prepareMulticall.config);
 
   return useMemo(
     () =>
-      [
-        approve.beetStage,
-        {
-          stageTitle: `Sell ${selectedLendgine.token1.symbol}+`,
-          parallelTransactions: [
+      native
+        ? [
             {
-              title: `Sell ${selectedLendgine.token1.symbol}+`,
-              tx: {
-                prepare: prepareBurn as ReturnType<
-                  typeof usePrepareContractWrite
-                >,
-                send: sendBurn,
-              },
+              stageTitle: `Sell ${selectedLendgine.token1.symbol}+`,
+              parallelTransactions: [
+                {
+                  title: `Sell ${selectedLendgine.token1.symbol}+`,
+                  tx: {
+                    prepare: prepareMulticall as ReturnType<
+                      typeof usePrepareContractWrite
+                    >,
+                    send: sendMulticall,
+                  },
+                },
+              ],
             },
-          ],
-        },
-      ].filter((s) => !!s) as BeetStage[],
-    [approve.beetStage, prepareBurn, selectedLendgine.token1.symbol, sendBurn]
+          ]
+        : ([
+            approve.beetStage,
+            {
+              stageTitle: `Sell ${selectedLendgine.token1.symbol}+`,
+              parallelTransactions: [
+                {
+                  title: `Sell ${selectedLendgine.token1.symbol}+`,
+                  tx: {
+                    prepare: prepareBurn as ReturnType<
+                      typeof usePrepareContractWrite
+                    >,
+                    send: sendBurn,
+                  },
+                },
+              ],
+            },
+          ].filter((s) => !!s) as BeetStage[]),
+    [
+      approve.beetStage,
+      native,
+      prepareBurn,
+      prepareMulticall,
+      selectedLendgine.token1.symbol,
+      sendBurn,
+      sendMulticall,
+    ]
   );
 };
 
