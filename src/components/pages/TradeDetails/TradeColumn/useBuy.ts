@@ -10,8 +10,11 @@ import { useAccount } from "wagmi";
 import { useEnvironment } from "../../../../contexts/environment2";
 import { useSettings } from "../../../../contexts/settings";
 import {
+  useLendgineRouter,
   useLendgineRouterMint,
+  useLendgineRouterMulticall,
   usePrepareLendgineRouterMint,
+  usePrepareLendgineRouterMulticall,
 } from "../../../../generated";
 import { useApprove } from "../../../../hooks/useApproval";
 import type { HookArg } from "../../../../hooks/useBalance";
@@ -50,10 +53,14 @@ export const useBuy = ({
   const mostLiquid = useMostLiquidMarket([base, quote]);
   const environment = useEnvironment();
 
+  const lendgineRouterContract = useLendgineRouter({
+    address: environment.base.lendgineRouter,
+  });
+
   const isLong = isLongLendgine(selectedLendgine, base);
   const approve = useApprove(amountIn, environment.base.lendgineRouter);
 
-  const { args } = useMemo(() => {
+  const { args, native } = useMemo(() => {
     if (
       !borrowAmount ||
       !liquidity ||
@@ -63,6 +70,10 @@ export const useBuy = ({
       !mostLiquid.data
     )
       return {};
+
+    const native = environment.interface.wrappedNative.equals(
+      amountIn.currency
+    );
 
     const args = [
       {
@@ -100,11 +111,12 @@ export const useBuy = ({
       },
     ] as const;
 
-    return { args };
+    return { args, native };
   }, [
     address,
     amountIn,
     borrowAmount,
+    environment.interface.wrappedNative,
     liquidity,
     mostLiquid.data,
     selectedLendgine.bound,
@@ -123,31 +135,75 @@ export const useBuy = ({
     enabled: !!args,
     staleTime: Infinity,
   });
-
   const sendMint = useLendgineRouterMint(prepareMint.config);
+
+  const prepareMulticall = usePrepareLendgineRouterMulticall({
+    address: environment.base.lendgineRouter,
+    staleTime: Infinity,
+    enabled: !!args && !!lendgineRouterContract && !!native,
+    args:
+      !!args && !!lendgineRouterContract
+        ? [
+            [
+              lendgineRouterContract.interface.encodeFunctionData("mint", args),
+              lendgineRouterContract.interface.encodeFunctionData("refundETH"),
+            ] as `0x${string}`[],
+          ]
+        : undefined,
+    overrides: {
+      value: args?.[0].amountIn,
+    },
+  });
+  const sendMulticall = useLendgineRouterMulticall(prepareMulticall.config);
 
   return useMemo(
     () =>
-      (
-        [
-          approve.beetStage,
-          {
-            stageTitle: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
-            parallelTransactions: [
-              {
-                title: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
-                tx: {
-                  prepare: prepareMint as ReturnType<
-                    typeof usePrepareContractWrite
-                  >,
-                  send: sendMint,
+      native
+        ? [
+            {
+              stageTitle: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
+              parallelTransactions: [
+                {
+                  title: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
+                  tx: {
+                    prepare: prepareMulticall as ReturnType<
+                      typeof usePrepareContractWrite
+                    >,
+                    send: sendMulticall,
+                  },
                 },
+              ],
+            },
+          ]
+        : ((
+            [
+              approve.beetStage,
+              {
+                stageTitle: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
+                parallelTransactions: [
+                  {
+                    title: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
+                    tx: {
+                      prepare: prepareMint as ReturnType<
+                        typeof usePrepareContractWrite
+                      >,
+                      send: sendMint,
+                    },
+                  },
+                ],
               },
-            ],
-          },
-        ] as const
-      ).filter((s) => !!s) as BeetStage[],
-    [approve.beetStage, isLong, prepareMint, quote.symbol, sendMint]
+            ] as const
+          ).filter((s) => !!s) as BeetStage[]),
+    [
+      approve.beetStage,
+      isLong,
+      native,
+      prepareMint,
+      prepareMulticall,
+      quote.symbol,
+      sendMint,
+      sendMulticall,
+    ]
   );
 };
 

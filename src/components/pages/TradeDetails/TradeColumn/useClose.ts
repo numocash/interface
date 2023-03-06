@@ -173,9 +173,10 @@ export const useClose = ({
 
   return useMemo(
     () =>
-      native
-        ? [
-            {
+      [
+        approve.beetStage,
+        native
+          ? {
               stageTitle: `Sell ${selectedLendgine.token1.symbol}+`,
               parallelTransactions: [
                 {
@@ -188,11 +189,8 @@ export const useClose = ({
                   },
                 },
               ],
-            },
-          ]
-        : ([
-            approve.beetStage,
-            {
+            }
+          : {
               stageTitle: `Sell ${selectedLendgine.token1.symbol}+`,
               parallelTransactions: [
                 {
@@ -206,7 +204,7 @@ export const useClose = ({
                 },
               ],
             },
-          ].filter((s) => !!s) as BeetStage[]),
+      ].filter((s) => !!s) as BeetStage[],
     [
       approve.beetStage,
       native,

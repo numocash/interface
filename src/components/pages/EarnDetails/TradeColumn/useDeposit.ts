@@ -8,8 +8,11 @@ import { useAccount } from "wagmi";
 import { useEnvironment } from "../../../../contexts/environment2";
 import { useSettings } from "../../../../contexts/settings";
 import {
+  useLiquidityManager,
   useLiquidityManagerAddLiquidity,
+  useLiquidityManagerMulticall,
   usePrepareLiquidityManagerAddLiquidity,
+  usePrepareLiquidityManagerMulticall,
 } from "../../../../generated";
 import { useApprove } from "../../../../hooks/useApproval";
 import type { HookArg } from "../../../../hooks/useBalance";
@@ -42,6 +45,10 @@ export const useDeposit = ({
   const settings = useSettings();
   const { address } = useAccount();
 
+  const liquidityManagerContract = useLiquidityManager({
+    address: environment.base.liquidityManager,
+  });
+
   const approveToken0 = useApprove(
     token0Input,
     environment.base.liquidityManager
@@ -52,9 +59,19 @@ export const useDeposit = ({
   );
   const lendgineInfo = useLendgine(lendgine);
 
-  const { args } = useMemo(() => {
+  const { args, native, nativePosition } = useMemo(() => {
     if (!token0Input || !token1Input || !lendgineInfo.data || !address)
       return {};
+
+    const native =
+      environment.interface.wrappedNative.equals(lendgine.token0) ||
+      environment.interface.wrappedNative.equals(lendgine.token1);
+
+    const nativePosition = environment.interface.wrappedNative.equals(
+      lendgine.token0
+    )
+      ? 0
+      : 1;
 
     if (lendgineInfo.data.totalLiquidity.equalTo(0)) {
       const { token0Amount } = priceToReserves(lendgine, price);
@@ -133,9 +150,10 @@ export const useDeposit = ({
       },
     ] as const;
 
-    return { args };
+    return { args, native, nativePosition };
   }, [
     address,
+    environment.interface.wrappedNative,
     lendgine,
     lendgineInfo.data,
     price,
@@ -154,37 +172,87 @@ export const useDeposit = ({
   });
   const sendAdd = useLiquidityManagerAddLiquidity(prepareAdd.config);
 
+  const prepareMulticall = usePrepareLiquidityManagerMulticall({
+    address: environment.base.liquidityManager,
+    enabled: !!args && !!native && !!liquidityManagerContract,
+    staleTime: Infinity,
+    args:
+      !!args && !!liquidityManagerContract
+        ? [
+            [
+              liquidityManagerContract.interface.encodeFunctionData(
+                "addLiquidity",
+                args
+              ),
+              liquidityManagerContract.interface.encodeFunctionData(
+                "refundETH"
+              ),
+            ] as `0x${string}`[],
+          ]
+        : undefined,
+    overrides: {
+      value:
+        nativePosition === 0
+          ? BigNumber.from(token0Input?.quotient.toString() ?? 0)
+          : BigNumber.from(token1Input?.quotient.toString() ?? 0),
+    },
+  });
+  const sendMulticall = useLiquidityManagerMulticall(prepareMulticall.config);
+
   return useMemo(
     () =>
       (
         [
-          approveToken0.beetStage,
-          approveToken1.beetStage,
-          {
-            stageTitle: `Add ${token0Input?.currency.symbol ?? ""} / ${
-              token1Input?.currency.symbol ?? ""
-            } liquidty`,
-            parallelTransactions: [
-              {
-                title: `Add ${token0Input?.currency.symbol ?? ""} / ${
+          native && nativePosition === 0 ? undefined : approveToken0.beetStage,
+          native && nativePosition === 1 ? undefined : approveToken1.beetStage,
+          native
+            ? {
+                stageTitle: `Add ${token0Input?.currency.symbol ?? ""} / ${
                   token1Input?.currency.symbol ?? ""
                 } liquidty`,
-                tx: {
-                  prepare: prepareAdd as ReturnType<
-                    typeof usePrepareContractWrite
-                  >,
-                  send: sendAdd,
-                },
+                parallelTransactions: [
+                  {
+                    title: `Add ${token0Input?.currency.symbol ?? ""} / ${
+                      token1Input?.currency.symbol ?? ""
+                    } liquidty`,
+                    tx: {
+                      prepare: prepareMulticall as ReturnType<
+                        typeof usePrepareContractWrite
+                      >,
+                      send: sendMulticall,
+                    },
+                  },
+                ],
+              }
+            : {
+                stageTitle: `Add ${token0Input?.currency.symbol ?? ""} / ${
+                  token1Input?.currency.symbol ?? ""
+                } liquidty`,
+                parallelTransactions: [
+                  {
+                    title: `Add ${token0Input?.currency.symbol ?? ""} / ${
+                      token1Input?.currency.symbol ?? ""
+                    } liquidty`,
+                    tx: {
+                      prepare: prepareAdd as ReturnType<
+                        typeof usePrepareContractWrite
+                      >,
+                      send: sendAdd,
+                    },
+                  },
+                ],
               },
-            ],
-          },
         ] as const
       ).filter((s): s is BeetStage => !!s),
     [
       approveToken0.beetStage,
       approveToken1.beetStage,
+      native,
+      nativePosition,
       prepareAdd,
+      prepareMulticall,
       sendAdd,
+      sendMulticall,
       token0Input?.currency.symbol,
       token1Input?.currency.symbol,
     ]
