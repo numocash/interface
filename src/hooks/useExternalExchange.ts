@@ -1,13 +1,14 @@
 import { defaultAbiCoder } from "@ethersproject/abi";
 import { getCreate2Address } from "@ethersproject/address";
 import { keccak256, pack } from "@ethersproject/solidity";
+import { useQuery } from "@tanstack/react-query";
 import { Fraction, Price } from "@uniswap/sdk-core";
 import type { Address } from "abitype";
 import JSBI from "jsbi";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { objectKeys } from "ts-extras";
-import { useContractReads, useQuery } from "wagmi";
+import { useContractReads } from "wagmi";
 
 import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
 import { useEnvironment } from "../contexts/environment2";
@@ -30,7 +31,7 @@ import {
   PriceHistoryDayV3Document,
   PriceHistoryHourV3Document,
 } from "../gql/uniswapV3/graphql";
-import type { PricePoint, UniswapV2Pool } from "../services/graphql/uniswapV2";
+import type { UniswapV2Pool } from "../services/graphql/uniswapV2";
 import {
   parsePairV2,
   parsePriceHistoryDayV2,
@@ -124,7 +125,7 @@ export const usePriceHistory = (
   const client = useClient();
   const chain = useChain();
 
-  return useQuery<readonly PricePoint[] | null>(
+  return useQuery(
     ["price history", externalExchange?.address, timeframe, chain],
     async () => {
       if (!externalExchange) return null;

@@ -1,11 +1,12 @@
 import type { BigNumber } from "@ethersproject/bignumber";
+import { useQuery } from "@tanstack/react-query";
 import { CurrencyAmount, Fraction, Token } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import { chunk } from "lodash";
 import { useCallback, useMemo } from "react";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
-import { useContractReads, useQuery } from "wagmi";
+import { useContractReads } from "wagmi";
 
 import type {
   Lendgine,
@@ -396,8 +397,9 @@ export const useLendginesPosition = <L extends Lendgine>(
 
 export const useExistingLendginesQueryKey = () => {
   const chain = useChain();
+  const client = useClient();
 
-  return ["existing lendgines", chain] as const;
+  return ["existing lendgines", chain, client.numoen] as const;
 };
 
 export const useExistingLendginesQueryFn = () => {
@@ -411,6 +413,7 @@ export const useExistingLendginesQueryFn = () => {
 export const useExistingLendginesQuery = () => {
   const queryKey = useExistingLendginesQueryKey();
   const queryFn = useExistingLendginesQueryFn();
+
   return useQuery<RawLendgine[]>(queryKey, queryFn, { staleTime: Infinity });
 };
 
@@ -419,6 +422,7 @@ export const useAllLendgines = () => {
   const addressToToken = useGetAddressToToken();
   const lendginesQuery = useExistingLendginesQuery();
   const chainID = useChain();
+
   return useMemo(() => {
     if (lendginesQuery.isLoading || !lendginesQuery.data) return null;
 
@@ -439,10 +443,10 @@ export const useAllLendgines = () => {
         )
           return undefined;
 
+        const ub = new Fraction(ld.upperBound, scale);
+
         // bound must be a power of 2
-        const quotient = ld.upperBound.greaterThan(1)
-          ? ld.upperBound.quotient
-          : ld.upperBound.invert().quotient;
+        const quotient = ub.greaterThan(1) ? ub.quotient : ub.invert().quotient;
         if (!JSBI.bitwiseAnd(quotient, JSBI.subtract(quotient, JSBI.BigInt(1))))
           return undefined;
 
@@ -451,7 +455,7 @@ export const useAllLendgines = () => {
           token1,
           token0Exp: ld.token0Exp,
           token1Exp: ld.token1Exp,
-          bound: fractionToPrice(ld.upperBound, token1, token0),
+          bound: fractionToPrice(ub, token1, token0),
           lendgine: new Token(chainID, ld.address, 18),
           address: ld.address,
         };
