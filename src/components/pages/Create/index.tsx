@@ -1,42 +1,22 @@
-import { getAddress } from "@ethersproject/address";
-import { BigNumber } from "@ethersproject/bignumber";
-import { AddressZero } from "@ethersproject/constants";
 import { useQueryClient } from "@tanstack/react-query";
-import { Fraction, Token } from "@uniswap/sdk-core";
+import { Fraction } from "@uniswap/sdk-core";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
-import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
-import type { Lendgine } from "../../../constants/types";
 import { useEnvironment } from "../../../contexts/environment2";
-import { useSettings } from "../../../contexts/settings";
-import {
-  useFactoryCreateLendgine,
-  useLiquidityManagerAddLiquidity,
-  usePrepareFactoryCreateLendgine,
-  usePrepareLiquidityManagerAddLiquidity,
-} from "../../../generated";
-import { useApprove } from "../../../hooks/useApproval";
 import { useBalance } from "../../../hooks/useBalance";
-import { useChain } from "../../../hooks/useChain";
 import { useCurrentPrice } from "../../../hooks/useExternalExchange";
 import { useAllLendgines } from "../../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { useDefaultTokenList } from "../../../hooks/useTokens2";
-import type { BeetStage } from "../../../utils/beet";
 import { useBeet } from "../../../utils/beet";
 import {
   formatDisplayWithSoftLimit,
   formatPrice,
   fractionToFloat,
 } from "../../../utils/format";
-import {
-  fractionToPrice,
-  priceToFraction,
-  priceToReserves,
-} from "../../../utils/Numoen/price";
-import { ONE_HUNDRED_PERCENT, scale } from "../../../utils/Numoen/trade";
+import { fractionToPrice, priceToFraction } from "../../../utils/Numoen/price";
 import tryParseCurrencyAmount from "../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
@@ -44,20 +24,20 @@ import { CenterSwitch } from "../../common/CenterSwitch";
 import { Plus } from "../../common/Plus";
 import { RowBetween } from "../../common/RowBetween";
 import { PageMargin } from "../../layout";
+import { useCreate, useDepositAmounts } from "./useCreate";
 
 export const Create: React.FC = () => {
   const Beet = useBeet();
   const queryClient = useQueryClient();
   const environment = useEnvironment();
-  const settings = useSettings();
   const { address } = useAccount();
-  const chainID = useChain();
 
   const tokens = useDefaultTokenList();
   const lendgines = useAllLendgines();
 
   const [token0, setToken0] = useState<WrappedTokenInfo | undefined>(undefined);
   const [token1, setToken1] = useState<WrappedTokenInfo | undefined>(undefined);
+
   const [token0Input, setToken0Input] = useState("");
   const [token1Input, setToken1Input] = useState("");
   const [bound, setBound] = useState(new Fraction(1));
@@ -69,52 +49,21 @@ export const Create: React.FC = () => {
     !!token0 && !!token1 ? ([token0, token1] as const) : null
   );
 
-  const { token0InputAmount, token1InputAmount, liquidity, positionSize } =
-    useMemo(() => {
-      const parsedAmount =
+  const { token0Input: token0InputAmount, token1Input: token1InputAmount } =
+    useDepositAmounts({
+      amount:
         tryParseCurrencyAmount(token0Input, token0) ??
-        tryParseCurrencyAmount(token1Input, token1);
-      if (!parsedAmount || !token0 || !token1 || !priceQuery.data) return {};
-
-      const lendgine: Lendgine = {
-        token0,
-        token0Exp: token0.decimals,
-        token1,
-        token1Exp: token1.decimals,
-        lendgine: new Token(chainID, AddressZero, 18),
-        address: AddressZero,
-        bound: fractionToPrice(bound, token1, token0),
-      };
-
-      const { token0Amount, token1Amount } = priceToReserves(
-        lendgine,
-        priceQuery.data
-      );
-
-      const liquidity = parsedAmount.currency.equals(lendgine.token0)
-        ? token0Amount.invert().quote(parsedAmount)
-        : token1Amount.invert().quote(parsedAmount);
-
-      const positionSize = liquidity;
-
-      const token0InputAmount = token0Amount.quote(liquidity);
-      const token1InputAmount = token1Amount.quote(liquidity);
-
-      return {
-        liquidity,
-        positionSize,
-        token0InputAmount,
-        token1InputAmount,
-      };
-    }, [
-      bound,
-      chainID,
-      priceQuery.data,
+        tryParseCurrencyAmount(token1Input, token1),
       token0,
-      token0Input,
       token1,
-      token1Input,
-    ]);
+      bound,
+    });
+
+  const create = useCreate({
+    token0Input: token0InputAmount,
+    token1Input: token1InputAmount,
+    bound,
+  });
 
   const onInput = useCallback((value: string, field: "token0" | "token1") => {
     field === "token0" ? setToken0Input(value) : setToken1Input(value);
@@ -131,99 +80,11 @@ export const Create: React.FC = () => {
     [token1, tokens]
   );
 
-  const approveToken0 = useApprove(
-    token0InputAmount,
-    environment.base.liquidityManager
-  );
-  const approveToken1 = useApprove(
-    token1InputAmount,
-    environment.base.liquidityManager
-  );
-
-  const prepare = usePrepareFactoryCreateLendgine({
-    args:
-      token0 && token1
-        ? [
-            getAddress(token0.address),
-            getAddress(token1.address),
-            token0.decimals,
-            token1.decimals,
-            BigNumber.from(bound.multiply(scale).quotient.toString()),
-          ]
-        : undefined,
-    address: environment.base.factory,
-    enabled: !!token0 && !!token1,
-  });
-  const write = useFactoryCreateLendgine(prepare.data);
-
-  const args = useMemo(
-    () =>
-      !!token0InputAmount &&
-      !!token1InputAmount &&
-      !!address &&
-      !!liquidity &&
-      !!token0 &&
-      !!token1
-        ? ([
-            {
-              token0: getAddress(token0.address),
-              token1: getAddress(token1.address),
-              token0Exp: BigNumber.from(token0.decimals),
-              token1Exp: BigNumber.from(token1.decimals),
-              upperBound: BigNumber.from(
-                bound.multiply(scale).quotient.toString()
-              ),
-              liquidity: BigNumber.from(
-                liquidity.multiply(999999).divide(1000000).quotient.toString()
-              ),
-              amount0Min: BigNumber.from(token0InputAmount.quotient.toString()),
-              amount1Min: BigNumber.from(token1InputAmount.quotient.toString()),
-              sizeMin: BigNumber.from(
-                positionSize
-                  .multiply(
-                    ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
-                  )
-                  .quotient.toString()
-              ),
-
-              recipient: address,
-              deadline: BigNumber.from(
-                Math.round(Date.now() / 1000) + settings.timeout * 60
-              ),
-            },
-          ] as const)
-        : undefined,
-    [
-      address,
-      bound,
-      liquidity,
-      positionSize,
-      settings.maxSlippagePercent,
-      settings.timeout,
-      token0,
-      token0InputAmount,
-      token1,
-      token1InputAmount,
-    ]
-  );
-
-  const prepareAdd = usePrepareLiquidityManagerAddLiquidity({
-    address: environment.base.liquidityManager,
-    args: args,
-    enabled: !!args,
-  });
-
-  const sendAdd = useLiquidityManagerAddLiquidity(prepareAdd.config);
-
   const disableReason = useMemo(
     () =>
       !token0 || !token1
         ? "Select a token"
-        : !priceQuery.data ||
-          lendgines === null ||
-          !prepare.config ||
-          approveToken0.allowanceQuery.isLoading ||
-          approveToken1.allowanceQuery.isLoading
+        : !priceQuery.data || lendgines === null
         ? "Loading"
         : !token0.equals(environment.interface.wrappedNative) &&
           !token1.equals(environment.interface.wrappedNative)
@@ -248,12 +109,9 @@ export const Create: React.FC = () => {
         ? "Insufficient amount"
         : null,
     [
-      approveToken0.allowanceQuery.isLoading,
-      approveToken1.allowanceQuery.isLoading,
       bound,
       environment.interface.wrappedNative,
       lendgines,
-      prepare.config,
       priceQuery.data,
       token0,
       token0Balance.data,
@@ -353,44 +211,7 @@ export const Create: React.FC = () => {
           disabled={!!disableReason}
           onClick={async () => {
             invariant(token0 && token1);
-            await Beet(
-              [
-                approveToken0.beetStage,
-                approveToken1.beetStage,
-                {
-                  stageTitle: `New ${token1.symbol ?? ""} + ${
-                    token0.symbol ?? ""
-                  } market`,
-                  parallelTransactions: [
-                    {
-                      title: `New ${token1.symbol ?? ""} + ${
-                        token0.symbol ?? ""
-                      } market`,
-                      tx: {
-                        prepare: prepare as ReturnType<
-                          typeof usePrepareContractWrite
-                        >,
-                        send: write,
-                      },
-                    },
-                  ],
-                },
-                {
-                  stageTitle: `Add ${token1.symbol} / ${token0.symbol} liquidty`,
-                  parallelTransactions: [
-                    {
-                      title: `Add ${token1.symbol} / ${token0.symbol} liquidty`,
-                      tx: {
-                        prepare: prepareAdd as ReturnType<
-                          typeof usePrepareContractWrite
-                        >,
-                        send: sendAdd,
-                      },
-                    },
-                  ],
-                },
-              ].filter((s): s is BeetStage => !!s)
-            );
+            await Beet(create);
 
             setToken0(undefined);
             setToken1(undefined);
