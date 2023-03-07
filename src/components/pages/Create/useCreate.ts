@@ -277,6 +277,12 @@ export const useDepositAmounts = ({
         token1Input: amount.currency.equals(token1) ? amount : undefined,
       };
 
+    if (priceQuery.data.greaterThan(bound))
+      return {
+        token0Input: amount.currency.equals(token0) ? amount : undefined,
+        token1Input: amount.currency.equals(token1) ? amount : undefined,
+      };
+
     const lendgine: Lendgine = {
       token0,
       token0Exp: token0.decimals,

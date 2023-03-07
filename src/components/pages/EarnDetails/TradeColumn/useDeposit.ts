@@ -312,5 +312,5 @@ export const useDepositAmounts = ({
       token0Input: updatedInfo.reserve0.multiply(share),
       token1Input: updatedInfo.reserve1.multiply(share),
     };
-  }, [amount, lendgine, lendgineInfo.data, price, t]);
+  }, [amount, base, lendgine, lendgineInfo.data, price, t]);
 };

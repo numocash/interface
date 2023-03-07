@@ -91,10 +91,10 @@ export const Create: React.FC = () => {
         ? `One token must be ${
             environment.interface.wrappedNative.symbol ?? ""
           }`
-        : !token0InputAmount || !token1InputAmount
-        ? "Enter an amount"
         : priceToFraction(priceQuery.data).greaterThan(bound)
         ? "Bound can't be below current price"
+        : !token0InputAmount || !token1InputAmount
+        ? "Enter an amount"
         : lendgines.find(
             (l) =>
               l.token0.equals(token0) &&
