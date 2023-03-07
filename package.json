@@ -81,7 +81,7 @@
     "start": "craco start",
     "build": "craco build",
     "clean": "rm -rf build/ src/gql/ src/generated.ts",
-    "build:production": "pnpm graphql-codegen && pnpm wagmi generate && pnpm run build && pnpm run delete-sourcemaps",
+    "build:production": "pnpm graphql-codegen && pnpm run build && pnpm run delete-sourcemaps",
     "build:analyze": "ANALYZE=1 craco build",
     "delete-sourcemaps": "find ./build -name \"*.map\" -delete",
     "test": "craco test",

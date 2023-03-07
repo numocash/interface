@@ -24,5 +24,4 @@ yarn-error.log*
 .eslintcache
 
 # codegen
-src/generated.ts
 src/gql
