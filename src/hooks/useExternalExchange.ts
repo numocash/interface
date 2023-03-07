@@ -211,23 +211,34 @@ export const useCurrentPrice = (tokens: HookArg<Market>) => {
 
     invariant(tokens);
 
-    const count =
-      (v2PriceQuery.data ? 1 : 0) +
-      (v3PricesQuery.data ? v3PricesQuery.data.filter((d) => !!d).length : 0);
-
-    const sum = (
-      v3PricesQuery.data
-        ? v3PricesQuery.data.reduce(
-            (acc, cur) => (cur ? acc.add(priceToFraction(cur)) : acc),
-            new Fraction(0)
-          )
-        : new Fraction(0)
-    ).add(
-      v2PriceQuery.data ? priceToFraction(v2PriceQuery.data) : new Fraction(0)
+    console.log(
+      v2PriceQuery.data?.toSignificant(4),
+      v3PricesQuery.data?.map((t) => t?.toSignificant(4))
     );
 
+    // TODO: use median price
+
+    const allPrices = [v2PriceQuery.data]
+      .concat(v3PricesQuery.data)
+      .filter((d): d is Price<WrappedTokenInfo, WrappedTokenInfo> => !!d)
+      .sort((a, b) => (a.greaterThan(b) ? 1 : -1));
+
+    if (allPrices.length % 2 === 1) {
+      return {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        data: allPrices[(allPrices.length - 1) / 2]!,
+        status: "success",
+      };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const lower = allPrices[(allPrices.length - 1) / 2]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const upper = allPrices[allPrices.length / 2]!;
+
+    const sum = priceToFraction(lower).add(priceToFraction(upper));
     return {
-      data: fractionToPrice(sum.divide(count), tokens[1], tokens[0]),
+      data: fractionToPrice(sum.divide(2), tokens[1], tokens[0]),
       status: "success",
     };
   }, [tokens, v2PriceQuery, v3PricesQuery]);
