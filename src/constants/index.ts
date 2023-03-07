@@ -1,3 +1,4 @@
+import type { NativeCurrency } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
 import type { chains } from "../AppWithProviders";
@@ -29,6 +30,7 @@ export type NumoenInterfaceConfig = {
   };
   numoenSubgraph: string;
   wrappedNative: WrappedTokenInfo;
+  native: NativeCurrency | undefined;
   stablecoin: WrappedTokenInfo;
   blockFreq: number; // How many blocks should go by before updating
 };

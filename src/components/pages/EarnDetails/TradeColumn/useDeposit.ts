@@ -17,6 +17,7 @@ import {
 import { useApprove } from "../../../../hooks/useApproval";
 import type { HookArg } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
 import type { BeetStage } from "../../../../utils/beet";
 import {
@@ -48,6 +49,8 @@ export const useDeposit = ({
   const liquidityManagerContract = useLiquidityManager({
     address: environment.base.liquidityManager,
   });
+  const native0 = useIsWrappedNative(lendgine.token0);
+  const native1 = useIsWrappedNative(lendgine.token1);
 
   const approveToken0 = useApprove(
     token0Input,
@@ -59,19 +62,9 @@ export const useDeposit = ({
   );
   const lendgineInfo = useLendgine(lendgine);
 
-  const { args, native, nativePosition } = useMemo(() => {
+  const { args } = useMemo(() => {
     if (!token0Input || !token1Input || !lendgineInfo.data || !address)
       return {};
-
-    const native =
-      environment.interface.wrappedNative.equals(lendgine.token0) ||
-      environment.interface.wrappedNative.equals(lendgine.token1);
-
-    const nativePosition = environment.interface.wrappedNative.equals(
-      lendgine.token0
-    )
-      ? 0
-      : 1;
 
     if (lendgineInfo.data.totalLiquidity.equalTo(0)) {
       const { token0Amount } = priceToReserves(lendgine, price);
@@ -150,10 +143,9 @@ export const useDeposit = ({
       },
     ] as const;
 
-    return { args, native, nativePosition };
+    return { args };
   }, [
     address,
-    environment.interface.wrappedNative,
     lendgine,
     lendgineInfo.data,
     price,
@@ -174,7 +166,7 @@ export const useDeposit = ({
 
   const prepareMulticall = usePrepareLiquidityManagerMulticall({
     address: environment.base.liquidityManager,
-    enabled: !!args && !!native && !!liquidityManagerContract,
+    enabled: !!args && (native0 || native1) && !!liquidityManagerContract,
     staleTime: Infinity,
     args:
       !!args && !!liquidityManagerContract
@@ -191,10 +183,9 @@ export const useDeposit = ({
           ]
         : undefined,
     overrides: {
-      value:
-        nativePosition === 0
-          ? BigNumber.from(token0Input?.quotient.toString() ?? 0)
-          : BigNumber.from(token1Input?.quotient.toString() ?? 0),
+      value: native0
+        ? BigNumber.from(token0Input?.quotient.toString() ?? 0)
+        : BigNumber.from(token1Input?.quotient.toString() ?? 0),
     },
   });
   const sendMulticall = useLiquidityManagerMulticall(prepareMulticall.config);
@@ -203,9 +194,9 @@ export const useDeposit = ({
     () =>
       (
         [
-          native && nativePosition === 0 ? undefined : approveToken0.beetStage,
-          native && nativePosition === 1 ? undefined : approveToken1.beetStage,
-          native
+          native0 ? undefined : approveToken0.beetStage,
+          native1 ? undefined : approveToken1.beetStage,
+          native0 || native1
             ? {
                 stageTitle: `Add ${token0Input?.currency.symbol ?? ""} / ${
                   token1Input?.currency.symbol ?? ""
@@ -247,8 +238,8 @@ export const useDeposit = ({
     [
       approveToken0.beetStage,
       approveToken1.beetStage,
-      native,
-      nativePosition,
+      native0,
+      native1,
       prepareAdd,
       prepareMulticall,
       sendAdd,

@@ -17,6 +17,7 @@ import {
   usePrepareLiquidityManagerCollect,
   usePrepareLiquidityManagerMulticall,
 } from "../../../../generated";
+import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import {
   accruedLendgineInfo,
   accruedLendginePositionInfo,
@@ -39,13 +40,12 @@ export const useCollect = ({
   const liquidityManagerContract = useLiquidityManager({
     address: environment.base.liquidityManager,
   });
+  const native = useIsWrappedNative(lendgine.token1);
 
-  const { args, native, unwrapArgs } = useMemo(() => {
+  const { args, unwrapArgs } = useMemo(() => {
     if (!address) return {};
     const updatedInfo = accruedLendgineInfo(lendgine, lendgineInfo, t);
     const updatedPosition = accruedLendginePositionInfo(updatedInfo, position);
-
-    const native = environment.interface.wrappedNative.equals(lendgine.token1);
 
     const args = [
       {
@@ -60,14 +60,7 @@ export const useCollect = ({
     const unwrapArgs = [BigNumber.from(0), address] as const; // safe to be zero because the collect estimation will fail
 
     return { args, native, unwrapArgs };
-  }, [
-    address,
-    environment.interface.wrappedNative,
-    lendgine,
-    lendgineInfo,
-    position,
-    t,
-  ]);
+  }, [address, lendgine, lendgineInfo, native, position, t]);
 
   const prepareCollect = usePrepareLiquidityManagerCollect({
     enabled: !!args,

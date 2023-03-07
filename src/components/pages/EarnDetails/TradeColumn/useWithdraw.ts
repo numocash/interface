@@ -20,6 +20,7 @@ import {
   useLendgine,
   useLendginePosition,
 } from "../../../../hooks/useLendgine";
+import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
 import {
   accruedLendgineInfo,
@@ -49,19 +50,11 @@ export const useWithdraw = ({
   const liquidityManagerContract = useLiquidityManager({
     address: environment.base.liquidityManager,
   });
+  const native0 = useIsWrappedNative(selectedLendgine.token0);
+  const native1 = useIsWrappedNative(selectedLendgine.token1);
 
-  const { args, native, unwrapArgs, sweepArgs } = useMemo(() => {
+  const { args, unwrapArgs, sweepArgs } = useMemo(() => {
     if (!size || !address || !amount0 || !amount1 || !liquidity) return {};
-
-    const native =
-      environment.interface.wrappedNative.equals(selectedLendgine.token1) ||
-      environment.interface.wrappedNative.equals(selectedLendgine.token0);
-
-    const nativePosition = environment.interface.wrappedNative.equals(
-      selectedLendgine.token0
-    )
-      ? 0
-      : 1;
 
     const args = [
       {
@@ -86,7 +79,7 @@ export const useWithdraw = ({
         ),
         size: BigNumber.from(size.quotient.toString()),
 
-        recipient: native ? AddressZero : address,
+        recipient: native0 || native1 ? AddressZero : address,
         deadline: BigNumber.from(
           Math.round(Date.now() / 1000) + settings.timeout * 60
         ),
@@ -95,23 +88,26 @@ export const useWithdraw = ({
 
     const unwrapArgs = [BigNumber.from(0), address] as const; // safe to be zero because the collect estimation will fail
     const sweepArgs = [
-      nativePosition === 0
+      native0
         ? selectedLendgine.token1.address
         : selectedLendgine.token0.address,
       BigNumber.from(0),
       address,
     ] as const; // safe to be zero because the collect estimation will fail
 
-    return { args, unwrapArgs, sweepArgs, native };
+    return { args, unwrapArgs, sweepArgs };
   }, [
     address,
     amount0,
     amount1,
-    environment.interface.wrappedNative,
     liquidity,
+    native0,
+    native1,
     selectedLendgine.bound,
-    selectedLendgine.token0,
-    selectedLendgine.token1,
+    selectedLendgine.token0.address,
+    selectedLendgine.token0.decimals,
+    selectedLendgine.token1.address,
+    selectedLendgine.token1.decimals,
     settings.maxSlippagePercent,
     settings.timeout,
     size,
@@ -128,7 +124,7 @@ export const useWithdraw = ({
   const prepareMulticall = usePrepareLiquidityManagerMulticall({
     enabled:
       !!prepareRemove.config.request &&
-      !!native &&
+      (native0 || native1) &&
       !!sweepArgs &&
       !!unwrapArgs &&
       !!liquidityManagerContract,
@@ -157,7 +153,7 @@ export const useWithdraw = ({
 
   return useMemo(
     () =>
-      native
+      native0 || native1
         ? [
             {
               stageTitle: `Remove ${selectedLendgine.token0.symbol} / ${selectedLendgine.token1.symbol} liquidty`,
@@ -191,7 +187,8 @@ export const useWithdraw = ({
             },
           ] as const),
     [
-      native,
+      native0,
+      native1,
       prepareMulticall,
       prepareRemove,
       selectedLendgine.token0.symbol,

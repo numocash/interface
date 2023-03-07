@@ -1,5 +1,6 @@
 import { chainID } from "@dahlia-labs/use-ethers";
 import { getAddress } from "@ethersproject/address";
+import { Ether } from "@uniswap/sdk-core";
 
 import { Stable, WrappedNative } from "./tokens";
 
@@ -29,6 +30,7 @@ export const arbitrumConfig = {
     numoenSubgraph:
       "https://api.thegraph.com/subgraphs/name/kyscott18/numoen-arbitrum",
     wrappedNative: WrappedNative[chainID.arbitrum],
+    native: Ether.onChain(chainID.arbitrum),
     stablecoin: Stable[chainID.arbitrum],
     blockFreq: 10,
   },

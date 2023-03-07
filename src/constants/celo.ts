@@ -28,6 +28,7 @@ export const celoConfig = {
     numoenSubgraph:
       "https://api.thegraph.com/subgraphs/name/kyscott18/numoen-celo",
     wrappedNative: WrappedNative[chainID.celo],
+    native: undefined,
     stablecoin: Stable[chainID.celo],
     blockFreq: 1,
   },

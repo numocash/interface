@@ -3,7 +3,7 @@ import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../../contexts/environment2";
 import { useApprove } from "../../../../hooks/useApproval";
-import { useBalances } from "../../../../hooks/useBalance";
+import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { useBeet } from "../../../../utils/beet";
 import { isLongLendgine } from "../../../../utils/lendgines";
@@ -20,7 +20,8 @@ export const Deposit: React.FC = () => {
   const Beet = useBeet();
   const { selectedLendgine, base, quote } = useEarnDetails();
   const isLong = isLongLendgine(selectedLendgine, base);
-  const balances = useBalances([base, quote], address);
+  const baseBalance = useBalance(base, address);
+  const quoteBalance = useBalance(quote, address);
   const lendgineInfo = useLendgine(selectedLendgine);
 
   const [baseInput, setBaseInput] = useState("");
@@ -76,25 +77,24 @@ export const Deposit: React.FC = () => {
         // ? "No liquidity in pair"
         !baseInputAmount || !quoteInputAmount
         ? "Enter an amount"
-        : balances.isLoading ||
+        : baseBalance.isLoading ||
+          quoteBalance.isLoading ||
           approveBase.allowanceQuery.isLoading ||
           approveQuote.allowanceQuery.isLoading
         ? "Loading"
-        : (balances.data &&
-            balances.data[0] &&
-            baseInputAmount.greaterThan(balances.data[0])) ||
-          (balances.data &&
-            balances.data[1] &&
-            quoteInputAmount.greaterThan(balances.data[1]))
+        : (baseBalance.data && baseInputAmount.greaterThan(baseBalance.data)) ||
+          (quoteBalance.data && quoteInputAmount.greaterThan(quoteBalance.data))
         ? "Insufficient amount"
         : null,
     [
       approveBase.allowanceQuery.isLoading,
       approveQuote.allowanceQuery.isLoading,
-      balances.data,
-      balances.isLoading,
+      baseBalance.data,
+      baseBalance.isLoading,
       baseInputAmount,
       lendgineInfo.isLoading,
+      quoteBalance.data,
+      quoteBalance.isLoading,
       quoteInputAmount,
     ]
   );
@@ -115,7 +115,7 @@ export const Deposit: React.FC = () => {
             onInput(value, "base");
           }}
           currentAmount={{
-            amount: balances.data?.[0],
+            amount: baseBalance.data,
             allowSelect: true,
           }}
         />
@@ -134,7 +134,7 @@ export const Deposit: React.FC = () => {
             onInput(value, "quote");
           }}
           currentAmount={{
-            amount: balances.data?.[1],
+            amount: quoteBalance.data,
             allowSelect: true,
           }}
         />

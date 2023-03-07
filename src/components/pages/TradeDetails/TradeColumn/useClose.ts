@@ -24,6 +24,7 @@ import {
   useMostLiquidMarket,
 } from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
 import type { BeetStage } from "../../../../utils/beet";
 import {
@@ -48,13 +49,15 @@ export const useClose = ({
   const mostLiquid = useMostLiquidMarket([base, quote]);
   const { shares, amount0, amount1 } = useCloseAmounts({ amountOut });
 
+  const native = useIsWrappedNative(selectedLendgine.token1);
+
   const approve = useApprove(shares, environment.base.lendgineRouter);
 
   const lendgineRouterContract = useLendgineRouter({
     address: environment.base.lendgineRouter,
   });
 
-  const { args, native, unwrapArgs } = useMemo(() => {
+  const { args, unwrapArgs } = useMemo(() => {
     if (
       !shares ||
       !amount0 ||
@@ -65,9 +68,6 @@ export const useClose = ({
     )
       return {};
 
-    const native = environment.interface.wrappedNative.equals(
-      amountOut.currency
-    );
     const args = [
       {
         token0: getAddress(selectedLendgine.token0.address),
@@ -128,8 +128,8 @@ export const useClose = ({
     amount0,
     amount1,
     amountOut,
-    environment.interface.wrappedNative,
     mostLiquid.data,
+    native,
     selectedLendgine.bound,
     selectedLendgine.token0.address,
     selectedLendgine.token0.decimals,

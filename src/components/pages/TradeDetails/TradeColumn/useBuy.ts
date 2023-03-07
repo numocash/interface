@@ -23,6 +23,7 @@ import {
   useMostLiquidMarket,
 } from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
 import type { BeetStage } from "../../../../utils/beet";
 import { isLongLendgine } from "../../../../utils/lendgines";
@@ -59,8 +60,9 @@ export const useBuy = ({
 
   const isLong = isLongLendgine(selectedLendgine, base);
   const approve = useApprove(amountIn, environment.base.lendgineRouter);
+  const native = useIsWrappedNative(selectedLendgine.token1);
 
-  const { args, native } = useMemo(() => {
+  const { args } = useMemo(() => {
     if (
       !borrowAmount ||
       !liquidity ||
@@ -70,10 +72,6 @@ export const useBuy = ({
       !mostLiquid.data
     )
       return {};
-
-    const native = environment.interface.wrappedNative.equals(
-      amountIn.currency
-    );
 
     const args = [
       {
@@ -116,9 +114,9 @@ export const useBuy = ({
     address,
     amountIn,
     borrowAmount,
-    environment.interface.wrappedNative,
     liquidity,
     mostLiquid.data,
+    native,
     selectedLendgine.bound,
     selectedLendgine.token0.address,
     selectedLendgine.token0.decimals,
