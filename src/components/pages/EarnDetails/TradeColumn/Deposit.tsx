@@ -103,7 +103,7 @@ export const Deposit: React.FC = () => {
     <>
       <div tw="flex flex-col rounded-lg border-2 border-stroke">
         <AssetSelection
-          tw=""
+          tw="pb-2"
           label={<span>Input</span>}
           selectedValue={base}
           inputValue={
@@ -123,7 +123,7 @@ export const Deposit: React.FC = () => {
         <CenterSwitch icon="plus" />
         <AssetSelection
           label={<span>Input</span>}
-          tw="pt-2"
+          tw="pt-4"
           selectedValue={quote}
           inputValue={
             quoteInput === ""
