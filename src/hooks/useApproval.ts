@@ -14,6 +14,7 @@ import {
   usePrepareErc20Approve,
 } from "../generated";
 import type { BeetStage } from "../utils/beet";
+import { ONE_HUNDRED_PERCENT } from "../utils/Numoen/trade";
 import type { HookArg } from "./useBalance";
 
 export const useAllowance = <T extends Token>(
@@ -77,7 +78,13 @@ export const useApprove = <T extends Token>(
             spender,
             settings.infiniteApprove
               ? BigNumber.from(MaxUint256.toString())
-              : BigNumber.from(tokenAmount.quotient.toString()),
+              : BigNumber.from(
+                  tokenAmount
+                    .multiply(
+                      ONE_HUNDRED_PERCENT.add(settings.maxSlippagePercent)
+                    )
+                    .quotient.toString()
+                ),
           ]
         : undefined,
     address: tokenAmount ? getAddress(tokenAmount.currency.address) : undefined,
