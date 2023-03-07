@@ -38,8 +38,10 @@ export const Buy: React.FC = () => {
         ? "Enter an amount"
         : !parsedAmount
         ? "Invalid amount"
-        : !selectedLendgineInfo.data
+        : !selectedLendgineInfo.data || !balance.data
         ? "Loading"
+        : parsedAmount.greaterThan(balance.data)
+        ? "Insufficient balance"
         : selectedLendgineInfo.data.totalLiquidity.equalTo(0)
         ? "Insufficient liquidity"
         : !liquidity || !shares

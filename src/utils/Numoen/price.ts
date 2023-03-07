@@ -118,7 +118,7 @@ export const nextLowestLendgine = <L extends Lendgine>(
   }
 ) => {
   const sortedLendgines = props.lendgines.sort((a, b) =>
-    a.bound.greaterThan(b.bound) ? 1 : -1
+    a.bound.greaterThan(b.bound) ? -1 : 1
   );
 
   const price = "lendgine" in props ? props.lendgine.bound : props.price;

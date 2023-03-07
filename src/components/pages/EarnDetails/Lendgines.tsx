@@ -24,27 +24,82 @@ export const Lendgines: React.FC = () => {
   const { longLendgine, shortLendgine, upEnable, downEnable } = useMemo(() => {
     const longLendgines = pickLongLendgines(lendgines, base);
     const shortLendgines = pickShortLendgines(lendgines, base);
-    const longLendgine = nextHighestLendgine({
-      price: fractionToPrice(
-        priceToFraction(price).multiply(boundMultiple / 2),
-        price.baseCurrency,
-        price.quoteCurrency
-      ),
-      lendgines: longLendgines,
-    });
-    const shortLendgine = nextHighestLendgine({
-      price: fractionToPrice(
-        priceToFraction(price.invert()).multiply(boundMultiple / 2),
-        price.quoteCurrency,
-        price.baseCurrency
-      ),
-      lendgines: shortLendgines,
-    });
 
+    console.log(
+      nextHighestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price).multiply(boundMultiple),
+          price.baseCurrency,
+          price.quoteCurrency
+        ),
+        lendgines: longLendgines,
+      })?.bound.toSignificant(4),
+      nextLowestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price).multiply(boundMultiple * 2),
+          price.baseCurrency,
+          price.quoteCurrency
+        ),
+        lendgines: longLendgines,
+      })?.bound.toSignificant(4)
+    );
+
+    const longLendgine =
+      nextHighestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price).multiply(boundMultiple),
+          price.baseCurrency,
+          price.quoteCurrency
+        ),
+        lendgines: longLendgines,
+      }) ===
+      nextLowestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price).multiply(boundMultiple * 2),
+          price.baseCurrency,
+          price.quoteCurrency
+        ),
+        lendgines: longLendgines,
+      })
+        ? nextHighestLendgine({
+            price: fractionToPrice(
+              priceToFraction(price).multiply(boundMultiple),
+              price.baseCurrency,
+              price.quoteCurrency
+            ),
+            lendgines: longLendgines,
+          })
+        : null;
+    const shortLendgine =
+      nextHighestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price.invert()).multiply(boundMultiple),
+          price.quoteCurrency,
+          price.baseCurrency
+        ),
+        lendgines: shortLendgines,
+      }) ===
+      nextLowestLendgine({
+        price: fractionToPrice(
+          priceToFraction(price).multiply(boundMultiple / 2),
+          price.baseCurrency,
+          price.quoteCurrency
+        ),
+        lendgines: longLendgines,
+      })
+        ? nextHighestLendgine({
+            price: fractionToPrice(
+              priceToFraction(price.invert()).multiply(boundMultiple),
+              price.quoteCurrency,
+              price.baseCurrency
+            ),
+            lendgines: shortLendgines,
+          })
+        : null;
     const upEnable =
       !!nextHighestLendgine({
         price: fractionToPrice(
-          priceToFraction(price).multiply(boundMultiple),
+          priceToFraction(price).multiply(boundMultiple * 2),
           price.baseCurrency,
           price.quoteCurrency
         ),
@@ -52,7 +107,7 @@ export const Lendgines: React.FC = () => {
       }) ||
       !!nextHighestLendgine({
         price: fractionToPrice(
-          priceToFraction(price.invert()).multiply(boundMultiple),
+          priceToFraction(price.invert()).multiply(boundMultiple * 2),
           price.quoteCurrency,
           price.baseCurrency
         ),
@@ -62,7 +117,7 @@ export const Lendgines: React.FC = () => {
     const downEnable =
       !!nextLowestLendgine({
         price: fractionToPrice(
-          priceToFraction(price).multiply(boundMultiple / 2),
+          priceToFraction(price).multiply(boundMultiple),
           price.baseCurrency,
           price.quoteCurrency
         ),
@@ -70,7 +125,7 @@ export const Lendgines: React.FC = () => {
       }) ||
       !!nextLowestLendgine({
         price: fractionToPrice(
-          priceToFraction(price.invert()).multiply(boundMultiple / 2),
+          priceToFraction(price.invert()).multiply(boundMultiple),
           price.quoteCurrency,
           price.baseCurrency
         ),
