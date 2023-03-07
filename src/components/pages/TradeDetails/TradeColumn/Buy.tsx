@@ -49,7 +49,14 @@ export const Buy: React.FC = () => {
         : liquidity.greaterThan(selectedLendgineInfo.data.totalLiquidity)
         ? "Insufficient liquidity"
         : null,
-    [input, liquidity, parsedAmount, selectedLendgineInfo.data, shares]
+    [
+      balance.data,
+      input,
+      liquidity,
+      parsedAmount,
+      selectedLendgineInfo.data,
+      shares,
+    ]
   );
 
   return (
