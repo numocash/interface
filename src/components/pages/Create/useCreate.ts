@@ -47,8 +47,6 @@ export const useCreate = ({
   const { address } = useAccount();
   const chainID = useChain();
 
-  console.log([token0Input?.currency, token1Input?.currency]);
-
   const priceQuery = useCurrentPrice(
     !!token0Input && !!token1Input
       ? ([token0Input.currency, token1Input.currency] as const)

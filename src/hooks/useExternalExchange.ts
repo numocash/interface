@@ -211,12 +211,10 @@ export const useCurrentPrice = (tokens: HookArg<Market>) => {
 
     invariant(tokens);
 
-    console.log(
-      v2PriceQuery.data?.toSignificant(4),
-      v3PricesQuery.data?.map((t) => t?.toSignificant(4))
-    );
-
-    // TODO: use median price
+    // console.log(
+    //   v2PriceQuery.data?.toSignificant(4),
+    //   v3PricesQuery.data?.map((t) => t?.toSignificant(4))
+    // );
 
     const allPrices = [v2PriceQuery.data]
       .concat(v3PricesQuery.data)
@@ -232,7 +230,7 @@ export const useCurrentPrice = (tokens: HookArg<Market>) => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const lower = allPrices[(allPrices.length - 1) / 2]!;
+    const lower = allPrices[allPrices.length / 2 - 1]!;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const upper = allPrices[allPrices.length / 2]!;
 
