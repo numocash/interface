@@ -226,12 +226,10 @@ export const Create: React.FC = () => {
           approveToken1.allowanceQuery.isLoading
         ? "Loading"
         : !token0.equals(environment.interface.wrappedNative) &&
-          !token0.equals(environment.interface.stablecoin) &&
-          !token1.equals(environment.interface.wrappedNative) &&
-          !token1.equals(environment.interface.stablecoin)
+          !token1.equals(environment.interface.wrappedNative)
         ? `One token must be ${
             environment.interface.wrappedNative.symbol ?? ""
-          } or ${environment.interface.stablecoin.symbol ?? ""}`
+          }`
         : !token0InputAmount || !token1InputAmount
         ? "Enter an amount"
         : priceToFraction(priceQuery.data).greaterThan(bound)
@@ -253,7 +251,6 @@ export const Create: React.FC = () => {
       approveToken0.allowanceQuery.isLoading,
       approveToken1.allowanceQuery.isLoading,
       bound,
-      environment.interface.stablecoin,
       environment.interface.wrappedNative,
       lendgines,
       prepare.config,

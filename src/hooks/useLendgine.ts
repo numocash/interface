@@ -432,13 +432,10 @@ export const useAllLendgines = () => {
         const token1 = addressToToken(ld.token1);
 
         if (!token0 || !token1) return undefined; // tokens must be in token list
-        // one of the tokens must be wrapped native or stable asset
+        // one of the tokens must be wrapped native
         if (
           ![token0, token1].find((t) =>
             t.equals(environment.interface.wrappedNative)
-          ) &&
-          ![token0, token1].find((t) =>
-            t.equals(environment.interface.stablecoin)
           )
         )
           return undefined;
@@ -464,7 +461,6 @@ export const useAllLendgines = () => {
   }, [
     addressToToken,
     chainID,
-    environment.interface.stablecoin,
     environment.interface.wrappedNative,
     lendginesQuery.data,
     lendginesQuery.isLoading,

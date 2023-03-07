@@ -65,6 +65,7 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
 
   const chain = useChain();
 
+  // TODO: look into wagmi query caching
   return useQuery<{
     pool: UniswapV2Pool | UniswapV3Pool;
   } | null>(
