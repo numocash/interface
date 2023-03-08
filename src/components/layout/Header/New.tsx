@@ -21,7 +21,12 @@ export const New: React.FC = () => {
           <p>
             Please migrate your funds from the beta version by withdrawing
             directly from the legacy site:
-            <a href="legacy.numoen.com" target="_blank" tw="underline">
+            <a
+              href="https://legacy.numoen.com"
+              target="_blank"
+              tw="underline"
+              rel="noreferrer"
+            >
               {" "}
               here
             </a>
