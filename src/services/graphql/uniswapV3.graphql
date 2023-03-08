@@ -8,7 +8,6 @@ query MostLiquidV3($token0: String, $token1: String) {
     id
     feeTier
     totalValueLockedToken0
-    token0Price
   }
 }
 
@@ -31,11 +30,5 @@ query PriceHistoryDayV3($id: ID!, $amount: Int) {
       token0Price
       date
     }
-  }
-}
-
-query PriceV3($id: ID!) {
-  pool(id: $id, subgraphError: allow) {
-    token0Price
   }
 }

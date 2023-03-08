@@ -1,9 +1,18 @@
-import type { UseQueryResult } from "@tanstack/react-query";
+import { defaultAbiCoder } from "@ethersproject/abi";
+import { getCreate2Address } from "@ethersproject/address";
+import { keccak256, pack } from "@ethersproject/solidity";
 import { useQuery } from "@tanstack/react-query";
-import type { Price } from "@uniswap/sdk-core";
+import { Fraction, Price } from "@uniswap/sdk-core";
+import type { Address } from "abitype";
+import JSBI from "jsbi";
+import { useMemo } from "react";
 import invariant from "tiny-invariant";
+import { objectKeys } from "ts-extras";
+import { useContractReads } from "wagmi";
 
 import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
+import { useEnvironment } from "../contexts/environment2";
+import { iUniswapV3PoolABI, useIUniswapV2PairGetReserves } from "../generated";
 import type {
   PriceHistoryDayV2Query,
   PriceHistoryHourV2Query,
@@ -22,7 +31,7 @@ import {
   PriceHistoryDayV3Document,
   PriceHistoryHourV3Document,
 } from "../gql/uniswapV3/graphql";
-import type { PricePoint, UniswapV2Pool } from "../services/graphql/uniswapV2";
+import type { UniswapV2Pool } from "../services/graphql/uniswapV2";
 import {
   parsePairV2,
   parsePriceHistoryDayV2,
@@ -30,10 +39,13 @@ import {
 } from "../services/graphql/uniswapV2";
 import type { UniswapV3Pool } from "../services/graphql/uniswapV3";
 import {
+  feeTiers,
   parseMostLiquidV3,
   parsePriceHistoryDayV3,
   parsePriceHistoryHourV3,
+  Q192,
 } from "../services/graphql/uniswapV3";
+import { fractionToPrice, priceToFraction } from "../utils/Numoen/price";
 import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
@@ -53,11 +65,11 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
 
   const chain = useChain();
 
+  // TODO: look into wagmi query caching
   return useQuery<{
     pool: UniswapV2Pool | UniswapV3Pool;
-    price: Price<WrappedTokenInfo, WrappedTokenInfo>;
   } | null>(
-    ["query liquidity", sortedTokens],
+    ["query liquidity", sortedTokens?.map((t) => t.address)],
     async () => {
       if (!sortedTokens) return null;
 
@@ -80,22 +92,18 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
         if (!v3data) return null;
         invariant(v2data);
         return {
-          price:
-            v2data.totalLiquidity > v3data.totalLiquidity
-              ? v2data.price
-              : v3data.price,
           pool: v3data.pool,
         };
       }
 
       if (!v3data) {
         invariant(v2data);
-        return { pool: v2data.pool, price: v2data.price };
+        return { pool: v2data.pool };
       }
 
       if (!v2data) {
         invariant(v3data);
-        return { pool: v3data.pool, price: v3data.price };
+        return { pool: v3data.pool };
       }
 
       return {
@@ -103,10 +111,6 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
           v2data.totalLiquidity > v3data.totalLiquidity
             ? v2data.pool
             : v3data.pool,
-        price:
-          v2data.totalLiquidity > v3data.totalLiquidity
-            ? v2data.price
-            : v3data.price,
       };
     },
     {
@@ -118,12 +122,12 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
 export const usePriceHistory = (
   externalExchange: HookArg<UniswapV2Pool | UniswapV3Pool>,
   timeframe: Times
-): UseQueryResult<readonly PricePoint[] | null> => {
+) => {
   const client = useClient();
   const chain = useChain();
 
-  return useQuery<readonly PricePoint[] | null>(
-    ["price history", externalExchange, timeframe, chain],
+  return useQuery(
+    ["price history", externalExchange?.address, timeframe, chain],
     async () => {
       if (!externalExchange) return null;
 
@@ -189,4 +193,203 @@ export const usePriceHistory = (
       staleTime: Infinity,
     }
   );
+};
+
+export const useCurrentPrice = (tokens: HookArg<Market>) => {
+  const v2PriceQuery = useV2Price(tokens);
+  const v3PricesQuery = useV3Prices(tokens);
+
+  return useMemo(() => {
+    if (v2PriceQuery.status === "loading" || v3PricesQuery.status === "loading")
+      return { status: "loading" };
+
+    if (
+      !v2PriceQuery.data &&
+      (!v3PricesQuery.data || v3PricesQuery.data.length === 0)
+    )
+      return { status: "error" };
+
+    invariant(tokens);
+
+    // console.log(
+    //   v2PriceQuery.data?.toSignificant(4),
+    //   v3PricesQuery.data?.map((t) => t?.toSignificant(4))
+    // );
+
+    const allPrices = [v2PriceQuery.data]
+      .concat(v3PricesQuery.data)
+      .filter((d): d is Price<WrappedTokenInfo, WrappedTokenInfo> => !!d)
+      .sort((a, b) => (a.greaterThan(b) ? 1 : -1));
+
+    if (allPrices.length % 2 === 1) {
+      return {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        data: allPrices[(allPrices.length - 1) / 2]!,
+        status: "success",
+      };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const lower = allPrices[allPrices.length / 2 - 1]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const upper = allPrices[allPrices.length / 2]!;
+
+    const sum = priceToFraction(lower).add(priceToFraction(upper));
+    return {
+      data: fractionToPrice(sum.divide(2), tokens[1], tokens[0]),
+      status: "success",
+    };
+  }, [tokens, v2PriceQuery, v3PricesQuery]);
+};
+
+const useV2Price = (tokens: HookArg<Market>) => {
+  const environment = useEnvironment();
+
+  const { token0, v2PairAddress } = useMemo(() => {
+    if (!tokens) return {};
+    const [token0, token1] = tokens[0].sortsBefore(tokens[1])
+      ? [tokens[0], tokens[1]]
+      : [tokens[1], tokens[0]]; // does safety checks
+    const v2PairAddress = getCreate2Address(
+      environment.interface.uniswapV2.factoryAddress,
+      keccak256(
+        ["bytes"],
+        [pack(["address", "address"], [token0.address, token1.address])]
+      ),
+      environment.interface.uniswapV2.pairInitCodeHash
+    );
+
+    return { token0, token1, v2PairAddress };
+  }, [
+    environment.interface.uniswapV2.factoryAddress,
+    environment.interface.uniswapV2.pairInitCodeHash,
+    tokens,
+  ]);
+
+  const reservesQuery = useIUniswapV2PairGetReserves({
+    address: (v2PairAddress as Address) ?? undefined,
+    staleTime: 3_000,
+    enabled: !!v2PairAddress,
+  });
+
+  const parseReturn = (
+    reserves: (typeof reservesQuery)["data"]
+  ): Price<WrappedTokenInfo, WrappedTokenInfo> | undefined => {
+    if (!reserves) return undefined;
+    invariant(tokens && token0); // if a balance is returned then the data passed must be valid
+
+    const invert = !token0.equals(tokens[0]);
+
+    const priceFraction = new Fraction(
+      reserves.reserve0.toString(),
+      reserves.reserve1.toString()
+    );
+    return new Price(
+      tokens[1],
+      tokens[0],
+      invert ? priceFraction.numerator : priceFraction.denominator,
+      invert ? priceFraction.denominator : priceFraction.numerator
+    );
+  };
+
+  // This could be generalized into a function
+  // update the query with the parsed data type
+  const updatedQuery = {
+    ...reservesQuery,
+    data: parseReturn(reservesQuery.data),
+    refetch: async (
+      options: Parameters<(typeof reservesQuery)["refetch"]>[0]
+    ) => {
+      const balance = await reservesQuery.refetch(options);
+      return parseReturn(balance.data);
+    },
+  };
+
+  return updatedQuery;
+};
+
+const useV3Prices = (tokens: HookArg<Market>) => {
+  const environment = useEnvironment();
+
+  const { token0, contracts } = useMemo(() => {
+    if (!tokens) return {};
+    const [token0, token1] = tokens[0].sortsBefore(tokens[1])
+      ? [tokens[0], tokens[1]]
+      : [tokens[1], tokens[0]]; // does safety checks
+    const calcAddress = (feeTier: UniswapV3Pool["feeTier"]) =>
+      getCreate2Address(
+        environment.interface.uniswapV3.factoryAddress,
+        keccak256(
+          ["bytes"],
+          [
+            defaultAbiCoder.encode(
+              ["address", "address", "uint24"],
+              [token0.address, token1.address, feeTier]
+            ),
+          ]
+        ),
+        environment.interface.uniswapV3.pairInitCodeHash
+      );
+
+    const contracts = objectKeys(feeTiers).map(
+      (fee) =>
+        ({
+          address: calcAddress(fee) as Address,
+          functionName: "slot0",
+          abi: iUniswapV3PoolABI,
+        } as const)
+    );
+
+    return { token0, token1, contracts };
+  }, [
+    environment.interface.uniswapV3.factoryAddress,
+    environment.interface.uniswapV3.pairInitCodeHash,
+    tokens,
+  ]);
+
+  const slotsQuery = useContractReads({
+    contracts,
+    allowFailure: true,
+    staleTime: 3_000,
+    enabled: !!contracts,
+  });
+
+  const parseReturn = (
+    slots: (typeof slotsQuery)["data"]
+  ): (Price<WrappedTokenInfo, WrappedTokenInfo> | undefined)[] | undefined => {
+    if (!slots) return undefined;
+    invariant(tokens && token0); // if a balance is returned then the data passed must be valid
+
+    const invert = token0.equals(tokens[0]);
+
+    return slots.map((slot) => {
+      if (!slot) return undefined;
+      const sqrtPriceX96 = JSBI.BigInt(slot.sqrtPriceX96.toString());
+
+      const priceFraction = new Fraction(
+        JSBI.multiply(sqrtPriceX96, sqrtPriceX96),
+        Q192
+      );
+
+      return new Price(
+        tokens[1],
+        tokens[0],
+        invert ? priceFraction.numerator : priceFraction.denominator,
+        invert ? priceFraction.denominator : priceFraction.numerator
+      );
+    });
+  };
+
+  // This could be generalized into a function
+  // update the query with the parsed data type
+  const updatedQuery = {
+    ...slotsQuery,
+    data: parseReturn(slotsQuery.data),
+    refetch: async (options: Parameters<(typeof slotsQuery)["refetch"]>[0]) => {
+      const balance = await slotsQuery.refetch(options);
+      return parseReturn(balance.data);
+    },
+  };
+
+  return updatedQuery;
 };

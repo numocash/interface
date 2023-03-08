@@ -1,11 +1,13 @@
 import { getAddress } from "@ethersproject/address";
-import type { Currency, Token } from "@uniswap/sdk-core";
+import type { Currency as UniCurrency, Token } from "@uniswap/sdk-core";
 import type { TokenInfo, TokenList } from "@uniswap/token-lists";
+import invariant from "tiny-invariant";
 
 import UniswapTokens from "../constants/tokenList/uniswap.json";
 import { useEnvironment } from "../contexts/environment2";
 import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
+import { useGetIsWrappedNative } from "./useTokens";
 
 export const dedupeTokens = <T extends Token | TokenInfo>(
   tokens: readonly T[]
@@ -67,7 +69,7 @@ export class WrappedTokenInfo implements Token {
     return this.tokenInfo.logoURI;
   }
 
-  equals(other: Currency): boolean {
+  equals(other: UniCurrency): boolean {
     return (
       other.chainId === this.chainId &&
       other.isToken &&
@@ -112,10 +114,23 @@ export class WrappedTokenInfo implements Token {
 
 export const useDefaultTokenList = () => {
   const chain = useChain();
+  const isWrappedNative = useGetIsWrappedNative();
+  const enviroment = useEnvironment();
 
   return dedupeTokens(
     (UniswapTokens.tokens as TokenInfo[]).filter((t) => t.chainId === chain)
-  ).map((t) => new WrappedTokenInfo(t));
+  ).map((t) => {
+    const token = new WrappedTokenInfo(t);
+    if (isWrappedNative(token)) {
+      invariant(enviroment.interface.native);
+      return new WrappedTokenInfo({
+        ...t,
+        name: enviroment.interface.native.name ?? t.name,
+        symbol: enviroment.interface.native.symbol ?? t.symbol,
+      });
+    }
+    return token;
+  });
 };
 
 export const useSortDenomTokens = (

@@ -1,25 +1,18 @@
-import { BigNumber } from "@ethersproject/bignumber";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
-import type { usePrepareContractWrite } from "wagmi";
-import { useAccount } from "wagmi";
 
 import type {
   Lendgine,
   LendgineInfo,
   LendginePosition,
 } from "../../../../../constants/types";
-import { useEnvironment } from "../../../../../contexts/environment2";
-import {
-  useLiquidityManagerCollect,
-  usePrepareLiquidityManagerCollect,
-} from "../../../../../generated";
 import { useBeet } from "../../../../../utils/beet";
 import { formatPercent } from "../../../../../utils/format";
 import { supplyRate } from "../../../../../utils/Numoen/jumprate";
 import {
   accruedLendgineInfo,
   accruedLendginePositionInfo,
+  getT,
   liquidityPerPosition,
 } from "../../../../../utils/Numoen/lendgineMath";
 import {
@@ -30,6 +23,7 @@ import { AsyncButton } from "../../../../common/AsyncButton";
 import { RowBetween } from "../../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
 import { useEarnDetails } from "../../EarnDetailsInner";
+import { useCollect } from "../../TradeColumn/useCollect";
 
 type Props<L extends Lendgine = Lendgine> = {
   lendgine: L;
@@ -42,22 +36,23 @@ export const PositionItem: React.FC<Props> = ({
   lendgineInfo,
   position,
 }: Props) => {
-  const { address } = useAccount();
-  const environment = useEnvironment();
   const Beet = useBeet();
   const { base, setSelectedLendgine, setClose, setModalOpen } =
     useEarnDetails();
   const isInverse = base.equals(lendgine.token1);
+  const t = getT();
+
+  const collect = useCollect({ lendgine, lendgineInfo, position });
 
   const { updatedLendgineInfo, updatedPositionInfo } = useMemo(
     () => ({
-      updatedLendgineInfo: accruedLendgineInfo(lendgine, lendgineInfo),
+      updatedLendgineInfo: accruedLendgineInfo(lendgine, lendgineInfo, t),
       updatedPositionInfo: accruedLendginePositionInfo(
-        accruedLendgineInfo(lendgine, lendgineInfo),
+        accruedLendgineInfo(lendgine, lendgineInfo, t),
         position
       ),
     }),
-    [lendgine, lendgineInfo, position]
+    [lendgine, lendgineInfo, position, t]
   );
 
   const apr = useMemo(() => {
@@ -97,30 +92,9 @@ export const PositionItem: React.FC<Props> = ({
     return { amount0, amount1 };
   }, [lendgine, position.size, updatedLendgineInfo]);
 
-  const prepareCollect = usePrepareLiquidityManagerCollect({
-    enabled: !!address,
-    address: environment.base.liquidityManager,
-    args: address
-      ? [
-          {
-            lendgine: lendgine.address,
-            recipient: address,
-            amountRequested: BigNumber.from(
-              updatedPositionInfo.tokensOwed.quotient.toString()
-            ),
-          },
-        ]
-      : undefined,
-  });
-
-  const sendCollect = useLiquidityManagerCollect(prepareCollect.config);
-
   return (
     <>
-      <div
-        tw="w-full justify-between md:grid grid-cols-7 items-center hidden"
-        key={lendgine.address}
-      >
+      <div tw="w-full justify-between md:grid grid-cols-7 items-center hidden">
         <div tw="  pl-4 col-span-2 flex flex-col gap-1">
           {(isInverse ? [amount1, amount0] : [amount0, amount1]).map((a) => (
             <TokenAmountDisplay
@@ -143,22 +117,7 @@ export const PositionItem: React.FC<Props> = ({
             tw="w-min px-1 py-0.5"
             disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
             onClick={async () => {
-              await Beet([
-                {
-                  stageTitle: "Collect interest",
-                  parallelTransactions: [
-                    {
-                      title: `Collect interest`,
-                      tx: {
-                        prepare: prepareCollect as ReturnType<
-                          typeof usePrepareContractWrite
-                        >,
-                        send: sendCollect,
-                      },
-                    },
-                  ],
-                },
-              ]);
+              await Beet(collect);
             }}
           >
             Collect
@@ -188,10 +147,7 @@ export const PositionItem: React.FC<Props> = ({
           Close
         </button>
       </div>
-      <div
-        tw="w-full justify-between flex flex-col md:hidden gap-2"
-        key={lendgine.address}
-      >
+      <div tw="w-full justify-between flex flex-col md:hidden gap-2">
         <>
           {(isInverse ? [amount1, amount0] : [amount0, amount1]).map((a) => (
             <RowBetween key={a.currency.address} tw="p-0 items-center">
@@ -220,22 +176,7 @@ export const PositionItem: React.FC<Props> = ({
           tw="h-8 text-xl"
           disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
           onClick={async () => {
-            await Beet([
-              {
-                stageTitle: "Collect interest",
-                parallelTransactions: [
-                  {
-                    title: `Collect interest`,
-                    tx: {
-                      prepare: prepareCollect as ReturnType<
-                        typeof usePrepareContractWrite
-                      >,
-                      send: sendCollect,
-                    },
-                  },
-                ],
-              },
-            ]);
+            await Beet(collect);
           }}
         >
           Collect

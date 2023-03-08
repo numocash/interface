@@ -1,29 +1,28 @@
 import type { CurrencyAmount, Percent } from "@uniswap/sdk-core";
-import React from "react";
 import { css, styled } from "twin.macro";
 
 import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { formatDisplayWithSoftLimit, formatPercent } from "../../utils/format";
 import { TokenIcon } from "./TokenIcon";
 
-export interface IProps {
-  amount: CurrencyAmount<WrappedTokenInfo>;
+export type IProps<T extends WrappedTokenInfo> = {
+  amount: CurrencyAmount<T>;
   isMonoNumber?: boolean;
   showIcon?: boolean;
   percent?: Percent;
   className?: string;
   showSymbol?: boolean;
   suffix?: string;
-}
+};
 
-export const TokenAmountDisplay: React.FC<IProps> = ({
+export const TokenAmountDisplay = <T extends WrappedTokenInfo>({
   amount,
   showIcon = false,
   showSymbol = true,
   percent,
   className,
   suffix = "",
-}: IProps) => {
+}: IProps<T>) => {
   return (
     <TokenAmountWrapper className={className}>
       {showIcon && (

@@ -7,11 +7,9 @@ import { useAccount } from "wagmi";
 
 import type { Lendgine } from "../../../constants/types";
 import { useBalance } from "../../../hooks/useBalance";
-import { isV3 } from "../../../hooks/useExternalExchange";
+import { isV3, useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import type { UniswapV2Pool } from "../../../services/graphql/uniswapV2";
-import type { UniswapV3Pool } from "../../../services/graphql/uniswapV3";
 import {
   isLongLendgine,
   isShortLendgine,
@@ -20,6 +18,7 @@ import {
 } from "../../../utils/lendgines";
 import {
   accruedLendgineInfo,
+  getT,
   liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../utils/Numoen/lendgineMath";
@@ -39,7 +38,6 @@ interface Props {
   quote: WrappedTokenInfo;
   lendgines: Lendgine[];
   price: Price<WrappedTokenInfo, WrappedTokenInfo>;
-  pool: UniswapV2Pool | UniswapV3Pool;
 }
 
 interface ITradeDetails {
@@ -60,7 +58,6 @@ interface ITradeDetails {
 
   lendgines: readonly Lendgine[];
   price: Price<WrappedTokenInfo, WrappedTokenInfo>;
-  pool: UniswapV2Pool | UniswapV3Pool;
 
   modalOpen: boolean;
   setModalOpen: (val: boolean) => void;
@@ -71,9 +68,8 @@ const useTradeDetailsInternal = ({
   quote,
   lendgines,
   price,
-  pool,
 }: Partial<Props> = {}): ITradeDetails => {
-  invariant(base && quote && lendgines && price && pool);
+  invariant(base && quote && lendgines && price);
   const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
   const [trade, setTrade] = useState<TradeType>(TradeType.Long);
   const [close, setClose] = useState(false);
@@ -125,7 +121,6 @@ const useTradeDetailsInternal = ({
 
     lendgines,
     price,
-    pool,
 
     modalOpen,
     setModalOpen,
@@ -166,17 +161,21 @@ export const { Provider: TradeDetailsProvider, useContainer: useTradeDetails } =
 
 export const usePositionValue = (lendgine: Lendgine) => {
   const { address } = useAccount();
-  const { price: referencePrice, base, pool } = useTradeDetails();
+  const { price: referencePrice, base, quote } = useTradeDetails();
+  const t = getT();
+  const mostLiquidQuery = useMostLiquidMarket([base, quote]);
 
   const balanceQuery = useBalance(lendgine.lendgine, address);
   const lendgineInfoQuery = useLendgine(lendgine);
 
   const { value } = useMemo(() => {
-    if (!balanceQuery.data || !lendgineInfoQuery.data) return {};
+    if (!balanceQuery.data || !lendgineInfoQuery.data || !mostLiquidQuery.data)
+      return {};
 
     const updatedLendgineInfo = accruedLendgineInfo(
       lendgine,
-      lendgineInfoQuery.data
+      lendgineInfoQuery.data,
+      t
     );
 
     // liq
@@ -201,8 +200,8 @@ export const usePositionValue = (lendgine: Lendgine) => {
       ? referencePrice.invert()
       : referencePrice;
 
-    const dexFee = isV3(pool)
-      ? new Percent(pool.feeTier, "1000000")
+    const dexFee = isV3(mostLiquidQuery.data.pool)
+      ? new Percent(mostLiquidQuery.data.pool.feeTier, "1000000")
       : new Percent("3000", "1000000");
 
     // token1
@@ -221,8 +220,9 @@ export const usePositionValue = (lendgine: Lendgine) => {
     base,
     lendgine,
     lendgineInfoQuery.data,
-    pool,
+    mostLiquidQuery.data,
     referencePrice,
+    t,
   ]);
 
   return value;
@@ -233,12 +233,9 @@ export const TradeDetailsInner: React.FC<Props> = ({
   quote,
   lendgines,
   price,
-  pool,
 }: Props) => {
   return (
-    <TradeDetailsProvider
-      initialState={{ base, quote, lendgines, price, pool }}
-    >
+    <TradeDetailsProvider initialState={{ base, quote, lendgines, price }}>
       <TradeDetailsInnerInner />
     </TradeDetailsProvider>
   );

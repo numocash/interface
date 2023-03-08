@@ -14,6 +14,7 @@ import {
   usePrepareErc20Approve,
 } from "../generated";
 import type { BeetStage } from "../utils/beet";
+import { ONE_HUNDRED_PERCENT } from "../utils/Numoen/trade";
 import type { HookArg } from "./useBalance";
 
 export const useAllowance = <T extends Token>(
@@ -24,8 +25,7 @@ export const useAllowance = <T extends Token>(
   const query = useErc20Allowance({
     address: token ? getAddress(token.address) : undefined,
     args: address && spender ? [address, spender] : undefined,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!token && !!address && !!spender,
   });
 
@@ -78,11 +78,18 @@ export const useApprove = <T extends Token>(
             spender,
             settings.infiniteApprove
               ? BigNumber.from(MaxUint256.toString())
-              : BigNumber.from(tokenAmount.quotient.toString()),
+              : BigNumber.from(
+                  tokenAmount
+                    .multiply(
+                      ONE_HUNDRED_PERCENT.add(settings.maxSlippagePercent)
+                    )
+                    .quotient.toString()
+                ),
           ]
         : undefined,
     address: tokenAmount ? getAddress(tokenAmount.currency.address) : undefined,
     enabled: !!tokenAmount && !!spender,
+    staleTime: Infinity,
   });
 
   const write = useErc20Approve(prepare.config);

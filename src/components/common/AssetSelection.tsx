@@ -39,10 +39,10 @@ const Section = styled.div(tw`flex items-center justify-between`);
 
 // const DEFAULT_TOKEN_DECIMALS = 3;
 
-type Props = {
-  tokens?: readonly WrappedTokenInfo[];
-  onSelect?: (token: WrappedTokenInfo) => void;
-  selectedValue: WrappedTokenInfo | null;
+type Props<T extends WrappedTokenInfo> = {
+  tokens?: readonly T[];
+  onSelect?: (token: T) => void;
+  selectedValue: T | null;
   inputOnChange?: (val: string) => void;
   inputValue?: string;
   hideInput?: boolean;
@@ -50,13 +50,13 @@ type Props = {
   className?: string;
   label?: string | React.ReactNode;
   currentAmount?: {
-    amount?: CurrencyAmount<WrappedTokenInfo>;
+    amount?: CurrencyAmount<T>;
     allowSelect?: boolean;
     label?: string;
   };
 };
 
-export const AssetSelection = ({
+export const AssetSelection: React.FC<Props<WrappedTokenInfo>> = ({
   onSelect,
   selectedValue,
   inputValue,
@@ -67,7 +67,7 @@ export const AssetSelection = ({
   label,
   currentAmount,
   tokens,
-}: Props) => {
+}: Props<WrappedTokenInfo>) => {
   // const { width } = useWindowDimensions();
 
   // const uiDecimals =
@@ -76,6 +76,8 @@ export const AssetSelection = ({
   const token = selectedValue;
 
   const [show, setShow] = useState(false);
+
+  // const disp
 
   return (
     <div tw="flex w-full flex-col pt-2 px-2" className={className}>

@@ -17,20 +17,20 @@
       "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
     },
     {
+      "address": "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0",
+      "chainId": 42161,
+      "name": "Uniswap",
+      "symbol": "UNI",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/12504/small/uniswap-uni.png?1600306604"
+    },
+    {
       "chainId": 42161,
       "address": "0xd4d42F0b6DEF4CE0383636770eF773390d85c61A",
       "name": "Sushi",
       "symbol": "SUSHI",
       "decimals": 18,
       "logoURI": "https://assets.coingecko.com/coins/images/12271/thumb/512x512_Logo_no_chop.png?1606986688"
-    },
-    {
-      "chainId": 42161,
-      "name": "Stargate Finance",
-      "symbol": "STG",
-      "logoURI": "https://assets.coingecko.com/coins/images/24413/thumb/STG_LOGO.png?1647654518",
-      "address": "0xe018C7a3d175Fb0fE15D70Da2c874d3CA16313EC",
-      "decimals": 18
     },
     {
       "chainId": 42161,
@@ -95,6 +95,46 @@
       "symbol": "PACT",
       "decimals": 18,
       "logoURI": "https://assets.coingecko.com/coins/images/21907/small/PACT_Token_Ticker_Blue_2x.png?1640236076"
+    },
+    {
+      "address": "0x0C4681e6C0235179ec3D4F4fc4DF3d14FDD96017",
+      "chainId": 42161,
+      "name": "Radiant",
+      "symbol": "RDNT",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/26536/small/Radiant-Logo-200x200.png?1658715865"
+    },
+    {
+      "address": "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4",
+      "chainId": 42161,
+      "name": "Chainlink",
+      "symbol": "LINK",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png?1547034700"
+    },
+    {
+      "address": "0x088cd8f5eF3652623c22D48b1605DCfE860Cd704",
+      "chainId": 42161,
+      "name": "Vela Token",
+      "symbol": "VELA",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/28739/small/VELA_logo_-_no_background.png?1673839129"
+    },
+    {
+      "address": "0x18c11FD286C5EC11c3b683Caa813B77f5163A122",
+      "chainId": 42161,
+      "name": "Gains Network",
+      "symbol": "GNS",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/19737/small/logo.png?1635909203"
+    },
+    {
+      "address": "0x7F465507f058e17Ad21623927a120ac05CA32741",
+      "chainId": 42161,
+      "name": "Arcadeum",
+      "symbol": "ARC",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/29044/small/arc.png?1676191620"
     }
   ]
 }

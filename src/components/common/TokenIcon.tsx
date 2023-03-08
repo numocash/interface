@@ -3,11 +3,11 @@ import { styled } from "twin.macro";
 
 import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 
-interface Props {
-  token?: WrappedTokenInfo | null;
+type Props = {
+  token?: WrappedTokenInfo;
   size?: number;
   className?: string;
-}
+};
 
 export const TokenIcon: React.FC<Props> = ({
   className,
@@ -30,7 +30,7 @@ export const TokenIcon: React.FC<Props> = ({
           onError={() => {
             setInvalid(true);
           }}
-          alt={`Icon for token ${token.name}`}
+          alt={`Icon for token ${token.name ?? ""}`}
         />
       )}
     </Wrapper>

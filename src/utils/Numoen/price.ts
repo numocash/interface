@@ -118,7 +118,7 @@ export const nextLowestLendgine = <L extends Lendgine>(
   }
 ) => {
   const sortedLendgines = props.lendgines.sort((a, b) =>
-    a.bound.greaterThan(b.bound) ? 1 : -1
+    a.bound.greaterThan(b.bound) ? -1 : 1
   );
 
   const price = "lendgine" in props ? props.lendgine.bound : props.price;
@@ -137,9 +137,8 @@ export const priceToReserves = <L extends Lendgine>(
   token0Amount: Price<L["lendgine"], L["token0"]>;
   token1Amount: Price<L["lendgine"], L["token1"]>;
 } => {
-  const token0AmountFraction = priceToFraction(price).multiply(
-    priceToFraction(price)
-  );
+  const p = price.greaterThan(lendgine.bound) ? lendgine.bound : price;
+  const token0AmountFraction = priceToFraction(p).multiply(priceToFraction(p));
   const token0Amount = fractionToPrice(
     token0AmountFraction,
     lendgine.lendgine,
@@ -147,7 +146,7 @@ export const priceToReserves = <L extends Lendgine>(
   );
 
   const token1AmountFraction = priceToFraction(lendgine.bound)
-    .subtract(priceToFraction(price))
+    .subtract(priceToFraction(p))
     .multiply(2);
   const token1Amount = fractionToPrice(
     token1AmountFraction,

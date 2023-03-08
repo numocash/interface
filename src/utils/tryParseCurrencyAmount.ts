@@ -1,13 +1,14 @@
 import { parseUnits } from "@ethersproject/units";
-import type { Currency } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
+
+import type { WrappedTokenInfo } from "../hooks/useTokens2";
 
 /**
  * Parses a CurrencyAmount from the passed string.
  * Returns the CurrencyAmount, or undefined if parsing fails.
  */
-export default function tryParseCurrencyAmount<T extends Currency>(
+export default function tryParseCurrencyAmount<T extends WrappedTokenInfo>(
   value?: string,
   currency?: T
 ): CurrencyAmount<T> | undefined {

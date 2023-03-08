@@ -4,7 +4,10 @@ import { useMemo } from "react";
 import type { Lendgine, LendgineInfo } from "../../../../../constants/types";
 import { formatPercent, formatPrice } from "../../../../../utils/format";
 import { borrowRate } from "../../../../../utils/Numoen/jumprate";
-import { accruedLendgineInfo } from "../../../../../utils/Numoen/lendgineMath";
+import {
+  accruedLendgineInfo,
+  getT,
+} from "../../../../../utils/Numoen/lendgineMath";
 import { numoenPrice } from "../../../../../utils/Numoen/price";
 import { RowBetween } from "../../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
@@ -27,11 +30,12 @@ export const PositionItem: React.FC<Props> = ({
   const isInverse = base.equals(lendgine.token1);
 
   const positionValue = usePositionValue(lendgine);
+  const t = getT();
 
   const funding = useMemo(() => {
-    const updatedLendgineInfo = accruedLendgineInfo(lendgine, lendgineInfo);
+    const updatedLendgineInfo = accruedLendgineInfo(lendgine, lendgineInfo, t);
     return borrowRate(updatedLendgineInfo);
-  }, [lendgine, lendgineInfo]);
+  }, [lendgine, lendgineInfo, t]);
 
   const value = useMemo(() => {
     if (!positionValue) return undefined;

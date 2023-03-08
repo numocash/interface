@@ -46,9 +46,12 @@ export const liquidityPerPosition = <L extends Lendgine>(
   return fractionToPrice(f, lendgine.lendgine, lendgine.lendgine);
 };
 
+export const getT = () => Math.round(Date.now() / (1000 * 10)) * 10;
+
 export const accruedLendgineInfo = <L extends Lendgine>(
   lendgine: Lendgine,
-  lendgineInfo: LendgineInfo<L>
+  lendgineInfo: LendgineInfo<L>,
+  t: number
 ): LendgineInfo<L> => {
   if (
     lendgineInfo.totalSupply.equalTo(0) ||
@@ -56,7 +59,6 @@ export const accruedLendgineInfo = <L extends Lendgine>(
   )
     return lendgineInfo;
 
-  const t = Math.round(Date.now() / 1000);
   const timeElapsed = t - lendgineInfo.lastUpdate;
 
   const br = borrowRate(lendgineInfo);

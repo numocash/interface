@@ -1,6 +1,5 @@
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
 import { arbitrum, celo } from "wagmi/chains";
@@ -55,9 +54,6 @@ const { connectors } = getDefaultWallets({
 });
 
 const wagmiClient = createClient({
-  logger: {
-    warn: null,
-  },
   autoConnect: true,
   connectors,
   provider,
@@ -70,16 +66,17 @@ export const AppWithProviders: React.FC = () => {
   return (
     <React.StrictMode>
       <WagmiConfig client={wagmiClient}>
-        <RainbowKitProvider coolMode chains={chains}>
-          <QueryClientProvider client={queryClient}>
-            <ReactQueryDevtools initialIsOpen={false} />
+        <QueryClientProvider client={queryClient}>
+          {/* <ReactQueryDevtools /> */}
+
+          <RainbowKitProvider coolMode chains={chains}>
             <EnvironmentProvider>
               <SettingsProvider>
                 <App />
               </SettingsProvider>
             </EnvironmentProvider>
-          </QueryClientProvider>
-        </RainbowKitProvider>
+          </RainbowKitProvider>
+        </QueryClientProvider>
       </WagmiConfig>
     </React.StrictMode>
   );

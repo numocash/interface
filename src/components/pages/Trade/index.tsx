@@ -39,7 +39,9 @@ const useTradeInternal = (): ITrade => {
       assets.length === 0
         ? dedupedMarkets
         : dedupedMarkets.filter(
-            (m) => assets.includes(m[0]) || assets.includes(m[1])
+            (m) =>
+              !!assets.find((a) => a.equals(m[0])) ||
+              !!assets.find((a) => a.equals(m[1]))
           );
 
     return filteredMarkets;

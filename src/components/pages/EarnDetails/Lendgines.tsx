@@ -1,91 +1,104 @@
-import { useMemo, useState } from "react";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { useMemo } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import tw, { styled } from "twin.macro";
 
 import { useLendgine } from "../../../hooks/useLendgine";
 import {
+  isLongLendgine,
   pickLongLendgines,
   pickShortLendgines,
 } from "../../../utils/lendgines";
 import {
-  fractionToPrice,
   nextHighestLendgine,
   nextLowestLendgine,
-  priceToFraction,
 } from "../../../utils/Numoen/price";
 import { useEarnDetails } from "./EarnDetailsInner";
 import { LendgineItem } from "./LendgineItem";
 
 export const Lendgines: React.FC = () => {
-  const { lendgines, price, base } = useEarnDetails();
+  const { lendgines, base, selectedLendgine, setSelectedLendgine } =
+    useEarnDetails();
 
-  const [boundMultiple, setBoundMultiple] = useState(2);
+  const {
+    longLendgine,
+    shortLendgine,
 
-  const { longLendgine, shortLendgine, upEnable, downEnable } = useMemo(() => {
+    lowerLendgine,
+    upperLendgine,
+  } = useMemo(() => {
     const longLendgines = pickLongLendgines(lendgines, base);
     const shortLendgines = pickShortLendgines(lendgines, base);
-    const longLendgine = nextHighestLendgine({
-      price: fractionToPrice(
-        priceToFraction(price).multiply(boundMultiple / 2),
-        price.baseCurrency,
-        price.quoteCurrency
-      ),
-      lendgines: longLendgines,
-    });
-    const shortLendgine = nextHighestLendgine({
-      price: fractionToPrice(
-        priceToFraction(price.invert()).multiply(boundMultiple / 2),
-        price.quoteCurrency,
-        price.baseCurrency
-      ),
-      lendgines: shortLendgines,
+
+    const opposite = lendgines.find((l) =>
+      l.bound.equalTo(selectedLendgine.bound.invert())
+    );
+
+    const [longLendgine, shortLendgine] = isLongLendgine(selectedLendgine, base)
+      ? [selectedLendgine, opposite]
+      : [opposite, selectedLendgine];
+
+    const similarLendgines = isLongLendgine(selectedLendgine, base)
+      ? pickLongLendgines(lendgines, base)
+      : pickShortLendgines(lendgines, base);
+
+    const oppositeLendgines = isLongLendgine(selectedLendgine, base)
+      ? pickShortLendgines(lendgines, base)
+      : pickLongLendgines(lendgines, base);
+
+    const nextSameLendgine = nextHighestLendgine({
+      lendgine: selectedLendgine,
+      lendgines: similarLendgines,
     });
 
-    const upEnable =
-      !!nextHighestLendgine({
-        price: fractionToPrice(
-          priceToFraction(price).multiply(boundMultiple),
-          price.baseCurrency,
-          price.quoteCurrency
-        ),
-        lendgines: longLendgines,
-      }) ||
-      !!nextHighestLendgine({
-        price: fractionToPrice(
-          priceToFraction(price.invert()).multiply(boundMultiple),
-          price.quoteCurrency,
-          price.baseCurrency
-        ),
-        lendgines: shortLendgines,
-      });
+    const lowerSameLendgine = nextLowestLendgine({
+      lendgine: selectedLendgine,
+      lendgines: similarLendgines,
+    });
 
-    const downEnable =
-      !!nextLowestLendgine({
-        price: fractionToPrice(
-          priceToFraction(price).multiply(boundMultiple / 2),
-          price.baseCurrency,
-          price.quoteCurrency
-        ),
-        lendgines: longLendgines,
-      }) ||
-      !!nextLowestLendgine({
-        price: fractionToPrice(
-          priceToFraction(price.invert()).multiply(boundMultiple / 2),
-          price.quoteCurrency,
-          price.baseCurrency
-        ),
-        lendgines: shortLendgines,
-      });
+    const nextOppositeLendgine = nextLowestLendgine({
+      price: selectedLendgine.bound.invert(),
+      lendgines: oppositeLendgines,
+    });
+
+    const lowerOppositeLendgine = nextHighestLendgine({
+      price: selectedLendgine.bound.invert(),
+      lendgines: oppositeLendgines,
+    });
+
+    const lowerLendgine =
+      !lowerOppositeLendgine && !lowerSameLendgine
+        ? undefined
+        : !lowerOppositeLendgine
+        ? lowerSameLendgine
+        : !lowerSameLendgine
+        ? lowerOppositeLendgine
+        : lowerSameLendgine?.bound
+            .invert()
+            .lessThan(lowerOppositeLendgine.bound.invert())
+        ? lowerOppositeLendgine
+        : lowerSameLendgine;
+
+    const upperLendgine =
+      !nextOppositeLendgine && !nextSameLendgine
+        ? undefined
+        : !nextOppositeLendgine
+        ? nextSameLendgine
+        : !nextSameLendgine
+        ? nextOppositeLendgine
+        : nextOppositeLendgine.bound.greaterThan(nextSameLendgine.bound)
+        ? nextSameLendgine
+        : nextOppositeLendgine;
 
     return {
       longLendgine,
       shortLendgine,
       longLendgines,
       shortLendgines,
-      upEnable,
-      downEnable,
+      lowerLendgine,
+      upperLendgine,
     };
-  }, [base, boundMultiple, lendgines, price]);
+  }, [base, lendgines, selectedLendgine]);
 
   const longInfo = useLendgine(longLendgine);
   const shortInfo = useLendgine(shortLendgine);
@@ -106,24 +119,20 @@ export const Lendgines: React.FC = () => {
       </div>
       <div tw="w-full justify-center flex">
         <div tw="flex items-center gap-6">
-          {downEnable && (
+          {lowerLendgine && (
             <button
               tw="bg-secondary p-1 rounded-lg items-center justify-center"
-              onClick={() => setBoundMultiple(boundMultiple / 2)}
+              onClick={() => setSelectedLendgine(lowerLendgine)}
             >
               <IoIosArrowDown tw="rotate-90" />
             </button>
           )}
 
-          <p tw="flex text-xl gap-1 w-32 justify-center">
-            Bound:<span tw="font-semibold"> {boundMultiple}x</span>
-          </p>
-
-          {upEnable && (
+          {upperLendgine && (
             <button tw="bg-secondary p-1 rounded-lg items-center justify-center">
               <IoIosArrowDown
                 tw="-rotate-90"
-                onClick={() => setBoundMultiple(boundMultiple * 2)}
+                onClick={() => setSelectedLendgine(upperLendgine)}
               />
             </button>
           )}

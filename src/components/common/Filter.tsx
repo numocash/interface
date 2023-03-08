@@ -40,10 +40,10 @@ export const Filter: React.FC<Props> = ({ assets, setAssets }: Props) => {
           {allDedupeTokens.map((t) => (
             <FilterItem
               key={t.address}
-              selected={assets.includes(t)}
+              selected={!!assets.find((a) => a.equals(t))}
               onClick={() => {
-                assets.includes(t)
-                  ? setAssets(assets.filter((a) => a !== t))
+                assets.find((a) => a.equals(t))
+                  ? setAssets(assets.filter((a) => !a.equals(t)))
                   : setAssets(assets.concat(t));
               }}
             >
@@ -51,7 +51,7 @@ export const Filter: React.FC<Props> = ({ assets, setAssets }: Props) => {
                 <TokenIcon token={t} size={32} />
                 <p tw="text-lg font-semibold">{t.symbol}</p>
               </div>
-              <Check show={assets.includes(t)} />
+              <Check show={!!assets.find((a) => a.equals(t))} />
             </FilterItem>
           ))}
         </Module>

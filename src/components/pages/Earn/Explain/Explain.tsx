@@ -13,7 +13,7 @@ export const Explain: React.FC = () => {
       <div tw="w-full flex rounded-xl justify-between items-center mt-[-1rem] mb-[-4rem] h-64 max-w-3xl">
         <ExplainItem
           title="Provide liquidity"
-          description="Provide liquidity to an automated market maker and earn interest from lending out your position"
+          description="Provide liquidity to an automated market maker and earn interest from lending out your position."
         />
         <rive.RiveComponent tw="w-64 h-64" />
       </div>

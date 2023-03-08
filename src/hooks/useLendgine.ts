@@ -96,8 +96,7 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
     //  ^?
     contracts,
     allowFailure: false,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!contracts,
   });
 
@@ -155,60 +154,63 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
 export const useLendgines = <L extends Lendgine>(
   lendgines: HookArg<readonly L[]>
 ) => {
-  const contracts = lendgines
-    ? lendgines.flatMap(
-        (lendgine) =>
-          [
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "totalPositionSize",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "totalLiquidityBorrowed",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "rewardPerPositionStored",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "lastUpdate",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "totalSupply",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "reserve0",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "reserve1",
-            },
-            {
-              address: lendgine.address,
-              abi: lendgineABI,
-              functionName: "totalLiquidity",
-            },
-          ] as const
-      )
-    : undefined;
+  const contracts = useMemo(
+    () =>
+      lendgines
+        ? lendgines.flatMap(
+            (lendgine) =>
+              [
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "totalPositionSize",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "totalLiquidityBorrowed",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "rewardPerPositionStored",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "lastUpdate",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "totalSupply",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "reserve0",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "reserve1",
+                },
+                {
+                  address: lendgine.address,
+                  abi: lendgineABI,
+                  functionName: "totalLiquidity",
+                },
+              ] as const
+          )
+        : undefined,
+    [lendgines]
+  );
 
   const query = useContractReads({
     //  ^?
     contracts,
     allowFailure: false,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!lendgines,
   });
 
@@ -277,8 +279,7 @@ export const useLendginePosition = <L extends Lendgine>(
   const positionQuery = useLiquidityManagerPositions({
     address: environment.base.liquidityManager,
     args: address && lendgine ? [address, lendgine.address] : undefined,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!lendgine && !!address,
   });
 
@@ -327,23 +328,25 @@ export const useLendginesPosition = <L extends Lendgine>(
   address: HookArg<Address>
 ) => {
   const environment = useEnvironment();
-  const contracts =
-    !!lendgines && !!address
-      ? lendgines.map(
-          (l) =>
-            ({
-              address: environment.base.liquidityManager,
-              abi: liquidityManagerABI,
-              functionName: "positions",
-              args: [address, l.address],
-            } as const)
-        )
-      : undefined;
+  const contracts = useMemo(
+    () =>
+      !!lendgines && !!address
+        ? lendgines.map(
+            (l) =>
+              ({
+                address: environment.base.liquidityManager,
+                abi: liquidityManagerABI,
+                functionName: "positions",
+                args: [address, l.address],
+              } as const)
+          )
+        : undefined,
+    [address, environment.base.liquidityManager, lendgines]
+  );
 
   const positionsQuery = useContractReads({
     contracts,
-    watch: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     allowFailure: false,
     enabled: !!contracts,
   });
@@ -394,8 +397,9 @@ export const useLendginesPosition = <L extends Lendgine>(
 
 export const useExistingLendginesQueryKey = () => {
   const chain = useChain();
+  const client = useClient();
 
-  return ["existing lendgines", chain] as const;
+  return ["existing lendgines", chain, client.numoen] as const;
 };
 
 export const useExistingLendginesQueryFn = () => {
@@ -409,6 +413,7 @@ export const useExistingLendginesQueryFn = () => {
 export const useExistingLendginesQuery = () => {
   const queryKey = useExistingLendginesQueryKey();
   const queryFn = useExistingLendginesQueryFn();
+
   return useQuery<RawLendgine[]>(queryKey, queryFn, { staleTime: Infinity });
 };
 
@@ -417,6 +422,7 @@ export const useAllLendgines = () => {
   const addressToToken = useGetAddressToToken();
   const lendginesQuery = useExistingLendginesQuery();
   const chainID = useChain();
+
   return useMemo(() => {
     if (lendginesQuery.isLoading || !lendginesQuery.data) return null;
 
@@ -426,21 +432,18 @@ export const useAllLendgines = () => {
         const token1 = addressToToken(ld.token1);
 
         if (!token0 || !token1) return undefined; // tokens must be in token list
-        // one of the tokens must be wrapped native or stable asset
+        // one of the tokens must be wrapped native
         if (
           ![token0, token1].find((t) =>
             t.equals(environment.interface.wrappedNative)
-          ) &&
-          ![token0, token1].find((t) =>
-            t.equals(environment.interface.stablecoin)
           )
         )
           return undefined;
 
+        const ub = new Fraction(ld.upperBound, scale);
+
         // bound must be a power of 2
-        const quotient = ld.upperBound.greaterThan(1)
-          ? ld.upperBound.quotient
-          : ld.upperBound.invert().quotient;
+        const quotient = ub.greaterThan(1) ? ub.quotient : ub.invert().quotient;
         if (!JSBI.bitwiseAnd(quotient, JSBI.subtract(quotient, JSBI.BigInt(1))))
           return undefined;
 
@@ -449,7 +452,7 @@ export const useAllLendgines = () => {
           token1,
           token0Exp: ld.token0Exp,
           token1Exp: ld.token1Exp,
-          bound: fractionToPrice(ld.upperBound, token1, token0),
+          bound: fractionToPrice(ub, token1, token0),
           lendgine: new Token(chainID, ld.address, 18),
           address: ld.address,
         };
@@ -458,7 +461,6 @@ export const useAllLendgines = () => {
   }, [
     addressToToken,
     chainID,
-    environment.interface.stablecoin,
     environment.interface.wrappedNative,
     lendginesQuery.data,
     lendginesQuery.isLoading,

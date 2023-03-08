@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 
 import {
+  useCurrentPrice,
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../hooks/useExternalExchange";
@@ -20,6 +21,7 @@ interface Props {
 
 export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
   const referenceMarketQuery = useMostLiquidMarket(tokens);
+  const priceQuery = useCurrentPrice(tokens);
 
   const invertPriceQuery = tokens[1].sortsBefore(tokens[0]);
 
@@ -38,25 +40,18 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
       : priceHistoryQuery.data;
   }, [invertPriceQuery, priceHistoryQuery.data]);
 
-  const currentPrice = useMemo(() => {
-    if (!referenceMarketQuery.data) return null;
-    return invertPriceQuery
-      ? referenceMarketQuery.data.price.invert()
-      : referenceMarketQuery.data.price;
-  }, [invertPriceQuery, referenceMarketQuery.data]);
-
   const priceChange = useMemo(() => {
-    if (!currentPrice || !priceHistory) return null;
+    if (!priceQuery.data || !priceHistory) return null;
 
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
-    const f = priceToFraction(currentPrice)
+    const f = priceToFraction(priceQuery.data)
       .subtract(oneDayOldPrice)
       .divide(oneDayOldPrice);
 
     return new Percent(f.numerator, f.denominator);
-  }, [currentPrice, priceHistory]);
+  }, [priceHistory, priceQuery.data]);
 
   return (
     <NavLink
@@ -76,8 +71,11 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
           </div>
         </div>
 
-        {!!priceHistory && !!currentPrice ? (
-          <MiniChart priceHistory={priceHistory} currentPrice={currentPrice} />
+        {!!priceHistory && !!priceQuery.data ? (
+          <MiniChart
+            priceHistory={priceHistory}
+            currentPrice={priceQuery.data}
+          />
         ) : (
           <div tw="rounded-lg h-10 w-32 animate-pulse transform ease-in-out duration-300 bg-secondary justify-self-center hidden md:(flex col-span-2)" />
         )}

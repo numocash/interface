@@ -1,3 +1,4 @@
+import type { NativeCurrency } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
 import type { chains } from "../AppWithProviders";
@@ -15,11 +16,23 @@ export type NumoenBaseConfig = {
 
 // TODO: CELO doesn't need to be used as a native token
 export type NumoenInterfaceConfig = {
-  uniswapV2subgraph: string;
-  uniswapV3subgraph: string;
+  uniswapV2: {
+    subgraph: string;
+    factoryAddress: string;
+    pairInitCodeHash: string;
+    routerAddress: string;
+  };
+  uniswapV3: {
+    subgraph: string;
+    factoryAddress: string;
+    pairInitCodeHash: string;
+    quoterAddress: string;
+  };
   numoenSubgraph: string;
   wrappedNative: WrappedTokenInfo;
+  native: NativeCurrency | undefined;
   stablecoin: WrappedTokenInfo;
+  blockFreq: number; // How many blocks should go by before updating
 };
 
 export const config: {

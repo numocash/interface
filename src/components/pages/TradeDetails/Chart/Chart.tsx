@@ -27,7 +27,7 @@ import { useTradeDetails } from "../TradeDetailsInner";
 import { EmptyChart } from "./EmptyChart";
 
 export const Chart: React.FC = () => {
-  const { base, quote, timeframe } = useTradeDetails();
+  const { base, quote, timeframe, price } = useTradeDetails();
   const referenceMarketQuery = useMostLiquidMarket([base, quote]);
 
   const invertPriceQuery = quote.sortsBefore(base);
@@ -47,20 +47,11 @@ export const Chart: React.FC = () => {
       : priceHistoryQuery.data;
   }, [invertPriceQuery, priceHistoryQuery.data]);
 
-  const currentPrice = useMemo(() => {
-    if (!referenceMarketQuery.data) return null;
-    return invertPriceQuery
-      ? referenceMarketQuery.data.price.invert()
-      : referenceMarketQuery.data.price;
-  }, [invertPriceQuery, referenceMarketQuery.data]);
-
   const [crosshair, setCrosshair] = useState<number | null>(null);
   const [displayPrice, setDisplayPrice] = useState<PricePoint | null>(null);
 
   const priceChange = useMemo(() => {
-    const secondPrice =
-      displayPrice?.price ??
-      (currentPrice ? priceToFraction(currentPrice) : null);
+    const secondPrice = displayPrice?.price ?? priceToFraction(price);
     if (!secondPrice || !priceHistory) return null;
 
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
@@ -69,7 +60,7 @@ export const Chart: React.FC = () => {
     const f = secondPrice.subtract(oneDayOldPrice).divide(oneDayOldPrice);
 
     return new Percent(f.numerator, f.denominator);
-  }, [currentPrice, displayPrice?.price, priceHistory]);
+  }, [displayPrice?.price, price, priceHistory]);
 
   const getX = useMemo(
     () =>
@@ -132,7 +123,7 @@ export const Chart: React.FC = () => {
     setDisplayPrice(null);
   }, [setCrosshair]);
 
-  const loading = !priceHistory || !currentPrice || !priceChange;
+  const loading = !priceHistory || !priceChange;
 
   return (
     <div tw="col-span-2 w-full flex flex-col gap-12">
@@ -152,7 +143,7 @@ export const Chart: React.FC = () => {
                       maximumFractionDigits: 4,
                     }
                   )
-                : formatPrice(currentPrice)}
+                : formatPrice(price)}
             </p>
           )}
           {loading ? (

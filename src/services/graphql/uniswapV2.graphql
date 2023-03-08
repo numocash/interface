@@ -1,14 +1,7 @@
-query PriceV2($id: ID!) {
-  pair(id: $id) {
-    token0Price
-  }
-}
-
 query PairV2($token0: String!, $token1: String!) {
   pairs(where: { token0: $token0, token1: $token1 }, subgraphError: allow) {
     id
     reserve0
-    token0Price
   }
 }
 
