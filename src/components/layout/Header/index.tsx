@@ -5,6 +5,7 @@ import { ReactComponent as Numoen } from "../../common/images/numoen-small.svg";
 import { ConnectButton } from "./ConnectButton";
 import { MoreInfo } from "./MoreInfo";
 import { Nav } from "./Nav";
+import { New } from "./New";
 import { Settings } from "./Settings";
 // import { Nav } from "./Nav";
 
@@ -34,6 +35,7 @@ export const Header: React.FC = () => {
         </div>
 
         <div tw="flex w-full  gap-2 items-center justify-end">
+          <New />
           <Nav tw="hidden md:flex" />
           <Settings tw="hidden md:flex" />
           <MoreInfo tw="hidden md:flex" />
