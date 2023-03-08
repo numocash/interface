@@ -1,37 +1,31 @@
-import type { Token } from "@dahlia-labs/token-utils";
-import React from "react";
-import invariant from "tiny-invariant";
 import tw, { styled } from "twin.macro";
 
-import { useDisplayToken } from "../../hooks/useTokens";
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { TokenIcon } from "./TokenIcon";
 
-interface IProps {
-  token: Token;
+type IProps<T extends WrappedTokenInfo> = {
+  token: T;
   iconSize?: number;
   className?: string;
   small?: boolean;
   showName?: boolean;
-}
+};
 
-export const TokenInfo: React.FC<IProps> = ({
+export const TokenInfo = <T extends WrappedTokenInfo>({
   token,
   iconSize = 30,
   className,
   small = false,
   showName = true,
-}: IProps) => {
-  const displayToken = useDisplayToken(token);
-  invariant(displayToken);
-
+}: IProps<T>) => {
   return (
     <TokenInfoWrapper className={className}>
-      <TokenIcon size={iconSize} token={displayToken} />
+      <TokenIcon size={iconSize} token={token} />
       <TokenMeta>
         <div tw="flex items-center">
-          <TokenSymbol small={small}>{displayToken.symbol}</TokenSymbol>
+          <TokenSymbol small={small}>{token.symbol}</TokenSymbol>
         </div>
-        {showName && <TokenName small={small}>{displayToken.name}</TokenName>}
+        {showName && <TokenName small={small}>{token.name}</TokenName>}
       </TokenMeta>
     </TokenInfoWrapper>
   );

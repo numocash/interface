@@ -1,4 +1,4 @@
-import { Percent } from "@dahlia-labs/token-utils";
+import { Percent } from "@uniswap/sdk-core";
 import { useState } from "react";
 import { createContainer } from "unstated-next";
 
@@ -34,11 +34,11 @@ const useSettingsInternal = (): ISettings => {
   const [maxSlippagePercent, setMaxSlippagePercent] = useState<Percent>(
     storedSlip
       ? new Percent(storedSlip.maxSlippagePercent, 10000)
-      : new Percent(100, 10_000)
+      : new Percent(30, 10_000)
   );
   // TOOD: allow for lower slippage
   const [timeout, setTimeout] = useState<number>(
-    storedSlip ? storedSlip.timeout : 30
+    storedSlip ? storedSlip.timeout : 2
   );
   const [infiniteApprove, setInfiniteApprove] = useState(
     storedSlip ? storedSlip.infiniteApprove : false

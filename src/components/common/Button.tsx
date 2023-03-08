@@ -2,7 +2,6 @@ import styled from "@emotion/styled";
 import React, { useState } from "react";
 import tw from "twin.macro";
 
-import { handleException } from "../../utils/error";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 type Variant =
@@ -64,13 +63,7 @@ export const Button: React.FC<ButtonProps> = ({
         onClick
           ? async (e) => {
               setLoading(true);
-              try {
-                await onClick(e);
-              } catch (e) {
-                handleException(e, {
-                  source: "button",
-                });
-              }
+              await onClick(e);
               setLoading(false);
             }
           : undefined
@@ -98,18 +91,19 @@ export const StyledButton = styled.button<AdditionalButtonProps>(
     tw`flex flex-row items-center justify-center leading-normal`,
     tw`rounded-lg`,
     tw`text-sm font-semibold`,
-    tw`text-white transform active:scale-98 hover:bg-opacity-90`,
+    tw`text-[#fffffe] active:scale-98 hover:bg-opacity-90`,
     tw`transition-transform`,
 
     variant === "outline" &&
       tw`text-white border border-gray-100 hover:border-white`,
-    variant === "primary" && tw`text-white shadow bg-blue`,
+    variant === "primary" &&
+      tw`text-white shadow bg-[#6246ea] border-2 border-button`,
     variant === "muted" && tw`text-gray-200 bg-neutral-700 hover:bg-opacity-50`,
 
-    variant === "danger" && tw`font-bold text-blue bg-red`,
+    variant === "danger" && tw`font-bold text-white shadow bg-red`,
     size === "swap" && tw`w-full text-xl font-bold shadow h-14`,
 
-    tw`disabled:(border border-[#AEAEB2] bg-white text-secondary cursor-not-allowed)`,
+    tw`disabled:(border-2 border-[#2b2c34] bg-[#d1d1e9] text-[#2b2c34] cursor-not-allowed)`,
 
     size === "sm" && tw`py-1.5 px-2 text-base`,
     size === "md" && tw`px-5 py-3 text-base`,

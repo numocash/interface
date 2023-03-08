@@ -1,67 +1,61 @@
-import type { IMarket } from "@dahlia-labs/numoen-utils";
-import type { Price, TokenAmount } from "@dahlia-labs/token-utils";
-import { Fraction, Percent } from "@dahlia-labs/token-utils";
+import type { CurrencyAmount, Price } from "@uniswap/sdk-core";
+import { Fraction, Percent } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
-import { scale } from "../../components/pages/Trade/useTrade";
-import { getAmountOut } from "./uniPairMath";
+import type { Lendgine, LendgineInfo } from "../../constants/types";
+import { isV3 } from "../../hooks/useExternalExchange";
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+import type { UniswapV2Pool } from "../../services/graphql/uniswapV2";
+import type { UniswapV3Pool } from "../../services/graphql/uniswapV3";
+import { liquidityPerCollateral } from "./lendgineMath";
+
+export const ONE_HUNDRED_PERCENT = new Fraction(1);
+
+export const scale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18));
 
 export const determineBorrowAmount = (
-  inputAmount: TokenAmount,
-  market: IMarket,
-  price: Price,
+  userAmount: CurrencyAmount<WrappedTokenInfo>,
+  lendgine: Lendgine,
+  lendgineInfo: LendgineInfo<Lendgine>,
+  referenceMarket: {
+    pool: UniswapV2Pool | UniswapV3Pool;
+    price: Price<WrappedTokenInfo, WrappedTokenInfo>;
+  },
   slippageBps: Percent
 ) => {
-  // TODO: use a better slippage predictor
-  const a = market.pair.bound.asFraction.multiply(2);
-  const b = price.adjusted.multiply(Percent.ONE_HUNDRED.subtract(slippageBps));
-  const c = market.pair.bound.subtract(price.adjusted).multiply(2);
+  const liqPerCol = liquidityPerCollateral(lendgine);
+  const userLiquidity = liqPerCol.quote(userAmount);
 
-  const numerator = inputAmount.scale(b.add(c));
-  const denominator = a.subtract(b).subtract(c);
+  const token0Amount = lendgineInfo.reserve0
+    .multiply(userLiquidity)
+    .divide(lendgineInfo.totalLiquidity);
 
-  return numerator.scale(denominator.invert());
-};
+  const token1Amount = lendgineInfo.reserve1
+    .multiply(userLiquidity)
+    .divide(lendgineInfo.totalLiquidity);
 
-// TODO: account for fees
-export const determineSlippage = (
-  inputAmount: TokenAmount,
-  u0: TokenAmount,
-  u1: TokenAmount
-): Percent => {
-  if (inputAmount.equalTo(0)) return new Percent(0);
-  // swap from base to speculative
-  const amountOut = getAmountOut(inputAmount, u0, u1);
+  // token0 / token1
+  const referencePrice = lendgine.token0.equals(
+    referenceMarket.price.quoteCurrency
+  )
+    ? referenceMarket.price
+    : referenceMarket.price.invert();
 
-  const a = JSBI.multiply(JSBI.multiply(amountOut.raw, u0.raw), scale.quotient);
-  const b = JSBI.multiply(inputAmount.raw, u1.raw);
+  const dexFee = isV3(referenceMarket.pool)
+    ? new Percent(referenceMarket.pool.feeTier, "1000000")
+    : new Percent("3000", "1000000");
 
-  return Percent.fromFraction(
-    new Fraction(
-      JSBI.subtract(scale.quotient, JSBI.divide(a, b)),
-      scale.quotient
-    )
-  ).subtract(new Fraction(inputAmount.greaterThan(0) ? 30 : 0, 10000));
-};
+  const expectedSwapOutput = referencePrice
+    .invert()
+    .quote(token0Amount)
+    .multiply(ONE_HUNDRED_PERCENT.subtract(dexFee))
+    .multiply(ONE_HUNDRED_PERCENT.subtract(slippageBps));
 
-export const determineRepayAmount = (
-  r0: JSBI,
-  r1: JSBI,
-  u0: JSBI,
-  u1: JSBI
-) => {
-  const thousand = JSBI.BigInt(1000);
-
-  const a = JSBI.multiply(JSBI.multiply(u0, u1), thousand);
-  const b = JSBI.subtract(u0, r0);
-  const c = JSBI.multiply(r1, thousand);
-  const d = JSBI.multiply(u1, thousand);
-
-  return JSBI.add(
-    JSBI.divide(
-      JSBI.subtract(JSBI.add(JSBI.divide(a, b), c), d),
-      JSBI.BigInt(997)
-    ),
-    JSBI.BigInt(1)
+  const userLiquidityValue = userAmount.subtract(
+    token1Amount.add(expectedSwapOutput)
   );
+
+  const multiple = userAmount.divide(userLiquidityValue).asFraction;
+
+  return userAmount.multiply(multiple.subtract(1));
 };

@@ -1,12 +1,5 @@
 {
-  "search.exclude": {
-    "**/.yarn": true,
-    "**/.pnp.*": true
-  },
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.tsdk": ".yarn/sdks/typescript/lib",
-  "eslint.nodePath": ".yarn/sdks",
-  "prettier.prettierPath": ".yarn/sdks/prettier/index.js",
   // editor settings
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
@@ -20,5 +13,6 @@
     "typescriptreact"
   ],
   "tailwindcss.documentColors": true,
-  "tailwindcss.jsxPropImportChecking": false
+  "tailwindcss.jsxPropImportChecking": false,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

@@ -14,6 +14,7 @@ export const LoadingPage: React.FC<Props> = ({ className }: Props) => {
         display: flex;
         align-items: center;
         justify-content: center;
+        height: 90vh;
       `}
       className={className}
     >

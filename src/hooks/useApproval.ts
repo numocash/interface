@@ -1,80 +1,122 @@
-import type { Token, TokenAmount } from "@dahlia-labs/token-utils";
-import { allowanceMulticall } from "@dahlia-labs/use-ethers";
-import { AddressZero, MaxUint256 } from "@ethersproject/constants";
-import { useCallback, useMemo } from "react";
+import { getAddress } from "@ethersproject/address";
+import { BigNumber } from "@ethersproject/bignumber";
+import type { Token } from "@uniswap/sdk-core";
+import { CurrencyAmount, MaxUint256 } from "@uniswap/sdk-core";
+import { useMemo } from "react";
 import invariant from "tiny-invariant";
+import type { Address, usePrepareContractWrite } from "wagmi";
+import { useAccount } from "wagmi";
 
 import { useSettings } from "../contexts/settings";
-import { useBlockMulticall } from "./useBlockQuery";
-import { useTokenContractFromAddress } from "./useContract";
-import { useIsWrappedNative } from "./useTokens";
+import {
+  useErc20Allowance,
+  useErc20Approve,
+  usePrepareErc20Approve,
+} from "../generated";
+import type { BeetStage } from "../utils/beet";
+import { ONE_HUNDRED_PERCENT } from "../utils/Numoen/trade";
+import type { HookArg } from "./useBalance";
 
-export type HookArg<T> = T | null | undefined;
+export const useAllowance = <T extends Token>(
+  token: HookArg<T>,
+  address: HookArg<Address>,
+  spender: HookArg<Address>
+) => {
+  const query = useErc20Allowance({
+    address: token ? getAddress(token.address) : undefined,
+    args: address && spender ? [address, spender] : undefined,
+    staleTime: 3_000,
+    enabled: !!token && !!address && !!spender,
+  });
 
-export const useTokenAllowance = (
-  token: HookArg<Token>,
-  address: HookArg<string>,
-  spender: HookArg<string>
-): TokenAmount | null => {
-  const data = useBlockMulticall(
-    token && address && spender
-      ? [allowanceMulticall(token, address, spender)]
-      : null
-  );
-  if (!data) return null;
+  // This function should be generalized to take the FetchBalanceResult type and then parsing it
+  // parse the return type into a more expressive type
+  const parseReturn = (balance: (typeof query)["data"]) => {
+    if (!balance) return undefined;
+    invariant(token); // if a balance is returned then the data passed must be valid
+    return CurrencyAmount.fromRawAmount(token, balance.toString());
+  };
 
-  return data[0];
+  // This could be generalized into a function
+  // update the query with the parsed data type
+  const updatedQuery = {
+    ...query,
+    data: parseReturn(query.data),
+    refetch: async (options: Parameters<(typeof query)["refetch"]>[0]) => {
+      const balance = await query.refetch(options);
+      return parseReturn(balance.data);
+    },
+  };
+
+  return updatedQuery;
 };
 
-// returns true if the token needs approval
-export const useApproval = (
-  tokenAmount: HookArg<TokenAmount>,
-  address: HookArg<string>,
-  spender: HookArg<string>
-): boolean | null => {
-  const allowance = useTokenAllowance(tokenAmount?.token, address, spender);
-  const isWrapped = useIsWrappedNative(tokenAmount?.token ?? null);
+export const useApprove = <T extends Token>(
+  tokenAmount: HookArg<CurrencyAmount<T>>,
+  spender: HookArg<Address>
+) => {
+  const settings = useSettings();
+  const { address } = useAccount();
 
-  return useMemo(() => {
-    if (isWrapped) return false;
-    return !allowance || !tokenAmount
-      ? null
-      : tokenAmount.greaterThan(allowance);
-  }, [allowance, isWrapped, tokenAmount]);
-};
+  const allowanceQuery = useAllowance(tokenAmount?.currency, address, spender);
 
-export const useTokenAllowances = (
-  tokens: HookArg<readonly Token[]>,
-  address: HookArg<string>,
-  spender: HookArg<string>
-): Readonly<TokenAmount[]> | null => {
-  const data = useBlockMulticall(
-    tokens && address && spender
-      ? tokens.map((t) => allowanceMulticall(t, address, spender))
-      : []
-  );
-  if (!data) return null;
-
-  return data;
-};
-
-export function useApprove(
-  amount: HookArg<TokenAmount>,
-  spender: HookArg<string>
-) {
-  const { infiniteApprove } = useSettings();
-  const tokenContract = useTokenContractFromAddress(
-    amount?.token.address ?? AddressZero,
-    true
+  const approvalRequired = useMemo(
+    () =>
+      allowanceQuery.data && tokenAmount
+        ? tokenAmount.greaterThan(allowanceQuery.data)
+        : null,
+    [allowanceQuery.data, tokenAmount]
   );
 
-  return useCallback(async () => {
-    invariant(tokenContract, "contract");
-    invariant(amount && amount.greaterThan(0), "amount");
-    invariant(spender, "approve spender");
-    return await tokenContract.approve(
-      spender,
-      infiniteApprove ? MaxUint256 : amount.raw.toString()
-    );
-  }, [amount, infiniteApprove, spender, tokenContract]);
-}
+  // const approvalRequired = true;
+  // return null if approval is already met
+  // return a Beet Transaction
+  const prepare = usePrepareErc20Approve({
+    args:
+      !!tokenAmount && !!spender
+        ? [
+            spender,
+            settings.infiniteApprove
+              ? BigNumber.from(MaxUint256.toString())
+              : BigNumber.from(
+                  tokenAmount
+                    .multiply(
+                      ONE_HUNDRED_PERCENT.add(settings.maxSlippagePercent)
+                    )
+                    .quotient.toString()
+                ),
+          ]
+        : undefined,
+    address: tokenAmount ? getAddress(tokenAmount.currency.address) : undefined,
+    enabled: !!tokenAmount && !!spender,
+    staleTime: Infinity,
+  });
+
+  const write = useErc20Approve(prepare.config);
+
+  const title = `Approve  ${
+    settings.infiniteApprove
+      ? "infinite"
+      : tokenAmount?.toSignificant(5, { groupSeparator: "," }) ?? ""
+  } ${tokenAmount?.currency.symbol ?? ""}`;
+
+  const beetStage: BeetStage = {
+    stageTitle: title,
+    parallelTransactions: [
+      {
+        title,
+        tx: {
+          prepare: prepare as ReturnType<typeof usePrepareContractWrite>,
+          send: write,
+        },
+      },
+    ],
+  };
+
+  return {
+    prepare: prepare as ReturnType<typeof usePrepareContractWrite>,
+    write,
+    allowanceQuery,
+    beetStage: approvalRequired === true ? beetStage : null,
+  };
+};

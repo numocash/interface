@@ -1,42 +1,46 @@
-import { weth } from "@dahlia-labs/numoen-config";
-import type { ChainsV1 } from "@dahlia-labs/numoen-utils";
-import { Token } from "@dahlia-labs/token-utils";
-import { chainID } from "@dahlia-labs/use-ethers";
-import { AddressZero } from "@ethersproject/constants";
+import type { NativeCurrency } from "@uniswap/sdk-core";
+import type { Address } from "wagmi";
 
-export const liquidityManagerGenesis: { [chain in ChainsV1]: number } = {
-  goerli: 8055410,
-  arbitrum: 42997088,
+import type { chains } from "../AppWithProviders";
+import type { WrappedTokenInfo } from "../hooks/useTokens2";
+import { arbitrumConfig } from "./arbitrum";
+import { celoConfig } from "./celo";
+
+export type SupportedChainIDs = (typeof chains)[number]["id"];
+
+export type NumoenBaseConfig = {
+  factory: Address;
+  lendgineRouter: Address;
+  liquidityManager: Address;
 };
 
-export const ArbitrageAddress: { [chain in ChainsV1]: string } = {
-  goerli: "0x29874Aa4cc27D7294929Ed01d11C3749f5eca8E0",
-  arbitrum: "0x29874Aa4cc27D7294929Ed01d11C3749f5eca8E0",
+// TODO: CELO doesn't need to be used as a native token
+export type NumoenInterfaceConfig = {
+  uniswapV2: {
+    subgraph: string;
+    factoryAddress: string;
+    pairInitCodeHash: string;
+    routerAddress: string;
+  };
+  uniswapV3: {
+    subgraph: string;
+    factoryAddress: string;
+    pairInitCodeHash: string;
+    quoterAddress: string;
+  };
+  numoenSubgraph: string;
+  wrappedNative: WrappedTokenInfo;
+  native: NativeCurrency | undefined;
+  stablecoin: WrappedTokenInfo;
+  blockFreq: number; // How many blocks should go by before updating
 };
 
-export const NativeTokens: { [chain in ChainsV1]: [Token, Token] } = {
-  goerli: [
-    weth.goerli,
-    new Token({
-      name: "Ether",
-      symbol: "ETH",
-      address: AddressZero,
-      decimals: 18,
-      chainId: chainID.goerli,
-      logoURI:
-        "https://raw.githubusercontent.com/Numoen/config/master/src/images/eth.jpg",
-    }),
-  ],
-  arbitrum: [
-    weth.arbitrum,
-    new Token({
-      name: "Ether",
-      symbol: "ETH",
-      address: AddressZero,
-      decimals: 18,
-      chainId: chainID.arbitrum,
-      logoURI:
-        "https://raw.githubusercontent.com/Numoen/config/master/src/images/eth.jpg",
-    }),
-  ],
+export const config: {
+  [chain in SupportedChainIDs]: {
+    interface: NumoenInterfaceConfig;
+    base: NumoenBaseConfig;
+  };
+} = {
+  42161: arbitrumConfig,
+  42220: celoConfig,
 };

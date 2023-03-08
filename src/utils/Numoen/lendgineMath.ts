@@ -1,75 +1,110 @@
-import type { IMarket, IMarketInfo } from "@dahlia-labs/numoen-utils";
-import { TokenAmount } from "@dahlia-labs/token-utils";
+import { Fraction } from "@uniswap/sdk-core";
 
+import type {
+  Lendgine,
+  LendgineInfo,
+  LendginePosition,
+} from "../../constants/types";
 import { borrowRate } from "./jumprate";
+import { fractionToPrice, priceToFraction } from "./price";
 
-export const speculativeToLiquidity = (
-  speculative: TokenAmount,
-  market: IMarket
-): TokenAmount => {
-  return new TokenAmount(
-    market.pair.lp,
-    speculative.scale(market.pair.bound.asFraction.multiply(2).invert()).raw
+export const liquidityPerShare = <L extends Lendgine>(
+  lendgine: L,
+  lendgineInfo: LendgineInfo<L>
+) => {
+  if (lendgineInfo.totalSupply.equalTo(0))
+    return fractionToPrice(
+      new Fraction(1, 1),
+      lendgine.lendgine,
+      lendgine.lendgine
+    );
+  const f = lendgineInfo.totalLiquidityBorrowed.divide(
+    lendgineInfo.totalSupply
   );
+  return fractionToPrice(f, lendgine.lendgine, lendgine.lendgine);
 };
 
-export const liquidityToSpeculative = (
-  liquidity: TokenAmount,
-  market: IMarket
-): TokenAmount => {
-  return new TokenAmount(
-    market.pair.speculativeToken,
-    liquidity.scale(market.pair.bound.asFraction.multiply(2)).raw
-  );
+export const liquidityPerCollateral = <L extends Lendgine>(lendgine: L) => {
+  const f = new Fraction(1).divide(priceToFraction(lendgine.bound).multiply(2));
+  return fractionToPrice(f, lendgine.token1, lendgine.lendgine);
 };
 
-export const convertShareToLiquidity = (
-  share: TokenAmount,
-  market: IMarket,
-  marketInfo: IMarketInfo
-): TokenAmount => {
-  const t = Math.round(Date.now() / 1000);
-  const timeElapsed = t - marketInfo.lastUpdate;
-  const br = borrowRate(marketInfo);
-  const dilutionLPRequested = marketInfo.totalLiquidityBorrowed.scale(
-    br.multiply(timeElapsed).divide(86400 * 365)
+export const liquidityPerPosition = <L extends Lendgine>(
+  lendgine: L,
+  lendgineInfo: LendgineInfo<L>
+) => {
+  const totalLiquiditySupplied = lendgineInfo.totalLiquidityBorrowed.add(
+    lendgineInfo.totalLiquidity
   );
-  const dilutionLP = dilutionLPRequested.greaterThan(
-    marketInfo.totalLiquidityBorrowed
+  if (lendgineInfo.totalPositionSize.equalTo(0))
+    return fractionToPrice(
+      new Fraction(1, 1),
+      lendgine.lendgine,
+      lendgine.lendgine
+    );
+  const f = totalLiquiditySupplied.divide(lendgineInfo.totalPositionSize);
+  return fractionToPrice(f, lendgine.lendgine, lendgine.lendgine);
+};
+
+export const getT = () => Math.round(Date.now() / (1000 * 10)) * 10;
+
+export const accruedLendgineInfo = <L extends Lendgine>(
+  lendgine: Lendgine,
+  lendgineInfo: LendgineInfo<L>,
+  t: number
+): LendgineInfo<L> => {
+  if (
+    lendgineInfo.totalSupply.equalTo(0) ||
+    lendgineInfo.totalLiquidityBorrowed.equalTo(0)
   )
-    ? marketInfo.totalLiquidityBorrowed
+    return lendgineInfo;
+
+  const timeElapsed = t - lendgineInfo.lastUpdate;
+
+  const br = borrowRate(lendgineInfo);
+  const dilutionLPRequested = lendgineInfo.totalLiquidityBorrowed
+    .multiply(br)
+    .multiply(timeElapsed)
+    .divide(86400 * 365);
+  const dilutionLP = dilutionLPRequested.greaterThan(
+    lendgineInfo.totalLiquidityBorrowed
+  )
+    ? lendgineInfo.totalLiquidityBorrowed
     : dilutionLPRequested;
-  return new TokenAmount(
-    market.pair.lp,
-    marketInfo.totalSupply.greaterThan(0)
-      ? share.scale(
-          marketInfo.totalLiquidityBorrowed
-            .subtract(dilutionLP)
-            .divide(marketInfo.totalSupply)
-        ).raw
-      : share.raw
+
+  const liqPerCol = liquidityPerCollateral(lendgine);
+
+  const dilutionToken1 = liqPerCol.invert().quote(dilutionLP);
+
+  const f = priceToFraction(lendgineInfo.rewardPerPositionStored).add(
+    dilutionToken1.asFraction.divide(lendgineInfo.totalPositionSize.asFraction)
   );
+
+  return {
+    ...lendgineInfo,
+    totalLiquidityBorrowed:
+      lendgineInfo.totalLiquidityBorrowed.subtract(dilutionLP),
+    rewardPerPositionStored: fractionToPrice(
+      f,
+      lendgine.lendgine,
+      lendgine.token1
+    ),
+  };
 };
 
-export const newRewardPerLiquidity = (
-  market: IMarket,
-  marketInfo: IMarketInfo
-): TokenAmount => {
-  const t = Math.round(Date.now() / 1000);
-  const timeElapsed = t - marketInfo.lastUpdate;
-  const br = borrowRate(marketInfo);
-  const dilutionLPRequested = marketInfo.totalLiquidityBorrowed.scale(
-    br.multiply(timeElapsed).divide(86400 * 365)
-  );
-  const dilutionLP = dilutionLPRequested.greaterThan(
-    marketInfo.totalLiquidityBorrowed
-  )
-    ? marketInfo.totalLiquidityBorrowed
-    : dilutionLPRequested;
-  const dilutionSpeculative = liquidityToSpeculative(dilutionLP, market);
+export const accruedLendginePositionInfo = <L extends Lendgine>(
+  lendgineInfo: LendgineInfo<L>,
+  lendginePosition: LendginePosition<L>
+): LendginePosition<L> => {
+  const newTokensOwed = lendgineInfo.rewardPerPositionStored
+    .quote(lendginePosition.size)
+    .subtract(
+      lendginePosition.rewardPerPositionPaid.quote(lendginePosition.size)
+    );
 
-  if (marketInfo.totalLiquidity.equalTo(0))
-    return new TokenAmount(market.pair.speculativeToken, 0);
-
-  return dilutionSpeculative.scale(marketInfo.totalLiquidity.invert());
+  return {
+    ...lendginePosition,
+    tokensOwed: lendginePosition.tokensOwed.add(newTokensOwed),
+    rewardPerPositionPaid: lendgineInfo.rewardPerPositionStored,
+  };
 };

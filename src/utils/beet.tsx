@@ -1,15 +1,26 @@
-import type { ContractTransaction } from "@ethersproject/contracts";
+import type {
+  PrepareWriteContractResult,
+  SendTransactionResult,
+} from "@wagmi/core";
+import type { Abi } from "abitype";
 import React, { useCallback } from "react";
 import toast from "react-hot-toast";
 import invariant from "tiny-invariant";
 import { styled } from "twin.macro";
+import type { Address, useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useNetwork } from "wagmi";
+import { writeContract } from "wagmi/actions";
 
 import { useAwaitTX } from "../hooks/useAwaitTX";
 
+// import { useAwaitTX } from "../hooks/useAwaitTx";
+
 export interface BeetTx {
-  txEnvelope: () => Promise<ContractTransaction>;
+  tx: {
+    prepare: ReturnType<typeof usePrepareContractWrite>;
+    send: ReturnType<typeof useContractWrite>;
+  };
   title: string;
-  description: string;
 }
 
 export interface BeetStage {
@@ -29,7 +40,7 @@ const genRanHex = (size: number) => {
 export const useBeet = () => {
   const awaitTX = useAwaitTX();
   return useCallback(
-    async (actionTitle: string, stages: BeetStage[]) => {
+    async (stages: BeetStage[]) => {
       const toaster = new DefaultToasterWrapper();
 
       const random = genRanHex(12); // to prevent toast collisions
@@ -44,71 +55,159 @@ export const useBeet = () => {
         0
       );
 
-      stages.length > 1 &&
-        toaster.generalToast({
-          type: "loading",
-          id: `${random}-general`, // Don't use 0-1, because hot toast doesn't recompute height
-          title: actionTitle,
-          message: "Building...",
-        });
+      // TODO: do we need this?
+      // stages.length > 1 &&
+      //   toaster.generalToast({
+      //     type: "loading",
+      //     id: `${random}-general`, // Don't use 0-1, because hot toast doesn't recompute height
+      //     title: actionTitle,
+      //     message: "Building...",
+      //   });
 
       for (const [stageIndex, stage] of stages.entries()) {
-        const previosTxs = [...Array(stageIndex).keys()].reduce(
+        const previousTxs = [...Array(stageIndex).keys()].reduce(
           (acc, i) => acc + (stages[i]?.parallelTransactions.length ?? 0),
           0
         );
 
-        const descriptions: Record<string, string> = {};
+        let updatedConfigs: PrepareWriteContractResult<
+          Abi | readonly unknown[],
+          string,
+          number
+        >[] = stage.parallelTransactions.map((t) => t.tx.prepare.config);
 
-        for (const [index, bpTx] of stage.parallelTransactions.entries()) {
-          descriptions[`TX#${1 + index}`] = bpTx.description;
+        if (stageIndex === 0) {
+          const preUpdatedConfigs = stage.parallelTransactions.map(
+            (t) => t.tx.prepare.config
+          );
+
+          if (preUpdatedConfigs.find((t) => t === undefined) !== undefined) {
+            const index = updatedConfigs.findIndex((t) => t === undefined);
+
+            const humanCount = `${1 + index + previousTxs}/${totaltx}`;
+
+            toaster.dismiss(`${random}-${stageIndex}-pre`);
+
+            toaster.txError(
+              _generateToasterId(stageIndex, index),
+              stage.stageTitle,
+              humanCount,
+              "Error with transaction"
+            );
+            return;
+          }
+
+          updatedConfigs = preUpdatedConfigs;
+        } else {
+          // if (stageIndex !== 0) {
+          // TODO: must get the return values of the refetch and pass them to send
+
+          const preUpdatedConfigs = await Promise.all(
+            stage.parallelTransactions.map(
+              async (t) => (await t.tx.prepare.refetch()).data
+            )
+          );
+
+          // if contains undefined, throw error
+          if (preUpdatedConfigs.find((t) => t === undefined) !== undefined) {
+            const index = preUpdatedConfigs.findIndex((t) => t === undefined);
+
+            const humanCount = `${1 + index + previousTxs}/${totaltx}`;
+
+            toaster.dismiss(`${random}-${stageIndex}-pre`);
+
+            toaster.txError(
+              _generateToasterId(stageIndex, index),
+              stage.stageTitle,
+              humanCount,
+              "Error with transaction"
+            );
+            return;
+          }
+
+          updatedConfigs = preUpdatedConfigs as typeof updatedConfigs;
+
+          console.log("all refetch");
         }
-        let txs: ContractTransaction[] = [];
 
-        const signPromptNotification = setTimeout(() => {
-          // dismiss the general loading messages
-          toaster.dismiss(`${random}-general`);
-        }, 1000);
+        // Error if any errors are present
+        // for (const [index, bpTx] of stage.parallelTransactions.entries()) {
+        //   if (
+        //     !bpTx.tx.send.writeAsync ||
+        //     !!bpTx.tx.prepare.error ||
+        //     !!bpTx.tx.send.error
+        //   ) {
+        //     const humanCount = `${1 + index + previousTxs}/${totaltx}`;
 
-        toaster.dismiss(`${random}-${stageIndex - 1}-pre`);
+        //     toaster.dismiss(`${random}-${stageIndex}-pre`);
+
+        //     toaster.txError(
+        //       _generateToasterId(stageIndex, index),
+        //       stage.stageTitle,
+        //       humanCount,
+        //       "Error with transaction"
+        //     );
+        //     return;
+        //   }
+
+        //   // if (stageIndex === 0)
+        //   //   invariant(
+        //   //     bpTx.tx.send.sendTransactionAsync,
+        //   //     "Transaction not ready to send"
+        //   //   );
+        // }
+
+        // once all transactions are estimated and not error, send transaction function can be assumed to be defined
+
+        let txs: SendTransactionResult[] = [];
+
+        // const signPromptNotification = setTimeout(() => {
+        //   // dismiss the general loading messages
+        //   toaster.dismiss(`${random}-general`);
+        // }, 1000);
+
+        // dismiss previous toast
         toaster.dismiss(`${random}-${stageIndex}-pre`);
         let start = 0;
 
         for (const [i, tx] of stage.parallelTransactions.entries()) {
-          const humanCount = `${1 + i + previosTxs}/${totaltx}`;
+          const humanCount = `${1 + i + previousTxs}/${totaltx}`;
 
           toaster.txLoading(
             _generateToasterId(stageIndex, i),
             tx.title,
             humanCount,
-            tx.description
+            "Approve in wallet"
           );
 
+          // send the transaction
+          // invariant(tx.tx.send.writeAsync, "send transaction");
+
+          // error if undefined
+
           try {
-            const contractTx = await tx.txEnvelope();
+            const config = updatedConfigs[i];
+            invariant(config);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            const contractTx = await writeContract(config);
             start = Date.now();
 
             toaster.txLoading(
               _generateToasterId(stageIndex, i),
               tx.title,
               humanCount,
-              tx.description,
+              "",
               contractTx.hash
             );
             txs = txs.concat(contractTx);
-          } catch (e) {
-            interface Error {
-              message: string;
-            }
-            console.error(e);
-            const message =
-              (e as Error).message ?? "Unknown error in transaction";
-
+          } catch (err) {
+            console.log(typeof err, err);
             toaster.txError(
               _generateToasterId(stageIndex, i),
-              stage.stageTitle,
+              tx.title,
               humanCount,
-              message
+              "Error sending transaction"
             );
             return;
           }
@@ -123,54 +222,44 @@ export const useBeet = () => {
             message: `Waiting for previous transaction${
               stage.parallelTransactions.length ? "s" : ""
             }...`,
-            duration: 30000,
+            duration: 30_000,
           });
         }
 
-        clearTimeout(signPromptNotification);
+        // clearTimeout(signPromptNotification);
 
         for (const [i, tx] of txs.entries()) {
           const h = stage.parallelTransactions[i];
-          const humanCount = `${1 + i + previosTxs}/${totaltx}`;
+          const humanCount = `${1 + i + previousTxs}/${totaltx}`;
 
           invariant(h);
-          try {
-            const rec = await awaitTX(tx.hash);
-            if (rec.status === 0) {
-              clearTimeout(signPromptNotification);
-              toaster.dismiss(`${random}-general`);
-              toaster.txError(
-                _generateToasterId(stageIndex, i),
-                h.title,
-                humanCount,
-                "Transaction reverted",
-                rec.transactionHash
-              );
-              return;
-            }
-            console.log((Date.now() - start) / 1000);
-            toaster.txSuccess(
-              _generateToasterId(stageIndex, i),
-              h.title,
-              humanCount,
-              h.description,
-              tx.hash
-            );
-          } catch (e) {
-            clearTimeout(signPromptNotification);
+          // wait for transactions to return
+          // const rec = await tx.wait(); // TODO: why can't we use web sockets
+          const rec = await awaitTX(tx.hash);
+          // const rec = await awaitTX(tx.hash); // TODO: could just wait for the first out the two
+          if (rec.status === 0) {
+            // clearTimeout(signPromptNotification);
             toaster.dismiss(`${random}-general`);
-            const message = "Unknown error in transaction";
-
             toaster.txError(
               _generateToasterId(stageIndex, i),
               h.title,
               humanCount,
-              message
+              "Transaction reverted",
+              rec.transactionHash
             );
+            return;
           }
+          console.log((Date.now() - start) / 1000);
+          toaster.txSuccess(
+            _generateToasterId(stageIndex, i),
+            h.title,
+            humanCount,
+            "",
+            tx.hash
+          );
         }
 
-        clearTimeout(signPromptNotification);
+        // clearTimeout(signPromptNotification);
       }
     },
     [awaitTX]
@@ -284,7 +373,7 @@ export class DefaultToasterWrapper {
     console.log(id, title, message);
     const toastHandler = toast[type];
     toastHandler(
-      <ToastContainer tw="flex flex-col">
+      <ToastContainer tw="flex flex-col overflow-hidden">
         <div tw="flex font-semibold justify-between items-center">
           <span tw="flex items-center gap-1">
             {title}
@@ -329,13 +418,7 @@ export class DefaultToasterWrapper {
           {hash ? (
             <div>
               View Transaction: {/* TODO: update the explorer based on chain */}
-              <a
-                href={`https://arbiscan.io/tx/${hash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {hash.slice(0, 6)}...{hash.slice(hash.length - 4)}
-              </a>
+              <AddressLink address={hash} data="tx" />
             </div>
           ) : (
             <div>{txDescription}</div>
@@ -345,6 +428,26 @@ export class DefaultToasterWrapper {
     );
   }
 }
+
+export const AddressLink: React.FC<{
+  address: Address | string;
+  data: "tx" | "address";
+  className?: string;
+}> = ({ address, className, data }) => {
+  const { chain } = useNetwork();
+  return (
+    <a
+      href={`${
+        chain?.blockExplorers?.default.url ?? "https://arbiscan.io"
+      }/${data}/${address}`}
+      rel="noopener noreferrer"
+      target="_blank"
+      className={className}
+    >
+      {address.slice(0, 6)}...{address.slice(address.length - 4)}
+    </a>
+  );
+};
 
 const ToastContainer = styled.div`
   width: 290px;

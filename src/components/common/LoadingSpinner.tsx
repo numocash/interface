@@ -1,9 +1,10 @@
 import styled from "@emotion/styled";
-import { CgSpinner } from "react-icons/cg";
 import tw from "twin.macro";
 
-export const LoadingSpinner = styled(CgSpinner)`
-  ${tw`animate-spin`}
+import { ReactComponent as Numoen } from "./images/numoen-small.svg";
+
+export const LoadingSpinner = styled(Numoen)`
+  ${tw`duration-1000 transform animate-ping `}
 
   display: inline;
   height: 1em;

@@ -1,58 +1,47 @@
-import type { Token } from "@dahlia-labs/token-utils";
 import { getAddress } from "@ethersproject/address";
+import type { Token } from "@uniswap/sdk-core";
 import { useCallback } from "react";
 
-import { NativeTokens } from "../constants";
-import { useEnvironment } from "../contexts/environment";
-import type { HookArg } from "./useApproval";
-import { useChain } from "./useChain";
+import { useEnvironment } from "../contexts/environment2";
+import type { HookArg } from "./useBalance";
+import { useDefaultTokenList } from "./useTokens2";
 
-export const useAddressToToken = (address: HookArg<string>): Token | null => {
-  const tokens = useAllTokens();
-  if (!address) return null;
-  return (
-    tokens.find((t) => getAddress(t.address) === getAddress(address)) ?? null
+export const useAddressToToken = (address: HookArg<string>) => {
+  return useGetAddressToToken()(address);
+};
+
+export const useGetAddressToToken = () => {
+  const tokens = useDefaultTokenList();
+
+  return useCallback(
+    (address: HookArg<string>) => {
+      if (!address) return null;
+      return (
+        tokens.find((t) => getAddress(t.address) === getAddress(address)) ??
+        null
+      );
+    },
+    [tokens]
   );
-};
-
-export const useMarketTokens = (): readonly Token[] => {
-  return useEnvironment().markets.map((m) => m.token);
-};
-
-export const useSpeculativeTokens = (): readonly Token[] => {
-  return useEnvironment().markets.map((m) => m.pair.speculativeToken);
-};
-
-export const useAllTokens = (): readonly Token[] => {
-  const marketTokens = useMarketTokens();
-  const speculativeTokens = useSpeculativeTokens();
-  return [...speculativeTokens, ...marketTokens] as const;
-};
-
-export const useIsWrappedNative = (token: HookArg<Token>) => {
-  const chain = useChain();
-  const native = NativeTokens[chain][0];
-  return token === native;
 };
 
 export const useGetIsWrappedNative = () => {
-  const chain = useChain();
-  return useCallback(
-    (token: Token | null) => {
-      const native = NativeTokens[chain][0];
-      return token === native;
-    },
-    [chain]
-  );
-};
+  const enviroment = useEnvironment();
+  return <T extends Token>(token: HookArg<T>) => {
+    if (!token) return undefined;
 
-export const useNative = () => {
-  const chain = useChain();
-  return NativeTokens[chain][1];
+    return !enviroment.interface.native
+      ? false
+      : enviroment.interface.native.wrapped.equals(token);
+  };
 };
+export const useIsWrappedNative = <T extends Token>(token: HookArg<T>) =>
+  useGetIsWrappedNative()(token);
 
-export const useDisplayToken = (token: HookArg<Token>) => {
-  const isNative = useIsWrappedNative(token);
-  const native = useNative();
-  return isNative ? native : token;
+export const useTokenSymbol = <T extends Token>(token: HookArg<T>) => {
+  const environment = useEnvironment();
+  if (useIsWrappedNative(token)) {
+    return environment.interface.native?.symbol;
+  }
+  return token?.symbol;
 };

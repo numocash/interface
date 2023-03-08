@@ -1,12 +1,13 @@
-import type { Token } from "@dahlia-labs/token-utils";
 import { useState } from "react";
 import { styled } from "twin.macro";
 
-interface Props {
-  token?: Token | null;
+import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+
+type Props = {
+  token?: WrappedTokenInfo;
   size?: number;
   className?: string;
-}
+};
 
 export const TokenIcon: React.FC<Props> = ({
   className,
@@ -14,21 +15,22 @@ export const TokenIcon: React.FC<Props> = ({
   size = 28,
 }: Props) => {
   const [invalid, setInvalid] = useState<boolean>(false);
+
   return (
     <Wrapper
       tw="flex rounded-[50%] overflow-hidden"
       className={className}
       size={size}
     >
-      {invalid || !token?.icon ? (
+      {invalid || !token?.logoURI ? (
         <Placeholder />
       ) : (
         <img
-          src={token.icon}
+          src={token.logoURI}
           onError={() => {
             setInvalid(true);
           }}
-          alt={`Icon for token ${token.name}`}
+          alt={`Icon for token ${token.name ?? ""}`}
         />
       )}
     </Wrapper>

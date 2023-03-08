@@ -1,28 +1,52 @@
-import { ThemeProvider } from "@emotion/react";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
-import { chain, configureChains, createClient, WagmiConfig } from "wagmi";
+import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { arbitrum, celo } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
+import { publicProvider } from "wagmi/providers/public";
 
 import { App } from "./App";
-import { BlockProvider } from "./contexts/block";
-import { EnvironmentProvider } from "./contexts/environment";
+import { EnvironmentProvider } from "./contexts/environment2";
 import { SettingsProvider } from "./contexts/settings";
-import { theme } from "./theme";
 
-const { provider, chains } = configureChains(
-  [chain.arbitrum],
+// const foundry = {
+//   id: 1,
+//   name: "Foundry",
+//   network: "foundry",
+//   nativeCurrency: {
+//     decimals: 18,
+//     name: "Ether",
+//     symbol: "ETH",
+//   },
+//   rpcUrls: {
+//     default: {
+//       http: ["http://127.0.0.1:8545"],
+//     },
+//     public: {
+//       http: ["http://127.0.0.1:8545"],
+//     },
+//   },
+// } as const;
+
+const { chains, provider, webSocketProvider } = configureChains(
   [
-    alchemyProvider({
-      apiKey: "UVgzpWCHx6zsVDO7qC8mtcA6jCl0vgV4",
-    }),
-    // infuraProvider({
-    //   apiKey: "6f9c9bc239054e9fb755198cc1e4973a",
-    // }),
+    arbitrum,
+    {
+      ...celo,
+      blockExplorers: {
+        ...celo.blockExplorers,
+        default: celo.blockExplorers.etherscan,
+      },
+    },
+  ],
+  [
+    alchemyProvider({ apiKey: "UVgzpWCHx6zsVDO7qC8mtcA6jCl0vgV4" }),
+    publicProvider(),
   ]
-);
+); // TODO: use websockets provider
+
+export { chains };
 
 const { connectors } = getDefaultWallets({
   appName: "Numoen",
@@ -33,6 +57,7 @@ const wagmiClient = createClient({
   autoConnect: true,
   connectors,
   provider,
+  webSocketProvider,
 });
 
 const queryClient = new QueryClient();
@@ -40,22 +65,19 @@ const queryClient = new QueryClient();
 export const AppWithProviders: React.FC = () => {
   return (
     <React.StrictMode>
-      <ThemeProvider theme={theme}>
-        <WagmiConfig client={wagmiClient}>
+      <WagmiConfig client={wagmiClient}>
+        <QueryClientProvider client={queryClient}>
+          {/* <ReactQueryDevtools /> */}
+
           <RainbowKitProvider coolMode chains={chains}>
-            <BlockProvider>
-              <QueryClientProvider client={queryClient}>
-                <ReactQueryDevtools initialIsOpen={false} />
-                <EnvironmentProvider>
-                  <SettingsProvider>
-                    <App />
-                  </SettingsProvider>
-                </EnvironmentProvider>
-              </QueryClientProvider>
-            </BlockProvider>
+            <EnvironmentProvider>
+              <SettingsProvider>
+                <App />
+              </SettingsProvider>
+            </EnvironmentProvider>
           </RainbowKitProvider>
-        </WagmiConfig>
-      </ThemeProvider>
+        </QueryClientProvider>
+      </WagmiConfig>
     </React.StrictMode>
   );
 };

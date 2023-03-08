@@ -1,32 +1,45 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [master]
   push:
-    branches: [master]
+    branches:
+      - "**"
 
 jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/yarn
-      - run: yarn typechain
-      - run: yarn typecheck
+        with:
+          submodules: "recursive"
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: "pnpm"
+      - uses: "foundry-rs/foundry-toolchain@v1"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm wagmi generate
+      - run: pnpm graphql-codegen
+      - run: pnpm typecheck
 
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/yarn
-      - run: yarn typechain
-      - run: yarn lint:ci
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/yarn
-      - run: yarn typechain
-      - run: yarn build
+        with:
+          submodules: "recursive"
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: "pnpm"
+      - uses: "foundry-rs/foundry-toolchain@v1"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm wagmi generate
+      - run: pnpm graphql-codegen
+      - run: pnpm lint:ci

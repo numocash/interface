@@ -2,15 +2,12 @@
 
 # dependencies
 /node_modules
-/.pnp
-.pnp.js
 
 # testing
 /coverage
 
 # production
 /build
-/src/generated
 
 # misc
 .DS_Store
@@ -26,10 +23,5 @@ yarn-error.log*
 .vercel
 .eslintcache
 
-.yarn/*
-!.yarn/patches
-!.yarn/releases
-!.yarn/plugins
-!.yarn/sdks
-!.yarn/versions
-.pnp.*
+# codegen
+src/gql

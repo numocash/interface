@@ -1,70 +1,61 @@
-import type { IMarket, IMarketUserInfo } from "@dahlia-labs/numoen-utils";
-import { useMemo } from "react";
-import { useAccount } from "wagmi";
+import { useMemo, useState } from "react";
+import { createContainer } from "unstated-next";
 
-import { useEnvironment } from "../../../contexts/environment";
-import { useUserLendgines } from "../../../hooks/useLendgine";
-import { LoadingPage } from "../../common/LoadingPage";
-import { Learn } from "./Learn";
-import { PositionCard } from "./PositionCard";
+import { useAllLendgines } from "../../../hooks/useLendgine";
+import type { Market } from "../../../hooks/useMarket";
+import {
+  dedupeMarkets,
+  useGetLendgineToMarket,
+} from "../../../hooks/useMarket";
+import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import { EarnInner } from "./EarnInner";
+
+interface IEarn {
+  assets: readonly WrappedTokenInfo[];
+  setAssets: (val: readonly WrappedTokenInfo[]) => void;
+
+  markets: readonly Market[] | null;
+}
+
+const useEarnInternal = (): IEarn => {
+  const [assets, setAssets] = useState<readonly WrappedTokenInfo[]>([]);
+
+  const lendgines = useAllLendgines();
+
+  const getLendgineToMarket = useGetLendgineToMarket();
+
+  const markets = useMemo(() => {
+    if (!lendgines) return null;
+    const markets = lendgines.map((l) => getLendgineToMarket(l));
+
+    const dedupedMarkets = dedupeMarkets(markets);
+
+    const filteredMarkets =
+      assets.length === 0
+        ? dedupedMarkets
+        : dedupedMarkets.filter(
+            (m) =>
+              !!assets.find((a) => a.equals(m[0])) ||
+              !!assets.find((a) => a.equals(m[1]))
+          );
+
+    return filteredMarkets;
+  }, [assets, getLendgineToMarket, lendgines]);
+
+  return {
+    assets,
+    setAssets,
+    markets,
+  };
+};
+
+export const { Provider: EarnProvider, useContainer: useEarn } =
+  createContainer(useEarnInternal);
 
 export const Earn: React.FC = () => {
-  const { markets } = useEnvironment();
-  const { address } = useAccount();
-
-  const userMarketInfo = useUserLendgines(address, markets);
-
-  type display = {
-    market: IMarket;
-    userInfo: IMarketUserInfo | null;
-  };
-
-  const { displayMarkets, hasDeposit } = useMemo(() => {
-    const userMarkets: display[] =
-      userMarketInfo?.map((m) => ({
-        market: m.market,
-        userInfo: m,
-      })) ?? [];
-
-    const hold = userMarkets.map((m) => m.market);
-
-    const nonUserMarkets: display[] = markets
-      .filter((m) => !hold.includes(m))
-      .map((m) => ({ market: m, userInfo: null }));
-    return {
-      displayMarkets: userMarkets.concat(nonUserMarkets),
-      hasDeposit: userMarkets.length > 0,
-    };
-  }, [markets, userMarketInfo]);
-
   return (
-    <div tw="grid w-full max-w-3xl flex-col gap-4">
-      <p tw="font-bold text-2xl text-default">Earn on your assets</p>
-
-      <p tw=" text-default">
-        Provide liquidity to Numoen pools and lend your position to options
-        buyers to earn yield.
-      </p>
-      <p tw="text-xs text-default">
-        Displaying <span tw="font-semibold">{markets.length} markets</span>
-      </p>
-      <Learn />
-      {hasDeposit && (
-        <p tw="text-xs text-black font-semibold mb-[-0.5rem]">Your positions</p>
-      )}
-      {userMarketInfo === null && address !== undefined ? (
-        <LoadingPage />
-      ) : (
-        <div tw="grid md:grid-cols-2  gap-6">
-          {displayMarkets.map((d) => (
-            <PositionCard
-              key={d.market.address}
-              userInfo={d.userInfo}
-              market={d.market}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <EarnProvider>
+      <EarnInner />
+    </EarnProvider>
   );
 };

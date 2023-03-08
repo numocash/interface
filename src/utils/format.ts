@@ -1,11 +1,19 @@
-import type { Fraction, Percent } from "@dahlia-labs/token-utils";
-import { ZERO } from "@dahlia-labs/token-utils";
+import type { Fraction, Percent, Price, Token } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
+import { priceToFraction } from "./Numoen/price";
+
+export const ZERO = JSBI.BigInt(0);
+
 export const FORMAT_PERCENT: Intl.NumberFormatOptions = {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 5,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
   style: "percent",
+};
+
+export const FORMAT_PRICE: Intl.NumberFormatOptions = {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 4,
 };
 
 export const fractionToFloat = (frac: Fraction): number => {
@@ -26,22 +34,24 @@ export const formatPercent = (percent: Percent): string => {
   );
 };
 
+export const formatPrice = <TBase extends Token, TQuote extends Token>(
+  price: Price<TBase, TQuote>
+) => {
+  return formatDisplayWithSoftLimit(
+    fractionToFloat(priceToFraction(price)),
+    4,
+    6,
+    {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 4,
+    }
+  );
+};
+
 export const formatPrecise = (percent: Percent): string => {
   return (fractionToFloat(percent.asFraction) * 100).toLocaleString(undefined, {
     maximumFractionDigits: 10,
   });
-};
-
-export const FORMAT_DOLLARS: Intl.NumberFormatOptions = {
-  currency: "USD",
-  style: "currency",
-};
-
-export const FORMAT_DOLLARS_WHOLE: Intl.NumberFormatOptions = {
-  currency: "USD",
-  style: "currency",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 0,
 };
 
 /**

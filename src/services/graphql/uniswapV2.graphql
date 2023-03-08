@@ -1,0 +1,26 @@
+query PairV2($token0: String!, $token1: String!) {
+  pairs(where: { token0: $token0, token1: $token1 }, subgraphError: allow) {
+    id
+    reserve0
+  }
+}
+
+query PriceHistoryHourV2($id: ID!, $amount: Int!) {
+  pair(id: $id, subgraphError: allow) {
+    hourData(orderDirection: desc, orderBy: date, first: $amount) {
+      date
+      reserve0
+      reserve1
+    }
+  }
+}
+
+query PriceHistoryDayV2($id: ID!, $amount: Int!) {
+  pair(id: $id, subgraphError: allow) {
+    dayData(orderBy: date, orderDirection: desc, first: $amount) {
+      date
+      reserve0
+      reserve1
+    }
+  }
+}
