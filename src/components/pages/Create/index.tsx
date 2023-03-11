@@ -8,6 +8,7 @@ import { useEnvironment } from "../../../contexts/environment2";
 import { useBalance } from "../../../hooks/useBalance";
 import { useCurrentPrice } from "../../../hooks/useExternalExchange";
 import { useAllLendgines } from "../../../hooks/useLendgine";
+import { isValidMarket } from "../../../hooks/useMarket";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
 import { useDefaultTokenList } from "../../../hooks/useTokens2";
 import { useBeet } from "../../../utils/beet";
@@ -86,11 +87,13 @@ export const Create: React.FC = () => {
         ? "Select a token"
         : !priceQuery.data || lendgines === null
         ? "Loading"
-        : !token0.equals(environment.interface.wrappedNative) &&
-          !token1.equals(environment.interface.wrappedNative)
-        ? `One token must be ${
-            environment.interface.wrappedNative.symbol ?? ""
-          }`
+        : !isValidMarket(
+            token0,
+            token1,
+            environment.interface.wrappedNative,
+            environment.interface.specialtyMarkets
+          )
+        ? "Does not conform to the rules of valid markets"
         : priceToFraction(priceQuery.data).greaterThan(bound)
         ? "Bound can't be below current price"
         : !token0InputAmount || !token1InputAmount
@@ -110,6 +113,7 @@ export const Create: React.FC = () => {
         : null,
     [
       bound,
+      environment.interface.specialtyMarkets,
       environment.interface.wrappedNative,
       lendgines,
       priceQuery.data,

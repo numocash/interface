@@ -7,6 +7,7 @@ import UniswapTokens from "../constants/tokenList/uniswap.json";
 import { useEnvironment } from "../contexts/environment2";
 import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
+import { isEqualToMarket } from "./useMarket";
 import { useGetIsWrappedNative } from "./useTokens";
 
 export const dedupeTokens = <T extends Token | TokenInfo>(
@@ -138,6 +139,16 @@ export const useSortDenomTokens = (
 ) => {
   const environment = useEnvironment();
   if (!tokens) return null;
+  const specialtyMatches = environment.interface.specialtyMarkets?.find((m) =>
+    isEqualToMarket(tokens[0], tokens[1], m)
+  );
+
+  if (specialtyMatches)
+    return [
+      tokens[0].equals(specialtyMatches[0]) ? tokens[0] : tokens[1],
+      tokens[0].equals(specialtyMatches[0]) ? tokens[1] : tokens[0],
+    ];
+
   if (
     tokens[0].equals(environment.interface.stablecoin) ||
     tokens[1].equals(environment.interface.stablecoin)

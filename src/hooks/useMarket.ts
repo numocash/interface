@@ -16,6 +16,20 @@ export const useGetLendgineToMarket = () => {
 
   return useCallback(
     (lendgine: Lendgine): Market => {
+      const specialtyMatches = environment.interface.specialtyMarkets?.find(
+        (m) => isEqualToMarket(lendgine.token0, lendgine.token1, m)
+      );
+
+      if (specialtyMatches)
+        return [
+          lendgine.token0.equals(specialtyMatches[0])
+            ? lendgine.token0
+            : lendgine.token1,
+          lendgine.token0.equals(specialtyMatches[0])
+            ? lendgine.token1
+            : lendgine.token0,
+        ];
+
       if (
         lendgine.token0.equals(environment.interface.stablecoin) ||
         lendgine.token1.equals(environment.interface.stablecoin)
@@ -28,7 +42,11 @@ export const useGetLendgineToMarket = () => {
         ? ([lendgine.token0, lendgine.token1] as const)
         : ([lendgine.token1, lendgine.token0] as const);
     },
-    [environment.interface.stablecoin, environment.interface.wrappedNative]
+    [
+      environment.interface.specialtyMarkets,
+      environment.interface.stablecoin,
+      environment.interface.wrappedNative,
+    ]
   );
 };
 
@@ -61,5 +79,25 @@ export const dedupeMarkets = (
     }
   });
 };
+
+export const isEqualToMarket = (
+  token0: WrappedTokenInfo,
+  token1: WrappedTokenInfo,
+  market: Market
+) =>
+  (market[0].equals(token0) && market[1].equals(token1)) ||
+  (market[0].equals(token1) && market[1].equals(token0));
+
+export const isValidMarket = (
+  token0: WrappedTokenInfo,
+  token1: WrappedTokenInfo,
+  wrappedNative: WrappedTokenInfo,
+  specialtyMarkets?: readonly Market[]
+) =>
+  [token0, token1].find((t) => t.equals(wrappedNative)) ||
+  (specialtyMarkets &&
+    specialtyMarkets
+      .map((m) => isEqualToMarket(token0, token1, m))
+      .includes(true));
 
 // filter markets

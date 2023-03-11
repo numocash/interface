@@ -28,6 +28,7 @@ import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
+import { isValidMarket } from "./useMarket";
 import { useGetAddressToToken } from "./useTokens";
 import type { WrappedTokenInfo } from "./useTokens2";
 
@@ -432,10 +433,13 @@ export const useAllLendgines = () => {
         const token1 = addressToToken(ld.token1);
 
         if (!token0 || !token1) return undefined; // tokens must be in token list
-        // one of the tokens must be wrapped native
+        // one of the tokens must be wrapped native or specialty
         if (
-          ![token0, token1].find((t) =>
-            t.equals(environment.interface.wrappedNative)
+          !isValidMarket(
+            token0,
+            token1,
+            environment.interface.wrappedNative,
+            environment.interface.specialtyMarkets
           )
         )
           return undefined;
@@ -461,6 +465,7 @@ export const useAllLendgines = () => {
   }, [
     addressToToken,
     chainID,
+    environment.interface.specialtyMarkets,
     environment.interface.wrappedNative,
     lendginesQuery.data,
     lendginesQuery.isLoading,
