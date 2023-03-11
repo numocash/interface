@@ -2,6 +2,7 @@ import type { NativeCurrency } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
 import type { chains } from "../AppWithProviders";
+import type { Market } from "../hooks/useMarket";
 import type { WrappedTokenInfo } from "../hooks/useTokens2";
 import { arbitrumConfig } from "./arbitrum";
 import { celoConfig } from "./celo";
@@ -30,7 +31,8 @@ export type NumoenInterfaceConfig = {
   };
   numoenSubgraph: string;
   wrappedNative: WrappedTokenInfo;
-  native: NativeCurrency | undefined;
+  native?: NativeCurrency;
+  specialtyMarkets?: readonly Market[];
   stablecoin: WrappedTokenInfo;
   blockFreq: number; // How many blocks should go by before updating
 };

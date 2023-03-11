@@ -2,7 +2,18 @@ import { chainID } from "@dahlia-labs/use-ethers";
 import { getAddress } from "@ethersproject/address";
 import { Ether } from "@uniswap/sdk-core";
 
+import { WrappedTokenInfo } from "../hooks/useTokens2";
 import { Stable, WrappedNative } from "./tokens";
+
+const USDT = new WrappedTokenInfo({
+  name: "Tether USD",
+  address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+  symbol: "USDT",
+  decimals: 6,
+  chainId: 42161,
+  logoURI:
+    "https://assets.coingecko.com/coins/images/325/small/Tether.png?1668148663",
+});
 
 export const arbitrumConfig = {
   base: {
@@ -31,6 +42,7 @@ export const arbitrumConfig = {
       "https://api.thegraph.com/subgraphs/name/kyscott18/numoen-arbitrum",
     wrappedNative: WrappedNative[chainID.arbitrum],
     native: Ether.onChain(chainID.arbitrum),
+    specialtyMarkets: [[USDT, Stable[chainID.arbitrum]]],
     stablecoin: Stable[chainID.arbitrum],
     blockFreq: 10,
   },
