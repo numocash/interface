@@ -6,7 +6,7 @@ import type {
   LendginePosition,
 } from "../../constants/types";
 import { borrowRate } from "./jumprate";
-import { fractionToPrice, priceToFraction } from "./price";
+import { fractionToPrice, priceToFraction, tokenToFraction } from "./price";
 
 export const liquidityPerShare = <L extends Lendgine>(
   lendgine: L,
@@ -77,7 +77,9 @@ export const accruedLendgineInfo = <L extends Lendgine>(
   const dilutionToken1 = liqPerCol.invert().quote(dilutionLP);
 
   const f = priceToFraction(lendgineInfo.rewardPerPositionStored).add(
-    dilutionToken1.asFraction.divide(lendgineInfo.totalPositionSize.asFraction)
+    tokenToFraction(dilutionToken1).divide(
+      tokenToFraction(lendgineInfo.totalPositionSize)
+    )
   );
 
   return {

@@ -147,7 +147,7 @@ export const useSortDenomTokens = (
     return [
       tokens[0].equals(specialtyMatches[0]) ? tokens[0] : tokens[1],
       tokens[0].equals(specialtyMatches[0]) ? tokens[1] : tokens[0],
-    ];
+    ] as const;
 
   if (
     tokens[0].equals(environment.interface.stablecoin) ||
