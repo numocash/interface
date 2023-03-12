@@ -14,7 +14,6 @@ import {
 } from "../../../utils/Numoen/price";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
-import { VerticalItem } from "../../common/VerticalItem";
 import { useEarnDetails } from "./EarnDetailsInner";
 
 type Props<L extends Lendgine = Lendgine> = {
@@ -33,7 +32,7 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
     [info, lendgine, t]
   );
 
-  const { apr, tvl, borrowValue, il, iv } = useMemo(() => {
+  const { apr, tvl, il, iv } = useMemo(() => {
     // token0 / liq
     const liquidityPrice = pricePerLiquidity({
       lendgine,
@@ -54,10 +53,6 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
       updatedInfo.totalLiquidity.add(updatedInfo.totalLiquidityBorrowed)
     );
 
-    const borrowValue = liquidityPrice.quote(
-      updatedInfo.totalLiquidityBorrowed
-    );
-
     const apr = supplyRate(updatedInfo).multiply(interestPremium);
 
     const lvr = lvrCoef(price, lendgine);
@@ -66,7 +61,6 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
     return {
       apr,
       tvl: inverse ? invert(price).quote(tvl) : tvl,
-      borrowValue: inverse ? invert(price).quote(borrowValue) : borrowValue,
       il,
       iv,
     };
@@ -79,28 +73,25 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
         close && setClose(false);
       }}
     >
-      <RowBetween tw="px-0">
-        <p tw="text-xl text-secondary">APR</p>
-        <p tw="text-xl font-semibold">
-          {apr.equalTo(0) ? "0%" : formatPercent(apr)}
-        </p>
+      <div tw="bg-secondary w-full flex h-16 items-center p-2">
+        <div tw="flex flex-col ">
+          <p tw="text-sm text-secondary">Best APR</p>
+          <p tw="text-2xl font-semibold">
+            {apr.equalTo(0) ? "0%" : formatPercent(apr)}
+          </p>
+        </div>
+      </div>
+
+      <RowBetween tw="px-2 py-1 pt-2 items-center">
+        <p tw="">TVL</p>
+        <TokenAmountDisplay amount={tvl} showSymbol />
       </RowBetween>
-      <RowBetween tw="justify-around">
-        <VerticalItem
-          label="TVL"
-          item={<TokenAmountDisplay amount={tvl} showSymbol />}
-        />
-        <VerticalItem
-          label="Open interest"
-          item={<TokenAmountDisplay amount={borrowValue} showSymbol />}
-        />
-      </RowBetween>
-      <RowBetween tw="mt-2 px-0 items-center">
+      <RowBetween tw="px-2 py-1  items-center">
         <p tw="text-sm text-secondary">Impermanent loss vs. Uni V2</p>
         <p>{il.equalTo(0) ? "0" : il.toFixed(2)}x</p>
       </RowBetween>
       {/* <div tw="w-full border-b-2 border-stroke" /> */}
-      <RowBetween tw="p-0 ">
+      <RowBetween tw="px-2 py-1  ">
         <p tw="text-sm  text-secondary">Implied vol.</p>
         <p>{iv.equalTo(0) ? "0" : iv.toFixed(2)}%</p>
       </RowBetween>
@@ -109,7 +100,7 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
 };
 
 const Wrapper = styled.button<{ selected: boolean }>(({ selected }) => [
-  tw`flex flex-col w-full max-w-sm px-4 py-2 duration-300 ease-in-out transform border-2 border-transparent rounded-xl hover:bg-secondary`,
+  tw`flex flex-col w-full max-w-sm duration-300 ease-in-out transform border-2 border-transparent rounded-xl sm:hover:scale-105 overflow-clip border-secondary`,
   selected && tw`border-stroke`,
 ]);
 
@@ -131,7 +122,7 @@ const W: React.FC<WProps> = ({ selected, onClick, children }: WProps) => {
           onClick();
           setModalOpen(true);
         }}
-        tw="border-0 xl:hidden"
+        tw="border-secondary xl:hidden"
       >
         {children}
       </Wrapper>
