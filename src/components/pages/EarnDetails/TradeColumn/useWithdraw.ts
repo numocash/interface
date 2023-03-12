@@ -229,13 +229,11 @@ export const useWithdrawAmounts = ({
 
     const amount0 = updatedLendgineInfo.reserve0
       .multiply(liquidity)
-      .divide(updatedLendgineInfo.totalLiquidity)
-      .divide(100);
+      .divide(updatedLendgineInfo.totalLiquidity);
 
     const amount1 = updatedLendgineInfo.reserve1
       .multiply(liquidity)
-      .divide(updatedLendgineInfo.totalLiquidity)
-      .divide(100);
+      .divide(updatedLendgineInfo.totalLiquidity);
 
     return { size, liquidity, amount0, amount1 };
   }, [

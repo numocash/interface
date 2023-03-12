@@ -1,4 +1,4 @@
-import type { Token } from "@uniswap/sdk-core";
+import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { Fraction, Price } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
@@ -14,12 +14,12 @@ export const numoenPrice = <L extends Lendgine>(
   if (lendgineInfo.totalLiquidity.equalTo(0))
     return new Price(lendgine.token1, lendgine.token0, 1, 0);
 
-  const scale1 = lendgineInfo.reserve1.asFraction.divide(
+  const scale1 = tokenToFraction(lendgineInfo.reserve1).divide(
     lendgineInfo.totalLiquidity
   );
 
   const priceFraction = priceToFraction(lendgine.bound).subtract(
-    scale1.asFraction.divide(2)
+    scale1.divide(2)
   );
 
   return fractionToPrice(priceFraction, lendgine.token1, lendgine.token0);
@@ -193,6 +193,16 @@ export const priceToFraction = <TBase extends Token, TQuote extends Token>(
       )
     );
 };
+
+export const tokenToFraction = <T extends Token>(
+  tokenAmount: CurrencyAmount<T>
+) =>
+  tokenAmount.asFraction.multiply(
+    JSBI.exponentiate(
+      JSBI.BigInt(10),
+      JSBI.BigInt(18 - tokenAmount.currency.decimals)
+    )
+  );
 
 export const invert = <TBase extends Token, TQuote extends Token>(
   price: Price<TBase, TQuote>

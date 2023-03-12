@@ -28,7 +28,7 @@ export const useGetLendgineToMarket = () => {
           lendgine.token0.equals(specialtyMatches[0])
             ? lendgine.token1
             : lendgine.token0,
-        ];
+        ] as const;
 
       if (
         lendgine.token0.equals(environment.interface.stablecoin) ||
