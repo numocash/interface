@@ -13,8 +13,6 @@ import { writeContract } from "wagmi/actions";
 
 import { useAwaitTX } from "../hooks/useAwaitTX";
 
-// import { useAwaitTX } from "../hooks/useAwaitTx";
-
 export interface BeetTx {
   tx: {
     prepare: ReturnType<typeof usePrepareContractWrite>;
@@ -25,7 +23,7 @@ export interface BeetTx {
 
 export interface BeetStage {
   stageTitle: string;
-  parallelTransactions: BeetTx[];
+  parallelTransactions: readonly BeetTx[];
 }
 
 const genRanHex = (size: number) => {
@@ -40,7 +38,7 @@ const genRanHex = (size: number) => {
 export const useBeet = () => {
   const awaitTX = useAwaitTX();
   return useCallback(
-    async (stages: BeetStage[]) => {
+    async (stages: readonly BeetStage[]) => {
       const toaster = new DefaultToasterWrapper();
 
       const random = genRanHex(12); // to prevent toast collisions
