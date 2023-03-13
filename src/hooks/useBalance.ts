@@ -1,8 +1,8 @@
 import { getAddress } from "@ethersproject/address";
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
-import type { Address } from "abitype";
 import { useMemo } from "react";
+import type { Address } from "wagmi";
 import {
   erc20ABI,
   useBalance as useWagmiBalance,

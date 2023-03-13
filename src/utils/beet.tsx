@@ -1,14 +1,13 @@
-import type {
-  PrepareWriteContractResult,
-  SendTransactionResult,
-} from "@wagmi/core";
-import type { Abi } from "abitype";
 import React, { useCallback } from "react";
 import toast from "react-hot-toast";
 import invariant from "tiny-invariant";
 import { styled } from "twin.macro";
 import type { Address, useContractWrite, usePrepareContractWrite } from "wagmi";
 import { useNetwork } from "wagmi";
+import type {
+  PrepareWriteContractResult,
+  SendTransactionResult,
+} from "wagmi/actions";
 import { prepareWriteContract, writeContract } from "wagmi/actions";
 
 import { useAwaitTX } from "../hooks/useAwaitTX";
@@ -96,15 +95,8 @@ export const useBeet = () => {
           return;
         }
 
-        const updatedConfigs: PrepareWriteContractResult<
-          Abi | readonly unknown[],
-          string,
-          number
-        >[] = preUpdatedConfigs as PrepareWriteContractResult<
-          Abi | readonly unknown[],
-          string,
-          number
-        >[];
+        const updatedConfigs: PrepareWriteContractResult[] =
+          preUpdatedConfigs as PrepareWriteContractResult[];
 
         // Error if any errors are present
         // for (const [index, bpTx] of stage.parallelTransactions.entries()) {

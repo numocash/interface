@@ -3,11 +3,11 @@ import { getCreate2Address } from "@ethersproject/address";
 import { keccak256, pack } from "@ethersproject/solidity";
 import { useQuery } from "@tanstack/react-query";
 import { Fraction, Price } from "@uniswap/sdk-core";
-import type { Address } from "abitype";
 import JSBI from "jsbi";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { objectKeys } from "ts-extras";
+import type { Address } from "wagmi";
 import { useContractReads } from "wagmi";
 
 import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
