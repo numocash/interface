@@ -33,7 +33,6 @@ export type NumoenInterfaceConfig = {
   wrappedNative: WrappedTokenInfo;
   native?: NativeCurrency;
   specialtyMarkets?: readonly Market[];
-  stablecoin: WrappedTokenInfo;
   blockFreq: number; // How many blocks should go by before updating
 };
 

@@ -30,21 +30,12 @@ export const useGetLendgineToMarket = () => {
             : lendgine.token0,
         ] as const;
 
-      if (
-        lendgine.token0.equals(environment.interface.stablecoin) ||
-        lendgine.token1.equals(environment.interface.stablecoin)
-      ) {
-        return lendgine.token0.equals(environment.interface.stablecoin)
-          ? ([lendgine.token0, lendgine.token1] as const)
-          : ([lendgine.token1, lendgine.token0] as const);
-      }
       return lendgine.token0.equals(environment.interface.wrappedNative)
         ? ([lendgine.token0, lendgine.token1] as const)
         : ([lendgine.token1, lendgine.token0] as const);
     },
     [
       environment.interface.specialtyMarkets,
-      environment.interface.stablecoin,
       environment.interface.wrappedNative,
     ]
   );
@@ -99,5 +90,3 @@ export const isValidMarket = (
     specialtyMarkets
       .map((m) => isEqualToMarket(token0, token1, m))
       .includes(true));
-
-// filter markets

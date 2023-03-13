@@ -16,7 +16,6 @@ import {
   useLiquidityManagerPositions,
 } from "../generated";
 import { LendginesDocument } from "../gql/numoen/graphql";
-import type { RawLendgine } from "../services/graphql/numoen";
 import { parseLendgines } from "../services/graphql/numoen";
 import { fractionToPrice } from "../utils/Numoen/price";
 import { scale } from "../utils/Numoen/trade";
@@ -354,9 +353,8 @@ export const useExistingLendginesQuery = () => {
   const queryKey = useExistingLendginesQueryKey();
   const queryFn = useExistingLendginesQueryFn();
 
-  return useQuery<RawLendgine[]>(queryKey, queryFn, {
+  return useQuery<ReturnType<typeof parseLendgines>>(queryKey, queryFn, {
     staleTime: Infinity,
-    refetchInterval: 5_000,
   });
 };
 

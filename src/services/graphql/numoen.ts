@@ -3,18 +3,16 @@ import type { Address } from "wagmi";
 
 import type { LendginesQuery } from "../../gql/numoen/graphql";
 
-export type RawLendgine = {
+export const parseLendgines = (
+  lendginesQuery: LendginesQuery
+): {
   token0: Address;
   token1: Address;
   token0Exp: number;
   token1Exp: number;
   upperBound: string;
   address: Address;
-};
-
-export const parseLendgines = (
-  lendginesQuery: LendginesQuery
-): RawLendgine[] => {
+}[] => {
   return lendginesQuery.lendgines.map((l) => ({
     token0: getAddress(l.token0),
     token1: getAddress(l.token1),

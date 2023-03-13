@@ -1,9 +1,9 @@
 import { getAddress } from "@ethersproject/address";
+import NumoenTokens from "@numoen/default-token-list";
 import type { Currency as UniCurrency, Token } from "@uniswap/sdk-core";
 import type { TokenInfo, TokenList } from "@uniswap/token-lists";
 import invariant from "tiny-invariant";
 
-import UniswapTokens from "../constants/tokenList/uniswap.json";
 import { useEnvironment } from "../contexts/environment2";
 import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
@@ -119,7 +119,7 @@ export const useDefaultTokenList = () => {
   const enviroment = useEnvironment();
 
   return dedupeTokens(
-    (UniswapTokens.tokens as TokenInfo[]).filter((t) => t.chainId === chain)
+    (NumoenTokens.tokens as TokenInfo[]).filter((t) => t.chainId === chain)
   ).map((t) => {
     const token = new WrappedTokenInfo(t);
     if (isWrappedNative(token)) {
@@ -149,14 +149,6 @@ export const useSortDenomTokens = (
       tokens[0].equals(specialtyMatches[0]) ? tokens[1] : tokens[0],
     ] as const;
 
-  if (
-    tokens[0].equals(environment.interface.stablecoin) ||
-    tokens[1].equals(environment.interface.stablecoin)
-  ) {
-    return tokens[0].equals(environment.interface.stablecoin)
-      ? tokens
-      : ([tokens[1], tokens[0]] as const);
-  }
   return tokens[0].equals(environment.interface.wrappedNative)
     ? tokens
     : ([tokens[1], tokens[0]] as const);
