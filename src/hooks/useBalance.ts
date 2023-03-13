@@ -6,7 +6,9 @@ import { useMemo } from "react";
 import {
   erc20ABI,
   useBalance as useWagmiBalance,
+  useBlockNumber,
   useContractReads,
+  useQueryClient,
 } from "wagmi";
 
 import { useEnvironment } from "../contexts/environment2";
@@ -22,9 +24,12 @@ export const useNativeBalance = (address: HookArg<Address>) => {
 
   const balanceQuery = useWagmiBalance({
     address: address ?? undefined,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!address && !!native,
+    scopeKey: "nativeBalance",
   });
+
+  useWatchQuery("nativeBalance");
 
   const parseReturn = (balance: (typeof balanceQuery)["data"]) => {
     if (!balance) return undefined;
@@ -49,6 +54,19 @@ export const useNativeBalance = (address: HookArg<Address>) => {
   return updatedQuery;
 };
 
+export const useWatchQuery = (scopeKey: string) => {
+  const environment = useEnvironment();
+  const queryClient = useQueryClient();
+  useBlockNumber({
+    onBlock: (blocknumber) =>
+      blocknumber % environment.interface.blockFreq === 0
+        ? void queryClient.invalidateQueries({
+            queryKey: [{ scopeKey }],
+          })
+        : undefined,
+  });
+};
+
 // how can the return type be determined
 export const useBalance = <T extends Token>(
   token: HookArg<T>,
@@ -58,11 +76,15 @@ export const useBalance = <T extends Token>(
   const balanceQuery = useErc20BalanceOf({
     address: token ? getAddress(token.address) : undefined,
     args: address ? [address] : undefined,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!token && !!address,
     select: (data) =>
       token ? CurrencyAmount.fromRawAmount(token, data.toString()) : undefined,
+    scopeKey: "erc20Balance",
   });
+
+  useWatchQuery("erc20Balance");
+
   if (useIsWrappedNative(token)) return nativeBalance;
   return balanceQuery;
 };
@@ -90,11 +112,13 @@ export const useBalances = <T extends Token>(
     [address, tokens]
   );
 
+  useWatchQuery("erc20Balances");
+
   return useContractReads({
     //  ^?
     contracts,
     allowFailure: false,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!tokens && !!address,
     select: (data) =>
       tokens
@@ -103,5 +127,6 @@ export const useBalances = <T extends Token>(
             CurrencyAmount.fromRawAmount(tokens[i]!, d.toString())
           )
         : undefined,
+    scopeKey: "erc20balances",
   });
 };

@@ -22,6 +22,7 @@ import { fractionToPrice } from "../utils/Numoen/price";
 import { scale } from "../utils/Numoen/trade";
 import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./useBalance";
+import { useWatchQuery } from "./useBalance";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 import { isValidMarket } from "./useMarket";
@@ -89,12 +90,15 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
       ] as const)
     : undefined;
 
+  useWatchQuery("lendgine");
+
   return useContractReads({
     //  ^?
     contracts,
     allowFailure: false,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!contracts,
+    scopeKey: "lendgine",
     select: (data) => {
       if (!lendgine) return undefined;
 
@@ -189,12 +193,15 @@ export const useLendgines = <L extends Lendgine>(
     [lendgines]
   );
 
+  useWatchQuery("lendgines");
+
   return useContractReads({
     //  ^?
     contracts,
     allowFailure: false,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!lendgines,
+    scopeKey: "lendgines",
     select: (data) => {
       if (!lendgines) return undefined;
 
@@ -245,11 +252,14 @@ export const useLendginePosition = <L extends Lendgine>(
   address: HookArg<Address>
 ) => {
   const environment = useEnvironment();
+  useWatchQuery("lendginePosition");
+
   return useLiquidityManagerPositions({
     address: environment.base.liquidityManager,
     args: address && lendgine ? [address, lendgine.address] : undefined,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!lendgine && !!address,
+    scopeKey: "lendginePosition",
     select: (data) => {
       if (!lendgine) return undefined;
       return {
@@ -292,11 +302,14 @@ export const useLendginesPosition = <L extends Lendgine>(
     [address, environment.base.liquidityManager, lendgines]
   );
 
+  useWatchQuery("lendginesPosition");
+
   return useContractReads({
     contracts,
-    staleTime: 3_000,
+    staleTime: Infinity,
     allowFailure: false,
     enabled: !!contracts,
+    scopeKey: "lendginesPosition",
     select: (data) => {
       if (!lendgines) return undefined;
       return data.map((p, i) => {
@@ -341,7 +354,10 @@ export const useExistingLendginesQuery = () => {
   const queryKey = useExistingLendginesQueryKey();
   const queryFn = useExistingLendginesQueryFn();
 
-  return useQuery<RawLendgine[]>(queryKey, queryFn, { staleTime: Infinity });
+  return useQuery<RawLendgine[]>(queryKey, queryFn, {
+    staleTime: Infinity,
+    refetchInterval: 5_000,
+  });
 };
 
 export const useAllLendgines = () => {
