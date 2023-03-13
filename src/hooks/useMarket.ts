@@ -90,5 +90,3 @@ export const isValidMarket = (
     specialtyMarkets
       .map((m) => isEqualToMarket(token0, token1, m))
       .includes(true));
-
-// filter markets
