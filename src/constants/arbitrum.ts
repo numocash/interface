@@ -44,6 +44,6 @@ export const arbitrumConfig = {
     native: Ether.onChain(chainID.arbitrum),
     specialtyMarkets: [[USDT, Stable[chainID.arbitrum]]],
     stablecoin: Stable[chainID.arbitrum],
-    blockFreq: 10,
+    blockFreq: 5,
   },
 } as const;

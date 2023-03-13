@@ -3,7 +3,6 @@ import { BigNumber } from "@ethersproject/bignumber";
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount, MaxUint256 } from "@uniswap/sdk-core";
 import { useMemo } from "react";
-import invariant from "tiny-invariant";
 import type { Address, usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
@@ -16,39 +15,23 @@ import {
 import type { BeetStage } from "../utils/beet";
 import { ONE_HUNDRED_PERCENT } from "../utils/Numoen/trade";
 import type { HookArg } from "./useBalance";
+import { useWatchQuery } from "./useBalance";
 
 export const useAllowance = <T extends Token>(
   token: HookArg<T>,
   address: HookArg<Address>,
   spender: HookArg<Address>
 ) => {
-  const query = useErc20Allowance({
+  useWatchQuery("erc20Allowance");
+  return useErc20Allowance({
     address: token ? getAddress(token.address) : undefined,
     args: address && spender ? [address, spender] : undefined,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!token && !!address && !!spender,
+    select: (data) =>
+      token ? CurrencyAmount.fromRawAmount(token, data.toString()) : undefined,
+    scopeKey: "erc20Allowance",
   });
-
-  // This function should be generalized to take the FetchBalanceResult type and then parsing it
-  // parse the return type into a more expressive type
-  const parseReturn = (balance: (typeof query)["data"]) => {
-    if (!balance) return undefined;
-    invariant(token); // if a balance is returned then the data passed must be valid
-    return CurrencyAmount.fromRawAmount(token, balance.toString());
-  };
-
-  // This could be generalized into a function
-  // update the query with the parsed data type
-  const updatedQuery = {
-    ...query,
-    data: parseReturn(query.data),
-    refetch: async (options: Parameters<(typeof query)["refetch"]>[0]) => {
-      const balance = await query.refetch(options);
-      return parseReturn(balance.data);
-    },
-  };
-
-  return updatedQuery;
 };
 
 export const useApprove = <T extends Token>(
