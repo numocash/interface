@@ -266,46 +266,26 @@ const useV2Price = (tokens: HookArg<Market>) => {
     tokens,
   ]);
 
-  const reservesQuery = useIUniswapV2PairGetReserves({
+  return useIUniswapV2PairGetReserves({
     address: (v2PairAddress as Address) ?? undefined,
     staleTime: 3_000,
     enabled: !!v2PairAddress,
-  });
-
-  const parseReturn = (
-    reserves: (typeof reservesQuery)["data"]
-  ): Price<WrappedTokenInfo, WrappedTokenInfo> | undefined => {
-    if (!reserves) return undefined;
-    invariant(tokens && token0); // if a balance is returned then the data passed must be valid
-
-    const invert = !token0.equals(tokens[0]);
-
-    const priceFraction = new Fraction(
-      reserves.reserve0.toString(),
-      reserves.reserve1.toString()
-    );
-    return new Price(
-      tokens[1],
-      tokens[0],
-      invert ? priceFraction.numerator : priceFraction.denominator,
-      invert ? priceFraction.denominator : priceFraction.numerator
-    );
-  };
-
-  // This could be generalized into a function
-  // update the query with the parsed data type
-  const updatedQuery = {
-    ...reservesQuery,
-    data: parseReturn(reservesQuery.data),
-    refetch: async (
-      options: Parameters<(typeof reservesQuery)["refetch"]>[0]
-    ) => {
-      const balance = await reservesQuery.refetch(options);
-      return parseReturn(balance.data);
+    select: (data) => {
+      if (!tokens) return undefined;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const invert = !token0!.equals(tokens[0]);
+      const priceFraction = new Fraction(
+        data.reserve0.toString(),
+        data.reserve1.toString()
+      );
+      return new Price(
+        tokens[1],
+        tokens[0],
+        invert ? priceFraction.numerator : priceFraction.denominator,
+        invert ? priceFraction.denominator : priceFraction.numerator
+      );
     },
-  };
-
-  return updatedQuery;
+  });
 };
 
 const useV3Prices = (tokens: HookArg<Market>) => {
