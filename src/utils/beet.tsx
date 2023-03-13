@@ -9,7 +9,7 @@ import invariant from "tiny-invariant";
 import { styled } from "twin.macro";
 import type { Address, useContractWrite, usePrepareContractWrite } from "wagmi";
 import { useNetwork } from "wagmi";
-import { writeContract } from "wagmi/actions";
+import { prepareWriteContract, writeContract } from "wagmi/actions";
 
 import { useAwaitTX } from "../hooks/useAwaitTX";
 
@@ -68,65 +68,43 @@ export const useBeet = () => {
           0
         );
 
-        let updatedConfigs: PrepareWriteContractResult<
+        // if (stageIndex !== 0) {
+        // TODO: must get the return values of the refetch and pass them to send
+
+        const preUpdatedConfigs = await Promise.all(
+          stage.parallelTransactions.map(
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            async (t) => await prepareWriteContract(t.tx.prepare.config) //TODO: error estimating gas occurs here
+          )
+        );
+
+        // if contains undefined, throw error
+        if (preUpdatedConfigs.find((t) => t === undefined) !== undefined) {
+          const index = preUpdatedConfigs.findIndex((t) => t === undefined);
+
+          const humanCount = `${1 + index + previousTxs}/${totaltx}`;
+
+          toaster.dismiss(`${random}-${stageIndex}-pre`);
+
+          toaster.txError(
+            _generateToasterId(stageIndex, index),
+            stage.stageTitle,
+            humanCount,
+            "Error with transaction"
+          );
+          return;
+        }
+
+        const updatedConfigs: PrepareWriteContractResult<
           Abi | readonly unknown[],
           string,
           number
-        >[] = stage.parallelTransactions.map((t) => t.tx.prepare.config);
-
-        if (stageIndex === 0) {
-          const preUpdatedConfigs = stage.parallelTransactions.map(
-            (t) => t.tx.prepare.config
-          );
-
-          if (preUpdatedConfigs.find((t) => t === undefined) !== undefined) {
-            const index = updatedConfigs.findIndex((t) => t === undefined);
-
-            const humanCount = `${1 + index + previousTxs}/${totaltx}`;
-
-            toaster.dismiss(`${random}-${stageIndex}-pre`);
-
-            toaster.txError(
-              _generateToasterId(stageIndex, index),
-              stage.stageTitle,
-              humanCount,
-              "Error with transaction"
-            );
-            return;
-          }
-
-          updatedConfigs = preUpdatedConfigs;
-        } else {
-          // if (stageIndex !== 0) {
-          // TODO: must get the return values of the refetch and pass them to send
-
-          const preUpdatedConfigs = await Promise.all(
-            stage.parallelTransactions.map(
-              async (t) => (await t.tx.prepare.refetch()).data
-            )
-          );
-
-          // if contains undefined, throw error
-          if (preUpdatedConfigs.find((t) => t === undefined) !== undefined) {
-            const index = preUpdatedConfigs.findIndex((t) => t === undefined);
-
-            const humanCount = `${1 + index + previousTxs}/${totaltx}`;
-
-            toaster.dismiss(`${random}-${stageIndex}-pre`);
-
-            toaster.txError(
-              _generateToasterId(stageIndex, index),
-              stage.stageTitle,
-              humanCount,
-              "Error with transaction"
-            );
-            return;
-          }
-
-          updatedConfigs = preUpdatedConfigs as typeof updatedConfigs;
-
-          console.log("all refetch");
-        }
+        >[] = preUpdatedConfigs as PrepareWriteContractResult<
+          Abi | readonly unknown[],
+          string,
+          number
+        >[];
 
         // Error if any errors are present
         // for (const [index, bpTx] of stage.parallelTransactions.entries()) {
