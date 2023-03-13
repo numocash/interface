@@ -1,5 +1,5 @@
 import { getAddress } from "@ethersproject/address";
-import type { Address } from "abitype";
+import type { Address } from "wagmi";
 
 import type { LendginesQuery } from "../../gql/numoen/graphql";
 

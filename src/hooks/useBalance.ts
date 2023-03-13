@@ -1,13 +1,14 @@
 import { getAddress } from "@ethersproject/address";
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
-import type { Address } from "abitype";
 import { useMemo } from "react";
-import invariant from "tiny-invariant";
+import type { Address } from "wagmi";
 import {
   erc20ABI,
   useBalance as useWagmiBalance,
+  useBlockNumber,
   useContractReads,
+  useQueryClient,
 } from "wagmi";
 
 import { useEnvironment } from "../contexts/environment2";
@@ -23,9 +24,12 @@ export const useNativeBalance = (address: HookArg<Address>) => {
 
   const balanceQuery = useWagmiBalance({
     address: address ?? undefined,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!address && !!native,
+    scopeKey: "nativeBalance",
   });
+
+  useWatchQuery("nativeBalance");
 
   const parseReturn = (balance: (typeof balanceQuery)["data"]) => {
     if (!balance) return undefined;
@@ -35,7 +39,6 @@ export const useNativeBalance = (address: HookArg<Address>) => {
     );
   };
 
-  // This could be generalized into a function
   // update the query with the parsed data type
   const updatedQuery = {
     ...balanceQuery,
@@ -51,6 +54,19 @@ export const useNativeBalance = (address: HookArg<Address>) => {
   return updatedQuery;
 };
 
+export const useWatchQuery = (scopeKey: string) => {
+  const environment = useEnvironment();
+  const queryClient = useQueryClient();
+  useBlockNumber({
+    onBlock: (blocknumber) =>
+      blocknumber % environment.interface.blockFreq === 0
+        ? void queryClient.invalidateQueries({
+            queryKey: [{ scopeKey }],
+          })
+        : undefined,
+  });
+};
+
 // how can the return type be determined
 export const useBalance = <T extends Token>(
   token: HookArg<T>,
@@ -60,33 +76,17 @@ export const useBalance = <T extends Token>(
   const balanceQuery = useErc20BalanceOf({
     address: token ? getAddress(token.address) : undefined,
     args: address ? [address] : undefined,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!token && !!address,
+    select: (data) =>
+      token ? CurrencyAmount.fromRawAmount(token, data.toString()) : undefined,
+    scopeKey: "erc20Balance",
   });
+
+  useWatchQuery("erc20Balance");
+
   if (useIsWrappedNative(token)) return nativeBalance;
-
-  // This function should be generalized to take the FetchBalanceResult type and then parsing it
-  // parse the return type into a more expressive type
-  const parseReturn = (balance: (typeof balanceQuery)["data"]) => {
-    if (!balance) return undefined;
-    invariant(token); // if a balance is returned then the data passed must be valid
-    return CurrencyAmount.fromRawAmount(token, balance.toString());
-  };
-
-  // This could be generalized into a function
-  // update the query with the parsed data type
-  const updatedQuery = {
-    ...balanceQuery,
-    data: parseReturn(balanceQuery.data),
-    refetch: async (
-      options: Parameters<(typeof balanceQuery)["refetch"]>[0]
-    ) => {
-      const balance = await balanceQuery.refetch(options);
-      return parseReturn(balance.data);
-    },
-  };
-
-  return updatedQuery;
+  return balanceQuery;
 };
 
 // accept a tuple of tokens
@@ -112,34 +112,21 @@ export const useBalances = <T extends Token>(
     [address, tokens]
   );
 
-  const balanceQuery = useContractReads({
+  useWatchQuery("erc20Balances");
+
+  return useContractReads({
     //  ^?
     contracts,
     allowFailure: false,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!tokens && !!address,
+    select: (data) =>
+      tokens
+        ? data.map((d, i) =>
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            CurrencyAmount.fromRawAmount(tokens[i]!, d.toString())
+          )
+        : undefined,
+    scopeKey: "erc20balances",
   });
-
-  const parseReturn = (balances: (typeof balanceQuery)["data"]) => {
-    if (!balances) return undefined;
-    invariant(tokens); // if a balance is returned then the data passed must be valid
-    return balances.map((b, i) => {
-      const token = tokens[i];
-      invariant(token);
-      return CurrencyAmount.fromRawAmount(token, b.toString());
-    });
-  };
-
-  const updatedQuery = {
-    ...balanceQuery,
-    data: parseReturn(balanceQuery.data),
-    refetch: async (
-      options: Parameters<(typeof balanceQuery)["refetch"]>[0]
-    ) => {
-      const balance = await balanceQuery.refetch(options);
-      return parseReturn(balance.data);
-    },
-  };
-
-  return updatedQuery;
 };

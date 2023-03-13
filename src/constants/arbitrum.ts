@@ -46,6 +46,6 @@ export const arbitrumConfig = {
       [USDT, Stable[chainID.arbitrum]],
       [Stable[chainID.arbitrum], WrappedNative[chainID.arbitrum]],
     ],
-    blockFreq: 10,
+    blockFreq: 5,
   },
 } as const;

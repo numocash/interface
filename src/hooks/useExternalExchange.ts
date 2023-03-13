@@ -3,11 +3,11 @@ import { getCreate2Address } from "@ethersproject/address";
 import { keccak256, pack } from "@ethersproject/solidity";
 import { useQuery } from "@tanstack/react-query";
 import { Fraction, Price } from "@uniswap/sdk-core";
-import type { Address } from "abitype";
 import JSBI from "jsbi";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { objectKeys } from "ts-extras";
+import type { Address } from "wagmi";
 import { useContractReads } from "wagmi";
 
 import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
@@ -47,6 +47,7 @@ import {
 } from "../services/graphql/uniswapV3";
 import { fractionToPrice, priceToFraction } from "../utils/Numoen/price";
 import type { HookArg } from "./useBalance";
+import { useWatchQuery } from "./useBalance";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 import type { Market } from "./useMarket";
@@ -114,7 +115,8 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
       };
     },
     {
-      staleTime: 1000,
+      staleTime: Infinity,
+      refetchInterval: 5_000,
     }
   );
 };
@@ -191,6 +193,7 @@ export const usePriceHistory = (
     },
     {
       staleTime: Infinity,
+      refetchInterval: 10 * 60_000,
     }
   );
 };
@@ -266,46 +269,29 @@ const useV2Price = (tokens: HookArg<Market>) => {
     tokens,
   ]);
 
-  const reservesQuery = useIUniswapV2PairGetReserves({
+  useWatchQuery("v2Price");
+
+  return useIUniswapV2PairGetReserves({
     address: (v2PairAddress as Address) ?? undefined,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!v2PairAddress,
-  });
-
-  const parseReturn = (
-    reserves: (typeof reservesQuery)["data"]
-  ): Price<WrappedTokenInfo, WrappedTokenInfo> | undefined => {
-    if (!reserves) return undefined;
-    invariant(tokens && token0); // if a balance is returned then the data passed must be valid
-
-    const invert = !token0.equals(tokens[0]);
-
-    const priceFraction = new Fraction(
-      reserves.reserve0.toString(),
-      reserves.reserve1.toString()
-    );
-    return new Price(
-      tokens[1],
-      tokens[0],
-      invert ? priceFraction.numerator : priceFraction.denominator,
-      invert ? priceFraction.denominator : priceFraction.numerator
-    );
-  };
-
-  // This could be generalized into a function
-  // update the query with the parsed data type
-  const updatedQuery = {
-    ...reservesQuery,
-    data: parseReturn(reservesQuery.data),
-    refetch: async (
-      options: Parameters<(typeof reservesQuery)["refetch"]>[0]
-    ) => {
-      const balance = await reservesQuery.refetch(options);
-      return parseReturn(balance.data);
+    scopeKey: "v2Price",
+    select: (data) => {
+      if (!tokens) return undefined;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const invert = !token0!.equals(tokens[0]);
+      const priceFraction = new Fraction(
+        data.reserve0.toString(),
+        data.reserve1.toString()
+      );
+      return new Price(
+        tokens[1],
+        tokens[0],
+        invert ? priceFraction.numerator : priceFraction.denominator,
+        invert ? priceFraction.denominator : priceFraction.numerator
+      );
     },
-  };
-
-  return updatedQuery;
+  });
 };
 
 const useV3Prices = (tokens: HookArg<Market>) => {
@@ -347,49 +333,35 @@ const useV3Prices = (tokens: HookArg<Market>) => {
     tokens,
   ]);
 
-  const slotsQuery = useContractReads({
+  useWatchQuery("v3Prices");
+
+  return useContractReads({
     contracts,
     allowFailure: true,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!contracts,
-  });
+    scopeKey: "v3Prices",
+    select: (data) => {
+      invariant(tokens && token0);
 
-  const parseReturn = (
-    slots: (typeof slotsQuery)["data"]
-  ): (Price<WrappedTokenInfo, WrappedTokenInfo> | undefined)[] | undefined => {
-    if (!slots) return undefined;
-    invariant(tokens && token0); // if a balance is returned then the data passed must be valid
+      const invert = token0.equals(tokens[0]);
 
-    const invert = token0.equals(tokens[0]);
+      return data.map((slot) => {
+        if (!slot) return undefined;
+        const sqrtPriceX96 = JSBI.BigInt(slot.sqrtPriceX96.toString());
 
-    return slots.map((slot) => {
-      if (!slot) return undefined;
-      const sqrtPriceX96 = JSBI.BigInt(slot.sqrtPriceX96.toString());
+        const priceFraction = new Fraction(
+          JSBI.multiply(sqrtPriceX96, sqrtPriceX96),
+          Q192
+        );
 
-      const priceFraction = new Fraction(
-        JSBI.multiply(sqrtPriceX96, sqrtPriceX96),
-        Q192
-      );
-
-      return new Price(
-        tokens[1],
-        tokens[0],
-        invert ? priceFraction.numerator : priceFraction.denominator,
-        invert ? priceFraction.denominator : priceFraction.numerator
-      );
-    });
-  };
-
-  // This could be generalized into a function
-  // update the query with the parsed data type
-  const updatedQuery = {
-    ...slotsQuery,
-    data: parseReturn(slotsQuery.data),
-    refetch: async (options: Parameters<(typeof slotsQuery)["refetch"]>[0]) => {
-      const balance = await slotsQuery.refetch(options);
-      return parseReturn(balance.data);
+        return new Price(
+          tokens[1],
+          tokens[0],
+          invert ? priceFraction.numerator : priceFraction.denominator,
+          invert ? priceFraction.denominator : priceFraction.numerator
+        );
+      });
     },
-  };
-
-  return updatedQuery;
+  });
 };
