@@ -8,7 +8,6 @@ import {
   accruedLendgineInfo,
   getT,
 } from "../../../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../../../utils/Numoen/price";
 import { RowBetween } from "../../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../../common/VerticalItem";
@@ -24,7 +23,7 @@ export const PositionItem: React.FC<Props> = ({
   lendgine,
   lendgineInfo,
 }: Props) => {
-  const { base, quote, setSelectedLendgine, setClose, setModalOpen } =
+  const { base, quote, setSelectedLendgine, setClose, setModalOpen, price } =
     useTradeDetails();
   const symbol = quote.symbol + (lendgine.token1.equals(quote) ? "+" : "-");
   const isInverse = base.equals(lendgine.token1);
@@ -39,11 +38,9 @@ export const PositionItem: React.FC<Props> = ({
 
   const value = useMemo(() => {
     if (!positionValue) return undefined;
-    // token0 / token1
-    const price = numoenPrice(lendgine, lendgineInfo);
 
     return isInverse ? positionValue : price.quote(positionValue);
-  }, [isInverse, lendgine, lendgineInfo, positionValue]);
+  }, [isInverse, positionValue, price]);
 
   return (
     <>
