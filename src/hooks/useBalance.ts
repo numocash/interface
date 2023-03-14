@@ -61,7 +61,7 @@ export const useWatchQuery = (scopeKey: string) => {
     onBlock: (blocknumber) =>
       blocknumber % environment.interface.blockFreq === 0
         ? void queryClient.invalidateQueries({
-            queryKey: [{ scopeKey }],
+            queryKey: [{ scopeKey: scopeKey }],
           })
         : undefined,
   });
