@@ -47,7 +47,6 @@ import {
 } from "../services/graphql/uniswapV3";
 import { fractionToPrice, priceToFraction } from "../utils/Numoen/price";
 import type { HookArg } from "./useBalance";
-import { useWatchQuery } from "./useBalance";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 import type { Market } from "./useMarket";
@@ -269,11 +268,9 @@ const useV2Price = (tokens: HookArg<Market>) => {
     tokens,
   ]);
 
-  useWatchQuery("v2Price");
-
   return useIUniswapV2PairGetReserves({
     address: (v2PairAddress as Address) ?? undefined,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!v2PairAddress,
     scopeKey: "v2Price",
     select: (data) => {
@@ -333,12 +330,10 @@ const useV3Prices = (tokens: HookArg<Market>) => {
     tokens,
   ]);
 
-  useWatchQuery("v3Prices");
-
   return useContractReads({
     contracts,
     allowFailure: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!contracts,
     scopeKey: "v3Prices",
     select: (data) => {

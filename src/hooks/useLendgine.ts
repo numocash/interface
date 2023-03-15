@@ -21,7 +21,6 @@ import { fractionToPrice } from "../utils/Numoen/price";
 import { scale } from "../utils/Numoen/trade";
 import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./useBalance";
-import { useWatchQuery } from "./useBalance";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 import { isValidMarket } from "./useMarket";
@@ -89,13 +88,11 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
       ] as const)
     : undefined;
 
-  useWatchQuery("lendgine");
-
   return useContractReads({
     //  ^?
     contracts,
     allowFailure: false,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!contracts,
     scopeKey: "lendgine",
     select: (data) => {
@@ -192,13 +189,11 @@ export const useLendgines = <L extends Lendgine>(
     [lendgines]
   );
 
-  useWatchQuery("lendgines");
-
   return useContractReads({
     //  ^?
     contracts,
     allowFailure: false,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!lendgines,
     scopeKey: "lendgines",
     select: (data) => {
@@ -251,12 +246,11 @@ export const useLendginePosition = <L extends Lendgine>(
   address: HookArg<Address>
 ) => {
   const environment = useEnvironment();
-  useWatchQuery("lendginePosition");
 
   return useLiquidityManagerPositions({
     address: environment.base.liquidityManager,
     args: address && lendgine ? [address, lendgine.address] : undefined,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!lendgine && !!address,
     scopeKey: "lendginePosition",
     select: (data) => {
@@ -301,11 +295,9 @@ export const useLendginesPosition = <L extends Lendgine>(
     [address, environment.base.liquidityManager, lendgines]
   );
 
-  useWatchQuery("lendginesPosition");
-
   return useContractReads({
     contracts,
-    staleTime: Infinity,
+    staleTime: 3_000,
     allowFailure: false,
     enabled: !!contracts,
     scopeKey: "lendginesPosition",
