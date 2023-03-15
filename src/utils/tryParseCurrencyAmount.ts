@@ -2,7 +2,7 @@ import { parseUnits } from "@ethersproject/units";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
-import type { WrappedTokenInfo } from "../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 
 /**
  * Parses a CurrencyAmount from the passed string.

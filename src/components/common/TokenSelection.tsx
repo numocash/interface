@@ -2,7 +2,7 @@ import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 
-import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 import { AssetSelectButton } from "./AssetSelection";
 import SelectTokenDialog from "./SelectTokenDialog";
 import { TokenIcon } from "./TokenIcon";

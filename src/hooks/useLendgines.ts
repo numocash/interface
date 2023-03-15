@@ -4,10 +4,10 @@ import { chunk } from "lodash";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import type { Lendgine } from "../constants/types";
 import { lendgineABI } from "../generated";
-import { fractionToPrice } from "../utils/Numoen/price";
-import { scale } from "../utils/Numoen/trade";
+import { scale } from "../lib/constants";
+import { fractionToPrice } from "../lib/price";
+import type { Lendgine } from "../lib/types/lendgine";
 import type { Tuple } from "../utils/readonlyTuple";
 import { useContractReads } from "./internal/useContractReads";
 import type { HookArg } from "./internal/utils";

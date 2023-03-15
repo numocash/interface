@@ -8,7 +8,7 @@ import type {
   PriceHistoryDayV2Query,
   PriceHistoryHourV2Query,
 } from "../../gql/uniswapV2/graphql";
-import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 
 export type UniswapV2Pool = {
   token0: Token;

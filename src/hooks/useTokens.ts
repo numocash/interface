@@ -1,17 +1,44 @@
 import { getAddress } from "@ethersproject/address";
+import NumoenTokens from "@numoen/default-token-list";
 import type { Token } from "@uniswap/sdk-core";
+import type { TokenInfo } from "@uniswap/token-lists";
 import { useCallback } from "react";
+import invariant from "tiny-invariant";
 
 import { useEnvironment } from "../contexts/useEnvironment";
+import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
+import { dedupe } from "../utils/dedupe";
 import type { HookArg } from "./internal/utils";
-import { useDefaultTokenList } from "./useTokens2";
+import { useChain } from "./useChain";
+
+export const useTokens = () => {
+  const chain = useChain();
+  const isWrappedNative = useGetIsWrappedNative();
+  const enviroment = useEnvironment();
+
+  return dedupe(
+    (NumoenTokens.tokens as TokenInfo[]).filter((t) => t.chainId === chain),
+    (t) => `${t.address}_${t.chainId}`
+  ).map((t) => {
+    const token = new WrappedTokenInfo(t);
+    if (isWrappedNative(token)) {
+      invariant(enviroment.interface.native);
+      return new WrappedTokenInfo({
+        ...t,
+        name: enviroment.interface.native.name ?? t.name,
+        symbol: enviroment.interface.native.symbol ?? t.symbol,
+      });
+    }
+    return token;
+  });
+};
 
 export const useAddressToToken = (address: HookArg<string>) => {
   return useGetAddressToToken()(address);
 };
 
 export const useGetAddressToToken = () => {
-  const tokens = useDefaultTokenList();
+  const tokens = useTokens();
 
   return useCallback(
     (address: HookArg<string>) => {
@@ -37,11 +64,3 @@ export const useGetIsWrappedNative = () => {
 };
 export const useIsWrappedNative = <T extends Token>(token: HookArg<T>) =>
   useGetIsWrappedNative()(token);
-
-export const useTokenSymbol = <T extends Token>(token: HookArg<T>) => {
-  const environment = useEnvironment();
-  if (useIsWrappedNative(token)) {
-    return environment.interface.native?.symbol;
-  }
-  return token?.symbol;
-};

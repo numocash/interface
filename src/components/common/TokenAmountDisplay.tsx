@@ -1,7 +1,7 @@
 import type { CurrencyAmount, Percent } from "@uniswap/sdk-core";
 import { css, styled } from "twin.macro";
 
-import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 import { formatDisplayWithSoftLimit, formatPercent } from "../../utils/format";
 import { TokenIcon } from "./TokenIcon";
 

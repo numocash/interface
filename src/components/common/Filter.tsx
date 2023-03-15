@@ -4,8 +4,8 @@ import { IoIosArrowDown } from "react-icons/io";
 import tw, { styled } from "twin.macro";
 
 import { useAllLendgines } from "../../hooks/useAllLendgines";
-import type { WrappedTokenInfo } from "../../hooks/useTokens2";
-import { dedupeTokens } from "../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
+import { dedupe } from "../../utils/dedupe";
 import { Modal } from "./Modal";
 import { Module } from "./Module";
 import { TokenIcon } from "./TokenIcon";
@@ -21,7 +21,10 @@ export const Filter: React.FC<Props> = ({ assets, setAssets }: Props) => {
   const lendgines = useAllLendgines();
   const allDedupeTokens = useMemo(() => {
     if (!lendgines) return null;
-    return dedupeTokens(lendgines.flatMap((l) => [l.token0, l.token1]));
+    return dedupe(
+      lendgines.flatMap((l) => [l.token0, l.token1]),
+      (l) => `${l.address}_${l.chainId}`
+    );
   }, [lendgines]);
 
   // TODO: close drop on click

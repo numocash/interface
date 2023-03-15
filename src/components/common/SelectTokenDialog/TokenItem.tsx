@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import React from "react";
 import tw, { styled } from "twin.macro";
 
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { TokenInfo } from "../TokenInfo";
 
 const Balance = styled.div(() => [tw`text-base text-secondary`]);

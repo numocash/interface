@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { Modal } from "../Modal";
 import { TokenSearch } from "./TokenSearch";
 

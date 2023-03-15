@@ -1,10 +1,10 @@
 import { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
-import type { Lendgine } from "../constants/types";
 import { useEnvironment } from "../contexts/useEnvironment";
 import { liquidityManagerABI } from "../generated";
-import { fractionToPrice } from "../utils/Numoen/price";
+import { fractionToPrice } from "../lib/price";
+import type { Lendgine } from "../lib/types/lendgine";
 import { useContractRead } from "./internal/useContractRead";
 import type { HookArg } from "./internal/utils";
 

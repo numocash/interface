@@ -8,8 +8,8 @@ import { useAccount } from "wagmi";
 
 import { useSettings } from "../contexts/settings";
 import { useErc20Approve, usePrepareErc20Approve } from "../generated";
+import { ONE_HUNDRED_PERCENT } from "../lib/constants";
 import type { BeetStage } from "../utils/beet";
-import { ONE_HUNDRED_PERCENT } from "../utils/Numoen/trade";
 import type { HookArg } from "./internal/utils";
 import { useAllowance } from "./useAllowance";
 

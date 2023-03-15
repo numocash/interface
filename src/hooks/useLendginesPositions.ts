@@ -3,11 +3,11 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 
-import type { Lendgine } from "../constants/types";
 import { useEnvironment } from "../contexts/useEnvironment";
 import { liquidityManagerABI } from "../generated";
-import { fractionToPrice } from "../utils/Numoen/price";
-import { scale } from "../utils/Numoen/trade";
+import { scale } from "../lib/constants";
+import { fractionToPrice } from "../lib/price";
+import type { Lendgine } from "../lib/types/lendgine";
 import { useContractReads } from "./internal/useContractReads";
 import type { HookArg } from "./internal/utils";
 

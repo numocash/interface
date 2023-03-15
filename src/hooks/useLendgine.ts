@@ -1,14 +1,14 @@
 import { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
-import type { Lendgine } from "../constants/types";
 import { lendgineABI } from "../generated";
-import { fractionToPrice } from "../utils/Numoen/price";
-import { scale } from "../utils/Numoen/trade";
+import { scale } from "../lib/constants";
+import { fractionToPrice } from "../lib/price";
+import type { Lendgine } from "../lib/types/lendgine";
+import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import { useContractReads } from "./internal/useContractReads";
 import type { HookArg } from "./internal/utils";
 import { useAllLendgines } from "./useAllLendgines";
-import type { WrappedTokenInfo } from "./useTokens2";
 
 export const useLendginesForTokens = (
   tokens: HookArg<readonly [WrappedTokenInfo, WrappedTokenInfo]>

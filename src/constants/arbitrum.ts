@@ -2,7 +2,7 @@ import { chainID } from "@dahlia-labs/use-ethers";
 import { getAddress } from "@ethersproject/address";
 import { Ether } from "@uniswap/sdk-core";
 
-import { WrappedTokenInfo } from "../hooks/useTokens2";
+import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import { Stable, WrappedNative } from "./tokens";
 
 const USDT = new WrappedTokenInfo({

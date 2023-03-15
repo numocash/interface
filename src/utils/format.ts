@@ -1,7 +1,7 @@
 import type { Fraction, Percent, Price, Token } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
-import { priceToFraction } from "./Numoen/price";
+import { priceToFraction } from "../lib/price";
 
 export const ZERO = JSBI.BigInt(0);
 
