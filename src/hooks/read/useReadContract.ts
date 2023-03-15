@@ -26,7 +26,7 @@ export type QueryFunctionArgs<T extends (...args: any) => any> =
   QueryFunctionContext<ReturnType<T>>;
 
 export type UseContractReadConfig<
-  TAbi extends Abi | readonly unknown[] = Abi,
+  TAbi extends Abi = Abi,
   TFunctionName extends string = string,
   TSelectData = ReadContractResult<TAbi, TFunctionName>
 > = PartialBy<
@@ -87,7 +87,7 @@ function queryFn<
 }
 
 export function useContractRead<
-  TAbi extends Abi | readonly unknown[],
+  TAbi extends Abi,
   TFunctionName extends string,
   TSelectData = ReadContractResult<TAbi, TFunctionName>
 >({
