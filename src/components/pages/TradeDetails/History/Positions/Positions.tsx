@@ -1,7 +1,7 @@
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { useBalances } from "../../../../../hooks/useBalance";
+import { useBalances } from "../../../../../hooks/read/useBalance";
 import { useLendgines } from "../../../../../hooks/useLendgine";
 import { EmptyPosition } from "../../../../common/EmptyPosition";
 import { Divider } from "../../../Trade/Loading";

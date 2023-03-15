@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
-import { useBalance } from "../../../../hooks/useBalance";
+import { useBalance } from "../../../../hooks/read/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { useBeet } from "../../../../utils/beet";
 import { isLongLendgine } from "../../../../utils/lendgines";

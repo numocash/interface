@@ -46,8 +46,8 @@ import {
   Q192,
 } from "../services/graphql/uniswapV3";
 import { fractionToPrice, priceToFraction } from "../utils/Numoen/price";
-import type { HookArg } from "./useBalance";
-import { useWatchQuery } from "./useBalance";
+import type { HookArg } from "./read/useBalance";
+import { useWatchQuery } from "./read/useBalance";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 import type { Market } from "./useMarket";

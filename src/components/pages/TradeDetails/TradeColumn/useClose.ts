@@ -17,8 +17,8 @@ import {
   usePrepareLendgineRouterMulticall,
 } from "../../../../generated";
 import { useApprove } from "../../../../hooks/useApproval";
-import type { HookArg } from "../../../../hooks/useBalance";
-import { useBalance } from "../../../../hooks/useBalance";
+import type { HookArg } from "../../../../hooks/read/useBalance";
+import { useBalance } from "../../../../hooks/read/useBalance";
 import {
   isV3,
   useMostLiquidMarket,

@@ -15,7 +15,7 @@ import {
   usePrepareLiquidityManagerMulticall,
 } from "../../../../generated";
 import { useApprove } from "../../../../hooks/useApproval";
-import type { HookArg } from "../../../../hooks/useBalance";
+import type { HookArg } from "../../../../hooks/read/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";

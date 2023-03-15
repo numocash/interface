@@ -11,9 +11,8 @@ import {
   useQueryClient,
 } from "wagmi";
 
-import { useEnvironment } from "../contexts/environment2";
-import { useErc20BalanceOf } from "../generated";
-import { useIsWrappedNative } from "./useTokens";
+import { useEnvironment } from "../../contexts/environment2";
+import { useContractRead } from "./useReadContract";
 
 export type HookArg<T> = T | null | undefined;
 
@@ -72,20 +71,20 @@ export const useBalance = <T extends Token>(
   token: HookArg<T>,
   address: HookArg<Address>
 ) => {
-  const nativeBalance = useNativeBalance(address);
-  const balanceQuery = useErc20BalanceOf({
+  // const nativeBalance = useNativeBalance(address);
+  const balanceQuery = useContractRead({
     address: token ? getAddress(token.address) : undefined,
     args: address ? [address] : undefined,
+    functionName: "balanceOf",
+    abi: erc20ABI,
     staleTime: Infinity,
     enabled: !!token && !!address,
     select: (data) =>
       token ? CurrencyAmount.fromRawAmount(token, data.toString()) : undefined,
-    scopeKey: "erc20Balance",
+    watch: true,
   });
 
-  useWatchQuery("erc20Balance");
-
-  if (useIsWrappedNative(token)) return nativeBalance;
+  // if (useIsWrappedNative(token)) return nativeBalance;
   return balanceQuery;
 };
 
