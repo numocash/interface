@@ -271,7 +271,7 @@ const useV2Price = (tokens: HookArg<Market>) => {
 
   return useContractRead({
     address: (v2PairAddress as Address) ?? undefined,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!v2PairAddress,
     abi: iUniswapV2PairABI,
     functionName: "getReserves",
@@ -336,7 +336,7 @@ const useV3Prices = (tokens: HookArg<Market>) => {
   return useContractReads({
     contracts,
     allowFailure: true,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!contracts,
     watch: true,
     select: (data) => {
