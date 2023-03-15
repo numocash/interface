@@ -8,8 +8,8 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 
 import { App } from "./App";
-import { EnvironmentProvider } from "./contexts/environment2";
 import { SettingsProvider } from "./contexts/settings";
+import { EnvironmentProvider } from "./contexts/useEnvironment";
 
 const { chains, provider, webSocketProvider } = configureChains(
   [
@@ -35,7 +35,7 @@ const { connectors } = getDefaultWallets({
   chains,
 });
 
-export const wagmiClient = createClient({
+const wagmiClient = createClient({
   autoConnect: true,
   connectors,
   provider,

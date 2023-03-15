@@ -1,12 +1,12 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { Create } from "./components/pages/Create";
-import { Earn } from "./components/pages/Earn";
-import { EarnDetails } from "./components/pages/EarnDetails";
-import { Test } from "./components/pages/Test";
-import { Trade } from "./components/pages/Trade";
-import { TradeDetails } from "./components/pages/TradeDetails";
+import { Create } from "./components/layout/pages/Create";
+import { Earn } from "./components/layout/pages/Earn";
+import { EarnDetails } from "./components/layout/pages/EarnDetails";
+import { Test } from "./components/layout/pages/Test";
+import { Trade } from "./components/layout/pages/Trade";
+import { TradeDetails } from "./components/layout/pages/TradeDetails";
 
 export const AppRouter: React.FC = () => {
   return (

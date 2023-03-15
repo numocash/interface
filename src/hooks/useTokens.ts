@@ -2,8 +2,8 @@ import { getAddress } from "@ethersproject/address";
 import type { Token } from "@uniswap/sdk-core";
 import { useCallback } from "react";
 
-import { useEnvironment } from "../contexts/environment2";
-import type { HookArg } from "./useBalance";
+import { useEnvironment } from "../contexts/useEnvironment";
+import type { HookArg } from "./internal/utils";
 import { useDefaultTokenList } from "./useTokens2";
 
 export const useAddressToToken = (address: HookArg<string>) => {

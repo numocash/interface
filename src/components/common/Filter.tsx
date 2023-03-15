@@ -3,7 +3,7 @@ import { FiCheck, FiX } from "react-icons/fi";
 import { IoIosArrowDown } from "react-icons/io";
 import tw, { styled } from "twin.macro";
 
-import { useAllLendgines } from "../../hooks/useLendgine";
+import { useAllLendgines } from "../../hooks/useAllLendgines";
 import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { dedupeTokens } from "../../hooks/useTokens2";
 import { Modal } from "./Modal";

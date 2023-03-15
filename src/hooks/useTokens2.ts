@@ -4,8 +4,8 @@ import type { Currency as UniCurrency, Token } from "@uniswap/sdk-core";
 import type { TokenInfo, TokenList } from "@uniswap/token-lists";
 import invariant from "tiny-invariant";
 
-import { useEnvironment } from "../contexts/environment2";
-import type { HookArg } from "./useBalance";
+import { useEnvironment } from "../contexts/useEnvironment";
+import type { HookArg } from "./internal/utils";
 import { useChain } from "./useChain";
 import { isEqualToMarket } from "./useMarket";
 import { useGetIsWrappedNative } from "./useTokens";

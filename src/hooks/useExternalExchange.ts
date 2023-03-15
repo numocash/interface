@@ -8,11 +8,10 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { objectKeys } from "ts-extras";
 import type { Address } from "wagmi";
-import { useContractReads } from "wagmi";
 
-import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
-import { useEnvironment } from "../contexts/environment2";
-import { iUniswapV3PoolABI, useIUniswapV2PairGetReserves } from "../generated";
+import { Times } from "../components/layout/pages/TradeDetails/Chart/TimeSelector";
+import { useEnvironment } from "../contexts/useEnvironment";
+import { iUniswapV2PairABI, iUniswapV3PoolABI } from "../generated";
 import type {
   PriceHistoryDayV2Query,
   PriceHistoryHourV2Query,
@@ -46,8 +45,9 @@ import {
   Q192,
 } from "../services/graphql/uniswapV3";
 import { fractionToPrice, priceToFraction } from "../utils/Numoen/price";
-import type { HookArg } from "./useBalance";
-import { useWatchQuery } from "./useBalance";
+import { useContractRead } from "./internal/useContractRead";
+import { useContractReads } from "./internal/useContractReads";
+import type { HookArg } from "./internal/utils";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 import type { Market } from "./useMarket";
@@ -269,13 +269,13 @@ const useV2Price = (tokens: HookArg<Market>) => {
     tokens,
   ]);
 
-  useWatchQuery("v2Price");
-
-  return useIUniswapV2PairGetReserves({
+  return useContractRead({
     address: (v2PairAddress as Address) ?? undefined,
     staleTime: Infinity,
     enabled: !!v2PairAddress,
-    scopeKey: "v2Price",
+    abi: iUniswapV2PairABI,
+    functionName: "getReserves",
+    watch: true,
     select: (data) => {
       if (!tokens) return undefined;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -333,14 +333,12 @@ const useV3Prices = (tokens: HookArg<Market>) => {
     tokens,
   ]);
 
-  useWatchQuery("v3Prices");
-
   return useContractReads({
     contracts,
     allowFailure: true,
     staleTime: Infinity,
     enabled: !!contracts,
-    scopeKey: "v3Prices",
+    watch: true,
     select: (data) => {
       invariant(tokens && token0);
 
