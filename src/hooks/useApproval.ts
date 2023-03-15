@@ -15,18 +15,16 @@ import {
 import type { BeetStage } from "../utils/beet";
 import { ONE_HUNDRED_PERCENT } from "../utils/Numoen/trade";
 import type { HookArg } from "./useBalance";
-import { useWatchQuery } from "./useBalance";
 
 export const useAllowance = <T extends Token>(
   token: HookArg<T>,
   address: HookArg<Address>,
   spender: HookArg<Address>
 ) => {
-  useWatchQuery("erc20Allowance");
   return useErc20Allowance({
     address: token ? getAddress(token.address) : undefined,
     args: address && spender ? [address, spender] : undefined,
-    staleTime: Infinity,
+    staleTime: 3_000,
     enabled: !!token && !!address && !!spender,
     select: (data) =>
       token ? CurrencyAmount.fromRawAmount(token, data.toString()) : undefined,
