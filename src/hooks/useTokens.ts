@@ -3,7 +3,7 @@ import type { Token } from "@uniswap/sdk-core";
 import { useCallback } from "react";
 
 import { useEnvironment } from "../contexts/environment2";
-import type { HookArg } from "./read/useBalance";
+import type { HookArg } from "./useBalance";
 import { useDefaultTokenList } from "./useTokens2";
 
 export const useAddressToToken = (address: HookArg<string>) => {

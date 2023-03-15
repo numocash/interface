@@ -16,7 +16,7 @@ import {
   usePrepareLendgineRouterMint,
   usePrepareLendgineRouterMulticall,
 } from "../../../../generated";
-import type { HookArg } from "../../../../hooks/read/useBalance";
+import type { HookArg } from "../../../../hooks/useBalance";
 import { useApprove } from "../../../../hooks/useApproval";
 import {
   isV3,

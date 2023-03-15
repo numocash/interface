@@ -20,7 +20,7 @@ import {
   usePrepareLiquidityManagerMulticall,
 } from "../../../generated";
 import { useApprove } from "../../../hooks/useApproval";
-import type { HookArg } from "../../../hooks/read/useBalance";
+import type { HookArg } from "../../../hooks/useBalance";
 import { useChain } from "../../../hooks/useChain";
 import { useCurrentPrice } from "../../../hooks/useExternalExchange";
 import { useIsWrappedNative } from "../../../hooks/useTokens";

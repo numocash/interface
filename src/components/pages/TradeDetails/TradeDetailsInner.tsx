@@ -6,7 +6,7 @@ import { createContainer } from "unstated-next";
 import { useAccount } from "wagmi";
 
 import type { Lendgine } from "../../../constants/types";
-import { useBalance } from "../../../hooks/read/useBalance";
+import { useBalance } from "../../../hooks/useBalance";
 import { isV3, useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../hooks/useLendgine";
 import type { WrappedTokenInfo } from "../../../hooks/useTokens2";

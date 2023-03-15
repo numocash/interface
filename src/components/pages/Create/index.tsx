@@ -5,7 +5,7 @@ import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment2";
-import { useBalance } from "../../../hooks/read/useBalance";
+import { useBalance } from "../../../hooks/useBalance";
 import { useCurrentPrice } from "../../../hooks/useExternalExchange";
 import { useAllLendgines } from "../../../hooks/useLendgine";
 import { isValidMarket } from "../../../hooks/useMarket";

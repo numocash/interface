@@ -1,129 +1,78 @@
-import { getAddress } from "@ethersproject/address";
-import type { Token } from "@uniswap/sdk-core";
-import { CurrencyAmount } from "@uniswap/sdk-core";
-import { useMemo } from "react";
-import type { Address } from "wagmi";
-import {
-  erc20ABI,
-  useBalance as useWagmiBalance,
-  useBlockNumber,
-  useQueryClient,
-} from "wagmi";
+import type { UseQueryOptions } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import type { FetchBalanceArgs, FetchBalanceResult } from "@wagmi/core";
+import * as React from "react";
+import { fetchBalance } from "wagmi/actions";
 
-import { useEnvironment } from "../../contexts/environment2";
-import { useContractRead } from "./useContractRead";
-import { useContractReads } from "./useContractReads";
+import { useChain } from "../useChain";
+import { useInvalidateOnBlock } from "../useInvalidateOnBlock";
+import type { QueryFunctionArgs } from "./useContractRead";
 
-export type HookArg<T> = T | null | undefined;
+export type UseBalanceArgs = Partial<FetchBalanceArgs> & {
+  /** Subscribe to changes */
+  watch?: boolean;
+};
 
-export const useNativeBalance = (address: HookArg<Address>) => {
-  const environment = useEnvironment();
+export type UseBalanceConfig<TSelectData = FetchBalanceResult> =
+  UseQueryOptions<FetchBalanceResult, Error, TSelectData>;
 
-  const native = environment.interface.native;
+type QueryKeyArgs = Partial<FetchBalanceArgs>;
 
-  const balanceQuery = useWagmiBalance({
-    address: address ?? undefined,
-    staleTime: Infinity,
-    enabled: !!address && !!native,
-    scopeKey: "nativeBalance",
-  });
-
-  useWatchQuery("nativeBalance");
-
-  const parseReturn = (balance: (typeof balanceQuery)["data"]) => {
-    if (!balance) return undefined;
-    return CurrencyAmount.fromRawAmount(
-      environment.interface.wrappedNative,
-      balance.value.toString()
-    );
-  };
-
-  // update the query with the parsed data type
-  const updatedQuery = {
-    ...balanceQuery,
-    data: parseReturn(balanceQuery.data),
-    refetch: async (
-      options: Parameters<(typeof balanceQuery)["refetch"]>[0]
-    ) => {
-      const balance = await balanceQuery.refetch(options);
-      return parseReturn(balance.data);
+function queryKey({ address, chainId, formatUnits, token }: QueryKeyArgs) {
+  return [
+    {
+      entity: "balance",
+      address,
+      chainId,
+      formatUnits,
+      token,
     },
-  };
+  ] as const;
+}
 
-  return updatedQuery;
-};
+function queryFn({
+  queryKey: [{ address, chainId, formatUnits, token }],
+}: QueryFunctionArgs<typeof queryKey>) {
+  if (!address) throw new Error("address is required");
+  return fetchBalance({ address, chainId, formatUnits, token });
+}
 
-export const useWatchQuery = (scopeKey: string) => {
-  const environment = useEnvironment();
-  const queryClient = useQueryClient();
-  useBlockNumber({
-    onBlock: (blocknumber) =>
-      blocknumber % environment.interface.blockFreq === 0
-        ? void queryClient.invalidateQueries({
-            queryKey: [{ scopeKey: scopeKey }],
-          })
-        : undefined,
-  });
-};
-
-// how can the return type be determined
-export const useBalance = <T extends Token>(
-  token: HookArg<T>,
-  address: HookArg<Address>
-) => {
-  // const nativeBalance = useNativeBalance(address);
-  const balanceQuery = useContractRead({
-    address: token ? getAddress(token.address) : undefined,
-    args: address ? [address] : undefined,
-    functionName: "balanceOf",
-    abi: erc20ABI,
-    staleTime: Infinity,
-    enabled: !!token && !!address,
-    select: (data) =>
-      token ? CurrencyAmount.fromRawAmount(token, data.toString()) : undefined,
-    watch: true,
-  });
-
-  // if (useIsWrappedNative(token)) return nativeBalance;
-  return balanceQuery;
-};
-
-// accept a tuple of tokens
-// must get contractRead to be strictly typed
-// return a tuple of currency amounts
-export const useBalances = <T extends Token>(
-  tokens: HookArg<readonly T[]>,
-  address: HookArg<Address>
-) => {
-  const contracts = useMemo(
-    () =>
-      address && tokens
-        ? tokens.map(
-            (t) =>
-              ({
-                address: getAddress(t.address),
-                abi: erc20ABI,
-                functionName: "balanceOf",
-                args: [address],
-              } as const)
-          )
-        : undefined,
-    [address, tokens]
+export function useBalance<TSelectData = FetchBalanceResult>({
+  address,
+  cacheTime,
+  enabled = true,
+  formatUnits,
+  staleTime,
+  suspense,
+  token,
+  watch,
+  select,
+  onError,
+  onSettled,
+  onSuccess,
+}: UseBalanceArgs & UseBalanceConfig<TSelectData> = {}) {
+  const chainId = useChain();
+  const queryKey_ = React.useMemo(
+    () => queryKey({ address, chainId, formatUnits, token }),
+    [address, chainId, formatUnits, token]
   );
-
-  return useContractReads({
-    //  ^?
-    contracts,
-    allowFailure: false,
-    staleTime: Infinity,
-    enabled: !!tokens && !!address,
-    select: (data) =>
-      tokens
-        ? data.map((d, i) =>
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            CurrencyAmount.fromRawAmount(tokens[i]!, d.toString())
-          )
-        : undefined,
-    watch: true,
+  const balanceQuery = useQuery(queryKey_, queryFn, {
+    cacheTime,
+    enabled: Boolean(enabled && address),
+    staleTime,
+    suspense,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    select: (data) => select!(data),
+    onError,
+    onSettled,
+    onSuccess,
   });
-};
+
+  useInvalidateOnBlock({
+    chainId,
+    enabled: Boolean(enabled && watch && address),
+    queryKey: queryKey_,
+  });
+
+  return balanceQuery;
+}

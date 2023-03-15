@@ -14,8 +14,8 @@ import {
 } from "../generated";
 import type { BeetStage } from "../utils/beet";
 import { ONE_HUNDRED_PERCENT } from "../utils/Numoen/trade";
-import type { HookArg } from "./read/useBalance";
-import { useWatchQuery } from "./read/useBalance";
+import type { HookArg } from "./useBalance";
+import { useWatchQuery } from "./useBalance";
 
 export const useAllowance = <T extends Token>(
   token: HookArg<T>,

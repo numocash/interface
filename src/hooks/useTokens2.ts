@@ -5,7 +5,7 @@ import type { TokenInfo, TokenList } from "@uniswap/token-lists";
 import invariant from "tiny-invariant";
 
 import { useEnvironment } from "../contexts/environment2";
-import type { HookArg } from "./read/useBalance";
+import type { HookArg } from "./useBalance";
 import { useChain } from "./useChain";
 import { isEqualToMarket } from "./useMarket";
 import { useGetIsWrappedNative } from "./useTokens";

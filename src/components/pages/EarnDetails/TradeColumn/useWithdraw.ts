@@ -15,7 +15,7 @@ import {
   usePrepareLiquidityManagerMulticall,
   usePrepareLiquidityManagerRemoveLiquidity,
 } from "../../../../generated";
-import type { HookArg } from "../../../../hooks/read/useBalance";
+import type { HookArg } from "../../../../hooks/useBalance";
 import {
   useLendgine,
   useLendginePosition,

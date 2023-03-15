@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { useAccount } from "wagmi";
 
-import { useBalance } from "../../../../hooks/read/useBalance";
+import { useBalance } from "../../../../hooks/useBalance";
 import { useBeet } from "../../../../utils/beet";
 import { isShortLendgine } from "../../../../utils/lendgines";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
