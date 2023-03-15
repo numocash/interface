@@ -1,13 +1,16 @@
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../contexts/environment2";
-import { useBalance } from "../../../hooks/read/useBalance";
+import { useBalances } from "../../../hooks/read/useBalance";
 import { PageMargin } from "../../layout";
 
 export const Test: React.FC = () => {
   const enviroment = useEnvironment();
   const { address } = useAccount();
-  const balance = useBalance(enviroment.interface.wrappedNative, address);
+  const balance = useBalances(
+    [enviroment.interface.wrappedNative] as const,
+    address
+  );
 
   return (
     <PageMargin tw=" w-full max-w-4xl ">
@@ -16,7 +19,7 @@ export const Test: React.FC = () => {
           ? "Loading"
           : balance.isError
           ? "Error"
-          : balance.data?.toSignificant(4)}
+          : balance.data?.[0]?.toSignificant(4)}
       </div>
     </PageMargin>
   );

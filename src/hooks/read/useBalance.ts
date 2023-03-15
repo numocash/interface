@@ -7,12 +7,12 @@ import {
   erc20ABI,
   useBalance as useWagmiBalance,
   useBlockNumber,
-  useContractReads,
   useQueryClient,
 } from "wagmi";
 
 import { useEnvironment } from "../../contexts/environment2";
-import { useContractRead } from "./useReadContract";
+import { useContractRead } from "./useContractRead";
+import { useContractReads } from "./useContractReads";
 
 export type HookArg<T> = T | null | undefined;
 
@@ -111,8 +111,6 @@ export const useBalances = <T extends Token>(
     [address, tokens]
   );
 
-  useWatchQuery("erc20Balances");
-
   return useContractReads({
     //  ^?
     contracts,
@@ -126,6 +124,6 @@ export const useBalances = <T extends Token>(
             CurrencyAmount.fromRawAmount(tokens[i]!, d.toString())
           )
         : undefined,
-    scopeKey: "erc20balances",
+    watch: true,
   });
 };
