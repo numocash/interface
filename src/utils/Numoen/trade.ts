@@ -1,5 +1,5 @@
-import type { CurrencyAmount, Price } from "@uniswap/sdk-core";
-import { Fraction, Percent } from "@uniswap/sdk-core";
+import type { Price } from "@uniswap/sdk-core";
+import { CurrencyAmount, Fraction, Percent } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
 import type { Lendgine, LendgineInfo } from "../../constants/types";
@@ -25,6 +25,9 @@ export const determineBorrowAmount = (
 ) => {
   const liqPerCol = liquidityPerCollateral(lendgine);
   const userLiquidity = liqPerCol.quote(userAmount);
+
+  if (lendgineInfo.totalLiquidity.equalTo(0))
+    return CurrencyAmount.fromRawAmount(userAmount.currency, 0);
 
   const token0Amount = lendgineInfo.reserve0
     .multiply(userLiquidity)
