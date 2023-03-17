@@ -1,5 +1,5 @@
-import type { ContractReceipt } from "@ethersproject/contracts";
-import type { Provider } from "@ethersproject/providers";
+import type { Provider } from "@wagmi/core";
+import type { ContractReceipt } from "ethers";
 import { useCallback } from "react";
 import { useProvider, useWebSocketProvider } from "wagmi";
 

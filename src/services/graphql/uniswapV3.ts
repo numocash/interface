@@ -1,6 +1,6 @@
-import { getAddress } from "@ethersproject/address";
 import type { Token } from "@uniswap/sdk-core";
 import { Fraction } from "@uniswap/sdk-core";
+import { utils } from "ethers";
 import JSBI from "jsbi";
 import type { Address } from "wagmi";
 
@@ -42,7 +42,7 @@ export const parseMostLiquidV3 = (
         pool: {
           token0: tokens[0],
           token1: tokens[1],
-          address: getAddress(mostLiquidV3Query.pools[0].id),
+          address: utils.getAddress(mostLiquidV3Query.pools[0].id),
           feeTier: mostLiquidV3Query.pools[0]
             .feeTier as UniswapV3Pool["feeTier"],
         },

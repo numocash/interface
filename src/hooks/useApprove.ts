@@ -1,7 +1,6 @@
-import { getAddress } from "@ethersproject/address";
-import { BigNumber } from "@ethersproject/bignumber";
 import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { MaxUint256 } from "@uniswap/sdk-core";
+import { BigNumber, utils } from "ethers";
 import { useMemo } from "react";
 import type { Address } from "wagmi";
 import { erc20ABI, useAccount } from "wagmi";
@@ -28,7 +27,7 @@ export const useApprove = <T extends Token>(
 
     const tx = async () => {
       const config = await prepareWriteContract({
-        address: getAddress(tokenAmount.currency.address),
+        address: utils.getAddress(tokenAmount.currency.address),
         abi: erc20ABI,
         functionName: "approve",
         args: [

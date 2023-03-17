@@ -1,7 +1,7 @@
-import { getAddress } from "@ethersproject/address";
 import NumoenTokens from "@numoen/default-token-list";
 import type { Token } from "@uniswap/sdk-core";
 import type { TokenInfo } from "@uniswap/token-lists";
+import { utils } from "ethers";
 import { useCallback } from "react";
 import invariant from "tiny-invariant";
 
@@ -44,8 +44,9 @@ export const useGetAddressToToken = () => {
     (address: HookArg<string>) => {
       if (!address) return null;
       return (
-        tokens.find((t) => getAddress(t.address) === getAddress(address)) ??
-        null
+        tokens.find(
+          (t) => utils.getAddress(t.address) === utils.getAddress(address)
+        ) ?? null
       );
     },
     [tokens]

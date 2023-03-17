@@ -1,8 +1,6 @@
-import { getAddress } from "@ethersproject/address";
-import { BigNumber } from "@ethersproject/bignumber";
-import { AddressZero } from "@ethersproject/constants";
 import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { prepareWriteContract } from "@wagmi/core";
+import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
 import { getContract, writeContract } from "wagmi/actions";
@@ -49,8 +47,8 @@ export const useWithdraw = ({
 
     const args = [
       {
-        token0: getAddress(selectedLendgine.token0.address),
-        token1: getAddress(selectedLendgine.token1.address),
+        token0: utils.getAddress(selectedLendgine.token0.address),
+        token1: utils.getAddress(selectedLendgine.token1.address),
         token0Exp: BigNumber.from(selectedLendgine.token0.decimals),
         token1Exp: BigNumber.from(selectedLendgine.token1.decimals),
         upperBound: BigNumber.from(
@@ -70,7 +68,7 @@ export const useWithdraw = ({
         ),
         size: BigNumber.from(size.quotient.toString()),
 
-        recipient: native0 || native1 ? AddressZero : address,
+        recipient: native0 || native1 ? constants.AddressZero : address,
         deadline: BigNumber.from(
           Math.round(Date.now() / 1000) + settings.timeout * 60
         ),

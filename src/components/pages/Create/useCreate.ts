@@ -1,8 +1,6 @@
-import { getAddress } from "@ethersproject/address";
-import { BigNumber } from "@ethersproject/bignumber";
-import { AddressZero } from "@ethersproject/constants";
 import type { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
 import { Token } from "@uniswap/sdk-core";
+import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
 import {
@@ -71,8 +69,8 @@ export const useCreate = ({
       token0Exp: token0Input.currency.decimals,
       token1: token1Input.currency,
       token1Exp: token1Input.currency.decimals,
-      lendgine: new Token(chainID, AddressZero, 18),
-      address: AddressZero,
+      lendgine: new Token(chainID, constants.AddressZero, 18),
+      address: constants.AddressZero,
       bound: fractionToPrice(bound, token1Input.currency, token0Input.currency),
     };
 
@@ -81,8 +79,8 @@ export const useCreate = ({
     const liquidity = token0Amount.invert().quote(token0Input);
 
     const createArgs = [
-      getAddress(lendgine.token0.address),
-      getAddress(lendgine.token1.address),
+      utils.getAddress(lendgine.token0.address),
+      utils.getAddress(lendgine.token1.address),
       lendgine.token0.decimals,
       lendgine.token1.decimals,
       BigNumber.from(bound.multiply(scale).quotient.toString()),
@@ -90,8 +88,8 @@ export const useCreate = ({
 
     const args = [
       {
-        token0: getAddress(lendgine.token0.address),
-        token1: getAddress(lendgine.token1.address),
+        token0: utils.getAddress(lendgine.token0.address),
+        token1: utils.getAddress(lendgine.token1.address),
         token0Exp: BigNumber.from(lendgine.token0.decimals),
         token1Exp: BigNumber.from(lendgine.token1.decimals),
         upperBound: BigNumber.from(
@@ -251,8 +249,8 @@ export const useDepositAmounts = ({
       token0Exp: token0.decimals,
       token1,
       token1Exp: token1.decimals,
-      lendgine: new Token(chainID, AddressZero, 18),
-      address: AddressZero,
+      lendgine: new Token(chainID, constants.AddressZero, 18),
+      address: constants.AddressZero,
       bound: fractionToPrice(bound, token1, token0),
     };
 

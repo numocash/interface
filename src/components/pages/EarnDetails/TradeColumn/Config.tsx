@@ -1,4 +1,4 @@
-import { getAddress } from "@ethersproject/address";
+import { utils } from "ethers";
 
 import { AddressLink } from "../../../../utils/beet";
 import { RowBetween } from "../../../common/RowBetween";
@@ -13,7 +13,7 @@ export const Config: React.FC = () => {
         <p tw="text-sm text-secondary">Base token:</p>
         <AddressLink
           data="address"
-          address={getAddress(denom.address)}
+          address={utils.getAddress(denom.address)}
           tw="text-sm underline"
         />
       </RowBetween>
@@ -21,7 +21,7 @@ export const Config: React.FC = () => {
         <p tw="text-sm text-secondary">Speculative token:</p>
         <AddressLink
           data="address"
-          address={getAddress(other.address)}
+          address={utils.getAddress(other.address)}
           tw="text-sm underline"
         />
       </RowBetween>

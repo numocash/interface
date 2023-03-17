@@ -1,6 +1,5 @@
-import { getAddress } from "@ethersproject/address";
-import { BigNumber } from "@ethersproject/bignumber";
 import type { CurrencyAmount } from "@uniswap/sdk-core";
+import { BigNumber, utils } from "ethers";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
@@ -83,8 +82,8 @@ export const useDeposit = ({
 
       args = [
         {
-          token0: getAddress(lendgine.token0.address),
-          token1: getAddress(lendgine.token1.address),
+          token0: utils.getAddress(lendgine.token0.address),
+          token1: utils.getAddress(lendgine.token1.address),
           token0Exp: BigNumber.from(lendgine.token0.decimals),
           token1Exp: BigNumber.from(lendgine.token1.decimals),
           upperBound: BigNumber.from(
@@ -118,8 +117,8 @@ export const useDeposit = ({
 
       args = [
         {
-          token0: getAddress(lendgine.token0.address),
-          token1: getAddress(lendgine.token1.address),
+          token0: utils.getAddress(lendgine.token0.address),
+          token1: utils.getAddress(lendgine.token1.address),
           token0Exp: BigNumber.from(lendgine.token0.decimals),
           token1Exp: BigNumber.from(lendgine.token1.decimals),
           upperBound: BigNumber.from(
