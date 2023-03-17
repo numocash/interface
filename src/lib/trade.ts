@@ -1,5 +1,5 @@
-import type { CurrencyAmount, Price } from "@uniswap/sdk-core";
-import { Percent } from "@uniswap/sdk-core";
+import type { Price } from "@uniswap/sdk-core";
+import { CurrencyAmount, Percent } from "@uniswap/sdk-core";
 
 import { isV3 } from "../hooks/useExternalExchange";
 import type { UniswapV2Pool } from "../services/graphql/uniswapV2";
@@ -21,6 +21,9 @@ export const determineBorrowAmount = (
 ) => {
   const liqPerCol = liquidityPerCollateral(lendgine);
   const userLiquidity = liqPerCol.quote(userAmount);
+
+  if (lendgineInfo.totalLiquidity.equalTo(0))
+    return CurrencyAmount.fromRawAmount(userAmount.currency, 0);
 
   const token0Amount = lendgineInfo.reserve0
     .multiply(userLiquidity)
