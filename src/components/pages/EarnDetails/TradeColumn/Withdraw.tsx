@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
+import invariant from "tiny-invariant";
 
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
@@ -106,6 +107,7 @@ export const Withdraw: React.FC<Props> = ({ modal }: Props) => {
         variant="primary"
         tw="h-12 text-lg"
         onClick={async () => {
+          invariant(withdraw);
           await Beet(withdraw);
           setClose(false);
         }}

@@ -4,18 +4,17 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
 import type { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
-import type { Address, usePrepareContractWrite } from "wagmi";
+import type { Address } from "wagmi";
 import { useAccount } from "wagmi";
+import {
+  getContract,
+  prepareWriteContract,
+  writeContract,
+} from "wagmi/actions";
 
+import { lendgineRouterABI } from "../../../../abis/lendgineRouter";
 import { useSettings } from "../../../../contexts/settings";
 import { useEnvironment } from "../../../../contexts/useEnvironment";
-import {
-  useLendgineRouter,
-  useLendgineRouterBurn,
-  useLendgineRouterMulticall,
-  usePrepareLendgineRouterBurn,
-  usePrepareLendgineRouterMulticall,
-} from "../../../../generated";
 import type { HookArg } from "../../../../hooks/internal/utils";
 import { useApprove } from "../../../../hooks/useApprove";
 import { useBalance } from "../../../../hooks/useBalance";
@@ -53,11 +52,7 @@ export const useClose = ({
 
   const approve = useApprove(shares, environment.base.lendgineRouter);
 
-  const lendgineRouterContract = useLendgineRouter({
-    address: environment.base.lendgineRouter,
-  });
-
-  const { args, unwrapArgs } = useMemo(() => {
+  return useMemo(() => {
     if (
       !shares ||
       !amount0 ||
@@ -66,7 +61,7 @@ export const useClose = ({
       !mostLiquid.data ||
       !address
     )
-      return {};
+      return undefined;
 
     const args = [
       {
@@ -113,6 +108,11 @@ export const useClose = ({
       },
     ] as const;
 
+    const lendgineRouterContract = getContract({
+      abi: lendgineRouterABI,
+      address: environment.base.lendgineRouter,
+    });
+
     const unwrapArgs = [
       BigNumber.from(
         amountOut
@@ -122,12 +122,62 @@ export const useClose = ({
       address,
     ] as const;
 
-    return { args, native, unwrapArgs };
+    const title = `Sell ${selectedLendgine.token1.symbol}+`;
+
+    const tx = native
+      ? async () => {
+          const config = await prepareWriteContract({
+            abi: lendgineRouterABI,
+            functionName: "multicall",
+            address: environment.base.lendgineRouter,
+            args: [
+              [
+                lendgineRouterContract.interface.encodeFunctionData(
+                  "burn",
+                  args
+                ),
+                lendgineRouterContract.interface.encodeFunctionData(
+                  "unwrapWETH",
+                  unwrapArgs
+                ),
+              ] as `0x${string}`[],
+            ],
+          });
+
+          const data = await writeContract(config);
+          return data;
+        }
+      : async () => {
+          const config = await prepareWriteContract({
+            abi: lendgineRouterABI,
+            functionName: "burn",
+            address: environment.base.lendgineRouter,
+            args,
+          });
+
+          const data = await writeContract(config);
+          return data;
+        };
+
+    return [
+      approve.beetStage,
+      {
+        stageTitle: title,
+        parallelTransactions: [
+          {
+            title: title,
+            tx,
+          },
+        ],
+      },
+    ].filter((s): s is BeetStage => !!s);
   }, [
     address,
     amount0,
     amount1,
     amountOut,
+    approve.beetStage,
+    environment.base.lendgineRouter,
     mostLiquid.data,
     native,
     selectedLendgine.bound,
@@ -135,86 +185,11 @@ export const useClose = ({
     selectedLendgine.token0.decimals,
     selectedLendgine.token1.address,
     selectedLendgine.token1.decimals,
+    selectedLendgine.token1.symbol,
     settings.maxSlippagePercent,
     settings.timeout,
     shares,
   ]);
-
-  const prepareBurn = usePrepareLendgineRouterBurn({
-    enabled: !!args,
-    address: environment.base.lendgineRouter,
-    args: args,
-    staleTime: Infinity,
-  });
-  const sendBurn = useLendgineRouterBurn(prepareBurn.config);
-
-  const prepareMulticall = usePrepareLendgineRouterMulticall({
-    enabled:
-      !!prepareBurn.config.request && !!native && !!lendgineRouterContract,
-    staleTime: Infinity,
-    address: environment.base.lendgineRouter,
-    args:
-      prepareBurn.config.request &&
-      prepareBurn.config.request.data &&
-      lendgineRouterContract
-        ? [
-            [
-              prepareBurn.config.request.data,
-              lendgineRouterContract.interface.encodeFunctionData(
-                "unwrapWETH",
-                unwrapArgs
-              ),
-            ] as `0x${string}`[],
-          ]
-        : undefined,
-  });
-  // TODO: wagmi should infer data as 0x and has mistyped prepare.config type
-  const sendMulticall = useLendgineRouterMulticall(prepareMulticall.config);
-
-  return useMemo(
-    () =>
-      [
-        approve.beetStage,
-        native
-          ? {
-              stageTitle: `Sell ${selectedLendgine.token1.symbol}+`,
-              parallelTransactions: [
-                {
-                  title: `Sell ${selectedLendgine.token1.symbol}+`,
-                  tx: {
-                    prepare: prepareMulticall as ReturnType<
-                      typeof usePrepareContractWrite
-                    >,
-                    send: sendMulticall,
-                  },
-                },
-              ],
-            }
-          : {
-              stageTitle: `Sell ${selectedLendgine.token1.symbol}+`,
-              parallelTransactions: [
-                {
-                  title: `Sell ${selectedLendgine.token1.symbol}+`,
-                  tx: {
-                    prepare: prepareBurn as ReturnType<
-                      typeof usePrepareContractWrite
-                    >,
-                    send: sendBurn,
-                  },
-                },
-              ],
-            },
-      ].filter((s) => !!s) as BeetStage[],
-    [
-      approve.beetStage,
-      native,
-      prepareBurn,
-      prepareMulticall,
-      selectedLendgine.token1.symbol,
-      sendBurn,
-      sendMulticall,
-    ]
-  );
 };
 
 export const useCloseAmounts = ({

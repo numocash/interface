@@ -1,17 +1,15 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
 import { useMemo } from "react";
-import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
-
-import { useEnvironment } from "../../../../contexts/useEnvironment";
 import {
-  useLiquidityManager,
-  useLiquidityManagerCollect,
-  useLiquidityManagerMulticall,
-  usePrepareLiquidityManagerCollect,
-  usePrepareLiquidityManagerMulticall,
-} from "../../../../generated";
+  getContract,
+  prepareWriteContract,
+  writeContract,
+} from "wagmi/actions";
+
+import { liquidityManagerABI } from "../../../../abis/liquidityManager";
+import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import {
   accruedLendgineInfo,
@@ -37,13 +35,10 @@ export const useCollect = ({
   const { address } = useAccount();
   const t = getT();
 
-  const liquidityManagerContract = useLiquidityManager({
-    address: environment.base.liquidityManager,
-  });
   const native = useIsWrappedNative(lendgine.token1);
 
-  const { args, unwrapArgs } = useMemo(() => {
-    if (!address) return {};
+  return useMemo(() => {
+    if (!address) return undefined;
     const updatedInfo = accruedLendgineInfo(lendgine, lendgineInfo, t);
     const updatedPosition = accruedLendginePositionInfo(updatedInfo, position);
 
@@ -59,77 +54,64 @@ export const useCollect = ({
 
     const unwrapArgs = [BigNumber.from(0), address] as const; // safe to be zero because the collect estimation will fail
 
-    return { args, native, unwrapArgs };
-  }, [address, lendgine, lendgineInfo, native, position, t]);
+    const liquidityManagerContract = getContract({
+      abi: liquidityManagerABI,
+      address: environment.base.liquidityManager,
+    });
 
-  const prepareCollect = usePrepareLiquidityManagerCollect({
-    enabled: !!args,
-    address: environment.base.liquidityManager,
-    args: args,
-    staleTime: Infinity,
-  });
-  const sendCollect = useLiquidityManagerCollect(prepareCollect.config);
+    const title = "Collect interest";
 
-  const prepareMulticall = usePrepareLiquidityManagerMulticall({
-    enabled:
-      !!native &&
-      !!unwrapArgs &&
-      !!prepareCollect.config.request &&
-      !!liquidityManagerContract,
-    address: environment.base.liquidityManager,
-    staleTime: Infinity,
-    args:
-      prepareCollect.config.request &&
-      prepareCollect.config.request.data &&
-      liquidityManagerContract
-        ? [
-            [
-              prepareCollect.config.request.data,
-              liquidityManagerContract.interface.encodeFunctionData(
-                "unwrapWETH",
-                unwrapArgs
-              ),
-            ] as `0x${string}`[],
-          ]
-        : undefined,
-  });
-  const sendMulticall = useLiquidityManagerMulticall(prepareMulticall.config);
+    const tx = native
+      ? async () => {
+          const config = await prepareWriteContract({
+            abi: liquidityManagerABI,
+            address: environment.base.liquidityManager,
+            functionName: "multicall",
+            args: [
+              [
+                liquidityManagerContract.interface.encodeFunctionData(
+                  "collect",
+                  args
+                ),
+                liquidityManagerContract.interface.encodeFunctionData(
+                  "unwrapWETH",
+                  unwrapArgs
+                ),
+              ] as `0x${string}`[],
+            ],
+          });
+          const data = await writeContract(config);
+          return data;
+        }
+      : async () => {
+          const config = await prepareWriteContract({
+            abi: liquidityManagerABI,
+            address: environment.base.liquidityManager,
+            functionName: "collect",
+            args,
+          });
+          const data = await writeContract(config);
+          return data;
+        };
 
-  return useMemo(
-    () =>
-      native
-        ? [
-            {
-              stageTitle: "Collect interest",
-              parallelTransactions: [
-                {
-                  title: `Collect interest`,
-                  tx: {
-                    prepare: prepareMulticall as ReturnType<
-                      typeof usePrepareContractWrite
-                    >,
-                    send: sendMulticall,
-                  },
-                },
-              ],
-            },
-          ]
-        : ([
-            {
-              stageTitle: "Collect interest",
-              parallelTransactions: [
-                {
-                  title: `Collect interest`,
-                  tx: {
-                    prepare: prepareCollect as ReturnType<
-                      typeof usePrepareContractWrite
-                    >,
-                    send: sendCollect,
-                  },
-                },
-              ],
-            },
-          ] as const),
-    [native, prepareCollect, prepareMulticall, sendCollect, sendMulticall]
-  );
+    return [
+      {
+        stageTitle: title,
+        parallelTransactions: [
+          {
+            title,
+            tx,
+          },
+        ],
+      },
+    ] as const;
+  }, [
+    address,
+    environment.base.liquidityManager,
+    lendgine,
+    lendgineInfo,
+    native,
+    position,
+    t,
+  ]);
 };

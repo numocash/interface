@@ -1,6 +1,0 @@
-[submodule "lib/numoen-contracts"]
-	path = lib/numoen-contracts
-	url = https://github.com/Numoen/contracts-mono
-[submodule "lib/numoen-subgraph"]
-	path = lib/numoen-subgraph
-	url = https://github.com/Numoen/subgraph

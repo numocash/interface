@@ -3,8 +3,8 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 
+import { liquidityManagerABI } from "../abis/liquidityManager";
 import { useEnvironment } from "../contexts/useEnvironment";
-import { liquidityManagerABI } from "../generated";
 import { scale } from "../lib/constants";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";

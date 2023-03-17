@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../../contexts/useEnvironment";
@@ -79,19 +80,23 @@ export const Deposit: React.FC = () => {
         ? "Enter an amount"
         : baseBalance.isLoading ||
           quoteBalance.isLoading ||
+          !approveBase.allowanceQuery ||
           approveBase.allowanceQuery.isLoading ||
-          approveQuote.allowanceQuery.isLoading
+          !approveQuote.allowanceQuery ||
+          approveQuote.allowanceQuery.isLoading ||
+          !deposit
         ? "Loading"
         : (baseBalance.data && baseInputAmount.greaterThan(baseBalance.data)) ||
           (quoteBalance.data && quoteInputAmount.greaterThan(quoteBalance.data))
         ? "Insufficient amount"
         : null,
     [
-      approveBase.allowanceQuery.isLoading,
-      approveQuote.allowanceQuery.isLoading,
+      approveBase.allowanceQuery,
+      approveQuote.allowanceQuery,
       baseBalance.data,
       baseBalance.isLoading,
       baseInputAmount,
+      deposit,
       lendgineInfo.isLoading,
       quoteBalance.data,
       quoteBalance.isLoading,
@@ -145,6 +150,7 @@ export const Deposit: React.FC = () => {
         disabled={!!disableReason}
         tw="mt-4 h-12 text-lg"
         onClick={async () => {
+          invariant(deposit);
           await Beet(deposit);
 
           onInput("", "base");

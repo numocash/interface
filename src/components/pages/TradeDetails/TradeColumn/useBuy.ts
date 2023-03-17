@@ -4,18 +4,17 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
-import type { Address, usePrepareContractWrite } from "wagmi";
+import type { Address } from "wagmi";
 import { useAccount } from "wagmi";
+import {
+  getContract,
+  prepareWriteContract,
+  writeContract,
+} from "wagmi/actions";
 
+import { lendgineRouterABI } from "../../../../abis/lendgineRouter";
 import { useSettings } from "../../../../contexts/settings";
 import { useEnvironment } from "../../../../contexts/useEnvironment";
-import {
-  useLendgineRouter,
-  useLendgineRouterMint,
-  useLendgineRouterMulticall,
-  usePrepareLendgineRouterMint,
-  usePrepareLendgineRouterMulticall,
-} from "../../../../generated";
 import type { HookArg } from "../../../../hooks/internal/utils";
 import { useApprove } from "../../../../hooks/useApprove";
 import {
@@ -51,15 +50,11 @@ export const useBuy = ({
   const mostLiquid = useMostLiquidMarket([base, quote]);
   const environment = useEnvironment();
 
-  const lendgineRouterContract = useLendgineRouter({
-    address: environment.base.lendgineRouter,
-  });
-
   const isLong = isLongLendgine(selectedLendgine, base);
   const approve = useApprove(amountIn, environment.base.lendgineRouter);
   const native = useIsWrappedNative(selectedLendgine.token1);
 
-  const { args } = useMemo(() => {
+  return useMemo(() => {
     if (
       !borrowAmount ||
       !liquidity ||
@@ -68,7 +63,7 @@ export const useBuy = ({
       !amountIn ||
       !mostLiquid.data
     )
-      return {};
+      return undefined;
 
     const args = [
       {
@@ -106,100 +101,76 @@ export const useBuy = ({
       },
     ] as const;
 
-    return { args, native };
+    const lendgineRouterContract = getContract({
+      abi: lendgineRouterABI,
+      address: environment.base.lendgineRouter,
+    });
+
+    const title = `Buy ${quote.symbol}${isLong ? "+" : "-"}`;
+
+    const tx = native
+      ? async () => {
+          const config = await prepareWriteContract({
+            abi: lendgineRouterABI,
+            functionName: "multicall",
+            address: environment.base.lendgineRouter,
+            args: [
+              [
+                lendgineRouterContract.interface.encodeFunctionData(
+                  "mint",
+                  args
+                ),
+                lendgineRouterContract.interface.encodeFunctionData(
+                  "refundETH"
+                ),
+              ] as `0x${string}`[],
+            ],
+            overrides: {
+              value: args[0].amountIn,
+            },
+          });
+          const data = await writeContract(config);
+          return data;
+        }
+      : async () => {
+          const config = await prepareWriteContract({
+            abi: lendgineRouterABI,
+            functionName: "mint",
+            address: environment.base.lendgineRouter,
+            args,
+          });
+          const data = await writeContract(config);
+          return data;
+        };
+
+    return [
+      native ? approve.beetStage : null,
+      {
+        stageTitle: title,
+        parallelTransactions: [
+          {
+            title,
+            tx,
+          },
+        ],
+      },
+    ].filter((s): s is BeetStage => !!s);
   }, [
     address,
     amountIn,
+    approve.beetStage,
     borrowAmount,
+    environment.base.lendgineRouter,
+    isLong,
     liquidity,
     mostLiquid.data,
     native,
-    selectedLendgine.bound,
-    selectedLendgine.token0.address,
-    selectedLendgine.token0.decimals,
-    selectedLendgine.token1.address,
-    selectedLendgine.token1.decimals,
+    quote.symbol,
+    selectedLendgine,
     settings.maxSlippagePercent,
     settings.timeout,
     shares,
   ]);
-
-  const prepareMint = usePrepareLendgineRouterMint({
-    address: environment.base.lendgineRouter,
-    args: args,
-    enabled: !!args,
-    staleTime: Infinity,
-  });
-  const sendMint = useLendgineRouterMint(prepareMint.config);
-
-  const prepareMulticall = usePrepareLendgineRouterMulticall({
-    address: environment.base.lendgineRouter,
-    staleTime: Infinity,
-    enabled: !!args && !!lendgineRouterContract && !!native,
-    args:
-      !!args && !!lendgineRouterContract
-        ? [
-            [
-              lendgineRouterContract.interface.encodeFunctionData("mint", args),
-              lendgineRouterContract.interface.encodeFunctionData("refundETH"),
-            ] as `0x${string}`[],
-          ]
-        : undefined,
-    overrides: {
-      value: args?.[0].amountIn,
-    },
-  });
-  const sendMulticall = useLendgineRouterMulticall(prepareMulticall.config);
-
-  return useMemo(
-    () =>
-      native
-        ? [
-            {
-              stageTitle: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
-              parallelTransactions: [
-                {
-                  title: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
-                  tx: {
-                    prepare: prepareMulticall as ReturnType<
-                      typeof usePrepareContractWrite
-                    >,
-                    send: sendMulticall,
-                  },
-                },
-              ],
-            },
-          ]
-        : ((
-            [
-              approve.beetStage,
-              {
-                stageTitle: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
-                parallelTransactions: [
-                  {
-                    title: `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
-                    tx: {
-                      prepare: prepareMint as ReturnType<
-                        typeof usePrepareContractWrite
-                      >,
-                      send: sendMint,
-                    },
-                  },
-                ],
-              },
-            ] as const
-          ).filter((s) => !!s) as BeetStage[]),
-    [
-      approve.beetStage,
-      isLong,
-      native,
-      prepareMint,
-      prepareMulticall,
-      quote.symbol,
-      sendMint,
-      sendMulticall,
-    ]
-  );
 };
 
 export const useBuyAmounts = ({

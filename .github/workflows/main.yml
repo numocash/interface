@@ -19,9 +19,7 @@ jobs:
         with:
           node-version: 16.x
           cache: "pnpm"
-      - uses: "foundry-rs/foundry-toolchain@v1"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm wagmi generate
       - run: pnpm graphql-codegen
       - run: pnpm typecheck
 
@@ -38,8 +36,6 @@ jobs:
         with:
           node-version: 16.x
           cache: "pnpm"
-      - uses: "foundry-rs/foundry-toolchain@v1"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm wagmi generate
       - run: pnpm graphql-codegen
       - run: pnpm lint:ci

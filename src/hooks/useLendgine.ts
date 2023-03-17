@@ -1,7 +1,7 @@
 import { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
-import { lendgineABI } from "../generated";
+import { lendgineABI } from "../abis/lendgine";
 import { scale } from "../lib/constants";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";

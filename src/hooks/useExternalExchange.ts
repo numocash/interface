@@ -9,9 +9,10 @@ import invariant from "tiny-invariant";
 import { objectKeys } from "ts-extras";
 import type { Address } from "wagmi";
 
+import { uniswapV2PairABI } from "../abis/uniswapV2Pair";
+import { uniswapV3PoolABI } from "../abis/uniswapV3Pool";
 import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
 import { useEnvironment } from "../contexts/useEnvironment";
-import { iUniswapV2PairABI, iUniswapV3PoolABI } from "../generated";
 import type {
   PriceHistoryDayV2Query,
   PriceHistoryHourV2Query,
@@ -273,7 +274,7 @@ const useV2Price = (tokens: HookArg<Market>) => {
     address: (v2PairAddress as Address) ?? undefined,
     staleTime: 3_000,
     enabled: !!v2PairAddress,
-    abi: iUniswapV2PairABI,
+    abi: uniswapV2PairABI,
     functionName: "getReserves",
     watch: true,
     select: (data) => {
@@ -322,7 +323,7 @@ const useV3Prices = (tokens: HookArg<Market>) => {
         ({
           address: calcAddress(fee) as Address,
           functionName: "slot0",
-          abi: iUniswapV3PoolABI,
+          abi: uniswapV3PoolABI,
         } as const)
     );
 
