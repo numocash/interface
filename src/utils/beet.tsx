@@ -2,21 +2,13 @@ import React, { useCallback } from "react";
 import toast from "react-hot-toast";
 import invariant from "tiny-invariant";
 import { styled } from "twin.macro";
-import type { Address, useContractWrite, usePrepareContractWrite } from "wagmi";
+import type { Address } from "wagmi";
 import { useNetwork } from "wagmi";
-import type {
-  PrepareWriteContractResult,
-  SendTransactionResult,
-} from "wagmi/actions";
-import { prepareWriteContract, writeContract } from "wagmi/actions";
 
 import { useAwaitTX } from "../hooks/useAwaitTX";
 
 export interface BeetTx {
-  tx: {
-    prepare: ReturnType<typeof usePrepareContractWrite>;
-    send: ReturnType<typeof useContractWrite>;
-  };
+  tx: () => Promise<{ hash: `0x${string}` }>;
   title: string;
 }
 
@@ -52,134 +44,52 @@ export const useBeet = () => {
         0
       );
 
-      // TODO: do we need this?
-      // stages.length > 1 &&
-      //   toaster.generalToast({
-      //     type: "loading",
-      //     id: `${random}-general`, // Don't use 0-1, because hot toast doesn't recompute height
-      //     title: actionTitle,
-      //     message: "Building...",
-      //   });
-
       for (const [stageIndex, stage] of stages.entries()) {
         const previousTxs = [...Array(stageIndex).keys()].reduce(
           (acc, i) => acc + (stages[i]?.parallelTransactions.length ?? 0),
           0
         );
 
-        // if (stageIndex !== 0) {
-        // TODO: must get the return values of the refetch and pass them to send
-
-        const preUpdatedConfigs = await Promise.all(
-          stage.parallelTransactions.map(
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            async (t) => await prepareWriteContract(t.tx.prepare.config) //TODO: error estimating gas occurs here
-          )
-        );
-
-        // if contains undefined, throw error
-        if (preUpdatedConfigs.find((t) => t === undefined) !== undefined) {
-          const index = preUpdatedConfigs.findIndex((t) => t === undefined);
-
-          const humanCount = `${1 + index + previousTxs}/${totaltx}`;
-
-          toaster.dismiss(`${random}-${stageIndex}-pre`);
-
-          toaster.txError(
-            _generateToasterId(stageIndex, index),
-            stage.stageTitle,
-            humanCount,
-            "Error with transaction"
-          );
-          return;
-        }
-
-        const updatedConfigs: PrepareWriteContractResult[] =
-          preUpdatedConfigs as PrepareWriteContractResult[];
-
-        // Error if any errors are present
-        // for (const [index, bpTx] of stage.parallelTransactions.entries()) {
-        //   if (
-        //     !bpTx.tx.send.writeAsync ||
-        //     !!bpTx.tx.prepare.error ||
-        //     !!bpTx.tx.send.error
-        //   ) {
-        //     const humanCount = `${1 + index + previousTxs}/${totaltx}`;
-
-        //     toaster.dismiss(`${random}-${stageIndex}-pre`);
-
-        //     toaster.txError(
-        //       _generateToasterId(stageIndex, index),
-        //       stage.stageTitle,
-        //       humanCount,
-        //       "Error with transaction"
-        //     );
-        //     return;
-        //   }
-
-        //   // if (stageIndex === 0)
-        //   //   invariant(
-        //   //     bpTx.tx.send.sendTransactionAsync,
-        //   //     "Transaction not ready to send"
-        //   //   );
-        // }
-
-        // once all transactions are estimated and not error, send transaction function can be assumed to be defined
-
-        let txs: SendTransactionResult[] = [];
-
-        // const signPromptNotification = setTimeout(() => {
-        //   // dismiss the general loading messages
-        //   toaster.dismiss(`${random}-general`);
-        // }, 1000);
-
         // dismiss previous toast
         toaster.dismiss(`${random}-${stageIndex}-pre`);
-        let start = 0;
 
-        for (const [i, tx] of stage.parallelTransactions.entries()) {
-          const humanCount = `${1 + i + previousTxs}/${totaltx}`;
-
-          toaster.txLoading(
-            _generateToasterId(stageIndex, i),
-            tx.title,
-            humanCount,
-            "Approve in wallet"
-          );
-
-          // send the transaction
-          // invariant(tx.tx.send.writeAsync, "send transaction");
-
-          // error if undefined
-
-          try {
-            const config = updatedConfigs[i];
-            invariant(config);
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            const contractTx = await writeContract(config);
-            start = Date.now();
+        const sent = await Promise.all(
+          stage.parallelTransactions.map(async (tx, i) => {
+            const humanCount = `${1 + i + previousTxs}/${totaltx}`;
 
             toaster.txLoading(
               _generateToasterId(stageIndex, i),
               tx.title,
               humanCount,
-              "",
-              contractTx.hash
+              "Sending transaction"
             );
-            txs = txs.concat(contractTx);
-          } catch (err) {
-            console.log(typeof err, err);
-            toaster.txError(
-              _generateToasterId(stageIndex, i),
-              tx.title,
-              humanCount,
-              "Error sending transaction"
-            );
-            return;
-          }
-        }
+
+            try {
+              const sent = await tx.tx();
+
+              toaster.txLoading(
+                _generateToasterId(stageIndex, i),
+                tx.title,
+                humanCount,
+                "",
+                sent.hash
+              );
+              return { ...sent, tx };
+            } catch (err) {
+              console.log(typeof err, err);
+              toaster.txError(
+                _generateToasterId(stageIndex, i),
+                tx.title,
+                humanCount,
+                "Error sending transaction"
+              );
+              return undefined;
+            }
+          })
+        );
+
+        // if any are undefined then return
+        if (sent.find((t) => t === undefined) !== undefined) return;
 
         const nextStage = stages[stageIndex + 1];
         if (nextStage) {
@@ -194,40 +104,34 @@ export const useBeet = () => {
           });
         }
 
-        // clearTimeout(signPromptNotification);
+        await Promise.all(
+          sent.map(async (tx, i) => {
+            const humanCount = `${1 + i + previousTxs}/${totaltx}`;
 
-        for (const [i, tx] of txs.entries()) {
-          const h = stage.parallelTransactions[i];
-          const humanCount = `${1 + i + previousTxs}/${totaltx}`;
+            invariant(tx);
 
-          invariant(h);
-          // wait for transactions to return
-          // const rec = await tx.wait(); // TODO: why can't we use web sockets
-          const rec = await awaitTX(tx.hash);
-          // const rec = await awaitTX(tx.hash); // TODO: could just wait for the first out the two
-          if (rec.status === 0) {
-            // clearTimeout(signPromptNotification);
-            toaster.dismiss(`${random}-general`);
-            toaster.txError(
+            // TODO: what if the transaction already was confirmed
+            const rec = await awaitTX(tx.hash);
+            if (rec.status === 0) {
+              toaster.dismiss(`${random}-general`);
+              toaster.txError(
+                _generateToasterId(stageIndex, i),
+                tx.tx.title,
+                humanCount,
+                "Transaction reverted",
+                rec.transactionHash
+              );
+              return;
+            }
+            toaster.txSuccess(
               _generateToasterId(stageIndex, i),
-              h.title,
+              tx.tx.title,
               humanCount,
-              "Transaction reverted",
-              rec.transactionHash
+              "",
+              tx.hash
             );
-            return;
-          }
-          console.log((Date.now() - start) / 1000);
-          toaster.txSuccess(
-            _generateToasterId(stageIndex, i),
-            h.title,
-            humanCount,
-            "",
-            tx.hash
-          );
-        }
-
-        // clearTimeout(signPromptNotification);
+          })
+        );
       }
     },
     [awaitTX]

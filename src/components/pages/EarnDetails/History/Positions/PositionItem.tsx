@@ -1,5 +1,6 @@
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
+import invariant from "tiny-invariant";
 
 import { supplyRate } from "../../../../../lib/jumprate";
 import {
@@ -117,6 +118,7 @@ export const PositionItem: React.FC<Props> = ({
             tw="w-min px-1 py-0.5"
             disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
             onClick={async () => {
+              invariant(collect);
               await Beet(collect);
             }}
           >
@@ -176,6 +178,7 @@ export const PositionItem: React.FC<Props> = ({
           tw="h-8 text-xl"
           disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
           onClick={async () => {
+            invariant(collect);
             await Beet(collect);
           }}
         >

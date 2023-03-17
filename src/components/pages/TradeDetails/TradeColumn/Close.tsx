@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
+import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useBalance } from "../../../../hooks/useBalance";
@@ -53,12 +54,19 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
         // ? "Enter more than zero"
         !parsedAmount
         ? "Invalid input"
-        : !shares || !balanceQuery.data || balanceQuery.isLoading
+        : !shares || !balanceQuery.data || balanceQuery.isLoading || !close
         ? "Loading"
         : shares.greaterThan(balanceQuery.data)
         ? "Insufficient balance"
         : null,
-    [balanceQuery.data, balanceQuery.isLoading, input, parsedAmount, shares]
+    [
+      balanceQuery.data,
+      balanceQuery.isLoading,
+      close,
+      input,
+      parsedAmount,
+      shares,
+    ]
   );
 
   return (
@@ -104,6 +112,7 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
         tw="h-12 text-xl font-bold items-center"
         disabled={!!disableReason}
         onClick={async () => {
+          invariant(close);
           await Beet(close);
 
           setInput("");

@@ -4,20 +4,17 @@ import { AddressZero } from "@ethersproject/constants";
 import type { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
 import { Token } from "@uniswap/sdk-core";
 import { useMemo } from "react";
-import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
+import {
+  getContract,
+  prepareWriteContract,
+  writeContract,
+} from "wagmi/actions";
 
+import { factoryABI } from "../../../abis/factory";
+import { liquidityManagerABI } from "../../../abis/liquidityManager";
 import { useSettings } from "../../../contexts/settings";
 import { useEnvironment } from "../../../contexts/useEnvironment";
-import {
-  useFactoryCreateLendgine,
-  useLiquidityManager,
-  useLiquidityManagerAddLiquidity,
-  useLiquidityManagerMulticall,
-  usePrepareFactoryCreateLendgine,
-  usePrepareLiquidityManagerAddLiquidity,
-  usePrepareLiquidityManagerMulticall,
-} from "../../../generated";
 import type { HookArg } from "../../../hooks/internal/utils";
 import { useApprove } from "../../../hooks/useApprove";
 import { useChain } from "../../../hooks/useChain";
@@ -41,7 +38,7 @@ export const useCreate = ({
   token0Input: HookArg<CurrencyAmount<WrappedTokenInfo>>;
   token1Input: HookArg<CurrencyAmount<WrappedTokenInfo>>;
   bound: HookArg<Fraction>;
-}): BeetStage[] => {
+}) => {
   const environment = useEnvironment();
   const settings = useSettings();
   const { address } = useAccount();
@@ -53,9 +50,6 @@ export const useCreate = ({
       : null
   );
 
-  const liquidityManagerContract = useLiquidityManager({
-    address: environment.base.liquidityManager,
-  });
   const native0 = useIsWrappedNative(token0Input?.currency);
   const native1 = useIsWrappedNative(token1Input?.currency);
 
@@ -68,9 +62,9 @@ export const useCreate = ({
     environment.base.liquidityManager
   );
 
-  const { args, createArgs } = useMemo(() => {
+  useMemo(() => {
     if (!token0Input || !token1Input || !address || !priceQuery.data || !bound)
-      return {};
+      return undefined;
 
     const lendgine: Lendgine = {
       token0: token0Input.currency,
@@ -120,137 +114,106 @@ export const useCreate = ({
       },
     ] as const;
 
-    return { args, createArgs };
+    const liquidityManagerContract = getContract({
+      abi: liquidityManagerABI,
+      address: environment.base.liquidityManager,
+    });
+
+    const createTitle = `New ${token1Input?.currency.symbol ?? ""} + ${
+      token0Input?.currency.symbol ?? ""
+    } market`;
+
+    const title = `Add ${token0Input?.currency.symbol ?? ""} / ${
+      token1Input?.currency.symbol ?? ""
+    } liquidty`;
+
+    const createTX = async () => {
+      const config = await prepareWriteContract({
+        abi: factoryABI,
+        functionName: "createLendgine",
+        address: environment.base.factory,
+        args: createArgs,
+      });
+      const data = await writeContract(config);
+      return data;
+    };
+
+    const tx =
+      native0 || native0
+        ? async () => {
+            const config = await prepareWriteContract({
+              abi: liquidityManagerABI,
+              functionName: "multicall",
+              address: environment.base.liquidityManager,
+              args: [
+                [
+                  liquidityManagerContract.interface.encodeFunctionData(
+                    "addLiquidity",
+                    args
+                  ),
+                  liquidityManagerContract.interface.encodeFunctionData(
+                    "refundETH"
+                  ),
+                ] as `0x${string}`[],
+              ],
+              overrides: {
+                value: native0
+                  ? BigNumber.from(token0Input?.quotient.toString() ?? 0)
+                  : BigNumber.from(token1Input?.quotient.toString() ?? 0),
+              },
+            });
+            const data = await writeContract(config);
+            return data;
+          }
+        : async () => {
+            const config = await prepareWriteContract({
+              abi: liquidityManagerABI,
+              functionName: "addLiquidity",
+              address: environment.base.liquidityManager,
+              args,
+            });
+            const data = await writeContract(config);
+            return data;
+          };
+
+    return [
+      native0 ? undefined : approveToken0.beetStage,
+      native1 ? undefined : approveToken1.beetStage,
+      {
+        stageTitle: createTitle,
+        parallelTransactions: [
+          {
+            title: createTitle,
+            tx: createTX,
+          },
+        ],
+      },
+      {
+        stageTitle: title,
+        parallelTransactions: [
+          {
+            title,
+            tx,
+          },
+        ],
+      },
+    ].filter((s): s is BeetStage => !!s);
   }, [
     address,
+    approveToken0.beetStage,
+    approveToken1.beetStage,
     bound,
     chainID,
+    environment.base.factory,
+    environment.base.liquidityManager,
+    native0,
+    native1,
     priceQuery.data,
     settings.maxSlippagePercent,
     settings.timeout,
     token0Input,
     token1Input,
   ]);
-
-  const prepare = usePrepareFactoryCreateLendgine({
-    args: createArgs,
-    address: environment.base.factory,
-    enabled: !!createArgs,
-  });
-  const write = useFactoryCreateLendgine(prepare.data);
-
-  const prepareAdd = usePrepareLiquidityManagerAddLiquidity({
-    address: environment.base.liquidityManager,
-    args: args,
-    enabled: !!args,
-    staleTime: Infinity,
-  });
-  const sendAdd = useLiquidityManagerAddLiquidity(prepareAdd.config);
-
-  const prepareMulticall = usePrepareLiquidityManagerMulticall({
-    address: environment.base.liquidityManager,
-    enabled: !!args && (native0 || native1) && !!liquidityManagerContract,
-    staleTime: Infinity,
-    args:
-      !!args && !!liquidityManagerContract
-        ? [
-            [
-              liquidityManagerContract.interface.encodeFunctionData(
-                "addLiquidity",
-                args
-              ),
-              liquidityManagerContract.interface.encodeFunctionData(
-                "refundETH"
-              ),
-            ] as `0x${string}`[],
-          ]
-        : undefined,
-    overrides: {
-      value: native0
-        ? BigNumber.from(token0Input?.quotient.toString() ?? 0)
-        : BigNumber.from(token1Input?.quotient.toString() ?? 0),
-    },
-  });
-  const sendMulticall = useLiquidityManagerMulticall(prepareMulticall.config);
-
-  return useMemo(
-    () =>
-      (
-        [
-          native0 ? undefined : approveToken0.beetStage,
-          native1 ? undefined : approveToken1.beetStage,
-          {
-            stageTitle: `New ${token1Input?.currency.symbol ?? ""} + ${
-              token0Input?.currency.symbol ?? ""
-            } market`,
-            parallelTransactions: [
-              {
-                title: `New ${token1Input?.currency.symbol ?? ""} + ${
-                  token0Input?.currency.symbol ?? ""
-                } market`,
-                tx: {
-                  prepare: prepare as ReturnType<
-                    typeof usePrepareContractWrite
-                  >,
-                  send: write,
-                },
-              },
-            ],
-          },
-          native0 || native1
-            ? {
-                stageTitle: `Add ${token0Input?.currency.symbol ?? ""} / ${
-                  token1Input?.currency.symbol ?? ""
-                } liquidty`,
-                parallelTransactions: [
-                  {
-                    title: `Add ${token0Input?.currency.symbol ?? ""} / ${
-                      token1Input?.currency.symbol ?? ""
-                    } liquidty`,
-                    tx: {
-                      prepare: prepareMulticall as ReturnType<
-                        typeof usePrepareContractWrite
-                      >,
-                      send: sendMulticall,
-                    },
-                  },
-                ],
-              }
-            : {
-                stageTitle: `Add ${token0Input?.currency.symbol ?? ""} / ${
-                  token1Input?.currency.symbol ?? ""
-                } liquidty`,
-                parallelTransactions: [
-                  {
-                    title: `Add ${token0Input?.currency.symbol ?? ""} / ${
-                      token1Input?.currency.symbol ?? ""
-                    } liquidty`,
-                    tx: {
-                      prepare: prepareAdd as ReturnType<
-                        typeof usePrepareContractWrite
-                      >,
-                      send: sendAdd,
-                    },
-                  },
-                ],
-              },
-        ] as const
-      ).filter((s): s is BeetStage => !!s),
-    [
-      approveToken0.beetStage,
-      approveToken1.beetStage,
-      native0,
-      native1,
-      prepare,
-      prepareAdd,
-      prepareMulticall,
-      sendAdd,
-      sendMulticall,
-      token0Input?.currency.symbol,
-      token1Input?.currency.symbol,
-      write,
-    ]
-  );
 };
 
 export const useDepositAmounts = ({

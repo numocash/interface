@@ -23,6 +23,8 @@ export const BuyStats: React.FC<Props> = ({ borrowRate }: Props) => {
     useTradeDetails();
   const isInverse = !isLongLendgine(selectedLendgine, base);
 
+  // const lendgineInfo = useLendgine(selectedLendgine);
+
   const { nextLendgine, lowerLendgine } = useMemo(() => {
     const similarLendgines = isInverse
       ? pickShortLendgines(lendgines, base)
@@ -75,6 +77,18 @@ export const BuyStats: React.FC<Props> = ({ borrowRate }: Props) => {
         <p tw="text-secondary">Funding APR</p>
         <p>{borrowRate ? formatPercent(borrowRate) : <LoadingSpinner />}</p>
       </RowBetween>
+      {/* <RowBetween tw="p-0">
+        <p tw="text-secondary">Internal Price</p>
+        <p>
+          {lendgineInfo.data
+            ? isInverse
+              ? formatPrice(
+                  invert(numoenPrice(selectedLendgine, lendgineInfo.data))
+                )
+              : formatPrice(numoenPrice(selectedLendgine, lendgineInfo.data))
+            : "loading"}
+        </p>
+      </RowBetween> */}
       <RowBetween tw="p-0">
         <p tw="text-secondary">Leverage</p>
         <p>Squared</p>

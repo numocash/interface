@@ -4,7 +4,7 @@ import { chunk } from "lodash";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import { lendgineABI } from "../generated";
+import { lendgineABI } from "../abis/lendgine";
 import { scale } from "../lib/constants";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";

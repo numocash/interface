@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useBalance } from "../../../../hooks/useBalance";
@@ -44,13 +45,14 @@ export const Buy: React.FC = () => {
         ? "Insufficient balance"
         : selectedLendgineInfo.data.totalLiquidity.equalTo(0)
         ? "Insufficient liquidity"
-        : !liquidity || !shares
+        : !liquidity || !shares || !buy
         ? "Loading"
         : liquidity.greaterThan(selectedLendgineInfo.data.totalLiquidity)
         ? "Insufficient liquidity"
         : null,
     [
       balance.data,
+      buy,
       input,
       liquidity,
       parsedAmount,
@@ -80,6 +82,7 @@ export const Buy: React.FC = () => {
         tw="h-12 text-xl font-bold items-center"
         disabled={!!disableReason}
         onClick={async () => {
+          invariant(buy);
           await Beet(buy);
 
           setInput("");

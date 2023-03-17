@@ -1,8 +1,8 @@
 import { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
+import { liquidityManagerABI } from "../abis/liquidityManager";
 import { useEnvironment } from "../contexts/useEnvironment";
-import { liquidityManagerABI } from "../generated";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
 import { useContractRead } from "./internal/useContractRead";
