@@ -11,8 +11,8 @@ import { bisect } from "d3-array";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
+import { isLongLendgine } from "../../../../lib/lendgines";
 import { formatPercent } from "../../../../utils/format";
-import { isLongLendgine } from "../../../../utils/lendgines";
 import { RowBetween } from "../../../common/RowBetween";
 import { useTradeDetails } from "../TradeDetailsInner";
 

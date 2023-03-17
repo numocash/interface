@@ -1,17 +1,13 @@
 import type { Price } from "@uniswap/sdk-core";
-import { CurrencyAmount, Fraction, Percent } from "@uniswap/sdk-core";
-import JSBI from "jsbi";
+import { CurrencyAmount, Percent } from "@uniswap/sdk-core";
 
-import type { Lendgine, LendgineInfo } from "../../constants/types";
-import { isV3 } from "../../hooks/useExternalExchange";
-import type { WrappedTokenInfo } from "../../hooks/useTokens2";
-import type { UniswapV2Pool } from "../../services/graphql/uniswapV2";
-import type { UniswapV3Pool } from "../../services/graphql/uniswapV3";
+import { isV3 } from "../hooks/useExternalExchange";
+import type { UniswapV2Pool } from "../services/graphql/uniswapV2";
+import type { UniswapV3Pool } from "../services/graphql/uniswapV3";
+import { ONE_HUNDRED_PERCENT } from "./constants";
 import { liquidityPerCollateral } from "./lendgineMath";
-
-export const ONE_HUNDRED_PERCENT = new Fraction(1);
-
-export const scale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18));
+import type { Lendgine, LendgineInfo } from "./types/lendgine";
+import type { WrappedTokenInfo } from "./types/wrappedTokenInfo";
 
 export const determineBorrowAmount = (
   userAmount: CurrencyAmount<WrappedTokenInfo>,

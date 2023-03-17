@@ -1,8 +1,8 @@
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { useBalances } from "../../../../../hooks/useBalance";
-import { useLendgines } from "../../../../../hooks/useLendgine";
+import { useBalances } from "../../../../../hooks/useBalances";
+import { useLendgines } from "../../../../../hooks/useLendgines";
 import { EmptyPosition } from "../../../../common/EmptyPosition";
 import { Divider } from "../../../Trade/Loading";
 import { useTradeDetails } from "../../TradeDetailsInner";

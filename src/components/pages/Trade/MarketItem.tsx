@@ -8,9 +8,9 @@ import {
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../hooks/useExternalExchange";
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import { priceToFraction } from "../../../lib/price";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { formatPercent } from "../../../utils/format";
-import { priceToFraction } from "../../../utils/Numoen/price";
 import { TokenIcon } from "../../common/TokenIcon";
 import { Times } from "../TradeDetails/Chart/TimeSelector";
 import { MiniChart } from "./MiniChart";

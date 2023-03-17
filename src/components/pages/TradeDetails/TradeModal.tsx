@@ -1,4 +1,4 @@
-import { isLongLendgine } from "../../../utils/lendgines";
+import { isLongLendgine } from "../../../lib/lendgines";
 import { X } from "../../common/Filter";
 import { Modal } from "../../common/Modal";
 import { Buy } from "./TradeColumn/Buy";

@@ -1,4 +1,4 @@
-import { isLongLendgine } from "../../../utils/lendgines";
+import { isLongLendgine } from "../../../lib/lendgines";
 import { Button } from "../../common/Button";
 import { TokenIcon } from "../../common/TokenIcon";
 import { Chart } from "./Chart/Chart";

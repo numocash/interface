@@ -3,9 +3,9 @@ import type { Fraction } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
 import tw, { styled } from "twin.macro";
 
-import { useLendgines } from "../../../hooks/useLendgine";
-import { isLongLendgine } from "../../../utils/lendgines";
-import { priceToFraction } from "../../../utils/Numoen/price";
+import { useLendgines } from "../../../hooks/useLendgines";
+import { isLongLendgine } from "../../../lib/lendgines";
+import { priceToFraction } from "../../../lib/price";
 import { useEarnDetails } from "./EarnDetailsInner";
 import { LendgineItem } from "./LendgineItem";
 

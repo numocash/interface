@@ -1,6 +1,6 @@
 import tw, { css } from "twin.macro";
 
-import { isLongLendgine } from "../../../../utils/lendgines";
+import { isLongLendgine } from "../../../../lib/lendgines";
 import { useNextLendgines, useTradeDetails } from "../TradeDetailsInner";
 import { Config } from "./Config";
 import { ProvideLiquidity } from "./ProvideLiquidity";

@@ -7,8 +7,8 @@ import { useMemo } from "react";
 import type { Address, usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../../contexts/environment2";
 import { useSettings } from "../../../../contexts/settings";
+import { useEnvironment } from "../../../../contexts/useEnvironment";
 import {
   useLendgineRouter,
   useLendgineRouterMint,
@@ -16,30 +16,27 @@ import {
   usePrepareLendgineRouterMint,
   usePrepareLendgineRouterMulticall,
 } from "../../../../generated";
-import { useApprove } from "../../../../hooks/useApproval";
-import type { HookArg } from "../../../../hooks/useBalance";
+import type { HookArg } from "../../../../hooks/internal/utils";
+import { useApprove } from "../../../../hooks/useApprove";
 import {
   isV3,
   useMostLiquidMarket,
 } from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
-import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
-import type { BeetStage } from "../../../../utils/beet";
-import { isLongLendgine } from "../../../../utils/lendgines";
-import { borrowRate } from "../../../../utils/Numoen/jumprate";
+import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
+import { borrowRate } from "../../../../lib/jumprate";
 import {
   accruedLendgineInfo,
   getT,
   liquidityPerCollateral,
   liquidityPerShare,
-} from "../../../../utils/Numoen/lendgineMath";
-import { priceToFraction } from "../../../../utils/Numoen/price";
-import {
-  determineBorrowAmount,
-  ONE_HUNDRED_PERCENT,
-  scale,
-} from "../../../../utils/Numoen/trade";
+} from "../../../../lib/lendgineMath";
+import { isLongLendgine } from "../../../../lib/lendgines";
+import { priceToFraction } from "../../../../lib/price";
+import { determineBorrowAmount } from "../../../../lib/trade";
+import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
+import type { BeetStage } from "../../../../utils/beet";
 import { useTradeDetails } from "../TradeDetailsInner";
 
 export const useBuy = ({

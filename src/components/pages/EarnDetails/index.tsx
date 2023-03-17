@@ -2,44 +2,59 @@ import { getAddress } from "@ethersproject/address";
 import { useNavigate, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 
+import { useEnvironment } from "../../../contexts/useEnvironment";
 import { useCurrentPrice } from "../../../hooks/useExternalExchange";
 import { useLendginesForTokens } from "../../../hooks/useLendgine";
 import { useAddressToToken } from "../../../hooks/useTokens";
-import { useSortDenomTokens } from "../../../hooks/useTokens2";
+import { isValidMarket } from "../../../lib/lendgineValidity";
 import { LoadingPage } from "../../common/LoadingPage";
 import { EarnDetailsInner } from "./EarnDetailsInner";
 
 export const EarnDetails: React.FC = () => {
   const navigate = useNavigate();
+  const environment = useEnvironment();
 
-  const { addressA, addressB } = useParams<{
-    addressA: string;
-    addressB: string;
+  const { base, quote } = useParams<{
+    base: string;
+    quote: string;
   }>();
-  if (!addressA || !addressB) navigate("/trade/");
-  invariant(addressA && addressB);
+  if (!base || !quote) navigate("/earn/");
+  invariant(base && quote);
 
+  // if they aren't addresses
   try {
-    getAddress(addressA);
-    getAddress(addressB);
+    getAddress(base);
+    getAddress(quote);
   } catch (err) {
     console.error(err);
     navigate("/trade/");
   }
 
-  const tokenA = useAddressToToken(addressA);
-  const tokenB = useAddressToToken(addressB);
+  const baseToken = useAddressToToken(base);
+  const quoteToken = useAddressToToken(quote);
 
-  const denomSortedTokens = useSortDenomTokens(
-    !!tokenA && !!tokenB ? ([tokenA, tokenB] as const) : null
-  );
-  const lendgines = useLendginesForTokens(denomSortedTokens);
-  const priceQuery = useCurrentPrice(denomSortedTokens);
+  // if they aren't in the token list
+  if (!baseToken || !quoteToken) navigate("/earn/");
+  invariant(baseToken && quoteToken);
 
-  return !!denomSortedTokens && !!lendgines && !!priceQuery.data ? (
+  // if the market isn't valid
+  const market = [baseToken, quoteToken] as const;
+  if (
+    !isValidMarket(
+      market,
+      environment.interface.wrappedNative,
+      environment.interface.specialtyMarkets
+    )
+  )
+    navigate("/earn/");
+
+  const lendgines = useLendginesForTokens(market);
+  const priceQuery = useCurrentPrice(market);
+
+  return !!lendgines && !!priceQuery.data ? (
     <EarnDetailsInner
-      base={denomSortedTokens[0]}
-      quote={denomSortedTokens[1]}
+      base={baseToken}
+      quote={quoteToken}
       lendgines={lendgines}
       price={priceQuery.data}
     />

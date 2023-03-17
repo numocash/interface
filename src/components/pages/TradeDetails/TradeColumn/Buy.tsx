@@ -3,8 +3,8 @@ import { useAccount } from "wagmi";
 
 import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { isLongLendgine } from "../../../../lib/lendgines";
 import { useBeet } from "../../../../utils/beet";
-import { isLongLendgine } from "../../../../utils/lendgines";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";

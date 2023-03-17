@@ -5,8 +5,8 @@ import { useMemo } from "react";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../../contexts/environment2";
 import { useSettings } from "../../../../contexts/settings";
+import { useEnvironment } from "../../../../contexts/useEnvironment";
 import {
   useLiquidityManager,
   useLiquidityManagerAddLiquidity,
@@ -14,24 +14,24 @@ import {
   usePrepareLiquidityManagerAddLiquidity,
   usePrepareLiquidityManagerMulticall,
 } from "../../../../generated";
-import { useApprove } from "../../../../hooks/useApproval";
-import type { HookArg } from "../../../../hooks/useBalance";
+import type { HookArg } from "../../../../hooks/internal/utils";
+import { useApprove } from "../../../../hooks/useApprove";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
-import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
-import type { BeetStage } from "../../../../utils/beet";
-import { isLongLendgine } from "../../../../utils/lendgines";
+import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
 import {
   accruedLendgineInfo,
   getT,
   liquidityPerPosition,
-} from "../../../../utils/Numoen/lendgineMath";
+} from "../../../../lib/lendgineMath";
+import { isLongLendgine } from "../../../../lib/lendgines";
 import {
   invert,
   priceToFraction,
   priceToReserves,
-} from "../../../../utils/Numoen/price";
-import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
+} from "../../../../lib/price";
+import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
+import type { BeetStage } from "../../../../utils/beet";
 import { useEarnDetails } from "../EarnDetailsInner";
 
 export const useDeposit = ({

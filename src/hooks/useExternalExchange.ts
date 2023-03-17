@@ -8,11 +8,10 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { objectKeys } from "ts-extras";
 import type { Address } from "wagmi";
-import { useContractReads } from "wagmi";
 
 import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
-import { useEnvironment } from "../contexts/environment2";
-import { iUniswapV3PoolABI, useIUniswapV2PairGetReserves } from "../generated";
+import { useEnvironment } from "../contexts/useEnvironment";
+import { iUniswapV2PairABI, iUniswapV3PoolABI } from "../generated";
 import type {
   PriceHistoryDayV2Query,
   PriceHistoryHourV2Query,
@@ -31,6 +30,9 @@ import {
   PriceHistoryDayV3Document,
   PriceHistoryHourV3Document,
 } from "../gql/uniswapV3/graphql";
+import { fractionToPrice, priceToFraction } from "../lib/price";
+import type { Market } from "../lib/types/market";
+import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import type { UniswapV2Pool } from "../services/graphql/uniswapV2";
 import {
   parsePairV2,
@@ -45,12 +47,11 @@ import {
   parsePriceHistoryHourV3,
   Q192,
 } from "../services/graphql/uniswapV3";
-import { fractionToPrice, priceToFraction } from "../utils/Numoen/price";
-import type { HookArg } from "./useBalance";
+import { useContractRead } from "./internal/useContractRead";
+import { useContractReads } from "./internal/useContractReads";
+import type { HookArg } from "./internal/utils";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
-import type { Market } from "./useMarket";
-import type { WrappedTokenInfo } from "./useTokens2";
 
 export const isV3 = (t: UniswapV2Pool | UniswapV3Pool): t is UniswapV3Pool =>
   "feeTier" in t;
@@ -268,11 +269,13 @@ const useV2Price = (tokens: HookArg<Market>) => {
     tokens,
   ]);
 
-  return useIUniswapV2PairGetReserves({
+  return useContractRead({
     address: (v2PairAddress as Address) ?? undefined,
     staleTime: 3_000,
     enabled: !!v2PairAddress,
-    scopeKey: "v2Price",
+    abi: iUniswapV2PairABI,
+    functionName: "getReserves",
+    watch: true,
     select: (data) => {
       if (!tokens) return undefined;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -335,7 +338,7 @@ const useV3Prices = (tokens: HookArg<Market>) => {
     allowFailure: true,
     staleTime: 3_000,
     enabled: !!contracts,
-    scopeKey: "v3Prices",
+    watch: true,
     select: (data) => {
       invariant(tokens && token0);
 

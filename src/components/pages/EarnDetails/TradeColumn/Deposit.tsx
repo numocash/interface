@@ -1,12 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../../contexts/environment2";
-import { useApprove } from "../../../../hooks/useApproval";
+import { useEnvironment } from "../../../../contexts/useEnvironment";
+import { useApprove } from "../../../../hooks/useApprove";
 import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { isLongLendgine } from "../../../../lib/lendgines";
 import { useBeet } from "../../../../utils/beet";
-import { isLongLendgine } from "../../../../utils/lendgines";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";

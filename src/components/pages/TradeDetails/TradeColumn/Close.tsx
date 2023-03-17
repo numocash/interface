@@ -3,8 +3,8 @@ import { FaChevronLeft } from "react-icons/fa";
 import { useAccount } from "wagmi";
 
 import { useBalance } from "../../../../hooks/useBalance";
+import { isShortLendgine } from "../../../../lib/lendgines";
 import { useBeet } from "../../../../utils/beet";
-import { isShortLendgine } from "../../../../utils/lendgines";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";

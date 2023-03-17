@@ -4,23 +4,24 @@ import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { useLendgines, useLendginesPosition } from "../../../hooks/useLendgine";
-import type { Market } from "../../../hooks/useMarket";
+import { useLendgines } from "../../../hooks/useLendgines";
+import { useLendginesPositions } from "../../../hooks/useLendginesPositions";
 import { useMarketToLendgines } from "../../../hooks/useMarket";
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import { formatPercent } from "../../../utils/format";
-import { supplyRate } from "../../../utils/Numoen/jumprate";
+import { supplyRate } from "../../../lib/jumprate";
 import {
   accruedLendgineInfo,
   getT,
   liquidityPerPosition,
-} from "../../../utils/Numoen/lendgineMath";
+} from "../../../lib/lendgineMath";
 import {
   invert,
   numoenPrice,
   pricePerCollateral,
   pricePerLiquidity,
-} from "../../../utils/Numoen/price";
+} from "../../../lib/price";
+import type { Market } from "../../../lib/types/market";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
+import { formatPercent } from "../../../utils/format";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
 import { TokenIcon } from "../../common/TokenIcon";
@@ -34,7 +35,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
   const { address } = useAccount();
   const t = getT();
 
-  const positions = useLendginesPosition(lendgines, address);
+  const positions = useLendginesPositions(lendgines, address);
   const lendgineInfosQuery = useLendgines(lendgines);
 
   const positionValue = useMemo(() => {

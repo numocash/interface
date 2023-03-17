@@ -2,16 +2,13 @@ import type { Percent } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import { formatPercent, formatPrice } from "../../../../utils/format";
 import {
   isLongLendgine,
   pickLongLendgines,
   pickShortLendgines,
-} from "../../../../utils/lendgines";
-import {
-  nextHighestLendgine,
-  nextLowestLendgine,
-} from "../../../../utils/Numoen/price";
+} from "../../../../lib/lendgines";
+import { nextHighestLendgine, nextLowestLendgine } from "../../../../lib/price";
+import { formatPercent, formatPrice } from "../../../../utils/format";
 import { LoadingSpinner } from "../../../common/LoadingSpinner";
 import { Plus } from "../../../common/Plus";
 import { RowBetween } from "../../../common/RowBetween";

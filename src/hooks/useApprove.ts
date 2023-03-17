@@ -1,36 +1,17 @@
 import { getAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
-import type { Token } from "@uniswap/sdk-core";
-import { CurrencyAmount, MaxUint256 } from "@uniswap/sdk-core";
+import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
+import { MaxUint256 } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import type { Address, usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
 import { useSettings } from "../contexts/settings";
-import {
-  useErc20Allowance,
-  useErc20Approve,
-  usePrepareErc20Approve,
-} from "../generated";
+import { useErc20Approve, usePrepareErc20Approve } from "../generated";
+import { ONE_HUNDRED_PERCENT } from "../lib/constants";
 import type { BeetStage } from "../utils/beet";
-import { ONE_HUNDRED_PERCENT } from "../utils/Numoen/trade";
-import type { HookArg } from "./useBalance";
-
-export const useAllowance = <T extends Token>(
-  token: HookArg<T>,
-  address: HookArg<Address>,
-  spender: HookArg<Address>
-) => {
-  return useErc20Allowance({
-    address: token ? getAddress(token.address) : undefined,
-    args: address && spender ? [address, spender] : undefined,
-    staleTime: 3_000,
-    enabled: !!token && !!address && !!spender,
-    select: (data) =>
-      token ? CurrencyAmount.fromRawAmount(token, data.toString()) : undefined,
-    scopeKey: "erc20Allowance",
-  });
-};
+import type { HookArg } from "./internal/utils";
+import { useAllowance } from "./useAllowance";
 
 export const useApprove = <T extends Token>(
   tokenAmount: HookArg<CurrencyAmount<T>>,

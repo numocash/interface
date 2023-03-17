@@ -1,6 +1,6 @@
 import { Percent } from "@uniswap/sdk-core";
 
-import type { Lendgine, LendgineInfo } from "../../constants/types";
+import type { Lendgine, LendgineInfo } from "./types/lendgine";
 
 const kink = new Percent(8, 10);
 const multiplier = new Percent(1375, 100000);

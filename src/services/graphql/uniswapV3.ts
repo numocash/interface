@@ -9,7 +9,7 @@ import type {
   PriceHistoryDayV3Query,
   PriceHistoryHourV3Query,
 } from "../../gql/uniswapV3/graphql";
-import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 import type { PricePoint } from "./uniswapV2";
 
 export const feeTiers = {

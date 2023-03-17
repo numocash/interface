@@ -2,8 +2,8 @@ import { useMemo, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { isLongLendgine } from "../../../../lib/lendgines";
 import { useBeet } from "../../../../utils/beet";
-import { isLongLendgine } from "../../../../utils/lendgines";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { CenterSwitch } from "../../../common/CenterSwitch";

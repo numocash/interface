@@ -1,23 +1,26 @@
+import { AddressZero } from "@ethersproject/constants";
 import { useQueryClient } from "@tanstack/react-query";
-import { Fraction } from "@uniswap/sdk-core";
+import { Fraction, Token } from "@uniswap/sdk-core";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
+import type { Address } from "wagmi";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../contexts/environment2";
+import { useEnvironment } from "../../../contexts/useEnvironment";
+import { useAllLendgines } from "../../../hooks/useAllLendgines";
 import { useBalance } from "../../../hooks/useBalance";
+import { useChain } from "../../../hooks/useChain";
 import { useCurrentPrice } from "../../../hooks/useExternalExchange";
-import { useAllLendgines } from "../../../hooks/useLendgine";
-import { isValidMarket } from "../../../hooks/useMarket";
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import { useDefaultTokenList } from "../../../hooks/useTokens2";
+import { useTokens } from "../../../hooks/useTokens";
+import { isValidLendgine } from "../../../lib/lendgineValidity";
+import { fractionToPrice, priceToFraction } from "../../../lib/price";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { useBeet } from "../../../utils/beet";
 import {
   formatDisplayWithSoftLimit,
   formatPrice,
   fractionToFloat,
 } from "../../../utils/format";
-import { fractionToPrice, priceToFraction } from "../../../utils/Numoen/price";
 import tryParseCurrencyAmount from "../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
@@ -32,8 +35,9 @@ export const Create: React.FC = () => {
   const queryClient = useQueryClient();
   const environment = useEnvironment();
   const { address } = useAccount();
+  const chainID = useChain();
 
-  const tokens = useDefaultTokenList();
+  const tokens = useTokens();
   const lendgines = useAllLendgines();
 
   const [token0, setToken0] = useState<WrappedTokenInfo | undefined>(undefined);
@@ -59,6 +63,22 @@ export const Create: React.FC = () => {
       token1,
       bound,
     });
+
+  const lendgine = useMemo(
+    () =>
+      !!token0 && !!token1
+        ? {
+            token0,
+            token1,
+            token0Exp: token0.decimals,
+            token1Exp: token1.decimals,
+            bound: fractionToPrice(bound, token1, token0),
+            address: AddressZero as Address,
+            lendgine: new Token(chainID, AddressZero, 18),
+          }
+        : undefined,
+    [bound, chainID, token0, token1]
+  );
 
   const create = useCreate({
     token0Input: token0InputAmount,
@@ -87,9 +107,9 @@ export const Create: React.FC = () => {
         ? "Select a token"
         : !priceQuery.data || lendgines === null
         ? "Loading"
-        : !isValidMarket(
-            token0,
-            token1,
+        : !lendgine ||
+          !isValidLendgine(
+            lendgine,
             environment.interface.wrappedNative,
             environment.interface.specialtyMarkets
           )
@@ -115,6 +135,7 @@ export const Create: React.FC = () => {
       bound,
       environment.interface.specialtyMarkets,
       environment.interface.wrappedNative,
+      lendgine,
       lendgines,
       priceQuery.data,
       token0,

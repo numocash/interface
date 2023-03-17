@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import React, { useCallback, useRef } from "react";
 import { useVirtual } from "react-virtual";
 
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { TokenItem } from "./TokenItem";
 
 interface Props {

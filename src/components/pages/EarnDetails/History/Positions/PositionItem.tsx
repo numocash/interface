@@ -1,24 +1,24 @@
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
-import type {
-  Lendgine,
-  LendgineInfo,
-  LendginePosition,
-} from "../../../../../constants/types";
-import { useBeet } from "../../../../../utils/beet";
-import { formatPercent } from "../../../../../utils/format";
-import { supplyRate } from "../../../../../utils/Numoen/jumprate";
+import { supplyRate } from "../../../../../lib/jumprate";
 import {
   accruedLendgineInfo,
   accruedLendginePositionInfo,
   getT,
   liquidityPerPosition,
-} from "../../../../../utils/Numoen/lendgineMath";
+} from "../../../../../lib/lendgineMath";
 import {
   pricePerCollateral,
   pricePerLiquidity,
-} from "../../../../../utils/Numoen/price";
+} from "../../../../../lib/price";
+import type {
+  Lendgine,
+  LendgineInfo,
+  LendginePosition,
+} from "../../../../../lib/types/lendgine";
+import { useBeet } from "../../../../../utils/beet";
+import { formatPercent } from "../../../../../utils/format";
 import { AsyncButton } from "../../../../common/AsyncButton";
 import { RowBetween } from "../../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";

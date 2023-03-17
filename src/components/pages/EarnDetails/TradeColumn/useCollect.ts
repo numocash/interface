@@ -4,12 +4,7 @@ import { useMemo } from "react";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
-import type {
-  Lendgine,
-  LendgineInfo,
-  LendginePosition,
-} from "../../../../constants/types";
-import { useEnvironment } from "../../../../contexts/environment2";
+import { useEnvironment } from "../../../../contexts/useEnvironment";
 import {
   useLiquidityManager,
   useLiquidityManagerCollect,
@@ -22,7 +17,12 @@ import {
   accruedLendgineInfo,
   accruedLendginePositionInfo,
   getT,
-} from "../../../../utils/Numoen/lendgineMath";
+} from "../../../../lib/lendgineMath";
+import type {
+  Lendgine,
+  LendgineInfo,
+  LendginePosition,
+} from "../../../../lib/types/lendgine";
 
 export const useCollect = ({
   lendgine,

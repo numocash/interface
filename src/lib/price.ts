@@ -1,10 +1,10 @@
-import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
-import { Fraction, Price } from "@uniswap/sdk-core";
+import type { CurrencyAmount, Fraction, Token } from "@uniswap/sdk-core";
+import { Price } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 
-import type { Lendgine, LendgineInfo } from "../../constants/types";
-import type { WrappedTokenInfo } from "../../hooks/useTokens2";
 import { liquidityPerCollateral } from "./lendgineMath";
+import type { Lendgine, LendgineInfo } from "./types/lendgine";
+import type { WrappedTokenInfo } from "./types/wrappedTokenInfo";
 
 // returns price in token0 / token1
 export const numoenPrice = <L extends Lendgine>(
@@ -65,19 +65,6 @@ export const pricePerShare = <L extends Lendgine>(
     pricePerLiquidity({ lendgine, lendgineInfo })
   );
   return fractionToPrice(f, lendgine.lendgine, lendgine.token0);
-};
-
-export const lvrCoef = (
-  price: Price<WrappedTokenInfo, WrappedTokenInfo>,
-  lendgine: Lendgine
-) => {
-  if (price.greaterThan(lendgine.bound)) return new Fraction(0);
-  const numerator = priceToFraction(price).multiply(priceToFraction(price));
-  const denominator = priceToFraction(price)
-    .multiply(priceToFraction(lendgine.bound))
-    .multiply(2)
-    .subtract(numerator);
-  return numerator.divide(denominator);
 };
 
 export const nextHighestLendgine = <L extends Lendgine>(

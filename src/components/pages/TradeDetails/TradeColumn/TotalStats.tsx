@@ -2,13 +2,9 @@ import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import { useLendgines } from "../../../../hooks/useLendgine";
-import { liquidityPerCollateral } from "../../../../utils/Numoen/lendgineMath";
-import {
-  invert,
-  numoenPrice,
-  pricePerLiquidity,
-} from "../../../../utils/Numoen/price";
+import { useLendgines } from "../../../../hooks/useLendgines";
+import { liquidityPerCollateral } from "../../../../lib/lendgineMath";
+import { invert, numoenPrice, pricePerLiquidity } from "../../../../lib/price";
 import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../common/VerticalItem";
 import { useTradeDetails } from "../TradeDetailsInner";

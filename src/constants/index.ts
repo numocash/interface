@@ -2,8 +2,8 @@ import type { NativeCurrency } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
 import type { chains } from "../AppWithProviders";
-import type { Market } from "../hooks/useMarket";
-import type { WrappedTokenInfo } from "../hooks/useTokens2";
+import type { Market } from "../lib/types/market";
+import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import { arbitrumConfig } from "./arbitrum";
 import { celoConfig } from "./celo";
 

@@ -7,9 +7,8 @@ import { useMemo } from "react";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
-import type { Lendgine } from "../../../constants/types";
-import { useEnvironment } from "../../../contexts/environment2";
 import { useSettings } from "../../../contexts/settings";
+import { useEnvironment } from "../../../contexts/useEnvironment";
 import {
   useFactoryCreateLendgine,
   useLiquidityManager,
@@ -19,19 +18,20 @@ import {
   usePrepareLiquidityManagerAddLiquidity,
   usePrepareLiquidityManagerMulticall,
 } from "../../../generated";
-import { useApprove } from "../../../hooks/useApproval";
-import type { HookArg } from "../../../hooks/useBalance";
+import type { HookArg } from "../../../hooks/internal/utils";
+import { useApprove } from "../../../hooks/useApprove";
 import { useChain } from "../../../hooks/useChain";
 import { useCurrentPrice } from "../../../hooks/useExternalExchange";
 import { useIsWrappedNative } from "../../../hooks/useTokens";
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import type { BeetStage } from "../../../utils/beet";
+import { ONE_HUNDRED_PERCENT, scale } from "../../../lib/constants";
 import {
   fractionToPrice,
   priceToFraction,
   priceToReserves,
-} from "../../../utils/Numoen/price";
-import { ONE_HUNDRED_PERCENT, scale } from "../../../utils/Numoen/trade";
+} from "../../../lib/price";
+import type { Lendgine } from "../../../lib/types/lendgine";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
+import type { BeetStage } from "../../../utils/beet";
 
 export const useCreate = ({
   token0Input,

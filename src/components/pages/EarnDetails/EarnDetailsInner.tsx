@@ -3,16 +3,10 @@ import { useState } from "react";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
-import type { Lendgine } from "../../../constants/types";
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import {
-  pickLongLendgines,
-  pickShortLendgines,
-} from "../../../utils/lendgines";
-import {
-  nextHighestLendgine,
-  nextLowestLendgine,
-} from "../../../utils/Numoen/price";
+import { pickLongLendgines, pickShortLendgines } from "../../../lib/lendgines";
+import { nextHighestLendgine, nextLowestLendgine } from "../../../lib/price";
+import type { Lendgine } from "../../../lib/types/lendgine";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { PageMargin } from "../../layout";
 import { History } from "./History/History";
 import { Positions } from "./History/Positions/Positions";

@@ -4,7 +4,7 @@ import { CurrencyAmount } from "@uniswap/sdk-core";
 import React, { useState } from "react";
 import tw, { css, styled } from "twin.macro";
 
-import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 import { BigNumericInput } from "./inputs/BigNumericInput";
 import SelectTokenDialog from "./SelectTokenDialog";
 import { TokenAmountDisplay } from "./TokenAmountDisplay";

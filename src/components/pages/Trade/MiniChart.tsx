@@ -8,8 +8,8 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
 import type { usePriceHistory } from "../../../hooks/useExternalExchange";
-import type { WrappedTokenInfo } from "../../../hooks/useTokens2";
-import { fractionToPrice } from "../../../utils/Numoen/price";
+import { fractionToPrice } from "../../../lib/price";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 
 interface Props {
   priceHistory: NonNullable<ReturnType<typeof usePriceHistory>["data"]>;

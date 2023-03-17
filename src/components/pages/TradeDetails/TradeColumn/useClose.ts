@@ -7,8 +7,8 @@ import { useMemo } from "react";
 import type { Address, usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../../contexts/environment2";
 import { useSettings } from "../../../../contexts/settings";
+import { useEnvironment } from "../../../../contexts/useEnvironment";
 import {
   useLendgineRouter,
   useLendgineRouterBurn,
@@ -16,8 +16,8 @@ import {
   usePrepareLendgineRouterBurn,
   usePrepareLendgineRouterMulticall,
 } from "../../../../generated";
-import { useApprove } from "../../../../hooks/useApproval";
-import type { HookArg } from "../../../../hooks/useBalance";
+import type { HookArg } from "../../../../hooks/internal/utils";
+import { useApprove } from "../../../../hooks/useApprove";
 import { useBalance } from "../../../../hooks/useBalance";
 import {
   isV3,
@@ -25,15 +25,15 @@ import {
 } from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
-import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
-import type { BeetStage } from "../../../../utils/beet";
+import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
 import {
   accruedLendgineInfo,
   getT,
   liquidityPerShare,
-} from "../../../../utils/Numoen/lendgineMath";
-import { priceToFraction } from "../../../../utils/Numoen/price";
-import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
+} from "../../../../lib/lendgineMath";
+import { priceToFraction } from "../../../../lib/price";
+import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
+import type { BeetStage } from "../../../../utils/beet";
 import { usePositionValue, useTradeDetails } from "../TradeDetailsInner";
 
 export const useClose = ({

@@ -1,14 +1,11 @@
 import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
-import type { Lendgine, LendgineInfo } from "../../../../../constants/types";
+import { borrowRate } from "../../../../../lib/jumprate";
+import { accruedLendgineInfo, getT } from "../../../../../lib/lendgineMath";
+import { numoenPrice } from "../../../../../lib/price";
+import type { Lendgine, LendgineInfo } from "../../../../../lib/types/lendgine";
 import { formatPercent, formatPrice } from "../../../../../utils/format";
-import { borrowRate } from "../../../../../utils/Numoen/jumprate";
-import {
-  accruedLendgineInfo,
-  getT,
-} from "../../../../../utils/Numoen/lendgineMath";
-import { numoenPrice } from "../../../../../utils/Numoen/price";
 import { RowBetween } from "../../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../../common/VerticalItem";

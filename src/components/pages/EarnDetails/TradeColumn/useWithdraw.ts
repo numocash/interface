@@ -6,8 +6,8 @@ import { useMemo } from "react";
 import type { usePrepareContractWrite } from "wagmi";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../../contexts/environment2";
 import { useSettings } from "../../../../contexts/settings";
+import { useEnvironment } from "../../../../contexts/useEnvironment";
 import {
   useLiquidityManager,
   useLiquidityManagerMulticall,
@@ -15,20 +15,18 @@ import {
   usePrepareLiquidityManagerMulticall,
   usePrepareLiquidityManagerRemoveLiquidity,
 } from "../../../../generated";
-import type { HookArg } from "../../../../hooks/useBalance";
-import {
-  useLendgine,
-  useLendginePosition,
-} from "../../../../hooks/useLendgine";
+import type { HookArg } from "../../../../hooks/internal/utils";
+import { useLendgine } from "../../../../hooks/useLendgine";
+import { useLendginePosition } from "../../../../hooks/useLendginePosition";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
-import type { WrappedTokenInfo } from "../../../../hooks/useTokens2";
+import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
 import {
   accruedLendgineInfo,
   getT,
   liquidityPerPosition,
-} from "../../../../utils/Numoen/lendgineMath";
-import { priceToFraction } from "../../../../utils/Numoen/price";
-import { ONE_HUNDRED_PERCENT, scale } from "../../../../utils/Numoen/trade";
+} from "../../../../lib/lendgineMath";
+import { priceToFraction } from "../../../../lib/price";
+import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
 import { useEarnDetails } from "../EarnDetailsInner";
 
 export const useWithdraw = ({

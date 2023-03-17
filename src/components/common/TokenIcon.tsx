@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { styled } from "twin.macro";
 
-import type { WrappedTokenInfo } from "../../hooks/useTokens2";
+import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 
 type Props = {
   token?: WrappedTokenInfo;

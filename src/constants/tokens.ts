@@ -1,7 +1,7 @@
 import { chainID } from "@dahlia-labs/use-ethers";
 import { getAddress } from "@ethersproject/address";
 
-import { WrappedTokenInfo } from "../hooks/useTokens2";
+import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 
 export const Stable = {
   1: new WrappedTokenInfo({

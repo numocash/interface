@@ -1,12 +1,12 @@
 import { Fraction } from "@uniswap/sdk-core";
 
+import { borrowRate } from "./jumprate";
+import { fractionToPrice, priceToFraction, tokenToFraction } from "./price";
 import type {
   Lendgine,
   LendgineInfo,
   LendginePosition,
-} from "../../constants/types";
-import { borrowRate } from "./jumprate";
-import { fractionToPrice, priceToFraction, tokenToFraction } from "./price";
+} from "./types/lendgine";
 
 export const liquidityPerShare = <L extends Lendgine>(
   lendgine: L,

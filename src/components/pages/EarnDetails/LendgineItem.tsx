@@ -1,17 +1,17 @@
 import { useMemo } from "react";
 import tw, { styled } from "twin.macro";
 
-import type { Lendgine, LendgineInfo } from "../../../constants/types";
-import { formatPercent } from "../../../utils/format";
-import { supplyRate } from "../../../utils/Numoen/jumprate";
-import { accruedLendgineInfo, getT } from "../../../utils/Numoen/lendgineMath";
+import { supplyRate } from "../../../lib/jumprate";
+import { accruedLendgineInfo, getT } from "../../../lib/lendgineMath";
 import {
   invert,
-  lvrCoef,
   numoenPrice,
   pricePerCollateral,
   pricePerLiquidity,
-} from "../../../utils/Numoen/price";
+} from "../../../lib/price";
+import { lvrCoef } from "../../../lib/stats";
+import type { Lendgine, LendgineInfo } from "../../../lib/types/lendgine";
+import { formatPercent } from "../../../utils/format";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
 import { useEarnDetails } from "./EarnDetailsInner";

@@ -15,6 +15,7 @@ import {
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../../hooks/useExternalExchange";
+import { priceToFraction } from "../../../../lib/price";
 import type { PricePoint } from "../../../../services/graphql/uniswapV2";
 import {
   formatDisplayWithSoftLimit,
@@ -22,7 +23,6 @@ import {
   formatPrice,
   fractionToFloat,
 } from "../../../../utils/format";
-import { priceToFraction } from "../../../../utils/Numoen/price";
 import { useTradeDetails } from "../TradeDetailsInner";
 import { EmptyChart } from "./EmptyChart";
 
