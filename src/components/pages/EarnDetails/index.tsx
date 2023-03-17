@@ -1,4 +1,4 @@
-import { getAddress } from "@ethersproject/address";
+import { utils } from "ethers";
 import { useNavigate, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 
@@ -23,8 +23,8 @@ export const EarnDetails: React.FC = () => {
 
   // if they aren't addresses
   try {
-    getAddress(base);
-    getAddress(quote);
+    utils.getAddress(base);
+    utils.getAddress(quote);
   } catch (err) {
     console.error(err);
     navigate("/trade/");

@@ -1,8 +1,6 @@
-import { defaultAbiCoder } from "@ethersproject/abi";
-import { getCreate2Address } from "@ethersproject/address";
-import { keccak256, pack } from "@ethersproject/solidity";
 import { useQuery } from "@tanstack/react-query";
 import { Fraction, Price } from "@uniswap/sdk-core";
+import { utils } from "ethers";
 import JSBI from "jsbi";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
@@ -254,11 +252,13 @@ const useV2Price = (tokens: HookArg<Market>) => {
     const [token0, token1] = tokens[0].sortsBefore(tokens[1])
       ? [tokens[0], tokens[1]]
       : [tokens[1], tokens[0]]; // does safety checks
-    const v2PairAddress = getCreate2Address(
+    const v2PairAddress = utils.getCreate2Address(
       environment.interface.uniswapV2.factoryAddress,
-      keccak256(
-        ["bytes"],
-        [pack(["address", "address"], [token0.address, token1.address])]
+      utils.keccak256(
+        utils.solidityPack(
+          ["address", "address"],
+          [token0.address, token1.address]
+        )
       ),
       environment.interface.uniswapV2.pairInitCodeHash
     );
@@ -304,16 +304,13 @@ const useV3Prices = (tokens: HookArg<Market>) => {
       ? [tokens[0], tokens[1]]
       : [tokens[1], tokens[0]]; // does safety checks
     const calcAddress = (feeTier: UniswapV3Pool["feeTier"]) =>
-      getCreate2Address(
+      utils.getCreate2Address(
         environment.interface.uniswapV3.factoryAddress,
-        keccak256(
-          ["bytes"],
-          [
-            defaultAbiCoder.encode(
-              ["address", "address", "uint24"],
-              [token0.address, token1.address, feeTier]
-            ),
-          ]
+        utils.keccak256(
+          utils.defaultAbiCoder.encode(
+            ["address", "address", "uint24"],
+            [token0.address, token1.address, feeTier]
+          )
         ),
         environment.interface.uniswapV3.pairInitCodeHash
       );

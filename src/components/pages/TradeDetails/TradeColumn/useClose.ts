@@ -1,8 +1,5 @@
-import { defaultAbiCoder } from "@ethersproject/abi";
-import { getAddress } from "@ethersproject/address";
-import { BigNumber } from "@ethersproject/bignumber";
-import { AddressZero } from "@ethersproject/constants";
 import type { CurrencyAmount } from "@uniswap/sdk-core";
+import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
 import type { Address } from "wagmi";
 import { useAccount } from "wagmi";
@@ -65,8 +62,8 @@ export const useClose = ({
 
     const args = [
       {
-        token0: getAddress(selectedLendgine.token0.address),
-        token1: getAddress(selectedLendgine.token1.address),
+        token0: utils.getAddress(selectedLendgine.token0.address),
+        token1: utils.getAddress(selectedLendgine.token1.address),
         token0Exp: BigNumber.from(selectedLendgine.token0.decimals),
         token1Exp: BigNumber.from(selectedLendgine.token1.decimals),
         upperBound: BigNumber.from(
@@ -92,7 +89,7 @@ export const useClose = ({
         ),
         swapType: isV3(mostLiquid.data.pool) ? 1 : 0,
         swapExtraData: isV3(mostLiquid.data.pool)
-          ? (defaultAbiCoder.encode(
+          ? (utils.defaultAbiCoder.encode(
               ["tuple(uint24 fee)"],
               [
                 {
@@ -100,8 +97,8 @@ export const useClose = ({
                 },
               ]
             ) as Address)
-          : AddressZero,
-        recipient: native ? AddressZero : address,
+          : constants.AddressZero,
+        recipient: native ? constants.AddressZero : address,
         deadline: BigNumber.from(
           Math.round(Date.now() / 1000) + settings.timeout * 60
         ),

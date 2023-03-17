@@ -1,6 +1,6 @@
-import { getAddress } from "@ethersproject/address";
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
+import { utils } from "ethers";
 import type { Address } from "wagmi";
 import { erc20ABI } from "wagmi";
 
@@ -13,7 +13,7 @@ export const useAllowance = <T extends Token>(
   spender: HookArg<Address>
 ) => {
   return useContractRead({
-    address: token ? getAddress(token.address) : undefined,
+    address: token ? utils.getAddress(token.address) : undefined,
     args: address && spender ? [address, spender] : undefined,
     staleTime: Infinity,
     enabled: !!token && !!address && !!spender,

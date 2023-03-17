@@ -1,5 +1,4 @@
-import { BigNumber } from "@ethersproject/bignumber";
-import { AddressZero } from "@ethersproject/constants";
+import { BigNumber, constants } from "ethers";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
 import {
@@ -45,7 +44,7 @@ export const useCollect = ({
     const args = [
       {
         lendgine: lendgine.address,
-        recipient: native ? AddressZero : address,
+        recipient: native ? constants.AddressZero : address,
         amountRequested: BigNumber.from(
           updatedPosition.tokensOwed.quotient.toString()
         ),

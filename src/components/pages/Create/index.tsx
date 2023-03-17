@@ -1,6 +1,6 @@
-import { AddressZero } from "@ethersproject/constants";
 import { useQueryClient } from "@tanstack/react-query";
 import { Fraction, Token } from "@uniswap/sdk-core";
+import { constants } from "ethers";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
@@ -73,8 +73,8 @@ export const Create: React.FC = () => {
             token0Exp: token0.decimals,
             token1Exp: token1.decimals,
             bound: fractionToPrice(bound, token1, token0),
-            address: AddressZero as Address,
-            lendgine: new Token(chainID, AddressZero, 18),
+            address: constants.AddressZero as Address,
+            lendgine: new Token(chainID, constants.AddressZero, 18),
           }
         : undefined,
     [bound, chainID, token0, token1]

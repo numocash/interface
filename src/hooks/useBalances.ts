@@ -1,6 +1,6 @@
-import { getAddress } from "@ethersproject/address";
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
+import { utils } from "ethers";
 import { useMemo } from "react";
 import type { Address } from "wagmi";
 import { erc20ABI } from "wagmi";
@@ -18,7 +18,7 @@ export const useBalances = <T extends Token>(
         ? tokens.map(
             (t) =>
               ({
-                address: getAddress(t.address),
+                address: utils.getAddress(t.address),
                 abi: erc20ABI,
                 functionName: "balanceOf",
                 args: [address],

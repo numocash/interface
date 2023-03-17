@@ -1,6 +1,6 @@
-import { getAddress } from "@ethersproject/address";
 import type { Token } from "@uniswap/sdk-core";
 import { Fraction } from "@uniswap/sdk-core";
+import { utils } from "ethers";
 import type { Address } from "wagmi";
 
 import type {
@@ -33,7 +33,7 @@ export const parsePairV2 = (
         pool: {
           token0: tokens[0],
           token1: tokens[1],
-          address: getAddress(pairV2Query.pairs[0].id),
+          address: utils.getAddress(pairV2Query.pairs[0].id),
         },
         totalLiquidity: parseFloat(pairV2Query.pairs[0].reserve0) * 2,
       }

@@ -1,5 +1,5 @@
-import type { BigNumber } from "@ethersproject/bignumber";
 import { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
+import type { BigNumber } from "ethers";
 import { chunk } from "lodash";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
