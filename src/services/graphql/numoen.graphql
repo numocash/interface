@@ -12,3 +12,75 @@ query Lendgines {
     upperBound
   }
 }
+
+query UserTradesQuery($user: Bytes!) {
+  mints(
+    orderDirection: asc
+    orderBy: transaction__timestamp
+    where: { transaction_: { origin: $user } }
+    subgraphError: allow
+  ) {
+    shares
+    liquidity
+    transaction {
+      blockNumber
+      pairBurns {
+        amount0
+        amount1
+        liquidity
+      }
+    }
+  }
+  burns(
+    orderDirection: asc
+    orderBy: transaction__timestamp
+    where: { transaction_: { origin: $user } }
+    subgraphError: allow
+  ) {
+    shares
+    liquidity
+    transaction {
+      blockNumber
+      pairMints {
+        amount0
+        amount1
+        liquidity
+      }
+    }
+  }
+}
+
+query AllTradesQuery {
+  mints(
+    orderDirection: asc
+    orderBy: transaction__timestamp
+    subgraphError: allow
+  ) {
+    shares
+    liquidity
+    transaction {
+      blockNumber
+      pairBurns {
+        amount0
+        amount1
+        liquidity
+      }
+    }
+  }
+  burns(
+    orderDirection: asc
+    orderBy: transaction__timestamp
+    subgraphError: allow
+  ) {
+    shares
+    liquidity
+    transaction {
+      blockNumber
+      pairMints {
+        amount0
+        amount1
+        liquidity
+      }
+    }
+  }
+}
