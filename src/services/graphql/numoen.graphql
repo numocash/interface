@@ -13,15 +13,18 @@ query Lendgines {
   }
 }
 
-query UserTradesQuery($user: Bytes!) {
+query UserTradesQuery($user: Bytes!, $lendgines: [ID!]!) {
   mints(
     orderDirection: asc
     orderBy: transaction__timestamp
-    where: { transaction_: { origin: $user } }
+    where: { transaction_: { origin: $user }, lendgine_: { id_in: $lendgines } }
     subgraphError: allow
   ) {
     shares
     liquidity
+    lendgine {
+      id
+    }
     transaction {
       blockNumber
       pairBurns {
@@ -34,11 +37,14 @@ query UserTradesQuery($user: Bytes!) {
   burns(
     orderDirection: asc
     orderBy: transaction__timestamp
-    where: { transaction_: { origin: $user } }
+    where: { transaction_: { origin: $user }, lendgine_: { id_in: $lendgines } }
     subgraphError: allow
   ) {
     shares
     liquidity
+    lendgine {
+      id
+    }
     transaction {
       blockNumber
       pairMints {
@@ -50,14 +56,18 @@ query UserTradesQuery($user: Bytes!) {
   }
 }
 
-query AllTradesQuery {
+query AllTradesQuery($lendgines: [ID!]!) {
   mints(
     orderDirection: asc
     orderBy: transaction__timestamp
+    where: { lendgine_: { id_in: $lendgines } }
     subgraphError: allow
   ) {
     shares
     liquidity
+    lendgine {
+      id
+    }
     transaction {
       blockNumber
       pairBurns {
@@ -70,10 +80,14 @@ query AllTradesQuery {
   burns(
     orderDirection: asc
     orderBy: transaction__timestamp
+    where: { lendgine_: { id_in: $lendgines } }
     subgraphError: allow
   ) {
     shares
     liquidity
+    lendgine {
+      id
+    }
     transaction {
       blockNumber
       pairMints {

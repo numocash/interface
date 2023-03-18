@@ -4,7 +4,6 @@ import { TokenIcon } from "../../common/TokenIcon";
 import { Chart } from "./Chart/Chart";
 import { TimeSelector } from "./Chart/TimeSelector";
 import { History } from "./History/History";
-import { Positions } from "./History/Positions/Positions";
 import { useNextLendgines, useTradeDetails } from "./TradeDetailsInner";
 import { TradeModal } from "./TradeModal";
 
@@ -61,7 +60,6 @@ export const MainView: React.FC = () => {
         <TimeSelector />
         <div tw="border-b-2 border-stroke" />
         <History />
-        <Positions />
       </div>
     </>
   );
