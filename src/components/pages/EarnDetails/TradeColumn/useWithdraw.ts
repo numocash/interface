@@ -1,9 +1,12 @@
 import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
-import { prepareWriteContract } from "@wagmi/core";
 import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
-import { getContract, writeContract } from "wagmi/actions";
+import {
+  getContract,
+  prepareWriteContract,
+  writeContract,
+} from "wagmi/actions";
 
 import { liquidityManagerABI } from "../../../../abis/liquidityManager";
 import { useSettings } from "../../../../contexts/settings";

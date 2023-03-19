@@ -76,7 +76,7 @@ export const useBeet = () => {
               );
               return { ...sent, tx };
             } catch (err) {
-              console.log(typeof err, err);
+              console.error(typeof err, err);
               toaster.txError(
                 _generateToasterId(stageIndex, i),
                 tx.title,
