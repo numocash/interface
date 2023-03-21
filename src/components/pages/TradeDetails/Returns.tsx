@@ -98,7 +98,7 @@ export const Returns: React.FC = () => {
   const derivReturns = new Percent(Math.round(displayPoint[1] * 100), 100);
 
   return (
-    <div tw="w-full flex flex-col gap-1 bg-white border rounded border-gray-200 p-6 shadow">
+    <div tw="w-full flex flex-col gap-1 bg-white border rounded-xl border-gray-200 p-6 shadow">
       <p tw="text-xl font-semibold">Expected Profit and Loss</p>
       {derivReturns.lessThan(0) ? (
         <p tw="font-semibold text-red text-lg">{formatPercent(derivReturns)}</p>

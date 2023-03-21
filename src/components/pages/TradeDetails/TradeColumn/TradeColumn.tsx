@@ -47,7 +47,7 @@ export const TradeColumn: React.FC = () => {
     </div>
   );
   return (
-    <div tw="w-full flex flex-col gap-4 bg-white border rounded border-gray-200 p-6 shadow">
+    <div tw="w-full flex flex-col gap-4 bg-white border rounded-xl border-gray-200 p-6 shadow">
       {!close && Tabs}
       <Trade />
     </div>

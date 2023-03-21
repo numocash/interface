@@ -12,7 +12,7 @@ export const History: React.FC = () => {
   const [history, setHistory] = useState<keyof typeof Histories>("position");
 
   return (
-    <div tw="w-full flex flex-col gap-4 bg-white border rounded border-gray-200 p-6 shadow ">
+    <div tw="w-full flex flex-col gap-4 bg-white border rounded-xl border-gray-200 p-6 shadow ">
       <div tw="w-full justify-start flex">
         <div tw="flex text-lg justify-end p-0.5 items-center rounded-xl bg-gray-100">
           {objectKeys(Histories).map((h) => {

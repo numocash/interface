@@ -42,19 +42,21 @@ export const PositionItem: React.FC<Props> = ({
   }, [isInverse, lendgine, lendgineInfo, positionValue]);
 
   return (
-    <div tw="w-full justify-between hidden md:grid grid-cols-6 items-center py-3">
-      <p tw="font-semibold pl-4 col-span-1">{symbol}</p>
+    <div tw="w-full justify-between grid grid-cols-3 sm:grid-cols-6 items-center py-3">
+      <p tw="font-semibold col-span-1">{symbol}</p>
 
       {value ? (
         <TokenAmountDisplay
           amount={value}
           showSymbol
-          tw="col-span-2 justify-self-start"
+          tw="sm:col-span-2 justify-self-start"
         />
       ) : (
         ""
       )}
-      <p tw="justify-self-start col-span-2">{formatPercent(funding)}</p>
+      <p tw="justify-self-start  hidden sm:(col-span-2 grid)">
+        {formatPercent(funding)}
+      </p>
 
       <Button
         variant="danger"

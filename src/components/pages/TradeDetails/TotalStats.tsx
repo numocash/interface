@@ -70,7 +70,7 @@ export const TotalStats: React.FC = () => {
   }, [base, lendgineInfosQuery.data, lendgineInfosQuery.isLoading, lendgines]);
 
   return (
-    <div tw="w-full flex flex-col items-center gap-4 bg-white border rounded border-gray-200 p-6 shadow h-min">
+    <div tw="w-full flex flex-col items-center gap-4 bg-white border rounded-xl border-gray-200 p-6 shadow h-min">
       <div tw="w-full grid md:grid-cols-2 gap-4">
         <div tw="flex flex-col gap-1">
           {!openInterest ? (

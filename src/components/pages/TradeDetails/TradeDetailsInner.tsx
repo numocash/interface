@@ -126,9 +126,7 @@ const TradeDetailsInnerInner: React.FC = () => {
   return (
     <>
       <div tw="w-full max-w-7xl grid lg:(grid-cols-3) gap-2">
-        <div tw="lg:col-span-2 w-full flex flex-col gap-2 bg-white border rounded border-[#dfdfdf] p-6 shadow">
-          {/* <TradeModal /> */}
-
+        <div tw="lg:col-span-2 w-full flex flex-col gap-2 bg-white border rounded-xl border-[#dfdfdf] p-6 shadow">
           <div tw="flex items-center gap-3 ">
             <div tw="flex items-center space-x-[-0.5rem]">
               <TokenIcon token={quote} size={32} />
@@ -138,17 +136,13 @@ const TradeDetailsInnerInner: React.FC = () => {
               {quote.symbol} / {base.symbol}
             </p>
           </div>
-          {/* {Buttons} */}
           <Chart />
           <TimeSelector />
-          {/* <div tw="border-b-2 border-stroke" />
-        <History />
-        <Positions /> */}
         </div>
 
         <TradeColumn tw="w-full" />
       </div>
-      <div tw="w-full max-w-7xl grid xl:( grid-cols-2) gap-2">
+      <div tw="w-full max-w-7xl grid lg:( grid-cols-2) gap-2">
         <History />
         <Returns />
         <TotalStats />

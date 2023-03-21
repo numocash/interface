@@ -8,6 +8,7 @@ import { useLendginesForTokens } from "../../../hooks/useLendgine";
 import { useAddressToToken } from "../../../hooks/useTokens";
 import { isValidMarket } from "../../../lib/lendgineValidity";
 import { LoadingPage } from "../../common/LoadingPage";
+import { PageMargin } from "../../layout";
 import { EarnDetailsInner } from "./EarnDetailsInner";
 
 export const EarnDetails: React.FC = () => {
@@ -51,14 +52,27 @@ export const EarnDetails: React.FC = () => {
   const lendgines = useLendginesForTokens(market);
   const priceQuery = useCurrentPrice(market);
 
-  return !!lendgines && !!priceQuery.data ? (
-    <EarnDetailsInner
-      base={baseToken}
-      quote={quoteToken}
-      lendgines={lendgines}
-      price={priceQuery.data}
-    />
-  ) : (
-    <LoadingPage />
+  return (
+    <PageMargin tw="w-full pb-12 sm:pb-0 flex flex-col gap-2">
+      <div tw="w-full max-w-7xl rounded bg-white  border border-[#dfdfdf]   pt-12 md:pt-20 px-6 pb-6 shadow">
+        <div tw="flex flex-col lg:flex-row lg:justify-between gap-4 lg:items-center">
+          <p tw="font-bold text-4xl">Provide Liquidity</p>
+          <p tw=" text-lg text-[#8f8f8f] max-w-md">
+            Provide liquidity to an automated market maker and earn interest
+            from lending out your position.
+          </p>
+        </div>
+      </div>{" "}
+      {!!lendgines && !!priceQuery.data ? (
+        <EarnDetailsInner
+          base={baseToken}
+          quote={quoteToken}
+          lendgines={lendgines}
+          price={priceQuery.data}
+        />
+      ) : (
+        <LoadingPage />
+      )}
+    </PageMargin>
   );
 };

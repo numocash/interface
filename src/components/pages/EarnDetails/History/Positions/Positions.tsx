@@ -19,16 +19,19 @@ export const Positions: React.FC = () => {
     !positions.data ||
     lendgineInfos.isLoading ||
     !lendgineInfos.data ? (
-    <div tw="w-full rounded-lg bg-secondary flex animate-pulse transform ease-in-out duration-300 h-12" />
+    <div tw="w-full rounded-lg bg-gray-100 flex animate-pulse transform ease-in-out duration-300 h-12" />
   ) : positions.data.filter((p) => p.size.greaterThan(0)).length === 0 ? (
     <EmptyPosition />
   ) : (
-    <>
-      <div tw="w-full justify-between bg-secondary rounded-lg font-semibold h-12 items-center grid-cols-7 hidden md:grid">
-        <p tw="col-start-3 col-span-2 justify-self-start">Interest</p>
-        <p tw="col-start-5 col-span-2 justify-self-start">Reward APR</p>
+    <div tw="flex flex-col">
+      <div tw="w-full text-secondary items-center grid-cols-3 sm:grid-cols-7 grid">
+        <p tw="col-span-2 justify-self-start">Value</p>
+        <p tw="col-span-2 justify-self-start hidden sm:flex">Interest</p>
+        <p tw="col-span-2 justify-self-start hidden sm:flex">Reward APR</p>
       </div>
-      {positions.data?.map((p, i) => {
+      <div tw="border-b border-gray-200 w-full" />
+
+      {positions.data.map((p, i) => {
         if (p.size.equalTo(0)) return null;
         const lendgine = lendgines[i];
         const lendgineInfo = lendgineInfos.data?.[i];
@@ -48,6 +51,6 @@ export const Positions: React.FC = () => {
           </>
         );
       })}
-    </>
+    </div>
   );
 };

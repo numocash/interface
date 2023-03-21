@@ -23,9 +23,9 @@ export const Positions: React.FC = () => {
     <EmptyPosition />
   ) : (
     <div tw="flex flex-col">
-      <div tw="w-full text-secondary items-center grid-cols-6 hidden md:grid">
-        <p tw="col-start-2 col-span-2 justify-self-start">Value</p>
-        <p tw="col-start-4 col-span-1 justify-self-start">Funding APR</p>
+      <div tw="w-full text-secondary items-center grid-cols-3 sm:grid-cols-6 grid">
+        <p tw="col-span-2 col-start-2 justify-self-start">Value</p>
+        <p tw="hidden sm:(col-start-4 grid) justify-self-start">Funding APR</p>
       </div>
       <div tw="border-b border-gray-200 w-full" />
       {balances.data?.map((d, i) => {

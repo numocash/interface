@@ -32,5 +32,5 @@ const PageWrapper = styled.div`
 `;
 
 export const PageMargin = styled.div(() => [
-  tw`relative items-center px-4 mx-auto mt-10 md:px-6 lg:px-10`,
+  tw`relative items-center min-h-screen px-4 mx-auto mt-10 md:px-6 lg:px-10`,
 ]);
