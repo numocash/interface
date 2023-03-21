@@ -1,9 +1,12 @@
-import styled from "@emotion/styled";
+interface Props {
+  className?: string;
+}
 
-const Numoen = () => <img src="/numoen.png" alt="Loading" />;
-
-export const LoadingSpinner = styled(Numoen)`
-  display: inline;
-  height: 1em;
-  width: 1em;
-`;
+export const LoadingSpinner: React.FC<Props> = ({ className }: Props) => (
+  <img
+    className={className}
+    src="/numoen.png"
+    alt="Loading"
+    tw="h-4 w-4 transform duration-1000 animate-ping opacity-20"
+  />
+);
