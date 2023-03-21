@@ -77,7 +77,3 @@ export const ConnectButton: React.FC = () => {
     </ConnectButtonRainbow.Custom>
   );
 };
-
-<div tw="p-1.5 bg-white rounded-xl">
-  <img src="/numoen.svg" alt="Numoen Logo" width={30} height={30} />
-</div>;
