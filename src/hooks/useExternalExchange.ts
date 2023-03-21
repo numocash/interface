@@ -9,7 +9,7 @@ import type { Address } from "wagmi";
 
 import { uniswapV2PairABI } from "../abis/uniswapV2Pair";
 import { uniswapV3PoolABI } from "../abis/uniswapV3Pool";
-import type { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
+import type { Times } from "../components/pages/TradeDetails/TimeSelector";
 import { useEnvironment } from "../contexts/useEnvironment";
 import type {
   PriceHistoryDayV2Query,

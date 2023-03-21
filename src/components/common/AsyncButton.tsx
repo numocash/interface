@@ -22,7 +22,6 @@ export const AsyncButton: React.FC<IProps> = ({
 
   return isConnected ? (
     <Button
-      size="lg"
       {...rest}
       disabled={disabled}
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -33,7 +32,7 @@ export const AsyncButton: React.FC<IProps> = ({
       {children}
     </Button>
   ) : (
-    <Button size="lg" {...rest} disabled={false} onClick={openConnectModal}>
+    <Button {...rest} disabled={false} onClick={openConnectModal}>
       {connectWalletOverride ?? "Connect Wallet"}
     </Button>
   );

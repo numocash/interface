@@ -30,7 +30,8 @@ import {
 import { priceToFraction } from "../../../../lib/price";
 import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
 import type { BeetStage } from "../../../../utils/beet";
-import { usePositionValue, useTradeDetails } from "../TradeDetailsInner";
+import { useTradeDetails } from "../TradeDetailsInner";
+import { usePositionValue } from "../usePositionValue";
 
 export const useClose = ({
   amountOut,

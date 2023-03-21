@@ -13,7 +13,8 @@ import { LoadingSpinner } from "../../../common/LoadingSpinner";
 import { RowBetween } from "../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../common/VerticalItem";
-import { usePositionValue, useTradeDetails } from "../TradeDetailsInner";
+import { useTradeDetails } from "../TradeDetailsInner";
+import { usePositionValue } from "../usePositionValue";
 import { useClose, useCloseAmounts } from "./useClose";
 
 interface Props {

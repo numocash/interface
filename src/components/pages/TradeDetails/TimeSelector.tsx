@@ -1,7 +1,7 @@
 import { objectKeys } from "ts-extras";
 import tw, { css } from "twin.macro";
 
-import { useTradeDetails } from "../TradeDetailsInner";
+import { useTradeDetails } from "./TradeDetailsInner";
 
 export const Times = {
   ONE_DAY: "1d",

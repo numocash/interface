@@ -8,7 +8,8 @@ import type { Lendgine, LendgineInfo } from "../../../../../lib/types/lendgine";
 import { formatPercent } from "../../../../../utils/format";
 import { Button } from "../../../../common/Button";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
-import { usePositionValue, useTradeDetails } from "../../TradeDetailsInner";
+import { useTradeDetails } from "../../TradeDetailsInner";
+import { usePositionValue } from "../../usePositionValue";
 
 type Props<L extends Lendgine = Lendgine> = {
   balance: CurrencyAmount<Token>;
@@ -20,8 +21,7 @@ export const PositionItem: React.FC<Props> = ({
   lendgine,
   lendgineInfo,
 }: Props) => {
-  const { base, quote, setSelectedLendgine, setClose, setModalOpen } =
-    useTradeDetails();
+  const { base, quote, setSelectedLendgine, setClose } = useTradeDetails();
   const symbol = quote.symbol + (lendgine.token1.equals(quote) ? "+" : "-");
   const isInverse = base.equals(lendgine.token1);
 

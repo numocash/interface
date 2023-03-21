@@ -12,7 +12,6 @@ import { priceToFraction } from "../../../lib/price";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { formatPercent } from "../../../utils/format";
 import { TokenIcon } from "../../common/TokenIcon";
-import { Times } from "../TradeDetails/Chart/TimeSelector";
 import { MiniChart } from "./MiniChart";
 
 interface Props {
@@ -27,7 +26,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
 
   const priceHistoryQuery = usePriceHistory(
     referenceMarketQuery.data?.pool,
-    Times.ONE_DAY
+    "ONE_DAY"
   );
 
   const priceHistory = useMemo(() => {
