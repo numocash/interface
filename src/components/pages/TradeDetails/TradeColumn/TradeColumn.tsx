@@ -8,7 +8,6 @@ import { Trade } from "./Trade";
 export const TradeTab = {
   Long: "Long",
   Short: "Short",
-  // Swap = "Swap",
 } as const;
 
 export const TradeColumn: React.FC = () => {
@@ -50,17 +49,6 @@ export const TradeColumn: React.FC = () => {
     <div tw="w-full flex flex-col gap-4 bg-white border rounded border-gray-200 p-6 shadow">
       {!close && Tabs}
       <Trade />
-      {/* <ProvideLiquidity />
-      {!close && (
-        <>
-          <div tw="w-full border-b-2 border-stroke" />
-          <Returns />
-        </>
-      )}
-      <div tw="w-full border-b-2 border-stroke" />
-      <TotalStats />
-      <div tw="w-full border-b-2 border-stroke" />
-      <Config /> */}
     </div>
   );
 };

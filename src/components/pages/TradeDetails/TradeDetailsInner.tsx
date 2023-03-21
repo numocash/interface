@@ -23,12 +23,15 @@ import {
 import { nextHighestLendgine, nextLowestLendgine } from "../../../lib/price";
 import type { Lendgine } from "../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
+import { TokenIcon } from "../../common/TokenIcon";
+import { Chart } from "./Chart/Chart";
 import type { Times } from "./Chart/TimeSelector";
+import { TimeSelector } from "./Chart/TimeSelector";
 import { History } from "./History/History";
-import { MainView } from "./MainView";
 import { Returns } from "./Returns";
 import { TotalStats } from "./TotalStats";
 import type { TradeTab } from "./TradeColumn/TradeColumn";
+import { TradeColumn } from "./TradeColumn/TradeColumn";
 
 interface Props {
   base: WrappedTokenInfo;
@@ -239,51 +242,38 @@ export const TradeDetailsInner: React.FC<Props> = ({
 };
 
 const TradeDetailsInnerInner: React.FC = () => {
-  const { base, setSelectedLendgine, setModalOpen } = useTradeDetails();
-  const { longLendgine, shortLendgine } = useNextLendgines();
+  const { base, quote } = useTradeDetails();
 
-  // const Buttons = (
-  //   <div tw="gap-2 items-center flex sm:hidden ">
-  //     {[longLendgine, shortLendgine].map((s) => {
-  //       if (!s) return null;
-  //       const isLong = isLongLendgine(s, base);
-
-  //       return (
-  //         <div key={s.address}>
-  //           <Button
-  //             variant="primary"
-  //             tw="h-8 text-xl font-semibold"
-  //             onClick={() => {
-  //               setSelectedLendgine(s);
-  //               setModalOpen(true);
-  //             }}
-  //           >
-  //             {isLong ? "Long" : "Short"}
-  //           </Button>
-  //         </div>
-  //       );
-  //     })}
-  //   </div>
-  // );
   return (
     <>
-      {/* <PageMargin tw="w-full pb-12 sm:pb-0"> */}
-      <div tw="w-full max-w-7xl xl:(grid grid-cols-3) gap-2">
-        <MainView />
-        {/* <div tw="flex max-w-sm justify-self-end">
-          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-44px] hidden xl:flex" />
-          <TradeColumn tw="" />
-        </div> */}
+      <div tw="w-full max-w-7xl grid lg:(grid-cols-3) gap-2">
+        <div tw="lg:col-span-2 w-full flex flex-col gap-2 bg-white border rounded border-[#dfdfdf] p-6 shadow">
+          {/* <TradeModal /> */}
+
+          <div tw="flex items-center gap-3 ">
+            <div tw="flex items-center space-x-[-0.5rem]">
+              <TokenIcon token={quote} size={32} />
+              <TokenIcon token={base} size={32} />
+            </div>
+            <p tw="text-2xl font-bold">
+              {quote.symbol} / {base.symbol}
+            </p>
+          </div>
+          {/* {Buttons} */}
+          <Chart />
+          <TimeSelector />
+          {/* <div tw="border-b-2 border-stroke" />
+        <History />
+        <Positions /> */}
+        </div>
+
+        <TradeColumn tw="w-full" />
       </div>
-      <div tw="w-full max-w-7xl xl:(grid grid-cols-2) gap-2">
+      <div tw="w-full max-w-7xl grid xl:( grid-cols-2) gap-2">
         <History />
         <Returns />
         <TotalStats />
       </div>
-      {/* </PageMargin> */}
-      {/* <div tw="z-10 sticky bottom-16 border-t-2 border-stroke  bg-background  sm:(hidden) w-full flex items-center px-4 py-2 pb-3 justify-end">
-        {Buttons}
-      </div> */}
     </>
   );
 };

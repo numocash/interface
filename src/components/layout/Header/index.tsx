@@ -8,7 +8,7 @@ import { Settings } from "./Settings";
 
 export const Header: React.FC = () => {
   return (
-    <div tw="fixed z-10 flex justify-center w-full top-4 px-4">
+    <div tw="fixed z-10 flex justify-center w-full top-4 px-6">
       <div tw="justify-between bg-[#303030] rounded-2xl max-w-xl  w-full flex items-center p-1">
         <NumoenIcon />
         <NavLink tw="text-white hover:opacity-80 hidden md:flex" to="/trade/">

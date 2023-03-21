@@ -23,7 +23,11 @@ export const ConnectButton: React.FC = () => {
             {(() => {
               if (!connected) {
                 return (
-                  <Button variant="primary" onClick={openConnectModal}>
+                  <Button
+                    variant="inverse"
+                    tw=" px-1 text-lg rounded-xl h-10"
+                    onClick={openConnectModal}
+                  >
                     Connect Wallet
                   </Button>
                 );
@@ -31,7 +35,11 @@ export const ConnectButton: React.FC = () => {
 
               if (chain.unsupported) {
                 return (
-                  <Button variant="danger" onClick={openChainModal}>
+                  <Button
+                    variant="danger"
+                    tw=" px-1 text-lg rounded-xl h-10"
+                    onClick={openChainModal}
+                  >
                     Wrong network
                   </Button>
                 );

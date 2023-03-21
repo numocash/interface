@@ -4,7 +4,7 @@ import tw from "twin.macro";
 
 import { LoadingSpinner } from "./LoadingSpinner";
 
-type Variant = "danger" | "primary";
+type Variant = "danger" | "primary" | "inverse";
 
 interface AdditionalButtonProps {
   variant?: Variant;
@@ -73,6 +73,8 @@ export const StyledButton = styled.button<AdditionalButtonProps>(
     tw`transition-transform`,
 
     variant === "primary" && tw`bg-black shadow `,
+
+    variant === "inverse" && tw`text-black bg-white shadow`,
 
     variant === "danger" && tw`font-bold shadow bg-red`,
 
