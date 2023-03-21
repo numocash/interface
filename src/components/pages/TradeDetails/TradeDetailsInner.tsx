@@ -132,7 +132,7 @@ const TradeDetailsInnerInner: React.FC = () => {
               <TokenIcon token={quote} size={32} />
               <TokenIcon token={base} size={32} />
             </div>
-            <p tw="text-2xl font-bold">
+            <p tw="text-lg sm:text-2xl font-bold">
               {quote.symbol} / {base.symbol}
             </p>
           </div>

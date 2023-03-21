@@ -11,7 +11,7 @@ export const Market: React.FC = () => {
             <TokenIcon token={quote} size={32} />
             <TokenIcon token={base} size={32} />
           </div>
-          <div tw="flex gap-1 font-semibold text-2xl text-black ">
+          <div tw="flex gap-1 font-semibold text-lg sm:text-2xl text-black ">
             <p tw="">{quote.symbol}</p>
             <p>/</p>
             <p tw="">{base.symbol}</p>

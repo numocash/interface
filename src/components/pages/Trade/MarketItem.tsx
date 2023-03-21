@@ -64,7 +64,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
             <TokenIcon token={tokens[0]} size={32} />
           </div>
           <div tw="grid gap-0.5">
-            <span tw="font-semibold text-xl text-default leading-tight">
+            <span tw="font-semibold sm:text-xl text-default leading-tight">
               {tokens[1].symbol} / {tokens[0].symbol}
             </span>
           </div>
@@ -80,7 +80,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
         )}
 
         {priceChange ? (
-          <div tw="text-lg font-semibold justify-self-end">
+          <div tw="sm:(text-lg font-semibold) justify-self-end">
             {priceChange.greaterThan(0) ? (
               <p tw="text-green ">+{formatPercent(priceChange)}</p>
             ) : (

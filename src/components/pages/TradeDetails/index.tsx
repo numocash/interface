@@ -57,8 +57,8 @@ export const TradeDetails: React.FC = () => {
     <PageMargin tw="w-full pb-12 sm:pb-0 flex flex-col justify-center gap-2">
       <div tw="w-full max-w-7xl rounded bg-white  border border-[#dfdfdf] justify-self-center items-center  pt-12 md:pt-20 px-6 pb-6 shadow mb-12">
         <div tw="flex flex-col lg:flex-row lg:justify-between gap-4 lg:items-center">
-          <p tw="font-bold text-4xl">Trade Power Tokens</p>
-          <p tw=" text-lg text-[#8f8f8f] max-w-md">
+          <p tw="font-bold text-2xl sm:text-4xl">Trade Power Tokens</p>
+          <p tw=" sm:text-lg text-[#8f8f8f] max-w-md">
             Power tokens maintain constant leverage, through a novel mechanism
             of borrowing AMM shares.
           </p>

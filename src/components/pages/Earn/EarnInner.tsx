@@ -9,9 +9,9 @@ export const EarnInner: React.FC = () => {
     <PageMargin tw="w-full pb-12 sm:pb-0 flex flex-col  gap-2">
       <div tw="w-full max-w-5xl rounded bg-white  border border-[#dfdfdf] pt-12 md:pt-20 px-6 pb-6 shadow mb-12">
         <div tw="flex flex-col lg:flex-row lg:justify-between gap-4 lg:items-center">
-          <p tw="font-bold text-4xl">Provide Liquidity</p>
+          <p tw="font-bold text-2xl sm:text-4xl">Provide Liquidity</p>
           <div tw="gap-2 grid">
-            <p tw=" text-lg text-[#8f8f8f] max-w-md">
+            <p tw="sm:text-lg text-[#8f8f8f] max-w-md">
               Provide liquidity to an automated market maker and earn interest
               from lending out your position.
             </p>

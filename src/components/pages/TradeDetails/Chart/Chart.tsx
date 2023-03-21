@@ -132,7 +132,7 @@ export const Chart: React.FC = () => {
           {loading ? (
             <div tw="bg-gray-100 animate-pulse h-8 w-20 rounded" />
           ) : (
-            <p tw="text-2xl font-semibold">
+            <p tw="text-lg sm:text-2xl font-semibold">
               {displayPrice
                 ? formatDisplayWithSoftLimit(
                     fractionToFloat(displayPrice.price),
