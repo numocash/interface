@@ -1,5 +1,4 @@
 import type { Placement } from "@popperjs/core";
-import { animated, config, useTransition } from "@react-spring/web";
 import React, { useCallback, useRef, useState } from "react";
 import { usePopper } from "react-popper";
 import tw, { css, styled } from "twin.macro";
@@ -21,6 +20,7 @@ interface Props {
   target: Element | null;
   children: React.ReactNode;
   placement?: Placement;
+  className?: string;
 }
 
 export const Drop: React.FC<Props> = ({
@@ -29,6 +29,7 @@ export const Drop: React.FC<Props> = ({
   onDismiss,
   children,
   placement = "auto",
+  className,
 }: Props) => {
   const popperElRef = useRef<HTMLDivElement | null>(null);
   const [popperElement, _setPopperElement] = useState<HTMLDivElement | null>(
@@ -36,13 +37,6 @@ export const Drop: React.FC<Props> = ({
   );
 
   useOnClickOutside(popperElRef, show ? () => onDismiss() : undefined);
-
-  const transition = useTransition(show, {
-    from: { scale: 0.96, opacity: 1 },
-    enter: { scale: 1, opacity: 1 },
-    leave: { scale: 1, opacity: 0 },
-    config: { ...config.default, duration: 100 },
-  });
 
   const setPopperElement = useCallback((el: HTMLDivElement) => {
     popperElRef.current = el;
@@ -55,7 +49,7 @@ export const Drop: React.FC<Props> = ({
       {
         name: "offset",
         options: {
-          offset: [0, 12],
+          offset: [0, 20],
         },
       },
     ],
@@ -65,15 +59,13 @@ export const Drop: React.FC<Props> = ({
   // one container for enter animation
   return (
     <PopoverContainer
+      className={className}
       show={show}
       ref={setPopperElement}
       style={styles.popper}
       {...attributes.popper}
     >
-      {transition(
-        (springStyles, item) =>
-          item && <animated.div style={springStyles}>{children}</animated.div>
-      )}
+      {children}
     </PopoverContainer>
   );
 };

@@ -1,4 +1,4 @@
-import tw, { styled } from "twin.macro";
+import { styled } from "twin.macro";
 
 export const Background: React.FC = () => (
   <>
@@ -19,5 +19,5 @@ const BGLayer = styled.div`
 
 const Gradient = styled(BGLayer)`
   z-index: -2;
-  ${tw`bg-background`}
+  background: #f5f5f4;
 `;

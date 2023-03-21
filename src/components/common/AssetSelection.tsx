@@ -16,7 +16,7 @@ export const AssetSelectButton = styled.button(
     tw`text-base appearance-none cursor-pointer`,
     tw`whitespace-nowrap`,
     tw`shadow-none`,
-    noAsset && tw`rounded-lg text-paragraph bg-brand`,
+    noAsset && tw`text-white bg-black rounded-lg`,
   ]
 );
 
@@ -106,7 +106,7 @@ export const AssetSelection: React.FC<Props<WrappedTokenInfo>> = ({
                     }
                   >
                     <TokenAmountDisplay
-                      tw="text-paragraph "
+                      tw="text-black "
                       amount={
                         currentAmount.amount ??
                         CurrencyAmount.fromRawAmount(selectedValue, 0)
@@ -182,7 +182,7 @@ export const AssetSelection: React.FC<Props<WrappedTokenInfo>> = ({
         {!hideInput && (
           <div tw="flex grow flex-1">
             <BigNumericInput
-              tw="text-right text-paragraph w-full py-1"
+              tw="text-right text-black w-full py-1"
               disabled={inputDisabled}
               value={inputValue}
               onChange={inputOnChange}

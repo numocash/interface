@@ -15,7 +15,7 @@ export const SearchInput: React.FC<Props> = ({
 }) => {
   const showClear = searchQuery.length > 0;
   return (
-    <div tw="flex items-stretch focus-within:(ring-brand border-brand) border border-white relative bg-white rounded-xl">
+    <div tw="flex items-stretch focus-within:(ring-black border-black) border border-gray-200 relative bg-white rounded-xl">
       <input
         css={[
           tw`bg-transparent border-none flex-grow focus:(outline-none ring-0 border-0) text-default  placeholder-gray-400 text-lg font-medium appearance-none w-full p-4 pr-0 outline-none overflow-hidden`,

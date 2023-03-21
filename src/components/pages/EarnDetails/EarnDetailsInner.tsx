@@ -7,13 +7,11 @@ import { pickLongLendgines, pickShortLendgines } from "../../../lib/lendgines";
 import { nextHighestLendgine, nextLowestLendgine } from "../../../lib/price";
 import type { Lendgine } from "../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
-import { PageMargin } from "../../layout";
 import { History } from "./History/History";
-import { Positions } from "./History/Positions/Positions";
 import { Lendgines } from "./Lendgines";
 import { Market } from "./Market";
+import { Config } from "./TradeColumn/Config";
 import { TradeColumn } from "./TradeColumn/TradeColumn";
-import { TradeModal } from "./TradeModal";
 
 interface Props {
   base: WrappedTokenInfo;
@@ -34,9 +32,6 @@ interface IEarnDetails {
 
   lendgines: readonly Lendgine[];
   price: Price<WrappedTokenInfo, WrappedTokenInfo>;
-
-  modalOpen: boolean;
-  setModalOpen: (val: boolean) => void;
 }
 
 const useEarnDetailsInternal = ({
@@ -47,7 +42,6 @@ const useEarnDetailsInternal = ({
 }: Partial<Props> = {}): IEarnDetails => {
   invariant(base && quote && lendgines && price);
   const [close, setClose] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
 
   const longLendgines = pickLongLendgines(lendgines, base);
   const shortLendgines = pickShortLendgines(lendgines, base);
@@ -85,8 +79,6 @@ const useEarnDetailsInternal = ({
     setSelectedLendgine,
     close,
     setClose,
-    modalOpen,
-    setModalOpen,
     price,
   };
 };
@@ -101,26 +93,19 @@ export const EarnDetailsInner: React.FC<Props> = ({
   price,
 }: Props) => {
   return (
-    <PageMargin tw="w-full ">
-      <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
-        <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
-          <TradeModal />
-
-          <div tw="w-full flex flex-col max-w-3xl gap-4 col-span-2 justify-self-center">
-            <Market />
-            <p tw="text-sm font-semibold text-headline">Select a pool</p>
-            <Lendgines />
-            <div tw="border-b-2 border-stroke" />
-
-            <History />
-            <Positions />
-          </div>
-          <div tw="flex max-w-sm justify-self-end">
-            <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-44px] hidden xl:flex" />
-            <TradeColumn tw="" />
-          </div>
-        </EarnDetailsProvider>
+    <EarnDetailsProvider initialState={{ base, quote, lendgines, price }}>
+      <div tw="w-full max-w-7xl grid lg:(grid-cols-3) gap-2">
+        <div tw="lg:col-span-2 w-full flex flex-col gap-2 bg-white border rounded-xl border-[#dfdfdf] p-6 shadow">
+          <Market />
+          <p tw="text-sm font-semibold text-headline">Select a pool</p>
+          <Lendgines />
+        </div>
+        <TradeColumn tw="w-full" />
       </div>
-    </PageMargin>
+      <div tw="w-full max-w-7xl flex flex-col lg:(grid grid-cols-3) gap-2">
+        <History />
+        <Config />
+      </div>
+    </EarnDetailsProvider>
   );
 };

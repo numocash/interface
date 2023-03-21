@@ -1,12 +1,12 @@
-import styled from "@emotion/styled";
-import tw from "twin.macro";
+interface Props {
+  className?: string;
+}
 
-import { ReactComponent as Numoen } from "./images/numoen-small.svg";
-
-export const LoadingSpinner = styled(Numoen)`
-  ${tw`duration-1000 transform animate-ping `}
-
-  display: inline;
-  height: 1em;
-  width: 1em;
-`;
+export const LoadingSpinner: React.FC<Props> = ({ className }: Props) => (
+  <img
+    className={className}
+    src="/numoen.png"
+    alt="Loading"
+    tw="h-4 w-4 transform duration-1000 animate-ping opacity-20"
+  />
+);

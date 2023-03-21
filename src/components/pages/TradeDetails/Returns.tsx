@@ -11,10 +11,9 @@ import { bisect } from "d3-array";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
-import { isLongLendgine } from "../../../../lib/lendgines";
-import { formatPercent } from "../../../../utils/format";
-import { RowBetween } from "../../../common/RowBetween";
-import { useTradeDetails } from "../TradeDetailsInner";
+import { isLongLendgine } from "../../../lib/lendgines";
+import { formatPercent } from "../../../utils/format";
+import { useTradeDetails } from "./TradeDetailsInner";
 
 export const Returns: React.FC = () => {
   const { quote, base, selectedLendgine } = useTradeDetails();
@@ -99,25 +98,26 @@ export const Returns: React.FC = () => {
   const derivReturns = new Percent(Math.round(displayPoint[1] * 100), 100);
 
   return (
-    <>
-      <RowBetween tw="items-center px-0">
-        <p tw="text-sm">Expected Profit and Loss</p>
-        {derivReturns.lessThan(0) ? (
-          <p tw="font-semibold text-red">{formatPercent(derivReturns)}</p>
-        ) : (
-          <p tw="font-semibold text-green">+{formatPercent(derivReturns)}</p>
-        )}
-      </RowBetween>
+    <div tw="w-full flex flex-col gap-1 bg-white border rounded-xl border-gray-200 p-6 shadow">
+      <p tw="text-xl font-semibold">Expected Profit and Loss</p>
+      {derivReturns.lessThan(0) ? (
+        <p tw="font-semibold text-red text-lg">{formatPercent(derivReturns)}</p>
+      ) : (
+        <p tw="font-semibold text-green text-lg">
+          +{formatPercent(derivReturns)}
+        </p>
+      )}
 
       {/* height being set to 100% */}
-      <ParentSize style={{}}>
+      <ParentSize style={{}} tw="pt-4">
         {(parent) => {
           xScale.range([0, parent.width]);
-          yScale.range([90, 0]);
+          const height = 150;
+          yScale.range([height - 10, 0]);
           return (
             <svg
               width={parent.width}
-              height={100}
+              height={height}
               tw="justify-self-center col-span-2"
             >
               <Group top={7}>
@@ -145,14 +145,14 @@ export const Returns: React.FC = () => {
                   data={data}
                   x={(d) => xScale(getX(d)) ?? 0}
                   y={(d) => yScale(getY(d)) ?? 0}
-                  stroke={"#333"}
+                  stroke={"#000000"}
                   strokeWidth={2}
                   strokeOpacity={1}
                 />
                 <Line
                   from={{ x: xScale(min), y: yScale(0) }}
                   to={{ x: xScale(max), y: yScale(0) }}
-                  stroke={"#333"}
+                  stroke={"#8f8f8f"}
                   strokeWidth={1}
                   pointerEvents="none"
                   strokeDasharray="4,4"
@@ -162,7 +162,7 @@ export const Returns: React.FC = () => {
               <Line
                 from={{ x: xScale(displayPoint[0]), y: 0 }}
                 to={{ x: xScale(displayPoint[0]), y: 192 }}
-                stroke={"#333"}
+                stroke={"#8f8f8f"}
                 strokeWidth={1}
                 pointerEvents="none"
                 strokeDasharray="4,4"
@@ -182,16 +182,14 @@ export const Returns: React.FC = () => {
           );
         }}
       </ParentSize>
-      <RowBetween tw="text-sm px-0">
-        <p tw="">
-          {quote.symbol} / {base.symbol} price
-        </p>
-        {underlyingReturns.lessThan(0) ? (
-          <p tw="">{formatPercent(underlyingReturns)}</p>
-        ) : (
-          <p tw="">+{formatPercent(underlyingReturns)}</p>
-        )}
-      </RowBetween>
-    </>
+      <p tw="pt-4">
+        {quote.symbol} / {base.symbol} price
+      </p>
+      {underlyingReturns.lessThan(0) ? (
+        <p tw="text-secondary text-sm">{formatPercent(underlyingReturns)}</p>
+      ) : (
+        <p tw="text-secondary text-sm">+{formatPercent(underlyingReturns)}</p>
+      )}
+    </div>
   );
 };

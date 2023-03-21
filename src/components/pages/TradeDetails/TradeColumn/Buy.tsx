@@ -11,6 +11,7 @@ import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { useTradeDetails } from "../TradeDetailsInner";
 import { BuyStats } from "./BuyStats";
+import { ProvideLiquidity } from "./ProvideLiquidity";
 import { useBuy, useBuyAmounts } from "./useBuy";
 
 export const Buy: React.FC = () => {
@@ -64,7 +65,7 @@ export const Buy: React.FC = () => {
   return (
     <>
       <AssetSelection
-        tw="border-2 border-stroke rounded-lg "
+        tw="border border-gray-200 rounded-lg "
         label={<span>Pay</span>}
         selectedValue={selectedLendgine.token1}
         inputValue={input}
@@ -95,6 +96,7 @@ export const Buy: React.FC = () => {
           </p>
         )}
       </AsyncButton>
+      <ProvideLiquidity />
     </>
   );
 };
