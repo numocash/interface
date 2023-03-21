@@ -16,7 +16,7 @@ export const AssetSelectButton = styled.button(
     tw`text-base appearance-none cursor-pointer`,
     tw`whitespace-nowrap`,
     tw`shadow-none`,
-    noAsset && tw`rounded-lg text-paragraph bg-brand`,
+    noAsset && tw`text-white bg-black rounded-lg`,
   ]
 );
 
