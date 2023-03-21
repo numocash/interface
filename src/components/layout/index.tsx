@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import tw from "twin.macro";
 
 import { Background } from "./Background";
+import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { PageLayout } from "./PageLayout";
 
@@ -15,23 +16,13 @@ interface IProps {
 export const Layout: React.FC<IProps> = ({ children }: IProps) => {
   return (
     <>
-      {/* <div tw="font-semibold  text-default p-1 bg-[#FBCC5C]">
-        Warning: Beta Version{" "}
-        <span tw="font-normal text-secondary">v1.0.0 </span>
-        <span tw="text-default font-normal text-sm">
-          Core contracts have been{" "}
-          <a tw="underline" href="https://www.certik.com/projects/numoen">
-            audited
-          </a>{" "}
-          but should still be used at your own risk. Please use caution.
-        </span>
-      </div> */}
       <Background />
       <Header />
       <PageWrapper>
         <PageLayout>{children}</PageLayout>
       </PageWrapper>
       <Toaster />
+      <Footer />
     </>
   );
 };
@@ -41,5 +32,5 @@ const PageWrapper = styled.div`
 `;
 
 export const PageMargin = styled.div(() => [
-  tw`relative items-center px-4 mx-auto mt-10 mb-20 md:px-6 lg:px-10`,
+  tw`relative items-center px-4 mx-auto mt-10 md:px-6 lg:px-10`,
 ]);

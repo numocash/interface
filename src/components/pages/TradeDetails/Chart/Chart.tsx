@@ -130,7 +130,7 @@ export const Chart: React.FC = () => {
       <div tw="flex w-full">
         <div tw="flex gap-2 items-center">
           {loading ? (
-            <div tw="bg-secondary animate-pulse h-8 w-20 rounded" />
+            <div tw="bg-gray-100 animate-pulse h-8 w-20 rounded" />
           ) : (
             <p tw="text-2xl font-semibold">
               {displayPrice
@@ -147,7 +147,7 @@ export const Chart: React.FC = () => {
             </p>
           )}
           {loading ? (
-            <div tw="bg-secondary animate-pulse h-5 w-12 rounded" />
+            <div tw="bg-gray-100 animate-pulse h-5 w-12 rounded" />
           ) : priceChange.greaterThan(0) ? (
             <p tw="text-green">+{formatPercent(priceChange)}</p>
           ) : (
