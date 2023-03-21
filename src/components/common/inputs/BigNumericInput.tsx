@@ -71,7 +71,7 @@ const StyledInput = styled.input<{
   text-overflow: ellipsis;
   width: 100%;
 
-  ${tw` text-paragraph`}
+  ${tw` text-[#8f8f8f]`}
 
   font-weight: 400;
   font-size: 24px;

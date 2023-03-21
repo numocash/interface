@@ -5,10 +5,9 @@ import { borrowRate } from "../../../../../lib/jumprate";
 import { accruedLendgineInfo, getT } from "../../../../../lib/lendgineMath";
 import { numoenPrice } from "../../../../../lib/price";
 import type { Lendgine, LendgineInfo } from "../../../../../lib/types/lendgine";
-import { formatPercent, formatPrice } from "../../../../../utils/format";
-import { RowBetween } from "../../../../common/RowBetween";
+import { formatPercent } from "../../../../../utils/format";
+import { Button } from "../../../../common/Button";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
-import { VerticalItem } from "../../../../common/VerticalItem";
 import { usePositionValue, useTradeDetails } from "../../TradeDetailsInner";
 
 type Props<L extends Lendgine = Lendgine> = {
@@ -44,11 +43,8 @@ export const PositionItem: React.FC<Props> = ({
 
   return (
     <>
-      <div tw="w-full justify-between hidden md:grid grid-cols-9 items-center">
-        <p tw="font-semibold pl-4 col-span-2">{symbol}</p>
-        <p tw="justify-self-start col-span-2">
-          {formatPrice(isInverse ? lendgine.bound.invert() : lendgine.bound)}
-        </p>
+      <div tw="w-full justify-between hidden md:grid grid-cols-6 items-center py-3">
+        <p tw="font-semibold pl-4 col-span-1">{symbol}</p>
 
         {value ? (
           <TokenAmountDisplay
@@ -61,16 +57,17 @@ export const PositionItem: React.FC<Props> = ({
         )}
         <p tw="justify-self-start col-span-2">{formatPercent(funding)}</p>
 
-        <button
-          tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 hidden xl:flex"
+        <Button
+          variant="danger"
+          tw=" text-lg font-semibold hidden xl:flex"
           onClick={() => {
             setClose(true);
             setSelectedLendgine(lendgine);
           }}
         >
           Close
-        </button>
-        <button
+        </Button>
+        {/* <button
           tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:hidden"
           onClick={() => {
             setClose(true);
@@ -79,9 +76,9 @@ export const PositionItem: React.FC<Props> = ({
           }}
         >
           Close
-        </button>
+        </button> */}
       </div>
-      <div tw="w-full justify-between flex flex-col  md:hidden gap-1">
+      {/* <div tw="w-full justify-between flex flex-col  md:hidden gap-1">
         <RowBetween tw="items-center p-0 mb-1">
           <p tw="font-semibold rounded-lg px-2 py-1 bg-secondary w-min">
             {symbol}
@@ -123,7 +120,7 @@ export const PositionItem: React.FC<Props> = ({
         >
           Close
         </button>
-      </div>
+      </div> */}
     </>
   );
 };

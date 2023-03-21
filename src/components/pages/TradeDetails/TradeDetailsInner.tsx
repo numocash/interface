@@ -16,7 +16,6 @@ import {
   liquidityPerShare,
 } from "../../../lib/lendgineMath";
 import {
-  isLongLendgine,
   isShortLendgine,
   pickLongLendgines,
   pickShortLendgines,
@@ -24,11 +23,12 @@ import {
 import { nextHighestLendgine, nextLowestLendgine } from "../../../lib/price";
 import type { Lendgine } from "../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
-import { Button } from "../../common/Button";
-import { PageMargin } from "../../layout";
-import { Times } from "./Chart/TimeSelector";
+import type { Times } from "./Chart/TimeSelector";
+import { History } from "./History/History";
 import { MainView } from "./MainView";
-import { TradeColumn, TradeType } from "./TradeColumn/TradeColumn";
+import { Returns } from "./Returns";
+import { TotalStats } from "./TotalStats";
+import type { TradeTab } from "./TradeColumn/TradeColumn";
 
 interface Props {
   base: WrappedTokenInfo;
@@ -41,11 +41,11 @@ interface ITradeDetails {
   base: WrappedTokenInfo;
   quote: WrappedTokenInfo;
 
-  timeframe: Times;
-  setTimeframe: (val: Times) => void;
+  timeframe: keyof typeof Times;
+  setTimeframe: (val: keyof typeof Times) => void;
 
-  trade: TradeType;
-  setTrade: (val: TradeType) => void;
+  trade: keyof typeof TradeTab;
+  setTrade: (val: keyof typeof TradeTab) => void;
 
   selectedLendgine: Lendgine;
   setSelectedLendgine: (val: Lendgine) => void;
@@ -67,8 +67,8 @@ const useTradeDetailsInternal = ({
   price,
 }: Partial<Props> = {}): ITradeDetails => {
   invariant(base && quote && lendgines && price);
-  const [timeframe, setTimeframe] = useState<Times>(Times.ONE_DAY);
-  const [trade, setTrade] = useState<TradeType>(TradeType.Long);
+  const [timeframe, setTimeframe] = useState<keyof typeof Times>("ONE_WEEK");
+  const [trade, setTrade] = useState<keyof typeof TradeTab>("Long");
   const [close, setClose] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -242,43 +242,48 @@ const TradeDetailsInnerInner: React.FC = () => {
   const { base, setSelectedLendgine, setModalOpen } = useTradeDetails();
   const { longLendgine, shortLendgine } = useNextLendgines();
 
-  const Buttons = (
-    <div tw="gap-2 items-center flex sm:hidden ">
-      {[longLendgine, shortLendgine].map((s) => {
-        if (!s) return null;
-        const isLong = isLongLendgine(s, base);
+  // const Buttons = (
+  //   <div tw="gap-2 items-center flex sm:hidden ">
+  //     {[longLendgine, shortLendgine].map((s) => {
+  //       if (!s) return null;
+  //       const isLong = isLongLendgine(s, base);
 
-        return (
-          <div key={s.address}>
-            <Button
-              variant="primary"
-              tw="h-8 text-xl font-semibold"
-              onClick={() => {
-                setSelectedLendgine(s);
-                setModalOpen(true);
-              }}
-            >
-              {isLong ? "Long" : "Short"}
-            </Button>
-          </div>
-        );
-      })}
-    </div>
-  );
+  //       return (
+  //         <div key={s.address}>
+  //           <Button
+  //             variant="primary"
+  //             tw="h-8 text-xl font-semibold"
+  //             onClick={() => {
+  //               setSelectedLendgine(s);
+  //               setModalOpen(true);
+  //             }}
+  //           >
+  //             {isLong ? "Long" : "Short"}
+  //           </Button>
+  //         </div>
+  //       );
+  //     })}
+  //   </div>
+  // );
   return (
     <>
-      <PageMargin tw="w-full pb-12 sm:pb-0">
-        <div tw="w-full flex justify-center xl:(grid grid-cols-3)">
-          <MainView />
-          <div tw="flex max-w-sm justify-self-end">
-            <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-44px] hidden xl:flex" />
-            <TradeColumn tw="" />
-          </div>
-        </div>
-      </PageMargin>
-      <div tw="z-10 sticky bottom-16 border-t-2 border-stroke  bg-background  sm:(hidden) w-full flex items-center px-4 py-2 pb-3 justify-end">
-        {Buttons}
+      {/* <PageMargin tw="w-full pb-12 sm:pb-0"> */}
+      <div tw="w-full max-w-7xl xl:(grid grid-cols-3) gap-2">
+        <MainView />
+        {/* <div tw="flex max-w-sm justify-self-end">
+          <div tw="border-l-2 border-stroke sticky h-[75vh] min-h-[50rem] mt-[-44px] hidden xl:flex" />
+          <TradeColumn tw="" />
+        </div> */}
       </div>
+      <div tw="w-full max-w-7xl xl:(grid grid-cols-2) gap-2">
+        <History />
+        <Returns />
+        <TotalStats />
+      </div>
+      {/* </PageMargin> */}
+      {/* <div tw="z-10 sticky bottom-16 border-t-2 border-stroke  bg-background  sm:(hidden) w-full flex items-center px-4 py-2 pb-3 justify-end">
+        {Buttons}
+      </div> */}
     </>
   );
 };

@@ -14,5 +14,5 @@ export const Loading: React.FC = () => {
 };
 
 export const Divider = styled.div(() => [
-  tw`flex mx-6 border-b-2 border-stroke`,
+  tw`flex mx-6 border-b border-gray-200`,
 ]);

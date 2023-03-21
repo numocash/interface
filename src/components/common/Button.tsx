@@ -4,32 +4,10 @@ import tw from "twin.macro";
 
 import { LoadingSpinner } from "./LoadingSpinner";
 
-type Variant =
-  | "outline"
-  | "default"
-  | "danger"
-  | "primary"
-  | "secondary"
-  | "notice"
-  | "cool"
-  | "muted"
-  | "gray"
-  | "primary-inverse";
-
-type Size =
-  | "sm"
-  | "small"
-  | "md"
-  | "medium"
-  | "lg"
-  | "large"
-  | "swap"
-  | undefined;
+type Variant = "danger" | "primary";
 
 interface AdditionalButtonProps {
-  size?: Size;
   variant?: Variant;
-  icon?: boolean;
 }
 
 export interface ButtonProps
@@ -87,27 +65,17 @@ export const Button: React.FC<ButtonProps> = ({
 };
 
 export const StyledButton = styled.button<AdditionalButtonProps>(
-  ({ size = "sm", variant = "default", icon }) => [
+  ({ variant = "primary" }) => [
     tw`flex flex-row items-center justify-center leading-normal`,
     tw`rounded-lg`,
     tw`text-sm font-semibold`,
-    tw`text-[#fffffe] active:scale-98 hover:bg-opacity-90`,
+    tw`text-white active:scale-98 hover:bg-opacity-90`,
     tw`transition-transform`,
 
-    variant === "outline" &&
-      tw`text-white border border-gray-100 hover:border-white`,
-    variant === "primary" &&
-      tw`text-white shadow bg-[#6246ea] border-2 border-button`,
-    variant === "muted" && tw`text-gray-200 bg-neutral-700 hover:bg-opacity-50`,
+    variant === "primary" && tw`bg-black shadow `,
 
-    variant === "danger" && tw`font-bold text-white shadow bg-red`,
-    size === "swap" && tw`w-full text-xl font-bold shadow h-14`,
+    variant === "danger" && tw`font-bold shadow bg-red`,
 
-    tw`disabled:(border-2 border-[#2b2c34] bg-[#d1d1e9] text-[#2b2c34] cursor-not-allowed)`,
-
-    size === "sm" && tw`py-1.5 px-2 text-base`,
-    size === "md" && tw`px-5 py-3 text-base`,
-
-    icon && tw`rounded-full w-7 h-7 p-0!`,
+    tw`disabled:(bg-gray-100 text-gray-500  cursor-not-allowed)`,
   ]
 );

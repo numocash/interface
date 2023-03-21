@@ -55,7 +55,7 @@ export const SettingsInner: React.FC = () => {
     <>
       <div tw="flex flex-col w-full gap-2">
         <div tw="flex  w-full items-center justify-between">
-          <p tw="text-white opacity-80 pr-4 ">Transaction Deadline</p>
+          <p tw="text-white opacity-80 pr-8 ">Transaction Deadline</p>
           <div tw="gap-2 items-center flex">
             <div tw="rounded-xl bg-[#4f4f4f] border-[#505050] border py-1 text-white w-16  flex justify-center">
               {settings.timeout} Mins

@@ -4,6 +4,14 @@ const brandColors = {
   DEFAULT: "#6246ea",
 };
 
+const gray = {
+  100: "#EFEFEF",
+  200: "#dfdfdf",
+  300: "#cfcfcf",
+  500: "#8f8f8f",
+  700: "#505050",
+};
+
 const custom = {
   red: "rgb(255,59,48)",
   blue: "rgb(0,122,255)",
@@ -23,7 +31,7 @@ const textColor = {
   headline: "#2b2c34",
   paragraph: "#2b2c34",
   button: "#fffffe",
-  secondary: "rgba(43, 44, 52, 0.6)",
+  secondary: "#707070",
   red: "rgb(255,59,48)",
   blue: "rgb(0,122,255)",
   green: "rgb(52,199,89)",
@@ -47,6 +55,7 @@ module.exports = {
         ...colors,
         ...custom,
         brand: brandColors,
+        gray: gray,
       },
       textColor,
       scale: {

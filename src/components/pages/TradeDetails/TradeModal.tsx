@@ -3,7 +3,7 @@ import { X } from "../../common/Filter";
 import { Modal } from "../../common/Modal";
 import { Buy } from "./TradeColumn/Buy";
 import { Close } from "./TradeColumn/Close";
-import { Returns } from "./TradeColumn/Returns";
+import { Returns } from "./Returns";
 import { useTradeDetails } from "./TradeDetailsInner";
 
 export const TradeModal: React.FC = () => {
