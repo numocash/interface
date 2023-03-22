@@ -4,7 +4,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
 import { arbitrum, celo, polygon } from "wagmi/chains";
-import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
+import { alchemyProvider } from "wagmi/providers/alchemy";
+import { publicProvider } from "wagmi/providers/public";
 
 import { App } from "./App";
 import { SettingsProvider } from "./contexts/settings";
@@ -12,49 +13,20 @@ import { EnvironmentProvider } from "./contexts/useEnvironment";
 
 const { chains, provider, webSocketProvider } = configureChains(
   [
-    {
-      ...arbitrum,
-      rpcUrls: {
-        ...arbitrum.rpcUrls,
-        default: {
-          http: [
-            "https://arb-mainnet.g.alchemy.com/v2/UVgzpWCHx6zsVDO7qC8mtcA6jCl0vgV4",
-          ],
-        },
-      },
-    },
-    {
-      ...polygon,
-      rpcUrls: {
-        ...polygon.rpcUrls,
-        default: {
-          http: [
-            "https://polygon-mainnet.g.alchemy.com/v2/UOYl0nPuXw_tVCxLnPnd6lSYtj4agcDO",
-          ],
-        },
-      },
-    },
+    arbitrum,
+    polygon,
     {
       ...celo,
       blockExplorers: {
         ...celo.blockExplorers,
         default: celo.blockExplorers.etherscan,
       },
-      rpcUrls: {
-        ...polygon.rpcUrls,
-        default: {
-          http: ["https://forno.celo.org"],
-        },
-      },
     },
   ],
   [
-    jsonRpcProvider({
-      rpc: (chain) => ({
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        http: chain.rpcUrls.default.http[0]!,
-      }),
-    }),
+    alchemyProvider({ apiKey: "UVgzpWCHx6zsVDO7qC8mtcA6jCl0vgV4" }),
+    alchemyProvider({ apiKey: "UOYl0nPuXw_tVCxLnPnd6lSYtj4agcDO" }),
+    publicProvider(),
   ]
 ); // TODO: use websockets provider
 
