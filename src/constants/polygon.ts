@@ -53,6 +53,15 @@ const WBTC = new WrappedTokenInfo({
   logoURI:
     "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
 });
+const GHST = new WrappedTokenInfo({
+  name: "Aavegotchi",
+  address: "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+  symbol: "GHST",
+  decimals: 18,
+  chainId: 137,
+  logoURI:
+    "https://assets.coingecko.com/coins/images/12467/small/ghst_200.png?1600750321",
+});
 
 export class Matic extends NativeCurrency {
   protected constructor(chainId: number) {
@@ -113,6 +122,7 @@ export const polygonConfig = {
       [USDC, WETH],
       [USDC, WBTC],
       [USDC, BOB],
+      [USDC, GHST],
     ],
     blockFreq: 1,
   },
