@@ -7,9 +7,9 @@ import { pickLongLendgines, pickShortLendgines } from "../../../lib/lendgines";
 import { nextHighestLendgine, nextLowestLendgine } from "../../../lib/price";
 import type { Lendgine } from "../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
-import { TokenIcon } from "../../common/TokenIcon";
 import { Chart } from "./Chart/Chart";
 import { History } from "./History/History";
+import { Markets } from "./Markets";
 import { Returns } from "./Returns";
 import type { Times } from "./TimeSelector";
 import { TimeSelector } from "./TimeSelector";
@@ -121,21 +121,11 @@ export const TradeDetailsInner: React.FC<Props> = ({
 };
 
 const TradeDetailsInnerInner: React.FC = () => {
-  const { base, quote } = useTradeDetails();
-
   return (
     <>
       <div tw="w-full max-w-7xl grid lg:(grid-cols-3) gap-2">
         <div tw="lg:col-span-2 w-full flex flex-col gap-2 bg-white border rounded-xl border-[#dfdfdf] p-6 shadow">
-          <div tw="flex items-center gap-3 ">
-            <div tw="flex items-center space-x-[-0.5rem]">
-              <TokenIcon token={quote} size={32} />
-              <TokenIcon token={base} size={32} />
-            </div>
-            <p tw="text-lg sm:text-2xl font-bold">
-              {quote.symbol} / {base.symbol}
-            </p>
-          </div>
+          <Markets />
           <Chart />
           <TimeSelector />
         </div>
