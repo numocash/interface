@@ -240,8 +240,8 @@ export const Create: React.FC = () => {
           tw="h-12 text-lg"
           disabled={!!disableReason}
           onClick={async () => {
-            invariant(token0 && token1);
-            invariant(create);
+            invariant(token0 && token1, "token invariant");
+            invariant(!!create, "create invariant");
             await Beet(create);
 
             setToken0(undefined);

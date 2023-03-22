@@ -91,16 +91,14 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       to={`/earn/details/${market[0].address}/${market[1].address}`}
     >
       <Wrapper>
-        <div tw="flex items-center gap-3 col-span-2">
+        <div tw="flex items-center gap-2 col-span-2">
           <div tw="flex items-center space-x-[-0.5rem]">
             <TokenIcon token={market[1]} size={32} />
             <TokenIcon token={market[0]} size={32} />
           </div>
-          <div tw="grid gap-0.5">
-            <span tw="font-semibold text-lg sm:text-xl text-default leading-tight">
-              {market[1].symbol} / {market[0].symbol}
-            </span>
-          </div>
+          <span tw="font-semibold text-lg sm:text-xl text-default leading-tight">
+            {market[1].symbol} / {market[0].symbol}
+          </span>
         </div>
 
         <div tw="flex flex-col ">
