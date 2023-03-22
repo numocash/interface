@@ -6,8 +6,12 @@ import { Earn } from "./components/pages/Earn";
 import { EarnDetails } from "./components/pages/EarnDetails";
 import { Trade } from "./components/pages/Trade";
 import { TradeDetails } from "./components/pages/TradeDetails";
+import { useEnvironment } from "./contexts/useEnvironment";
 
 export const AppRouter: React.FC = () => {
+  const environment = useEnvironment();
+
+  const specialty = environment.interface.specialtyMarkets?.[0];
   return (
     <Routes>
       <Route path="/trade" element={<Trade />} />
@@ -17,7 +21,19 @@ export const AppRouter: React.FC = () => {
 
       <Route path="/create/" element={<Create />} />
 
-      <Route path="" element={<Navigate to="trade" replace />} />
+      <Route
+        path=""
+        element={
+          <Navigate
+            to={
+              specialty
+                ? `/trade/details/${specialty[0].address}/${specialty[1].address}`
+                : "/trade"
+            }
+            replace
+          />
+        }
+      />
     </Routes>
   );
 };
