@@ -6,6 +6,7 @@ import type { Market } from "../lib/types/market";
 import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import { arbitrumConfig } from "./arbitrum";
 import { celoConfig } from "./celo";
+import { polygonConfig } from "./polygon";
 
 export type SupportedChainIDs = (typeof chains)[number]["id"];
 
@@ -44,4 +45,5 @@ export const config: {
 } = {
   42161: arbitrumConfig,
   42220: celoConfig,
+  137: polygonConfig,
 };

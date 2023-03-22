@@ -89,6 +89,7 @@ export const useBeet = () => {
         );
 
         // if any are undefined then return
+
         if (sent.find((t) => t === undefined) !== undefined) return;
 
         const nextStage = stages[stageIndex + 1];
