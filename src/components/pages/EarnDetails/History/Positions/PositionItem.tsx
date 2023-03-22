@@ -1,3 +1,4 @@
+import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
@@ -91,13 +92,17 @@ export const PositionItem: React.FC<Props> = ({
       .multiply(liquidityPrice)
       .quote(updatedPositionInfo.size);
 
-    const amount0 = updatedLendgineInfo.reserve0
-      .multiply(liqPerPosition.quote(position.size))
-      .divide(updatedLendgineInfo.totalLiquidity);
+    const amount0 = updatedLendgineInfo.totalLiquidity.greaterThan(0)
+      ? updatedLendgineInfo.reserve0
+          .multiply(liqPerPosition.quote(position.size))
+          .divide(updatedLendgineInfo.totalLiquidity)
+      : CurrencyAmount.fromRawAmount(updatedLendgineInfo.reserve0.currency, 0);
 
-    const amount1 = updatedLendgineInfo.reserve1
-      .multiply(liqPerPosition.quote(position.size))
-      .divide(updatedLendgineInfo.totalLiquidity);
+    const amount1 = updatedLendgineInfo.totalLiquidity.greaterThan(0)
+      ? updatedLendgineInfo.reserve1
+          .multiply(liqPerPosition.quote(position.size))
+          .divide(updatedLendgineInfo.totalLiquidity)
+      : CurrencyAmount.fromRawAmount(updatedLendgineInfo.reserve1.currency, 0);
 
     return {
       amount0,

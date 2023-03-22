@@ -35,6 +35,13 @@ export const WrappedNative = {
     symbol: "ETH",
     name: "Ether",
   }),
+  [chainID.polygon]: new WrappedTokenInfo({
+    chainId: chainID.polygon,
+    address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+    decimals: 18,
+    symbol: "MATIC",
+    name: "Matic",
+  }),
   [chainID.arbitrum]: new WrappedTokenInfo({
     chainId: chainID.arbitrum,
     address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
