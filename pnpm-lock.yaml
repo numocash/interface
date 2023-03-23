@@ -23,7 +23,7 @@ specifiers:
   '@graphql-codegen/cli': ^3.2.2
   '@graphql-codegen/client-preset': ^2.1.1
   '@graphql-typed-document-node/core': ^3.2.0
-  '@numoen/default-token-list': ^0.0.5
+  '@numoen/default-token-list': ^0.0.10
   '@popperjs/core': ^2.11.6
   '@rainbow-me/rainbowkit': ^0.11.1
   '@reach/dialog': ^0.18.0
@@ -135,7 +135,7 @@ dependencies:
   '@fortawesome/fontawesome-svg-core': 6.3.0
   '@fortawesome/free-solid-svg-icons': 6.3.0
   '@fortawesome/react-fontawesome': 0.2.0_d5rbrisxfyemehbvmdbryvgjte
-  '@numoen/default-token-list': 0.0.5
+  '@numoen/default-token-list': 0.0.10
   '@popperjs/core': 2.11.6
   '@rainbow-me/rainbowkit': 0.11.1_n6t5aahpmtkwjlwfqif42jvo7q
   '@reach/dialog': 0.18.0_zula6vjvt3wdocc4mwcxqa6nzi
@@ -3385,8 +3385,8 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
-  /@numoen/default-token-list/0.0.5:
-    resolution: {integrity: sha512-TYFxw/Q1+gIcdKSIcDaxTJWD+fR6m+1/jLHwrcR30uCEL3NLgeo1N+ouq7Q7+FIFkYh7lvxUqzROQarSYzXvlw==}
+  /@numoen/default-token-list/0.0.10:
+    resolution: {integrity: sha512-P7rI3F2WXAkoeUzCpPYf7F/XGWC+qJxYlH24LQYweXU7z9CmHnuaLxuwdnVmt595JHN51+2m+SAWY8llpILn+w==}
     dev: false
 
   /@parcel/watcher/2.1.0:
