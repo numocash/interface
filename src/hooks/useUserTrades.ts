@@ -12,7 +12,6 @@ import type { Lendgine } from "../lib/types/lendgine";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 
-// TODO: only get first 10
 export const useUserTrades = ({
   address,
   lendgines,

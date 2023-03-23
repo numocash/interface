@@ -4,6 +4,7 @@ import tw, { css } from "twin.macro";
 
 import { PersonalHistory } from "./PersonalHistory/PersonalHistory";
 import { Positions } from "./Positions/Positions";
+import { TotalHistory } from "./TotalHistory/TotalHistory";
 
 const Histories = {
   position: "Your positions",
@@ -41,6 +42,7 @@ export const History: React.FC = () => {
       </div>
       {history === "position" && <Positions />}
       {history === "personalHistory" && <PersonalHistory />}
+      {history === "totalHistory" && <TotalHistory />}
     </div>
   );
 };

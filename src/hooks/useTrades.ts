@@ -11,8 +11,7 @@ import type { Lendgine } from "../lib/types/lendgine";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 
-// TODO: only get first 10 or so
-export const useUserTrades = ({
+export const useTrades = ({
   lendgines,
 }: {
   lendgines: readonly Lendgine[];
@@ -67,6 +66,7 @@ export const useUserTrades = ({
         const debtValue = amount1.add(invert(price).quote(amount0));
 
         const value = collateral.subtract(debtValue);
+        const account = utils.getAddress(m.transaction.origin);
 
         return {
           lendgine,
@@ -74,6 +74,7 @@ export const useUserTrades = ({
           trade: "Buy",
           value,
           block: m.transaction.blockNumber,
+          account,
         };
       });
 
@@ -109,6 +110,7 @@ export const useUserTrades = ({
         const debtValue = amount1.add(invert(price).quote(amount0));
 
         const value = collateral.subtract(debtValue);
+        const account = utils.getAddress(b.transaction.origin);
 
         return {
           lendgine,
@@ -116,6 +118,7 @@ export const useUserTrades = ({
           trade: "Sell",
           value,
           block: b.transaction.blockNumber,
+          account,
         };
       });
 

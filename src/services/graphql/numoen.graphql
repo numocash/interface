@@ -70,6 +70,7 @@ query AllTradesQuery($lendgines: [ID!]!) {
     }
     transaction {
       blockNumber
+      origin
       pairBurns {
         amount0
         amount1
@@ -90,6 +91,7 @@ query AllTradesQuery($lendgines: [ID!]!) {
     }
     transaction {
       blockNumber
+      origin
       pairMints {
         amount0
         amount1
