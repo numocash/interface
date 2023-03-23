@@ -13,7 +13,7 @@ export const PersonalHistory: React.FC = () => {
     );
 
   return (
-    <div tw="flex flex-col">
+    <div tw="flex flex-col h-full">
       <div tw="w-full text-secondary items-center grid-cols-3 grid">
         <p tw="col-start-2 justify-self-start">Value</p>
         <p tw="col-start-3 justify-self-start">Entry/Exit Price</p>
