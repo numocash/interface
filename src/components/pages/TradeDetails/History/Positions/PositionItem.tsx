@@ -42,7 +42,7 @@ export const PositionItem: React.FC<Props> = ({
   }, [isInverse, lendgine, lendgineInfo, positionValue]);
 
   return (
-    <div tw="w-full justify-between grid grid-cols-3 sm:grid-cols-6 items-center py-3">
+    <div tw="w-full justify-between grid grid-cols-3 sm:grid-cols-6 items-center h-12">
       <p tw="font-semibold col-span-1">{symbol}</p>
 
       {value ? (
@@ -52,7 +52,7 @@ export const PositionItem: React.FC<Props> = ({
           tw="sm:col-span-2 justify-self-start"
         />
       ) : (
-        ""
+        <div tw="w-14 sm:w-20 h-6 rounded-lg sm:col-span-2 justify-self-start bg-gray-100 " />
       )}
       <p tw="justify-self-start  hidden sm:(col-span-2 grid)">
         {formatPercent(funding)}
@@ -60,7 +60,7 @@ export const PositionItem: React.FC<Props> = ({
 
       <Button
         variant="danger"
-        tw=" text-lg font-semibold"
+        tw="w-fit px-2 justify-self-end text-lg font-semibold"
         onClick={() => {
           setClose(true);
           setSelectedLendgine(lendgine);

@@ -9,7 +9,10 @@ import type { WrappedTokenInfo } from "./types/wrappedTokenInfo";
 // returns price in token0 / token1
 export const numoenPrice = <L extends Lendgine>(
   lendgine: L,
-  lendgineInfo: LendgineInfo<L>
+  lendgineInfo: Pick<
+    LendgineInfo<L>,
+    "reserve0" | "reserve1" | "totalLiquidity"
+  >
 ) => {
   if (lendgineInfo.totalLiquidity.equalTo(0))
     return new Price(lendgine.token1, lendgine.token0, 1, 0);

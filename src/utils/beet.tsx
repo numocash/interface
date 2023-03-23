@@ -316,6 +316,7 @@ export const AddressLink: React.FC<{
       rel="noopener noreferrer"
       target="_blank"
       className={className}
+      tw="underline"
     >
       {address.slice(0, 6)}...{address.slice(address.length - 4)}
     </a>
