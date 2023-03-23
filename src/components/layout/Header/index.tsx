@@ -1,66 +1,38 @@
 import React from "react";
-import { css } from "twin.macro";
+import { NavLink } from "react-router-dom";
 
-import { ReactComponent as Numoen } from "../../common/images/numoen-small.svg";
 import { ConnectButton } from "./ConnectButton";
+import { More } from "./More";
 import { MoreInfo } from "./MoreInfo";
-import { Nav } from "./Nav";
-import { New } from "./New";
 import { Settings } from "./Settings";
-// import { Nav } from "./Nav";
 
 export const Header: React.FC = () => {
   return (
-    <>
-      <div
-        tw="z-10 md:fixed top-0 bottom-auto justify-between bg-background md:bg-transparent md:(border-b-2 border-stroke) w-full flex items-center px-4 py-2 pb-1"
-        // from ribbon interface
-        css={css`
-          @media (min-width: 768px) {
-            backdrop-filter: blur(40px);
-            /**
-     * Firefox desktop come with default flag to have backdrop-filter disabled
-     * Firefox Android also currently has bug where backdrop-filter is not being applied
-     * More info: https://bugzilla.mozilla.org/show_bug.cgi?id=1178765
-     **/
-            @-moz-document url-prefix() {
-              background-color: rgba(0, 0, 0, 0.9);
-            }
-          }
-        `}
-      >
-        <div tw="flex space-x-[-16px] items-center">
-          <Numoen tw="h-8" />
-          <h1 tw="font-bold text-2xl hidden md:flex">Numoen</h1>
-        </div>
+    <div tw="fixed z-10 flex justify-center w-full top-4 px-6">
+      <div tw="justify-between bg-[#303030] rounded-2xl max-w-xl  w-full flex items-center p-1">
+        <NumoenIcon />
+        <NavLink tw="text-white hover:opacity-80 hidden md:flex" to="/trade/">
+          <p>Trade</p>
+        </NavLink>
+        <NavLink tw="text-white hover:opacity-80 hidden md:flex" to="/earn/">
+          <p>Earn</p>
+        </NavLink>
 
-        <div tw="flex w-full  gap-2 items-center justify-end">
-          <New />
-          <Nav tw="hidden md:flex" />
-          <Settings tw="hidden md:flex" />
-          <MoreInfo tw="hidden md:flex" />
+        <Settings tw="hidden md:flex" />
+        <MoreInfo tw="hidden md:flex" />
+        <div tw="gap-1 flex items-center">
           <ConnectButton tw="" />
+          <More />
         </div>
       </div>
-      <div
-        tw="z-10 fixed bottom-0 border-t-2 border-stroke justify-between  md:(hidden) w-full flex items-center px-4 py-2 pb-1"
-        // from ribbon interface
-        css={css`
-          backdrop-filter: blur(40px);
-          /**
-     * Firefox desktop come with default flag to have backdrop-filter disabled
-     * Firefox Android also currently has bug where backdrop-filter is not being applied
-     * More info: https://bugzilla.mozilla.org/show_bug.cgi?id=1178765
-     **/
-          @-moz-document url-prefix() {
-            background-color: rgba(0, 0, 0, 0.9);
-          }
-        `}
-      >
-        <Nav tw="" />
-        <Settings tw="" />
-        <MoreInfo tw="" />
-      </div>
-    </>
+    </div>
+  );
+};
+
+const NumoenIcon: React.FC = () => {
+  return (
+    <div tw="p-1.5 bg-white rounded-xl">
+      <img src="/numoen.png" alt="Numoen Logo" width={30} height={30} />
+    </div>
   );
 };

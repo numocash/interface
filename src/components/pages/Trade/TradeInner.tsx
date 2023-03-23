@@ -1,27 +1,19 @@
-import { Display } from "../../common/Display";
-import { Filter } from "../../common/Filter";
 import { PageMargin } from "../../layout";
-import { useTrade } from ".";
-import { Explain } from "./Explain/Explain";
 import { Markets } from "./Markets";
 
 export const TradeInner: React.FC = () => {
-  const { markets, assets, setAssets } = useTrade();
   return (
-    <>
-      <Explain />
-      <div tw="border-b-2 border-stroke h-[296px] relative mt-[-296px] bg-secondary -z-10 w-full" />
-
-      <PageMargin tw=" w-full max-w-4xl ">
-        <div tw="flex flex-col gap-4 w-full ">
-          <Display numMarkets={markets?.length} />
-          <div tw=" gap-4 items-center ">
-            <Filter assets={assets} setAssets={setAssets} />
-            {/* <Sort /> */}
-          </div>
-          <Markets />
+    <PageMargin tw="w-full pb-12 sm:pb-0 flex flex-col  gap-2">
+      <div tw="w-full max-w-5xl rounded bg-white  border border-gray-200 items-center pt-12 md:pt-20 px-6 pb-6 shadow mb-12">
+        <div tw="flex flex-col lg:flex-row lg:justify-between gap-4 lg:items-center">
+          <p tw="font-bold text-2xl sm:text-4xl">Trade Power Tokens</p>
+          <p tw=" sm:text-lg text-[#8f8f8f] max-w-md">
+            Power tokens maintain constant leverage, through a novel mechanism
+            of borrowing AMM shares.
+          </p>
         </div>
-      </PageMargin>
-    </>
+      </div>
+      <Markets />
+    </PageMargin>
   );
 };

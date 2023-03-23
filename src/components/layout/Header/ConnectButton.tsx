@@ -1,7 +1,6 @@
 import { ConnectButton as ConnectButtonRainbow } from "@rainbow-me/rainbowkit";
 
 import { Button } from "../../common/Button";
-import { HeaderItem } from "./Nav";
 
 export const ConnectButton: React.FC = () => {
   return (
@@ -24,7 +23,11 @@ export const ConnectButton: React.FC = () => {
             {(() => {
               if (!connected) {
                 return (
-                  <Button variant="primary" onClick={openConnectModal}>
+                  <Button
+                    variant="inverse"
+                    tw=" px-1 text-lg rounded-xl h-10"
+                    onClick={openConnectModal}
+                  >
                     Connect Wallet
                   </Button>
                 );
@@ -32,7 +35,11 @@ export const ConnectButton: React.FC = () => {
 
               if (chain.unsupported) {
                 return (
-                  <Button variant="danger" onClick={openChainModal}>
+                  <Button
+                    variant="danger"
+                    tw=" px-1 text-lg rounded-xl h-10"
+                    onClick={openChainModal}
+                  >
                     Wrong network
                   </Button>
                 );
@@ -40,41 +47,26 @@ export const ConnectButton: React.FC = () => {
 
               return (
                 <>
-                  <button onClick={openChainModal}>
-                    <HeaderItem
-                      item={
-                        <div
-                          style={{
-                            background: chain.iconBackground,
-                            width: 24,
-                            height: 24,
-                            borderRadius: 999,
-                            overflow: "hidden",
-                          }}
-                        >
-                          <img
-                            alt={chain.name ?? "Chain icon"}
-                            src={
-                              chain.iconUrl ??
-                              "https://assets.coingecko.com/coins/images/11090/small/InjXBNx9_400x400.jpg?1674707499"
-                            }
-                            style={{ width: 24, height: 24 }}
-                          />
-                        </div>
-                      }
-                      label="Chain"
-                    />
-                  </button>
-
                   <button onClick={openAccountModal}>
-                    <HeaderItem
-                      item={
-                        <p tw="font-bold text-headline">
-                          {account.displayName}
-                        </p>
-                      }
-                      label="Account"
-                    />
+                    <div tw="px-4 h-10  rounded-xl flex flex-col bg-[#4f4f4f]">
+                      <p tw="font-bold items-center text-white flex h-full">
+                        {account.displayName}
+                      </p>
+                    </div>
+                  </button>
+                  <button onClick={openChainModal}>
+                    <div tw="p-1.5 rounded-xl bg-[#4f4f4f]">
+                      <img
+                        alt={chain.name ?? "Chain icon"}
+                        src={
+                          chain.iconUrl ??
+                          "https://assets.coingecko.com/coins/images/11090/small/InjXBNx9_400x400.jpg?1674707499"
+                        }
+                        tw="rounded-full"
+                        width={30}
+                        height={30}
+                      />
+                    </div>
                   </button>
                 </>
               );

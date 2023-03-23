@@ -9,7 +9,10 @@ import {
   getT,
   liquidityPerPosition,
 } from "../../../../../lib/lendgineMath";
+import { isLongLendgine } from "../../../../../lib/lendgines";
 import {
+  invert,
+  numoenPrice,
   pricePerCollateral,
   pricePerLiquidity,
 } from "../../../../../lib/price";
@@ -21,7 +24,7 @@ import type {
 import { useBeet } from "../../../../../utils/beet";
 import { formatPercent } from "../../../../../utils/format";
 import { AsyncButton } from "../../../../common/AsyncButton";
-import { RowBetween } from "../../../../common/RowBetween";
+import { Button } from "../../../../common/Button";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
 import { useEarnDetails } from "../../EarnDetailsInner";
 import { useCollect } from "../../TradeColumn/useCollect";
@@ -38,9 +41,7 @@ export const PositionItem: React.FC<Props> = ({
   position,
 }: Props) => {
   const Beet = useBeet();
-  const { base, setSelectedLendgine, setClose, setModalOpen } =
-    useEarnDetails();
-  const isInverse = base.equals(lendgine.token1);
+  const { base, setSelectedLendgine, setClose } = useEarnDetails();
   const t = getT();
 
   const collect = useCollect({ lendgine, lendgineInfo, position });
@@ -56,7 +57,7 @@ export const PositionItem: React.FC<Props> = ({
     [lendgine, lendgineInfo, position, t]
   );
 
-  const apr = useMemo(() => {
+  const { apr } = useMemo(() => {
     // token0 / liq
     const liquidityPrice = pricePerLiquidity({
       lendgine,
@@ -70,112 +71,75 @@ export const PositionItem: React.FC<Props> = ({
       .subtract(liquidityPrice)
       .divide(liquidityPrice);
 
-    return supplyRate(updatedLendgineInfo).multiply(interestPremium);
+    return { apr: supplyRate(updatedLendgineInfo).multiply(interestPremium) };
   }, [lendgine, updatedLendgineInfo]);
 
-  const { amount0, amount1 } = useMemo(() => {
-    if (updatedLendgineInfo.totalLiquidity.equalTo(0))
-      return {
-        amount0: CurrencyAmount.fromRawAmount(lendgine.token0, 0),
-        amount1: CurrencyAmount.fromRawAmount(lendgine.token1, 0),
-      };
-
+  const { value } = useMemo(() => {
+    // liq / size
     const liqPerPosition = liquidityPerPosition(lendgine, updatedLendgineInfo);
 
-    const amount0 = updatedLendgineInfo.reserve0
-      .multiply(liqPerPosition.quote(position.size))
-      .divide(updatedLendgineInfo.totalLiquidity);
+    // token0 / liq
+    const liquidityPrice = pricePerLiquidity({
+      lendgine,
+      lendgineInfo: updatedLendgineInfo,
+    });
 
-    const amount1 = updatedLendgineInfo.reserve1
-      .multiply(liqPerPosition.quote(position.size))
-      .divide(updatedLendgineInfo.totalLiquidity);
+    // token0 / token1
+    const price = numoenPrice(lendgine, updatedLendgineInfo);
 
-    return { amount0, amount1 };
-  }, [lendgine, position.size, updatedLendgineInfo]);
+    // token0
+    const value = liqPerPosition
+      .multiply(liquidityPrice)
+      .quote(updatedPositionInfo.size);
+
+    const amount0 = updatedLendgineInfo.totalLiquidity.greaterThan(0)
+      ? updatedLendgineInfo.reserve0
+          .multiply(liqPerPosition.quote(position.size))
+          .divide(updatedLendgineInfo.totalLiquidity)
+      : CurrencyAmount.fromRawAmount(updatedLendgineInfo.reserve0.currency, 0);
+
+    const amount1 = updatedLendgineInfo.totalLiquidity.greaterThan(0)
+      ? updatedLendgineInfo.reserve1
+          .multiply(liqPerPosition.quote(position.size))
+          .divide(updatedLendgineInfo.totalLiquidity)
+      : CurrencyAmount.fromRawAmount(updatedLendgineInfo.reserve1.currency, 0);
+
+    return {
+      amount0,
+      amount1,
+      value: isLongLendgine(lendgine, base)
+        ? value
+        : invert(price).quote(value),
+    };
+  }, [
+    base,
+    lendgine,
+    position.size,
+    updatedLendgineInfo,
+    updatedPositionInfo.size,
+  ]);
 
   return (
-    <>
-      <div tw="w-full justify-between md:grid grid-cols-7 items-center hidden">
-        <div tw="  pl-4 col-span-2 flex flex-col gap-1">
-          {(isInverse ? [amount1, amount0] : [amount0, amount1]).map((a) => (
-            <TokenAmountDisplay
-              key={a.currency.address}
-              amount={a}
-              showIcon
-              showSymbol
-            />
-          ))}
-        </div>
-        <div tw="col-span-2 flex flex-col gap-1 justify-self-start">
-          <TokenAmountDisplay
-            tw="col-span-2"
-            amount={updatedPositionInfo.tokensOwed}
-            showIcon
-            showSymbol
-          />
-          <AsyncButton
-            variant="primary"
-            tw="w-min px-1 py-0.5"
-            disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
-            onClick={async () => {
-              invariant(collect);
-              await Beet(collect);
-            }}
-          >
-            Collect
-          </AsyncButton>
-        </div>
+    <div tw="w-full grid grid-cols-2 sm:grid-cols-7 items-center py-3">
+      <TokenAmountDisplay
+        amount={value}
+        showSymbol
+        tw="sm:col-span-2 w-full "
+      />
+      <TokenAmountDisplay
+        tw="col-span-2  w-full hidden sm:flex"
+        amount={updatedPositionInfo.tokensOwed}
+        showIcon
+        showSymbol
+      />
+      <p tw="justify-self-start col-span-1 hidden sm:flex">
+        {formatPercent(apr)}
+      </p>
 
-        <p tw="justify-self-start col-span-2">{formatPercent(apr)}</p>
-
-        <button
-          tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:flex hidden"
-          onClick={() => {
-            setSelectedLendgine(lendgine);
-            setClose(true);
-          }}
-        >
-          Close
-        </button>
-
-        <button
-          tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:hidden"
-          onClick={() => {
-            setSelectedLendgine(lendgine);
-            setClose(true);
-            setModalOpen(true);
-          }}
-        >
-          Close
-        </button>
-      </div>
-      <div tw="w-full justify-between flex flex-col md:hidden gap-2">
-        <>
-          {(isInverse ? [amount1, amount0] : [amount0, amount1]).map((a) => (
-            <RowBetween key={a.currency.address} tw="p-0 items-center">
-              <p tw="text-secondary">{a.currency.symbol} amount</p>
-              <TokenAmountDisplay amount={a} showIcon showSymbol />
-            </RowBetween>
-          ))}
-        </>
-
-        <RowBetween tw="p-0 items-center">
-          <p tw="text-secondary">Interest</p>
-          <TokenAmountDisplay
-            tw="col-span-2"
-            amount={updatedPositionInfo.tokensOwed}
-            showIcon
-            showSymbol
-          />
-        </RowBetween>
-        <RowBetween tw="p-0 items-center">
-          <p tw="text-secondary">Reward APR</p>
-          <p>{formatPercent(apr)}</p>
-        </RowBetween>
-
+      <div tw="grid grid-cols-2 gap-2 sm:col-span-2 w-full justify-self-end">
         <AsyncButton
           variant="primary"
-          tw="h-8 text-xl"
+          tw="sm:(text-lg font-semibold) py-0.5"
           disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
           onClick={async () => {
             invariant(collect);
@@ -184,17 +148,17 @@ export const PositionItem: React.FC<Props> = ({
         >
           Collect
         </AsyncButton>
-        <button
-          tw="text-button rounded-lg bg-tertiary  h-8 text-xl font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90"
+        <Button
+          variant="danger"
+          tw="sm:(text-lg font-semibold) py-0.5"
           onClick={() => {
             setSelectedLendgine(lendgine);
             setClose(true);
-            setModalOpen(true);
           }}
         >
           Close
-        </button>
+        </Button>
       </div>
-    </>
+    </div>
   );
 };

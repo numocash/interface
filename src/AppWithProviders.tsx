@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
-import { arbitrum, celo } from "wagmi/chains";
+import { arbitrum, celo, polygon } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 
@@ -14,6 +14,7 @@ import { EnvironmentProvider } from "./contexts/useEnvironment";
 const { chains, provider, webSocketProvider } = configureChains(
   [
     arbitrum,
+    polygon,
     {
       ...celo,
       blockExplorers: {
@@ -24,6 +25,7 @@ const { chains, provider, webSocketProvider } = configureChains(
   ],
   [
     alchemyProvider({ apiKey: "UVgzpWCHx6zsVDO7qC8mtcA6jCl0vgV4" }),
+    alchemyProvider({ apiKey: "UOYl0nPuXw_tVCxLnPnd6lSYtj4agcDO" }),
     publicProvider(),
   ]
 ); // TODO: use websockets provider

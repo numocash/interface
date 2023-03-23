@@ -18,16 +18,16 @@ export const Positions: React.FC = () => {
   const lendgineInfos = useLendgines(lendgines);
 
   return !balances.data || !lendgineInfos.data ? (
-    <div tw="w-full rounded-lg bg-secondary flex animate-pulse transform ease-in-out duration-300 h-12" />
+    <div tw="w-full rounded-lg bg-gray-100 flex animate-pulse transform ease-in-out duration-300 h-12 mt-2" />
   ) : !address || balances.data.filter((b) => b.greaterThan(0)).length === 0 ? (
     <EmptyPosition />
   ) : (
-    <>
-      <div tw="w-full justify-between bg-secondary rounded-lg font-semibold h-12 items-center grid-cols-9 hidden md:grid">
-        <p tw="col-start-3 col-span-2 justify-self-start">Bound</p>
-        <p tw="col-start-5 col-span-2 justify-self-start">Value</p>
-        <p tw="col-start-7 col-span-2 justify-self-start">Funding APR</p>
+    <div tw="flex flex-col">
+      <div tw="w-full text-secondary items-center grid-cols-3 sm:grid-cols-6 grid">
+        <p tw="col-span-2 col-start-2 justify-self-start">Value</p>
+        <p tw="hidden sm:(col-start-4 grid) justify-self-start">Funding APR</p>
       </div>
+      <div tw="border-b border-gray-200 w-full" />
       {balances.data?.map((d, i) => {
         if (d.equalTo(0)) return null;
         const lendgine = lendgines?.[i];
@@ -44,6 +44,6 @@ export const Positions: React.FC = () => {
           </>
         );
       })}
-    </>
+    </div>
   );
 };

@@ -8,26 +8,26 @@ export const Config: React.FC = () => {
   const { base: denom, quote: other, lendgines } = useEarnDetails();
 
   return (
-    <div tw="flex flex-col w-full">
-      <RowBetween tw="items-center">
-        <p tw="text-sm text-secondary">Base token:</p>
+    <div tw="w-full flex flex-col bg-white border rounded-xl border-gray-200 p-6 shadow gap-2 h-fit">
+      <RowBetween tw="items-center p-0">
+        <p tw=" text-secondary">Base token</p>
         <AddressLink
           data="address"
           address={utils.getAddress(denom.address)}
-          tw="text-sm underline"
+          tw=" underline"
         />
       </RowBetween>
-      <RowBetween tw="items-center">
-        <p tw="text-sm text-secondary">Speculative token:</p>
+      <RowBetween tw="items-center p-0">
+        <p tw=" text-secondary">Speculative token</p>
         <AddressLink
           data="address"
           address={utils.getAddress(other.address)}
-          tw="text-sm underline"
+          tw="underline"
         />
       </RowBetween>
 
-      <RowBetween tw="items-start">
-        <p tw="text-sm text-secondary">Lendgines:</p>
+      <RowBetween tw="items-start p-0">
+        <p tw=" text-secondary">Lendgines</p>
 
         <div tw="flex flex-col gap-4">
           {lendgines.map((l) => (
@@ -35,7 +35,7 @@ export const Config: React.FC = () => {
               data="address"
               key={l.address}
               address={l.address}
-              tw="text-sm underline"
+              tw="underline"
             />
           ))}
         </div>

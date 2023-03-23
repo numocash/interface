@@ -148,23 +148,28 @@ export const Create: React.FC = () => {
   );
 
   return (
-    <PageMargin tw="w-full pt-8 max-w-lg">
-      <div tw="flex flex-col lg:pt-12  gap-4">
-        <h1 tw="text-xl font-semibold">Create a new market</h1>
-        <p>
-          Numoen allows for the permissionless creation of markets. Read{" "}
-          <span tw="underline">
-            <a
-              href="https://numoen.gitbook.io/numoen/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              here
-            </a>
-          </span>{" "}
-          to learn more about the structure of a Numoen market.
-        </p>
-        <div tw="flex flex-col rounded-lg border-2 border-stroke">
+    <PageMargin tw="w-full pb-12 sm:pb-0 flex flex-col  gap-2">
+      <div tw="w-full max-w-5xl rounded bg-white  border border-[#dfdfdf] pt-12 md:pt-20 px-6 pb-6 shadow mb-12">
+        <div tw="flex flex-col lg:flex-row lg:justify-between gap-4 lg:items-center">
+          <p tw="font-bold text-4xl">Create a new market</p>
+
+          <p tw=" text-lg text-[#8f8f8f] max-w-md">
+            Numoen allows for the permissionless creation of markets. Read{" "}
+            <span tw="underline">
+              <a
+                href="https://numoen.gitbook.io/numoen/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                here
+              </a>
+            </span>{" "}
+            to learn more about the structure of a Numoen market.
+          </p>
+        </div>
+      </div>
+      <div tw="flex flex-col gap-4 w-full rounded-xl bg-white border border-[#dfdfdf] shadow max-w-xl p-6">
+        <div tw="flex flex-col rounded-lg border border-gray-200">
           <AssetSelection
             tw="pb-4"
             onSelect={setToken1}
@@ -184,7 +189,7 @@ export const Create: React.FC = () => {
               allowSelect: true,
             }}
           />
-          <div tw=" border-b-2 w-full border-stroke" />
+          <div tw=" border-b w-full border-gray-200" />
 
           <CenterSwitch icon="plus" />
           <AssetSelection
@@ -235,8 +240,8 @@ export const Create: React.FC = () => {
           tw="h-12 text-lg"
           disabled={!!disableReason}
           onClick={async () => {
-            invariant(token0 && token1);
-            invariant(create);
+            invariant(token0 && token1, "token invariant");
+            invariant(create, "create invariant");
             await Beet(create);
 
             setToken0(undefined);

@@ -106,7 +106,7 @@ export const Deposit: React.FC = () => {
 
   return (
     <>
-      <div tw="flex flex-col rounded-lg border-2 border-stroke">
+      <div tw="flex flex-col rounded-lg border border-gray-200">
         <AssetSelection
           tw="pb-2"
           label={<span>Input</span>}
@@ -124,7 +124,7 @@ export const Deposit: React.FC = () => {
             allowSelect: true,
           }}
         />
-        <div tw=" border-b-2 w-full border-stroke" />
+        <div tw=" border-b w-full border-gray-200" />
         <CenterSwitch icon="plus" />
         <AssetSelection
           label={<span>Input</span>}
@@ -148,7 +148,7 @@ export const Deposit: React.FC = () => {
       <AsyncButton
         variant="primary"
         disabled={!!disableReason}
-        tw="mt-4 h-12 text-lg"
+        tw=" h-12 text-lg"
         onClick={async () => {
           invariant(deposit);
           await Beet(deposit);

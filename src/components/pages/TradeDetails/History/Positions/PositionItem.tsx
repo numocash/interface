@@ -5,11 +5,11 @@ import { borrowRate } from "../../../../../lib/jumprate";
 import { accruedLendgineInfo, getT } from "../../../../../lib/lendgineMath";
 import { numoenPrice } from "../../../../../lib/price";
 import type { Lendgine, LendgineInfo } from "../../../../../lib/types/lendgine";
-import { formatPercent, formatPrice } from "../../../../../utils/format";
-import { RowBetween } from "../../../../common/RowBetween";
+import { formatPercent } from "../../../../../utils/format";
+import { Button } from "../../../../common/Button";
 import { TokenAmountDisplay } from "../../../../common/TokenAmountDisplay";
-import { VerticalItem } from "../../../../common/VerticalItem";
-import { usePositionValue, useTradeDetails } from "../../TradeDetailsInner";
+import { useTradeDetails } from "../../TradeDetailsInner";
+import { usePositionValue } from "../../usePositionValue";
 
 type Props<L extends Lendgine = Lendgine> = {
   balance: CurrencyAmount<Token>;
@@ -21,8 +21,7 @@ export const PositionItem: React.FC<Props> = ({
   lendgine,
   lendgineInfo,
 }: Props) => {
-  const { base, quote, setSelectedLendgine, setClose, setModalOpen } =
-    useTradeDetails();
+  const { base, quote, setSelectedLendgine, setClose } = useTradeDetails();
   const symbol = quote.symbol + (lendgine.token1.equals(quote) ? "+" : "-");
   const isInverse = base.equals(lendgine.token1);
 
@@ -43,87 +42,32 @@ export const PositionItem: React.FC<Props> = ({
   }, [isInverse, lendgine, lendgineInfo, positionValue]);
 
   return (
-    <>
-      <div tw="w-full justify-between hidden md:grid grid-cols-9 items-center">
-        <p tw="font-semibold pl-4 col-span-2">{symbol}</p>
-        <p tw="justify-self-start col-span-2">
-          {formatPrice(isInverse ? lendgine.bound.invert() : lendgine.bound)}
-        </p>
+    <div tw="w-full justify-between grid grid-cols-3 sm:grid-cols-6 items-center h-12">
+      <p tw="font-semibold col-span-1">{symbol}</p>
 
-        {value ? (
-          <TokenAmountDisplay
-            amount={value}
-            showSymbol
-            tw="col-span-2 justify-self-start"
-          />
-        ) : (
-          ""
-        )}
-        <p tw="justify-self-start col-span-2">{formatPercent(funding)}</p>
+      {value ? (
+        <TokenAmountDisplay
+          amount={value}
+          showSymbol
+          tw="sm:col-span-2 justify-self-start"
+        />
+      ) : (
+        <div tw="w-14 sm:w-20 h-6 rounded-lg sm:col-span-2 justify-self-start bg-gray-100 " />
+      )}
+      <p tw="justify-self-start  hidden sm:(col-span-2 grid)">
+        {formatPercent(funding)}
+      </p>
 
-        <button
-          tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 hidden xl:flex"
-          onClick={() => {
-            setClose(true);
-            setSelectedLendgine(lendgine);
-          }}
-        >
-          Close
-        </button>
-        <button
-          tw="text-tertiary text-lg font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90 xl:hidden"
-          onClick={() => {
-            setClose(true);
-            setModalOpen(true);
-            setSelectedLendgine(lendgine);
-          }}
-        >
-          Close
-        </button>
-      </div>
-      <div tw="w-full justify-between flex flex-col  md:hidden gap-1">
-        <RowBetween tw="items-center p-0 mb-1">
-          <p tw="font-semibold rounded-lg px-2 py-1 bg-secondary w-min">
-            {symbol}
-          </p>
-          <VerticalItem
-            item={
-              value ? (
-                <TokenAmountDisplay
-                  amount={value}
-                  showSymbol
-                  tw="col-span-2 justify-self-start"
-                />
-              ) : (
-                ""
-              )
-            }
-            label="Position Value"
-          />
-        </RowBetween>
-        <RowBetween tw="items-center p-0">
-          <p tw="text-secondary">Bound</p>
-          <p tw="justify-self-start col-span-2">
-            {formatPrice(isInverse ? lendgine.bound.invert() : lendgine.bound)}
-          </p>
-        </RowBetween>
-
-        <RowBetween tw="items-center p-0">
-          <p tw="text-secondary">Funding Rate</p>
-          <p tw="justify-self-start col-span-2">{formatPercent(funding)}</p>
-        </RowBetween>
-
-        <button
-          tw="text-button rounded-lg bg-tertiary  h-8 text-xl font-semibold transform ease-in-out duration-300 hover:text-opacity-75 active:scale-90"
-          onClick={() => {
-            setClose(true);
-            setModalOpen(true);
-            setSelectedLendgine(lendgine);
-          }}
-        >
-          Close
-        </button>
-      </div>
-    </>
+      <Button
+        variant="danger"
+        tw=" text-lg font-semibold"
+        onClick={() => {
+          setClose(true);
+          setSelectedLendgine(lendgine);
+        }}
+      >
+        Close
+      </Button>
+    </div>
   );
 };

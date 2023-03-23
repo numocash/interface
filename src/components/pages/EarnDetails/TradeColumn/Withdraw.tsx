@@ -12,11 +12,7 @@ import { PercentageSlider } from "../../../common/inputs/PercentageSlider";
 import { useEarnDetails } from "../EarnDetailsInner";
 import { useWithdraw, useWithdrawAmounts } from "./useWithdraw";
 
-interface Props {
-  modal: boolean;
-}
-
-export const Withdraw: React.FC<Props> = ({ modal }: Props) => {
+export const Withdraw: React.FC = () => {
   const { setClose, base, quote, selectedLendgine } = useEarnDetails();
 
   const Beet = useBeet();
@@ -63,16 +59,14 @@ export const Withdraw: React.FC<Props> = ({ modal }: Props) => {
 
   return (
     <div tw="flex flex-col gap-4 w-full">
-      {!modal && (
-        <button onClick={() => setClose(false)} tw="items-center flex">
-          <div tw="text-xs flex gap-1 items-center">
-            <FaChevronLeft />
-            Back
-          </div>
-        </button>
-      )}
+      <button onClick={() => setClose(false)} tw="items-center flex">
+        <div tw="text-xs flex gap-1 items-center">
+          <FaChevronLeft />
+          Back
+        </div>
+      </button>
 
-      <div tw="flex flex-col rounded-lg border-2 border-stroke">
+      <div tw="flex flex-col rounded-lg border border-gray-200">
         <div tw=" px-2 py-2 gap-2 flex flex-col w-full">
           <PercentageSlider
             disabled={false}
@@ -80,7 +74,7 @@ export const Withdraw: React.FC<Props> = ({ modal }: Props) => {
             onChange={setWithdrawPercent}
           />
         </div>
-        <div tw=" border-b-2 w-full border-stroke" />
+        <div tw=" border-b w-full border-gray-200" />
         <CenterSwitch icon="arrow" />
         <div tw="flex flex-col gap-2 pt-3">
           <AssetSelection

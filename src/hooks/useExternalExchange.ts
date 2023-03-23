@@ -9,7 +9,7 @@ import type { Address } from "wagmi";
 
 import { uniswapV2PairABI } from "../abis/uniswapV2Pair";
 import { uniswapV3PoolABI } from "../abis/uniswapV3Pool";
-import { Times } from "../components/pages/TradeDetails/Chart/TimeSelector";
+import type { Times } from "../components/pages/TradeDetails/TimeSelector";
 import { useEnvironment } from "../contexts/useEnvironment";
 import type {
   PriceHistoryDayV2Query,
@@ -122,7 +122,7 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
 
 export const usePriceHistory = (
   externalExchange: HookArg<UniswapV2Pool | UniswapV3Pool>,
-  timeframe: Times
+  timeframe: keyof typeof Times
 ) => {
   const client = useClient();
   const chain = useChain();
@@ -135,17 +135,17 @@ export const usePriceHistory = (
       const variables = {
         id: externalExchange.address.toLowerCase(),
         amount:
-          timeframe === Times.ONE_DAY
+          timeframe === "ONE_DAY"
             ? 24
-            : timeframe === Times.ONE_WEEK
+            : timeframe === "ONE_WEEK"
             ? 24 * 7
-            : timeframe === Times.THREE_MONTH
+            : timeframe === "THREE_MONTH"
             ? 92
             : 365,
       };
 
       const priceHistory =
-        timeframe === Times.ONE_DAY || timeframe === Times.ONE_WEEK
+        timeframe === "ONE_DAY" || timeframe === "ONE_WEEK"
           ? isV3(externalExchange)
             ? await client.uniswapV3.request(
                 PriceHistoryHourV3Document,

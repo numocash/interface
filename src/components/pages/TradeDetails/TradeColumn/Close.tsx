@@ -13,7 +13,8 @@ import { LoadingSpinner } from "../../../common/LoadingSpinner";
 import { RowBetween } from "../../../common/RowBetween";
 import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../common/VerticalItem";
-import { usePositionValue, useTradeDetails } from "../TradeDetailsInner";
+import { useTradeDetails } from "../TradeDetailsInner";
+import { usePositionValue } from "../usePositionValue";
 import { useClose, useCloseAmounts } from "./useClose";
 
 interface Props {
@@ -80,7 +81,7 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
         </button>
       )}
       <RowBetween tw="items-center p-0 ">
-        <div tw="rounded-lg bg-secondary px-2 py-1 text-lg font-semibold">
+        <div tw="rounded-lg bg-gray-100 px-2 py-1 text-lg font-semibold">
           {symbol}
         </div>
         {positionValue ? (
@@ -96,7 +97,7 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
         )}
       </RowBetween>
       <AssetSelection
-        tw="border-2 border-[#2b2c34] rounded-lg "
+        tw="border border-gray-200 rounded-lg "
         inputValue={input}
         selectedValue={selectedLendgine.token1}
         label={<span>Receive</span>}

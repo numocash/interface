@@ -141,7 +141,7 @@ export const useBuy = ({
         };
 
     return [
-      native ? approve.beetStage : null,
+      !native ? approve.beetStage : null,
       {
         stageTitle: title,
         parallelTransactions: [

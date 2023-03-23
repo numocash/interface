@@ -1,3 +1,4 @@
+import { utils } from "ethers";
 import { useMemo } from "react";
 import tw, { styled } from "twin.macro";
 
@@ -67,13 +68,16 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
   }, [updatedInfo, inverse, lendgine]);
   return (
     <W
-      selected={selectedLendgine === lendgine}
+      selected={
+        utils.getAddress(selectedLendgine.address) ===
+        utils.getAddress(lendgine.address)
+      }
       onClick={() => {
         setSelectedLendgine(lendgine);
         close && setClose(false);
       }}
     >
-      <div tw="bg-secondary w-full flex h-16 items-center p-2">
+      <div tw="bg-gray-100 w-full flex h-16 items-center p-2">
         <div tw="flex flex-col ">
           <p tw="text-sm text-secondary">Best APR</p>
           <p tw="text-2xl font-semibold">
@@ -90,7 +94,6 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
         <p tw="text-sm text-secondary">Impermanent loss vs. Uni V2</p>
         <p>{il.equalTo(0) ? "0" : il.toFixed(2)}x</p>
       </RowBetween>
-      {/* <div tw="w-full border-b-2 border-stroke" /> */}
       <RowBetween tw="px-2 py-1  ">
         <p tw="text-sm  text-secondary">Implied vol.</p>
         <p>{iv.equalTo(0) ? "0" : iv.toFixed(2)}%</p>
@@ -100,8 +103,8 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
 };
 
 const Wrapper = styled.button<{ selected: boolean }>(({ selected }) => [
-  tw`flex flex-col w-full max-w-sm duration-300 ease-in-out transform border-2 border-transparent rounded-xl sm:hover:scale-105 overflow-clip border-secondary`,
-  selected && tw`border-stroke`,
+  tw`flex flex-col w-full duration-300 ease-in-out transform border-2 border-transparent border-gray-100 rounded-xl sm:hover:scale-105 overflow-clip`,
+  selected && tw`border-black`,
 ]);
 
 interface WProps {
@@ -110,22 +113,9 @@ interface WProps {
   children: React.ReactNode;
 }
 const W: React.FC<WProps> = ({ selected, onClick, children }: WProps) => {
-  const { setModalOpen } = useEarnDetails();
   return (
-    <>
-      <Wrapper selected={selected} onClick={onClick} tw="hidden xl:flex">
-        {children}
-      </Wrapper>
-      <Wrapper
-        selected={false}
-        onClick={() => {
-          onClick();
-          setModalOpen(true);
-        }}
-        tw="border-secondary xl:hidden"
-      >
-        {children}
-      </Wrapper>
-    </>
+    <Wrapper selected={selected} onClick={onClick} tw="">
+      {children}
+    </Wrapper>
   );
 };

@@ -130,9 +130,9 @@ export const Chart: React.FC = () => {
       <div tw="flex w-full">
         <div tw="flex gap-2 items-center">
           {loading ? (
-            <div tw="bg-secondary animate-pulse h-8 w-20 rounded" />
+            <div tw="bg-gray-100 animate-pulse h-8 w-20 rounded" />
           ) : (
-            <p tw="text-2xl">
+            <p tw="text-lg sm:text-2xl font-semibold">
               {displayPrice
                 ? formatDisplayWithSoftLimit(
                     fractionToFloat(displayPrice.price),
@@ -147,7 +147,7 @@ export const Chart: React.FC = () => {
             </p>
           )}
           {loading ? (
-            <div tw="bg-secondary animate-pulse h-5 w-12 rounded" />
+            <div tw="bg-gray-100 animate-pulse h-5 w-12 rounded" />
           ) : priceChange.greaterThan(0) ? (
             <p tw="text-green">+{formatPercent(priceChange)}</p>
           ) : (
@@ -180,7 +180,7 @@ export const Chart: React.FC = () => {
                     }
                     x={(d) => xScale(getX(d)) ?? 0}
                     y={(d) => yScale(getY(d)) ?? 0}
-                    stroke={"#6246ea"}
+                    stroke={"#000000"}
                     strokeWidth={2}
                     strokeOpacity={1}
                   />
@@ -189,7 +189,7 @@ export const Chart: React.FC = () => {
                   <Line
                     from={{ x: xScale(crosshair), y: 0 }}
                     to={{ x: xScale(crosshair), y: 208 }}
-                    stroke={"#d1d1e9"}
+                    stroke={"#8f8f8f"}
                     strokeWidth={1}
                     pointerEvents="none"
                     strokeDasharray="4,4"
@@ -200,8 +200,8 @@ export const Chart: React.FC = () => {
                     left={xScale(crosshair)}
                     top={yScale(getY(displayPrice)) + marginTop}
                     size={50}
-                    fill={"#6246ea"}
-                    stroke={"#6246ea"}
+                    fill={"#000000"}
+                    stroke={"#000000"}
                     strokeWidth={0.5}
                   />
                 )}
