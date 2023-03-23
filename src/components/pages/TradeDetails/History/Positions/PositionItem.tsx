@@ -60,7 +60,7 @@ export const PositionItem: React.FC<Props> = ({
 
       <Button
         variant="danger"
-        tw=" text-lg font-semibold"
+        tw="w-fit px-2 justify-self-end text-lg font-semibold"
         onClick={() => {
           setClose(true);
           setSelectedLendgine(lendgine);

@@ -81,17 +81,17 @@ const Item: React.FC<ItemProps> = ({ trade }: ItemProps) => {
   const long = isLongLendgine(trade.lendgine, base);
   return (
     <div tw="w-full grid rounded-lg h-12 items-center grid-cols-3">
-      <p tw="justify-self-start font-semibold">
+      <p tw="justify-self-start font-semibold text-sm sm:text-base">
         {trade.trade} {quote.symbol}
         {long ? "+" : "-"}
       </p>
       <TokenAmountDisplay
         amount={!long ? trade.value : trade.price.quote(trade.value)}
         showSymbol
-        tw=" justify-self-start"
+        tw=" justify-self-end text-sm sm:text-base"
       />
 
-      <p tw="justify-self-start">
+      <p tw="justify-self-end text-sm sm:text-base">
         {long ? formatPrice(trade.price) : formatPrice(invert(trade.price))}
       </p>
     </div>

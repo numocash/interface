@@ -7,9 +7,9 @@ import { Positions } from "./Positions/Positions";
 import { TotalHistory } from "./TotalHistory/TotalHistory";
 
 const Histories = {
-  position: "Your positions",
-  personalHistory: "Your trade history",
-  totalHistory: "Total trade history",
+  position: "Positions",
+  personalHistory: "Trades",
+  totalHistory: "Total trades",
 } as const;
 
 export const History: React.FC = () => {
@@ -18,7 +18,7 @@ export const History: React.FC = () => {
   return (
     <div tw="w-full flex flex-col gap-4 bg-white border rounded-xl border-gray-200 p-6 pb-3 shadow ">
       <div tw="w-full justify-start flex">
-        <div tw="flex text-lg justify-end p-0.5 items-center rounded-xl bg-gray-100">
+        <div tw="flex sm:text-lg justify-end p-0.5 items-center rounded-xl bg-gray-100">
           {objectKeys(Histories).map((h) => {
             return (
               <div key={Histories[h]}>
