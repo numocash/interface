@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { parseContractResult } from "@wagmi/core";
 import type { Abi } from "abitype";
 import * as React from "react";
-import { useBlockNumber } from "wagmi";
 import type { ReadContractConfig, ReadContractResult } from "wagmi/actions";
 import { readContract } from "wagmi/actions";
 
@@ -24,8 +23,6 @@ export type UseContractReadConfig<
     Error,
     TSelectData
   > & {
-    /** If set to `true`, the cache will depend on the block number */
-    cacheOnBlock?: boolean;
     /** Subscribe to changes */
     watch?: boolean;
   };
@@ -80,7 +77,6 @@ export function useContractRead<
   abi,
   address,
   args,
-  cacheOnBlock = false,
   cacheTime,
   enabled: enabled_ = true,
   functionName,
@@ -95,35 +91,27 @@ export function useContractRead<
   watch,
 }: UseContractReadConfig<TAbi, TFunctionName, TSelectData>) {
   const chainId = useChain();
-  const { data: blockNumber } = useBlockNumber({
-    chainId,
-    enabled: watch || cacheOnBlock,
-    scopeKey: watch || cacheOnBlock ? undefined : "idle",
-    watch,
-  });
 
   const queryKey_ = React.useMemo(
     () =>
       queryKey({
         address,
         args,
-        blockNumber: cacheOnBlock ? blockNumber : undefined,
         chainId,
         functionName,
         overrides,
       } as Omit<ReadContractConfig, "abi">),
-    [address, args, blockNumber, cacheOnBlock, chainId, functionName, overrides]
+    [address, args, chainId, functionName, overrides]
   );
 
   const enabled = React.useMemo(() => {
-    let enabled = Boolean(enabled_ && abi && address && functionName);
-    if (cacheOnBlock) enabled = Boolean(enabled && blockNumber);
+    const enabled = Boolean(enabled_ && abi && address && functionName);
     return enabled;
-  }, [abi, address, blockNumber, cacheOnBlock, enabled_, functionName]);
+  }, [abi, address, enabled_, functionName]);
 
   useInvalidateOnBlock({
     chainId,
-    enabled: Boolean(enabled && watch && !cacheOnBlock),
+    enabled: Boolean(enabled && watch),
     queryKey: queryKey_,
   });
 

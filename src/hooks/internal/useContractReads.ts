@@ -5,7 +5,6 @@ import type { Contract } from "@wagmi/core/internal";
 import type { Abi } from "abitype";
 import * as React from "react";
 import type { Address } from "wagmi";
-import { useBlockNumber } from "wagmi";
 import type { ReadContractsConfig, ReadContractsResult } from "wagmi/actions";
 import { readContracts } from "wagmi/actions";
 
@@ -22,8 +21,6 @@ export type UseContractReadsConfig<
     ? DeepPartial<Config[K], 2>
     : Config[K];
 } & UseQueryOptions<ReadContractsResult<TContracts>, Error, TSelectData> & {
-    /** If set to `true`, the cache will depend on the block number */
-    cacheOnBlock?: boolean;
     /** Subscribe to changes */
     watch?: boolean;
   };
@@ -111,7 +108,6 @@ export function useContractReads<
   TSelectData = ReadContractsResult<TContracts>
 >({
   allowFailure = true,
-  cacheOnBlock = false,
   cacheTime,
   contracts,
   enabled: enabled_ = true,
@@ -130,37 +126,31 @@ export function useContractReads<
   TSelectData
 >): // Need explicit type annotation so TypeScript doesn't expand return type into recursive conditional
 UseQueryResult<TSelectData, Error> {
-  const { data: blockNumber } = useBlockNumber({
-    enabled: watch || cacheOnBlock,
-    watch,
-  });
   const chainId = useChain();
 
   const queryKey_ = React.useMemo(
     () =>
       queryKey({
         allowFailure,
-        blockNumber: cacheOnBlock ? blockNumber : undefined,
         chainId,
         contracts: contracts as unknown as ContractConfig[],
         overrides,
       }),
-    [allowFailure, blockNumber, cacheOnBlock, chainId, contracts, overrides]
+    [allowFailure, chainId, contracts, overrides]
   );
 
   const enabled = React.useMemo(() => {
-    let enabled = Boolean(
+    const enabled = Boolean(
       enabled_ &&
         (contracts as unknown as ContractConfig[])?.every(
           (x) => x.abi && x.address && x.functionName
         )
     );
-    if (cacheOnBlock) enabled = Boolean(enabled && blockNumber);
     return enabled;
-  }, [blockNumber, cacheOnBlock, contracts, enabled_]);
+  }, [contracts, enabled_]);
 
   useInvalidateOnBlock({
-    enabled: Boolean(enabled && watch && !cacheOnBlock),
+    enabled: Boolean(enabled && watch),
     queryKey: queryKey_,
   });
 
