@@ -37,6 +37,15 @@ export const PersonalHistoryItems: React.FC<Props> = ({ user }: Props) => {
         userTradesQuery.data && (
           <div tw="flex flex-col gap-1 justify-between h-full">
             <div tw="flex flex-col gap-1">
+              <div tw="w-full text-secondary items-center grid-cols-3 grid">
+                <p tw="col-start-2 justify-self-end text-xs sm:text-sm">
+                  Value
+                </p>
+                <p tw="col-start-3 justify-self-end text-xs sm:text-sm">
+                  Price
+                </p>
+              </div>
+              <div tw="border-b border-gray-200 w-full" />
               {trades?.map((trade, i) => (
                 <>
                   <Item

@@ -14,13 +14,6 @@ export const Positions: React.FC = () => {
 
   return (
     <div tw="flex flex-col">
-      <div tw="w-full text-secondary items-center grid-cols-3 sm:grid-cols-5 grid">
-        <p tw=" col-start-2 justify-self-end">Value</p>
-        <p tw=" justify-self-end hidden sm:( grid)">Returns</p>
-
-        <p tw="hidden sm:( grid) justify-self-end">Funding APR</p>
-      </div>
-      <div tw="border-b border-gray-200 w-full" />
       <PositionItems address={address} />
     </div>
   );
