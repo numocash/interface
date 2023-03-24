@@ -98,6 +98,6 @@ const Item: React.FC<ItemProps> = ({ trade }: ItemProps) => {
   );
 };
 
-const Loading = styled.div(() => [
+export const Loading = styled.div(() => [
   tw`flex w-full h-12 mt-2 duration-300 ease-in-out transform bg-gray-100 rounded-lg animate-pulse`,
 ]);

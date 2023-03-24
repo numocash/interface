@@ -80,6 +80,7 @@ export const useUserTrades = ({
           trade: "Buy",
           value,
           block: m.transaction.blockNumber,
+          shares: CurrencyAmount.fromRawAmount(lendgine.lendgine, +m.shares),
         };
       });
 
@@ -122,7 +123,8 @@ export const useUserTrades = ({
           trade: "Sell",
           value,
           block: b.transaction.blockNumber,
-        };
+          shares: CurrencyAmount.fromRawAmount(lendgine.lendgine, +b.shares),
+        } as const;
       });
 
       return parsedBuy
@@ -135,3 +137,7 @@ export const useUserTrades = ({
     }
   );
 };
+
+export type UserTrade = NonNullable<
+  ReturnType<typeof useUserTrades>["data"]
+>[number];
