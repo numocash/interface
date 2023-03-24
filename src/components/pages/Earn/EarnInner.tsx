@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 
 import { Button } from "../../common/Button";
 import { PageMargin } from "../../layout";
+import { LiquidStaking } from "./LiquidStaking";
 import { Markets } from "./Markets";
 
 export const EarnInner: React.FC = () => {
@@ -23,6 +24,7 @@ export const EarnInner: React.FC = () => {
           </div>
         </div>
       </div>
+      <LiquidStaking />
       <Markets />
     </PageMargin>
   );
