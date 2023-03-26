@@ -90,6 +90,7 @@ export function useContractRead<
   select,
   staleTime,
   suspense,
+  refetchInterval,
 }: UseContractReadConfig<TAbi, TFunctionName, TSelectData>) {
   const chainId = useChain();
 
@@ -117,6 +118,7 @@ export function useContractRead<
       abi: abi as Abi,
     }),
     {
+      refetchInterval: refetchInterval as number,
       cacheTime,
       enabled,
       isDataEqual,

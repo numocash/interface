@@ -112,6 +112,7 @@ export function useContractReads<
   select,
   staleTime,
   suspense,
+  refetchInterval,
 }: UseContractReadsConfig<
   TContracts,
   TSelectData
@@ -145,6 +146,7 @@ UseQueryResult<TSelectData, Error> {
   );
 
   return useQuery(queryKey_, queryFn({ abis }), {
+    refetchInterval: refetchInterval as number,
     cacheTime,
     enabled,
     isDataEqual,
