@@ -5,7 +5,7 @@ import { useAccount } from "wagmi";
 import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
-import { useBeet } from "../../../../utils/beet";
+import { Beet } from "../../../../utils/beet";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
@@ -17,7 +17,6 @@ import { useBuy, useBuyAmounts } from "./useBuy";
 export const Buy: React.FC = () => {
   const { quote, base, selectedLendgine } = useTradeDetails();
   const isLong = isLongLendgine(selectedLendgine, base);
-  const Beet = useBeet();
   const { address } = useAccount();
 
   const selectedLendgineInfo = useLendgine(selectedLendgine);
@@ -46,7 +45,7 @@ export const Buy: React.FC = () => {
         ? "Insufficient balance"
         : selectedLendgineInfo.data.totalLiquidity.equalTo(0)
         ? "Insufficient liquidity"
-        : !liquidity || !shares || !buy
+        : !liquidity || !shares || !buy.data
         ? "Loading"
         : liquidity.greaterThan(selectedLendgineInfo.data.totalLiquidity)
         ? "Insufficient liquidity"
@@ -83,8 +82,8 @@ export const Buy: React.FC = () => {
         tw="h-12 text-xl font-bold items-center"
         disabled={!!disableReason}
         onClick={async () => {
-          invariant(buy);
-          await Beet(buy);
+          invariant(buy.data);
+          await Beet(buy.data);
 
           setInput("");
         }}

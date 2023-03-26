@@ -42,6 +42,7 @@ import { determineBorrowAmount } from "../../../../lib/trade";
 import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
 import type { UniswapV2Pool } from "../../../../services/graphql/uniswapV2";
 import type { UniswapV3Pool } from "../../../../services/graphql/uniswapV3";
+import type { BeetStage, TxToast } from "../../../../utils/beet";
 import { useTradeDetails } from "../TradeDetailsInner";
 
 export const useBuy = ({
@@ -70,51 +71,28 @@ export const useBuy = ({
     address: environment.base.lendgineRouter,
   });
 
-  const title = `Buy ${quote.symbol}${isLong ? "+" : "-"}`;
-  const mintTitle = useMemo(
+  const title = useMemo(
     () => `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
     [isLong, quote.symbol]
   );
 
-  // mint side effects: allowance, token1balance,  long balance
-
   const approveMutation = useMutation({
-    mutationFn: async (approveTx: () => Promise<SendTransactionResult>) => {
+    mutationFn: async ({
+      approveTx,
+      toast,
+    }: { approveTx: () => Promise<SendTransactionResult> } & {
+      toast: TxToast;
+    }) => {
       const transaction = await approveTx();
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      toaster.txLoading("approve", approve.title!, "1/2", "", transaction.hash);
+      toaster.txPending({ ...toast, hash: transaction.hash });
 
-      return await Promise.race([
-        transaction.wait(),
-        awaitTX(transaction.hash),
-      ]);
+      return await awaitTX(transaction);
     },
-    onMutate: () =>
-      toaster.txLoading(
-        "approve",
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        approve.title!,
-        "1/2",
-        "Sending transaction"
-      ),
-    onError: () =>
-      toaster.txError(
-        "approve",
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        approve.title!,
-        "1/2",
-        "Error sending transaction"
-      ),
-    onSuccess: async (data) => {
-      toaster.txSuccess(
-        "approve",
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        approve.title!,
-        "1/2",
-        "",
-        data.transactionHash
-      );
+    onMutate: ({ toast }) => toaster.txSending(toast),
+    onError: (_, { toast }) => toaster.txError(toast),
+    onSuccess: async (data, input) => {
+      toaster.txSuccess({ ...input.toast, receipt: data });
       await invalidate(
         getAllowanceRead(
           selectedLendgine.token1,
@@ -132,13 +110,14 @@ export const useBuy = ({
       address,
       amountIn,
       mostLiquidPool,
+      toast,
     }: {
       borrowAmount: CurrencyAmount<WrappedTokenInfo>;
       shares: CurrencyAmount<Token>;
       address: Address;
       amountIn: CurrencyAmount<WrappedTokenInfo>;
       mostLiquidPool: UniswapV2Pool | UniswapV3Pool;
-    }) => {
+    } & { toast: TxToast }) => {
       const args = [
         {
           token0: utils.getAddress(selectedLendgine.token0.address),
@@ -212,19 +191,14 @@ export const useBuy = ({
 
       const transaction = await tx();
 
-      toaster.txLoading("mint", mintTitle, "2/2", "", transaction.hash);
+      toaster.txPending({ ...toast, hash: transaction.hash });
 
-      return await Promise.race([
-        transaction.wait(),
-        awaitTX(transaction.hash),
-      ]);
+      return await awaitTX(transaction);
     },
-    onMutate: () =>
-      toaster.txLoading("mint", mintTitle, "2/2", "Sending transaction"),
-    onError: () =>
-      toaster.txError("mint", mintTitle, "2/2", "Error sending transaction"),
+    onMutate: ({ toast }) => toaster.txSending(toast),
+    onError: (_, { toast }) => toaster.txError(toast),
     onSuccess: async (data, input) => {
-      toaster.txSuccess("mint", mintTitle, "2/2", "", data.transactionHash);
+      toaster.txSuccess({ ...input.toast, receipt: data });
       await Promise.all([
         invalidate(
           getAllowanceRead(
@@ -240,64 +214,73 @@ export const useBuy = ({
   });
 
   return useMemo(() => {
+    if (approve.status === "loading") return { status: "loading" } as const;
     if (
       !borrowAmount ||
       !shares ||
       !address ||
       !amountIn ||
       !mostLiquid.data ||
-      approve.status !== "success"
+      approve.status === "error"
     )
-      return undefined;
+      return { status: "error" } as const;
 
-    return async () => {
-      approve.tx && (await approveMutation.mutateAsync(approve.tx));
-      await mintMutation.mutateAsync({
-        borrowAmount,
-        shares,
-        address,
-        amountIn,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        mostLiquidPool: mostLiquid.data!.pool,
-      });
-    };
-
-    const tx = {
-      ...mutation,
-      mutateAsync: async () =>
-        mutation.mutateAsync({
-          borrowAmount,
-          shares,
-          address,
-          amountIn,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          mostLiquidPool: mostLiquid.data!.pool,
-        }),
-    };
-
-    return [
-      !native ? approve.beetStage : null,
-      {
-        stageTitle: title,
-        parallelTransactions: [
+    return {
+      status: "success",
+      data: (
+        [
+          native && approve.tx
+            ? {
+                title: approve.title,
+                parallelTxs: [
+                  {
+                    title: approve.title,
+                    description: approve.title,
+                    callback: (toast: TxToast) =>
+                      approveMutation.mutateAsync({
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        approveTx: approve.tx!,
+                        toast,
+                      }),
+                  },
+                ],
+              }
+            : undefined,
           {
             title,
-            tx,
+            parallelTxs: [
+              {
+                title,
+                description: title,
+                callback: (toast: TxToast) =>
+                  mintMutation.mutateAsync({
+                    borrowAmount,
+                    shares,
+                    address,
+                    amountIn,
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    mostLiquidPool: mostLiquid.data!.pool,
+                    toast,
+                  }),
+              },
+            ],
           },
-        ],
-      },
-    ].filter((s): s is BeetStage => !!s);
+        ] as readonly (BeetStage | undefined)[]
+      ).filter((s): s is BeetStage => !!s),
+    } as const satisfies { data: readonly BeetStage[]; status: "success" };
   }, [
     address,
     amountIn,
-    approve.beetStage,
+    approve.status,
+    approve.title,
+    approve.tx,
+    approveMutation,
     borrowAmount,
-    isLong,
+    mintMutation,
     mostLiquid.data,
-    mutation,
     native,
-    quote.symbol,
     shares,
+    title,
   ]);
 };
 

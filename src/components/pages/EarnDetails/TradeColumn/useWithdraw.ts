@@ -36,6 +36,7 @@ import type {
   LendginePosition,
 } from "../../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
+import type { BeetStage, TxToast } from "../../../../utils/beet";
 import { useEarnDetails } from "../EarnDetailsInner";
 
 export const useWithdraw = ({
@@ -69,12 +70,13 @@ export const useWithdraw = ({
       amount1,
       size,
       address,
+      toast,
     }: {
       amount0: CurrencyAmount<Lendgine["token0"]>;
       amount1: CurrencyAmount<Lendgine["token1"]>;
       size: LendginePosition<Lendgine>["size"];
       address: Address;
-    }) => {
+    } & { toast: TxToast }) => {
       const args = [
         {
           token0: utils.getAddress(selectedLendgine.token0.address),
@@ -161,41 +163,17 @@ export const useWithdraw = ({
             };
 
       const transaction = await tx();
-      toaster.txLoading(
-        "withdrawLiquidity",
-        title,
-        "1/1",
-        "",
-        transaction.hash
-      );
+      toaster.txPending({
+        ...toast,
+        hash: transaction.hash,
+      });
 
-      return await Promise.race([
-        transaction.wait(),
-        awaitTX(transaction.hash),
-      ]);
+      return await awaitTX(transaction);
     },
-    onMutate: () =>
-      toaster.txLoading(
-        "withdrawLiquidity",
-        title,
-        "1/1",
-        "Sending Transaction"
-      ),
-    onError: () =>
-      toaster.txError(
-        "withdrawLiqudity",
-        title,
-        "1/1",
-        "Error sending transaction"
-      ),
+    onMutate: ({ toast }) => toaster.txSending(toast),
+    onError: (_, { toast }) => toaster.txError(toast),
     onSuccess: async (data, input) => {
-      toaster.txSuccess(
-        "withdrawLiquidity",
-        title,
-        "1/1",
-        "",
-        data.transactionHash
-      );
+      toaster.txSuccess({ ...input.toast, receipt: data });
       await Promise.all([
         invalidate(
           getLendginePositionRead(
@@ -211,10 +189,32 @@ export const useWithdraw = ({
   });
 
   return useMemo(() => {
-    if (!size || !address || !amount0 || !amount1) return undefined;
+    if (!size || !address || !amount0 || !amount1)
+      return { status: "error" } as const;
 
-    return () => mutation.mutateAsync({ amount0, amount1, size, address });
-  }, [address, amount0, amount1, mutation, size]);
+    return {
+      status: "success",
+      data: [
+        {
+          title,
+          parallelTxs: [
+            {
+              title,
+              description: title,
+              callback: (toast: TxToast) =>
+                mutation.mutateAsync({
+                  amount0,
+                  amount1,
+                  size,
+                  address,
+                  toast,
+                }),
+            },
+          ],
+        },
+      ],
+    } as const satisfies { data: readonly BeetStage[]; status: "success" };
+  }, [address, amount0, amount1, mutation, size, title]);
 };
 
 export const useWithdrawAmounts = ({

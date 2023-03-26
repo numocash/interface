@@ -1,165 +1,129 @@
+import type { ContractReceipt } from "ethers";
 import React from "react";
 import toast from "react-hot-toast";
 import { styled } from "twin.macro";
 import type { Address } from "wagmi";
 import { useNetwork } from "wagmi";
 
-type GeneralToastArgs = {
-  type: "loading" | "success" | "error";
+export type BeetTx = {
+  title: string;
+  description: string;
+  callback: (toast: TxToast) => Promise<ContractReceipt>;
+};
+export type BeetStage = { title: string; parallelTxs: readonly BeetTx[] };
+
+export type TxToast = {
   id: string;
   title: string;
-  message: string | JSX.Element | React.ReactNode;
-  humanCount?: string;
-  duration?: number;
+  description: string;
+  humanCount: string;
+};
+type TxSending = TxToast & { status: "sending" };
+type TxSuccess = TxToast & { status: "success"; receipt: ContractReceipt };
+type TxPending = TxToast & { status: "pending"; hash: string };
+type TxError = TxToast & { status: "error"; error?: string };
+
+const genRanHex = (size: number) => {
+  const chars = "0123456789abcdef";
+  let result = "";
+  for (let i = 0; i < size; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+};
+
+export const Beet = async (stages: readonly BeetStage[]) => {
+  const random = genRanHex(12); // to prevent toast collisions
+
+  const totaltx = stages.reduce((acc, cur) => acc + cur.parallelTxs.length, 0);
+
+  for (const [stageIndex, stage] of stages.entries()) {
+    const previousTxs = [...Array(stageIndex).keys()].reduce(
+      (acc, i) => acc + (stages[i]?.parallelTxs.length ?? 0),
+      0
+    );
+
+    await Promise.all([
+      stage.parallelTxs.map((beetTx, i) =>
+        beetTx.callback({
+          id: `${random}-${stageIndex}-${i}`,
+          title: beetTx.title,
+          description: beetTx.description,
+          humanCount: `${1 + i + previousTxs}/${totaltx}`,
+        })
+      ),
+    ]);
+  }
 };
 
 export class DefaultToasterWrapper {
-  // style = tw`p-4 rounded-xl min-w-[300px]`;
+  txSending(tx: Omit<TxSending, "status">) {
+    toast.loading(this._buildToastContainer({ ...tx, status: "sending" }), {
+      id: tx.id,
+      duration: 10_000,
+      position: "bottom-left",
+    });
+  }
 
-  txLoading(
-    id: string,
-    title: string,
-    humanCount: string,
-    txDescription: string,
-    txHash?: string
-  ): void {
-    toast.loading(
-      this._buildToastContainer(
-        title,
-        humanCount,
-        () => {
-          toast.dismiss(id);
-        },
-        txDescription,
-        txHash
-      ),
-      {
-        id,
-        duration: 10000,
-        position: "bottom-left",
-      }
-    );
+  txPending(tx: Omit<TxPending, "status">) {
+    toast.loading(this._buildToastContainer({ ...tx, status: "pending" }), {
+      id: tx.id,
+      duration: 10_000,
+      position: "bottom-left",
+    });
+  }
+
+  txError(tx: Omit<TxError, "status">) {
+    toast.error(this._buildToastContainer({ ...tx, status: "error" }), {
+      id: tx.id,
+      duration: 6000,
+      position: "bottom-left",
+    });
     return;
   }
-  txError(
-    // TODO: These fucntions can be combined into 1 just like generalToast
-    id: string,
-    title: string,
-    humanCount: string,
-    message: string,
-    txHash?: string
-  ): void {
-    toast.error(
-      this._buildToastContainer(
-        title,
-        humanCount,
-        () => {
-          toast.dismiss(id);
-        },
-        message,
-        txHash
-      ),
-      {
-        id,
-        duration: 6000,
-        position: "bottom-left",
-      }
-    );
-    return;
-  }
-  txSuccess(
-    id: string,
-    title: string,
-    humanCount: string,
-    txDescription: string,
-    txHash: string
-  ): void {
-    toast.success(
-      this._buildToastContainer(
-        title,
-        humanCount,
-        () => {
-          toast.dismiss(id);
-        },
-        txDescription,
-        txHash
-      ),
-      {
-        id,
-        duration: 3000,
-        position: "bottom-left",
-      }
-    );
-    return;
+
+  txSuccess(tx: Omit<TxSuccess, "status">) {
+    toast.success(this._buildToastContainer({ ...tx, status: "success" }), {
+      id: tx.id,
+      duration: 3000,
+      position: "bottom-left",
+    });
   }
 
   dismiss(id: string): void {
     toast.dismiss(id);
   }
 
-  generalToast({
-    type,
-    id,
-    title,
-    message,
-    duration,
-    humanCount,
-  }: GeneralToastArgs): void {
-    if (!duration) {
-      duration = 7000;
-    }
-    console.log(id, title, message);
-    const toastHandler = toast[type];
-    toastHandler(
-      <ToastContainer tw="flex flex-col overflow-hidden">
-        <div tw="flex font-semibold justify-between items-center">
-          <span tw="flex items-center gap-1">
-            {title}
-            {humanCount && (
-              <span tw="flex text-sm text-secondary">({humanCount})</span>
-            )}
-          </span>
-          <ToastExitButton onClick={() => toast.dismiss(id)}>×</ToastExitButton>
-        </div>
-
-        <div tw="flex text-secondary">
-          <div>{message}</div>
-        </div>
-      </ToastContainer>,
-      {
-        id,
-        duration,
-        position: "bottom-left",
-      }
-    );
-    return;
-  }
-
   private _buildToastContainer(
-    title: string,
-    humanCount: string,
-    dismiss: () => void,
-    txDescription?: string,
-    hash?: string
+    tx: TxSending | TxSuccess | TxError | TxPending
   ) {
     return (
       <ToastContainer tw="flex flex-col overflow-hidden">
         <div tw="flex font-semibold justify-between items-center">
           <span tw="flex items-center gap-1">
-            {title}
-            <span tw="flex text-sm text-secondary">({humanCount})</span>
+            {tx.title}
+            <span tw="flex text-sm text-secondary">{tx.humanCount}</span>
           </span>
-          <ToastExitButton onClick={dismiss}>×</ToastExitButton>
+          <ToastExitButton onClick={() => toast.dismiss(tx.id)}>
+            ×
+          </ToastExitButton>
         </div>
 
         <div tw="flex text-secondary">
-          {hash ? (
+          {tx.status === "success" ? (
             <div>
               View Transaction:
-              <AddressLink address={hash} data="tx" />
+              <AddressLink address={tx.receipt.transactionHash} data="tx" />
             </div>
+          ) : tx.status === "pending" ? (
+            <div>
+              View Transaction:
+              <AddressLink address={tx.hash} data="tx" />
+            </div>
+          ) : tx.status === "error" ? (
+            tx.error ?? tx.description
           ) : (
-            <div>{txDescription}</div>
+            tx.description
           )}
         </div>
       </ToastContainer>

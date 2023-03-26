@@ -1,8 +1,11 @@
+import { useMutation } from "@tanstack/react-query";
 import type { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
 import { Token } from "@uniswap/sdk-core";
+import type { Address } from "abitype";
 import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
+import type { SendTransactionResult } from "wagmi/actions";
 import {
   getContract,
   prepareWriteContract,
@@ -11,10 +14,14 @@ import {
 
 import { factoryABI } from "../../../abis/factory";
 import { liquidityManagerABI } from "../../../abis/liquidityManager";
+import { toaster } from "../../../AppWithProviders";
 import { useSettings } from "../../../contexts/settings";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import type { HookArg } from "../../../hooks/internal/types";
+import { useInvalidateCall } from "../../../hooks/internal/useInvalidateCall";
+import { getAllowanceRead } from "../../../hooks/useAllowance";
 import { useApprove } from "../../../hooks/useApprove";
+import { useAwaitTX } from "../../../hooks/useAwaitTX";
 import { useChain } from "../../../hooks/useChain";
 import { useCurrentPrice } from "../../../hooks/useExternalExchange";
 import { useIsWrappedNative } from "../../../hooks/useTokens";
@@ -26,7 +33,7 @@ import {
 } from "../../../lib/price";
 import type { Lendgine } from "../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
-import type { BeetStage } from "../../../utils/beet";
+import type { BeetStage, TxToast } from "../../../utils/beet";
 
 export const useCreate = ({
   token0Input,
@@ -42,6 +49,9 @@ export const useCreate = ({
   const { address } = useAccount();
   const chainID = useChain();
 
+  const awaitTX = useAwaitTX();
+  const invalidate = useInvalidateCall();
+
   const priceQuery = useCurrentPrice(
     !!token0Input && !!token1Input
       ? ([token0Input.currency, token1Input.currency] as const)
@@ -51,18 +61,205 @@ export const useCreate = ({
   const native0 = useIsWrappedNative(token0Input?.currency);
   const native1 = useIsWrappedNative(token1Input?.currency);
 
-  const approveToken0 = useApprove(
-    token0Input,
-    environment.base.liquidityManager
-  );
-  const approveToken1 = useApprove(
-    token1Input,
-    environment.base.liquidityManager
-  );
+  const approve0 = useApprove(token0Input, environment.base.liquidityManager);
+  const approve1 = useApprove(token1Input, environment.base.liquidityManager);
+
+  const liquidityManagerContract = getContract({
+    abi: liquidityManagerABI,
+    address: environment.base.liquidityManager,
+  });
+
+  const createTitle = `New ${token1Input?.currency.symbol ?? ""} + ${
+    token0Input?.currency.symbol ?? ""
+  } market`;
+
+  const title = `Add ${token0Input?.currency.symbol ?? ""} / ${
+    token1Input?.currency.symbol ?? ""
+  } liquidty`;
+
+  const approve0Mutation = useMutation({
+    mutationFn: async ({
+      approveTx,
+      toast,
+    }: { approveTx: () => Promise<SendTransactionResult> } & {
+      toast: TxToast;
+    }) => {
+      const transaction = await approveTx();
+
+      toaster.txPending({ ...toast, hash: transaction.hash });
+
+      return await awaitTX(transaction);
+    },
+    onMutate: ({ toast }) => toaster.txSending(toast),
+    onError: (_, { toast }) => toaster.txError(toast),
+    onSuccess: async (data, input) => {
+      toaster.txSuccess({ ...input.toast, receipt: data });
+      await invalidate(
+        getAllowanceRead(
+          lendgine.token0,
+          address ?? constants.AddressZero,
+          environment.base.lendgineRouter
+        )
+      );
+    },
+  });
+
+  const approve1Mutation = useMutation({
+    mutationFn: async ({
+      approveTx,
+      toast,
+    }: { approveTx: () => Promise<SendTransactionResult> } & {
+      toast: TxToast;
+    }) => {
+      const transaction = await approveTx();
+
+      toaster.txPending({ ...toast, hash: transaction.hash });
+
+      return await awaitTX(transaction);
+    },
+    onMutate: ({ toast }) => toaster.txSending(toast),
+    onError: (_, { toast }) => toaster.txError(toast),
+    onSuccess: async (data, input) => {
+      toaster.txSuccess({ ...input.toast, receipt: data });
+      await invalidate(
+        getAllowanceRead(
+          lendgine.token1,
+          address ?? constants.AddressZero,
+          environment.base.lendgineRouter
+        )
+      );
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async ({
+      lendgine,
+      toast,
+    }: { lendgine: Lendgine } & { toast: TxToast }) => {
+      const createArgs = [
+        utils.getAddress(lendgine.token0.address),
+        utils.getAddress(lendgine.token1.address),
+        lendgine.token0.decimals,
+        lendgine.token1.decimals,
+        BigNumber.from(
+          priceToFraction(lendgine.bound).multiply(scale).quotient.toString()
+        ),
+      ] as const;
+
+      const config = await prepareWriteContract({
+        abi: factoryABI,
+        functionName: "createLendgine",
+        address: environment.base.factory,
+        args: createArgs,
+      });
+      const transaction = await writeContract(config);
+
+      toaster.txPending({ ...toast, hash: transaction.hash });
+
+      return await awaitTX(transaction);
+    },
+    onMutate: ({ toast }) => toaster.txSending(toast),
+    onError: (_, { toast }) => toaster.txError(toast),
+    onSuccess: async (data, input) => {
+      toaster.txSuccess({ ...input.toast, receipt: data });
+    },
+  });
+
+  const depositMutation = useMutation({
+    mutationFn: async ({
+      lendgine,
+      liquidity,
+      token0Input,
+      token1Input,
+      address,
+
+      toast,
+    }: {
+      lendgine: Lendgine;
+      liquidity: CurrencyAmount<Token>;
+      token0Input: CurrencyAmount<WrappedTokenInfo>;
+      token1Input: CurrencyAmount<WrappedTokenInfo>;
+      address: Address;
+    } & {
+      toast: TxToast;
+    }) => {
+      const args = [
+        {
+          token0: utils.getAddress(lendgine.token0.address),
+          token1: utils.getAddress(lendgine.token1.address),
+          token0Exp: BigNumber.from(lendgine.token0.decimals),
+          token1Exp: BigNumber.from(lendgine.token1.decimals),
+          upperBound: BigNumber.from(
+            priceToFraction(lendgine.bound).multiply(scale).quotient.toString()
+          ),
+          liquidity: BigNumber.from(
+            liquidity.multiply(999990).divide(1000000).quotient.toString()
+          ),
+          amount0Min: BigNumber.from(token0Input.quotient.toString()),
+          amount1Min: BigNumber.from(token1Input.quotient.toString()),
+          sizeMin: BigNumber.from(
+            liquidity
+              .multiply(
+                ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+              )
+              .quotient.toString()
+          ),
+          recipient: address,
+          deadline: BigNumber.from(
+            Math.round(Date.now() / 1000) + settings.timeout * 60
+          ),
+        },
+      ] as const;
+
+      const tx =
+        native0 || native0
+          ? async () => {
+              const config = await prepareWriteContract({
+                abi: liquidityManagerABI,
+                functionName: "multicall",
+                address: environment.base.liquidityManager,
+                args: [
+                  [
+                    liquidityManagerContract.interface.encodeFunctionData(
+                      "addLiquidity",
+                      args
+                    ),
+                    liquidityManagerContract.interface.encodeFunctionData(
+                      "refundETH"
+                    ),
+                  ] as `0x${string}`[],
+                ],
+                overrides: {
+                  value: native0
+                    ? BigNumber.from(token0Input?.quotient.toString() ?? 0)
+                    : BigNumber.from(token1Input?.quotient.toString() ?? 0),
+                },
+              });
+              const data = await writeContract(config);
+              return data;
+            }
+          : async () => {
+              const config = await prepareWriteContract({
+                abi: liquidityManagerABI,
+                functionName: "addLiquidity",
+                address: environment.base.liquidityManager,
+                args,
+              });
+              const data = await writeContract(config);
+              return data;
+            };
+
+      const transaction = await tx();
+
+      toaster.txPending({ ...toast, hash: transaction.hash });
+
+      return awaitTX(transaction);
+    },
+  });
 
   return useMemo(() => {
     if (!token0Input || !token1Input || !address || !priceQuery.data || !bound)
-      return undefined;
+      return { status: "error" } as const;
 
     const lendgine: Lendgine = {
       token0: token0Input.currency,
@@ -77,102 +274,6 @@ export const useCreate = ({
     const { token0Amount } = priceToReserves(lendgine, priceQuery.data);
 
     const liquidity = token0Amount.invert().quote(token0Input);
-
-    const createArgs = [
-      utils.getAddress(lendgine.token0.address),
-      utils.getAddress(lendgine.token1.address),
-      lendgine.token0.decimals,
-      lendgine.token1.decimals,
-      BigNumber.from(bound.multiply(scale).quotient.toString()),
-    ] as const;
-
-    const args = [
-      {
-        token0: utils.getAddress(lendgine.token0.address),
-        token1: utils.getAddress(lendgine.token1.address),
-        token0Exp: BigNumber.from(lendgine.token0.decimals),
-        token1Exp: BigNumber.from(lendgine.token1.decimals),
-        upperBound: BigNumber.from(
-          priceToFraction(lendgine.bound).multiply(scale).quotient.toString()
-        ),
-        liquidity: BigNumber.from(
-          liquidity.multiply(999990).divide(1000000).quotient.toString()
-        ),
-        amount0Min: BigNumber.from(token0Input.quotient.toString()),
-        amount1Min: BigNumber.from(token1Input.quotient.toString()),
-        sizeMin: BigNumber.from(
-          liquidity
-            .multiply(ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent))
-            .quotient.toString()
-        ),
-        recipient: address,
-        deadline: BigNumber.from(
-          Math.round(Date.now() / 1000) + settings.timeout * 60
-        ),
-      },
-    ] as const;
-
-    const liquidityManagerContract = getContract({
-      abi: liquidityManagerABI,
-      address: environment.base.liquidityManager,
-    });
-
-    const createTitle = `New ${token1Input?.currency.symbol ?? ""} + ${
-      token0Input?.currency.symbol ?? ""
-    } market`;
-
-    const title = `Add ${token0Input?.currency.symbol ?? ""} / ${
-      token1Input?.currency.symbol ?? ""
-    } liquidty`;
-
-    const createTX = async () => {
-      const config = await prepareWriteContract({
-        abi: factoryABI,
-        functionName: "createLendgine",
-        address: environment.base.factory,
-        args: createArgs,
-      });
-      const data = await writeContract(config);
-      return data;
-    };
-
-    const tx =
-      native0 || native0
-        ? async () => {
-            const config = await prepareWriteContract({
-              abi: liquidityManagerABI,
-              functionName: "multicall",
-              address: environment.base.liquidityManager,
-              args: [
-                [
-                  liquidityManagerContract.interface.encodeFunctionData(
-                    "addLiquidity",
-                    args
-                  ),
-                  liquidityManagerContract.interface.encodeFunctionData(
-                    "refundETH"
-                  ),
-                ] as `0x${string}`[],
-              ],
-              overrides: {
-                value: native0
-                  ? BigNumber.from(token0Input?.quotient.toString() ?? 0)
-                  : BigNumber.from(token1Input?.quotient.toString() ?? 0),
-              },
-            });
-            const data = await writeContract(config);
-            return data;
-          }
-        : async () => {
-            const config = await prepareWriteContract({
-              abi: liquidityManagerABI,
-              functionName: "addLiquidity",
-              address: environment.base.liquidityManager,
-              args,
-            });
-            const data = await writeContract(config);
-            return data;
-          };
 
     return [
       native0 ? undefined : approveToken0.beetStage,

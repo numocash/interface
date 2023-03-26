@@ -4,6 +4,7 @@ import invariant from "tiny-invariant";
 
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
+import { Beet } from "../../../../utils/beet";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { CenterSwitch } from "../../../common/CenterSwitch";
@@ -39,7 +40,8 @@ export const Withdraw: React.FC = () => {
           !baseAmount ||
           !size ||
           !liquidity ||
-          !lendgineInfoQuery.data
+          !lendgineInfoQuery.data ||
+          withdraw.status === "error"
         ? "Loading"
         : liquidity.greaterThan(lendgineInfoQuery.data.totalLiquidity)
         ? "Insufficient liquidity"
@@ -50,6 +52,7 @@ export const Withdraw: React.FC = () => {
       liquidity,
       quoteAmount,
       size,
+      withdraw.status,
       withdrawPercent,
     ]
   );
@@ -98,8 +101,8 @@ export const Withdraw: React.FC = () => {
         variant="primary"
         tw="h-12 text-lg"
         onClick={async () => {
-          invariant(withdraw);
-          await withdraw();
+          invariant(withdraw.data);
+          await Beet(withdraw.data);
           setClose(false);
         }}
       >

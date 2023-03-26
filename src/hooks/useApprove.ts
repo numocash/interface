@@ -1,4 +1,4 @@
-import type { CurrencyAmount } from "@uniswap/sdk-core";
+import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { MaxUint256 } from "@uniswap/sdk-core";
 import { BigNumber, utils } from "ethers";
 import { useMemo } from "react";
@@ -7,11 +7,10 @@ import { erc20ABI, useAccount } from "wagmi";
 import { prepareWriteContract, writeContract } from "wagmi/actions";
 
 import { useSettings } from "../contexts/settings";
-import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import type { HookArg } from "./internal/types";
 import { useAllowance } from "./useAllowance";
 
-export const useApprove = <T extends WrappedTokenInfo>(
+export const useApprove = <T extends Token>(
   tokenAmount: HookArg<CurrencyAmount<T>>,
   spender: HookArg<Address>
 ) => {
@@ -46,7 +45,7 @@ export const useApprove = <T extends WrappedTokenInfo>(
       settings.infiniteApprove
         ? "∞"
         : tokenAmount.toSignificant(5, { groupSeparator: "," })
-    } ${tokenAmount.currency.symbol}`;
+    } ${tokenAmount.currency.symbol ?? "tokens"}`;
 
     return {
       status: "success",
