@@ -12,7 +12,7 @@ import {
 import { lendgineRouterABI } from "../../../../abis/lendgineRouter";
 import { useSettings } from "../../../../contexts/settings";
 import { useEnvironment } from "../../../../contexts/useEnvironment";
-import type { HookArg } from "../../../../hooks/internal/utils";
+import type { HookArg } from "../../../../hooks/internal/types";
 import { useApprove } from "../../../../hooks/useApprove";
 import { useBalance } from "../../../../hooks/useBalance";
 import {

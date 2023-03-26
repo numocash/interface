@@ -10,7 +10,6 @@ import { readContracts } from "wagmi/actions";
 
 import { useChain } from "../useChain";
 import type { DeepPartial, QueryFunctionArgs } from "./types";
-import { useInvalidateOnBlock } from "./useInvalidateOnBlock";
 
 export type UseContractReadsConfig<
   TContracts extends Contract[],
@@ -20,15 +19,11 @@ export type UseContractReadsConfig<
   [K in keyof Config]?: K extends "contracts"
     ? DeepPartial<Config[K], 2>
     : Config[K];
-} & UseQueryOptions<ReadContractsResult<TContracts>, Error, TSelectData> & {
-    /** Subscribe to changes */
-    watch?: boolean;
-  };
+} & UseQueryOptions<ReadContractsResult<TContracts>, Error, TSelectData>;
 
 type QueryKeyArgs<TContracts extends Contract[]> =
   ReadContractsConfig<TContracts>;
 type QueryKeyConfig = {
-  blockNumber?: number;
   chainId?: number;
 };
 
@@ -41,7 +36,6 @@ function queryKey<
   }[]
 >({
   allowFailure,
-  blockNumber,
   chainId,
   contracts,
   overrides,
@@ -50,13 +44,11 @@ function queryKey<
     {
       entity: "readContracts",
       allowFailure,
-      blockNumber,
       chainId,
       contracts: ((contracts ?? []) as unknown as ContractConfig[]).map(
-        ({ address, args, chainId, functionName }) => ({
+        ({ address, args, functionName }) => ({
           address,
           args,
-          chainId,
           functionName,
         })
       ),
@@ -120,7 +112,6 @@ export function useContractReads<
   select,
   staleTime,
   suspense,
-  watch,
 }: UseContractReadsConfig<
   TContracts,
   TSelectData
@@ -148,11 +139,6 @@ UseQueryResult<TSelectData, Error> {
     );
     return enabled;
   }, [contracts, enabled_]);
-
-  useInvalidateOnBlock({
-    enabled: Boolean(enabled && watch),
-    queryKey: queryKey_,
-  });
 
   const abis = ((contracts ?? []) as unknown as ContractConfig[]).map(
     ({ abi }) => abi

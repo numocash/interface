@@ -4,7 +4,6 @@ import invariant from "tiny-invariant";
 
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
-import { useBeet } from "../../../../utils/beet";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { CenterSwitch } from "../../../common/CenterSwitch";
@@ -14,8 +13,6 @@ import { useWithdraw, useWithdrawAmounts } from "./useWithdraw";
 
 export const Withdraw: React.FC = () => {
   const { setClose, base, quote, selectedLendgine } = useEarnDetails();
-
-  const Beet = useBeet();
 
   const [withdrawPercent, setWithdrawPercent] = useState(20);
   const lendgineInfoQuery = useLendgine(selectedLendgine);
@@ -32,7 +29,7 @@ export const Withdraw: React.FC = () => {
     [amount0, amount1, isLong]
   );
 
-  const withdraw = useWithdraw({ size, liquidity, amount0, amount1 });
+  const withdraw = useWithdraw({ size, amount0, amount1 });
 
   const disableReason = useMemo(
     () =>
@@ -102,7 +99,7 @@ export const Withdraw: React.FC = () => {
         tw="h-12 text-lg"
         onClick={async () => {
           invariant(withdraw);
-          await Beet(withdraw);
+          await withdraw();
           setClose(false);
         }}
       >

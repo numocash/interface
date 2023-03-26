@@ -1,4 +1,4 @@
-import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
+import type { CurrencyAmount } from "@uniswap/sdk-core";
 import { MaxUint256 } from "@uniswap/sdk-core";
 import { BigNumber, utils } from "ethers";
 import { useMemo } from "react";
@@ -7,11 +7,11 @@ import { erc20ABI, useAccount } from "wagmi";
 import { prepareWriteContract, writeContract } from "wagmi/actions";
 
 import { useSettings } from "../contexts/settings";
-import type { BeetStage } from "../utils/beet";
-import type { HookArg } from "./internal/utils";
+import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
+import type { HookArg } from "./internal/types";
 import { useAllowance } from "./useAllowance";
 
-export const useApprove = <T extends Token>(
+export const useApprove = <T extends WrappedTokenInfo>(
   tokenAmount: HookArg<CurrencyAmount<T>>,
   spender: HookArg<Address>
 ) => {
@@ -21,7 +21,9 @@ export const useApprove = <T extends Token>(
   const allowanceQuery = useAllowance(tokenAmount?.currency, address, spender);
 
   return useMemo(() => {
-    if (!allowanceQuery.data || !tokenAmount || !spender) return {};
+    if (allowanceQuery.isLoading) return { status: "loading" } as const;
+    if (!allowanceQuery.data || !tokenAmount || !spender)
+      return { status: "error" } as const;
 
     const approvalRequired = tokenAmount.greaterThan(allowanceQuery.data);
 
@@ -37,29 +39,20 @@ export const useApprove = <T extends Token>(
             : BigNumber.from(tokenAmount.multiply(2).quotient.toString()),
         ],
       });
-      const data = await writeContract(config);
-      return data;
+      return await writeContract(config);
     };
 
     const title = `Approve  ${
       settings.infiniteApprove
-        ? "infinite"
-        : tokenAmount?.toSignificant(5, { groupSeparator: "," }) ?? ""
-    } ${tokenAmount?.currency.symbol ?? ""}`;
-
-    const beetStage: BeetStage = {
-      stageTitle: title,
-      parallelTransactions: [
-        {
-          title,
-          tx,
-        },
-      ],
-    };
+        ? "∞"
+        : tokenAmount.toSignificant(5, { groupSeparator: "," })
+    } ${tokenAmount.currency.symbol}`;
 
     return {
+      status: "success",
       allowanceQuery,
-      beetStage: approvalRequired === true ? beetStage : null,
-    };
+      title,
+      tx: approvalRequired ? tx : undefined,
+    } as const;
   }, [allowanceQuery, settings.infiniteApprove, spender, tokenAmount]);
 };

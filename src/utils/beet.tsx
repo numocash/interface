@@ -1,143 +1,8 @@
-import React, { useCallback } from "react";
+import React from "react";
 import toast from "react-hot-toast";
-import invariant from "tiny-invariant";
 import { styled } from "twin.macro";
 import type { Address } from "wagmi";
 import { useNetwork } from "wagmi";
-
-import { useAwaitTX } from "../hooks/useAwaitTX";
-
-export interface BeetTx {
-  tx: () => Promise<{ hash: `0x${string}` }>;
-  title: string;
-}
-
-export interface BeetStage {
-  stageTitle: string;
-  parallelTransactions: readonly BeetTx[];
-}
-
-const genRanHex = (size: number) => {
-  const chars = "0123456789abcdef";
-  let result = "";
-  for (let i = 0; i < size; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-};
-
-export const useBeet = () => {
-  const awaitTX = useAwaitTX();
-  return useCallback(
-    async (stages: readonly BeetStage[]) => {
-      const toaster = new DefaultToasterWrapper();
-
-      const random = genRanHex(12); // to prevent toast collisions
-
-      function _generateToasterId(stageIndex: number, localTxIndex: number) {
-        console.log(`${random}-${stageIndex}-${localTxIndex}`);
-        return `${random}-${stageIndex}-${localTxIndex}`;
-      }
-
-      const totaltx = stages.reduce(
-        (acc, cur) => acc + cur.parallelTransactions.length,
-        0
-      );
-
-      for (const [stageIndex, stage] of stages.entries()) {
-        const previousTxs = [...Array(stageIndex).keys()].reduce(
-          (acc, i) => acc + (stages[i]?.parallelTransactions.length ?? 0),
-          0
-        );
-
-        // dismiss previous toast
-        toaster.dismiss(`${random}-${stageIndex}-pre`);
-
-        const sent = await Promise.all(
-          stage.parallelTransactions.map(async (tx, i) => {
-            const humanCount = `${1 + i + previousTxs}/${totaltx}`;
-
-            toaster.txLoading(
-              _generateToasterId(stageIndex, i),
-              tx.title,
-              humanCount,
-              "Sending transaction"
-            );
-
-            try {
-              const sent = await tx.tx();
-
-              toaster.txLoading(
-                _generateToasterId(stageIndex, i),
-                tx.title,
-                humanCount,
-                "",
-                sent.hash
-              );
-              return { ...sent, tx };
-            } catch (err) {
-              console.error(typeof err, err);
-              toaster.txError(
-                _generateToasterId(stageIndex, i),
-                tx.title,
-                humanCount,
-                "Error sending transaction"
-              );
-              return undefined;
-            }
-          })
-        );
-
-        // if any are undefined then return
-
-        if (sent.find((t) => t === undefined) !== undefined) return;
-
-        const nextStage = stages[stageIndex + 1];
-        if (nextStage) {
-          toaster.generalToast({
-            type: "loading",
-            id: `${random}-${stageIndex + 1}-pre`,
-            title: nextStage.stageTitle,
-            message: `Waiting for previous transaction${
-              stage.parallelTransactions.length ? "s" : ""
-            }...`,
-            duration: 30_000,
-          });
-        }
-
-        await Promise.all(
-          sent.map(async (tx, i) => {
-            const humanCount = `${1 + i + previousTxs}/${totaltx}`;
-
-            invariant(tx);
-
-            // TODO: what if the transaction already was confirmed
-            const rec = await awaitTX(tx.hash);
-            if (rec.status === 0) {
-              toaster.dismiss(`${random}-general`);
-              toaster.txError(
-                _generateToasterId(stageIndex, i),
-                tx.tx.title,
-                humanCount,
-                "Transaction reverted",
-                rec.transactionHash
-              );
-              return;
-            }
-            toaster.txSuccess(
-              _generateToasterId(stageIndex, i),
-              tx.tx.title,
-              humanCount,
-              "",
-              tx.hash
-            );
-          })
-        );
-      }
-    },
-    [awaitTX]
-  );
-};
 
 type GeneralToastArgs = {
   type: "loading" | "success" | "error";
@@ -290,7 +155,7 @@ export class DefaultToasterWrapper {
         <div tw="flex text-secondary">
           {hash ? (
             <div>
-              View Transaction: {/* TODO: update the explorer based on chain */}
+              View Transaction:
               <AddressLink address={hash} data="tx" />
             </div>
           ) : (

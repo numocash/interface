@@ -1,12 +1,11 @@
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
-import { utils } from "ethers";
 import { useMemo } from "react";
 import type { Address } from "wagmi";
-import { erc20ABI } from "wagmi";
 
+import type { HookArg } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
-import type { HookArg } from "./internal/utils";
+import { getBalanceRead } from "./useBalance";
 
 export const useBalances = <T extends Token>(
   tokens: HookArg<readonly T[]>,
@@ -15,15 +14,7 @@ export const useBalances = <T extends Token>(
   const contracts = useMemo(
     () =>
       address && tokens
-        ? tokens.map(
-            (t) =>
-              ({
-                address: utils.getAddress(t.address),
-                abi: erc20ABI,
-                functionName: "balanceOf",
-                args: [address],
-              } as const)
-          )
+        ? tokens.map((t) => getBalanceRead(t, address))
         : undefined,
     [address, tokens]
   );
@@ -40,6 +31,5 @@ export const useBalances = <T extends Token>(
             CurrencyAmount.fromRawAmount(tokens[i]!, d.toString())
           )
         : undefined,
-    watch: true,
   });
 };

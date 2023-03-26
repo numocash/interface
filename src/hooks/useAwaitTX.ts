@@ -13,7 +13,7 @@ export const useAwaitTX = () => {
   );
 };
 
-export const awaitTX = async (
+const awaitTX = async (
   provider: Provider,
   txHash: string
 ): Promise<ContractReceipt> =>

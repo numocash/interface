@@ -3,13 +3,13 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 
-import { liquidityManagerABI } from "../abis/liquidityManager";
 import { useEnvironment } from "../contexts/useEnvironment";
 import { scale } from "../lib/constants";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
+import type { HookArg } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
-import type { HookArg } from "./internal/utils";
+import { getLendginePositionRead } from "./useLendginePosition";
 
 export const useLendginesPositions = <L extends Lendgine>(
   lendgines: HookArg<readonly L[]>,
@@ -19,14 +19,12 @@ export const useLendginesPositions = <L extends Lendgine>(
   const contracts = useMemo(
     () =>
       !!lendgines && !!address
-        ? lendgines.map(
-            (l) =>
-              ({
-                address: environment.base.liquidityManager,
-                abi: liquidityManagerABI,
-                functionName: "positions",
-                args: [address, l.address],
-              } as const)
+        ? lendgines.map((l) =>
+            getLendginePositionRead(
+              l,
+              address,
+              environment.base.liquidityManager
+            )
           )
         : undefined,
     [address, environment.base.liquidityManager, lendgines]
@@ -37,7 +35,6 @@ export const useLendginesPositions = <L extends Lendgine>(
     staleTime: Infinity,
     allowFailure: false,
     enabled: !!contracts,
-    watch: true,
     select: (data) => {
       if (!lendgines) return undefined;
       return data.map((p, i) => {

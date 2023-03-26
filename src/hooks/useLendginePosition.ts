@@ -5,8 +5,8 @@ import { liquidityManagerABI } from "../abis/liquidityManager";
 import { useEnvironment } from "../contexts/useEnvironment";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
+import type { HookArg, ReadConfig } from "./internal/types";
 import { useContractRead } from "./internal/useContractRead";
-import type { HookArg } from "./internal/utils";
 
 export const useLendginePosition = <L extends Lendgine>(
   lendgine: HookArg<L>,
@@ -14,14 +14,24 @@ export const useLendginePosition = <L extends Lendgine>(
 ) => {
   const environment = useEnvironment();
 
+  const config =
+    !!lendgine && !!address
+      ? getLendginePositionRead(
+          lendgine,
+          address,
+          environment.base.liquidityManager
+        )
+      : {
+          address: undefined,
+          args: undefined,
+          functionName: undefined,
+          abi: undefined,
+        };
+
   return useContractRead({
-    address: environment.base.liquidityManager,
-    args: address && lendgine ? [address, lendgine.address] : undefined,
+    ...config,
     staleTime: Infinity,
     enabled: !!lendgine && !!address,
-    watch: true,
-    abi: liquidityManagerABI,
-    functionName: "positions",
     select: (data) => {
       if (!lendgine) return undefined;
       return {
@@ -42,3 +52,15 @@ export const useLendginePosition = <L extends Lendgine>(
     },
   });
 };
+
+export const getLendginePositionRead = <L extends Lendgine>(
+  lendgine: Pick<L, "address">,
+  address: Address,
+  liquidityManager: Address
+) =>
+  ({
+    address: liquidityManager,
+    args: [address, lendgine.address],
+    abi: liquidityManagerABI,
+    functionName: "positions",
+  } as const satisfies ReadConfig<typeof liquidityManagerABI, "positions">);

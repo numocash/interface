@@ -8,7 +8,6 @@ import { readContract } from "wagmi/actions";
 
 import { useChain } from "../useChain";
 import type { PartialBy, QueryFunctionArgs } from "./types";
-import { useInvalidateOnBlock } from "./useInvalidateOnBlock";
 
 export type UseContractReadConfig<
   TAbi extends Abi = Abi,
@@ -18,14 +17,7 @@ export type UseContractReadConfig<
   ReadContractConfig<TAbi, TFunctionName>,
   "abi" | "address" | "args" | "functionName"
 > &
-  UseQueryOptions<
-    ReadContractResult<TAbi, TFunctionName>,
-    Error,
-    TSelectData
-  > & {
-    /** Subscribe to changes */
-    watch?: boolean;
-  };
+  UseQueryOptions<ReadContractResult<TAbi, TFunctionName>, Error, TSelectData>;
 
 type QueryKeyArgs = Omit<ReadContractConfig, "abi">;
 
@@ -39,10 +31,14 @@ function queryKey({
   return [
     {
       entity: "readContract",
-      address,
-      args,
+      contracts: [
+        {
+          address,
+          args,
+          functionName,
+        },
+      ],
       chainId,
-      functionName,
       overrides,
     },
   ] as const;
@@ -53,7 +49,13 @@ function queryFn<
   TFunctionName extends string
 >({ abi }: { abi?: Abi | readonly unknown[] }) {
   return async ({
-    queryKey: [{ address, args, chainId, functionName, overrides }],
+    queryKey: [
+      {
+        chainId,
+        overrides,
+        contracts: [{ address, args, functionName }],
+      },
+    ],
   }: QueryFunctionArgs<typeof queryKey>) => {
     if (!abi) throw new Error("abi is required");
     if (!address) throw new Error("address is required");
@@ -88,7 +90,6 @@ export function useContractRead<
   select,
   staleTime,
   suspense,
-  watch,
 }: UseContractReadConfig<TAbi, TFunctionName, TSelectData>) {
   const chainId = useChain();
 
@@ -108,12 +109,6 @@ export function useContractRead<
     const enabled = Boolean(enabled_ && abi && address && functionName);
     return enabled;
   }, [abi, address, enabled_, functionName]);
-
-  useInvalidateOnBlock({
-    chainId,
-    enabled: Boolean(enabled && watch),
-    queryKey: queryKey_,
-  });
 
   return useQuery(
     queryKey_,

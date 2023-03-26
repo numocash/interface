@@ -6,12 +6,8 @@ import { fetchBalance } from "wagmi/actions";
 
 import { useChain } from "../useChain";
 import type { QueryFunctionArgs } from "./types";
-import { useInvalidateOnBlock } from "./useInvalidateOnBlock";
 
-export type UseBalanceArgs = Partial<FetchBalanceArgs> & {
-  /** Subscribe to changes */
-  watch?: boolean;
-};
+export type UseBalanceArgs = Partial<FetchBalanceArgs>;
 
 export type UseBalanceConfig<TSelectData = FetchBalanceResult> =
   UseQueryOptions<FetchBalanceResult, Error, TSelectData>;
@@ -45,7 +41,7 @@ export function useBalance<TSelectData = FetchBalanceResult>({
   staleTime,
   suspense,
   token,
-  watch,
+
   select,
   onError,
   onSettled,
@@ -66,12 +62,6 @@ export function useBalance<TSelectData = FetchBalanceResult>({
     onError,
     onSettled,
     onSuccess,
-  });
-
-  useInvalidateOnBlock({
-    chainId,
-    enabled: Boolean(enabled && watch && address),
-    queryKey: queryKey_,
   });
 
   return balanceQuery;
