@@ -5,6 +5,7 @@ import type { Address } from "wagmi";
 
 import type { HookArg } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
+import { userRefectchInterval } from "./internal/utils";
 import { getBalanceRead } from "./useBalance";
 
 export const useBalances = <T extends Token>(
@@ -31,5 +32,6 @@ export const useBalances = <T extends Token>(
             CurrencyAmount.fromRawAmount(tokens[i]!, d.toString())
           )
         : undefined,
+    refetchInterval: userRefectchInterval,
   });
 };

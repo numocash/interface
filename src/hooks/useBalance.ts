@@ -8,6 +8,7 @@ import { useEnvironment } from "../contexts/useEnvironment";
 import type { HookArg, ReadConfig } from "./internal/types";
 import { useBalance as useNativeBalance } from "./internal/useBalance";
 import { useContractRead } from "./internal/useContractRead";
+import { userRefectchInterval } from "./internal/utils";
 import { useIsWrappedNative } from "./useTokens";
 
 export const useBalance = <T extends Token>(
@@ -44,6 +45,7 @@ export const useBalance = <T extends Token>(
     enabled: !!token && !!address,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     select: (data) => CurrencyAmount.fromRawAmount(token!, data.toString()),
+    refetchInterval: userRefectchInterval,
   });
 
   if (useIsWrappedNative(token)) return nativeBalance;

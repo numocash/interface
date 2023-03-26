@@ -10,6 +10,7 @@ import type { Lendgine } from "../lib/types/lendgine";
 import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
+import { externalRefetchInterval } from "./internal/utils";
 import { getLendgineRead } from "./useLendgine";
 
 export const useLendgines = <L extends Lendgine>(
@@ -70,5 +71,6 @@ export const useLendgines = <L extends Lendgine>(
         };
       });
     },
+    refetchInterval: externalRefetchInterval,
   });
 };

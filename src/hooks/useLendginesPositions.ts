@@ -9,6 +9,7 @@ import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
 import type { HookArg } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
+import { userRefectchInterval } from "./internal/utils";
 import { getLendginePositionRead } from "./useLendginePosition";
 
 export const useLendginesPositions = <L extends Lendgine>(
@@ -57,5 +58,6 @@ export const useLendginesPositions = <L extends Lendgine>(
         };
       });
     },
+    refetchInterval: userRefectchInterval,
   });
 };

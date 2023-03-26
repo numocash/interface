@@ -24,7 +24,9 @@ import { useInvalidateCall } from "../../../../hooks/internal/useInvalidateCall"
 import { getAllowanceRead } from "../../../../hooks/useAllowance";
 import { useApprove } from "../../../../hooks/useApprove";
 import { useAwaitTX } from "../../../../hooks/useAwaitTX";
+import { getBalanceRead } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { getLendginePositionRead } from "../../../../hooks/useLendginePosition";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
 import {
@@ -289,27 +291,58 @@ export const useDeposit = ({
     },
     onMutate: ({ toast }) => toaster.txSending(toast),
     onError: (_, { toast }) => toaster.txError(toast),
-    onSuccess: (data, input) => {
+    onSuccess: async (data, input) => {
       toaster.txSuccess({ ...input.toast, receipt: data });
-      // TODO: invalidate
+      await Promise.all([
+        invalidate(
+          getLendginePositionRead(
+            lendgine,
+            input.address,
+            environment.base.liquidityManager
+          )
+        ),
+        invalidate(
+          getAllowanceRead(
+            input.token0Input.currency,
+            input.address,
+            environment.base.liquidityManager
+          )
+        ),
+        invalidate(
+          getAllowanceRead(
+            input.token1Input.currency,
+            input.address,
+            environment.base.liquidityManager
+          )
+        ),
+        invalidate(getBalanceRead(input.token0Input.currency, input.address)),
+        invalidate(getBalanceRead(input.token1Input.currency, input.address)),
+      ]);
     },
   });
 
   return useMemo(() => {
     if (approve0.status === "loading" || approve1.status === "loading")
       return { status: "loading" } as const;
-    if (!token0Input || !token1Input || !lendgineInfo.data || !address)
+    if (
+      !token0Input ||
+      !token1Input ||
+      !lendgineInfo.data ||
+      !address ||
+      approve0.status === "error" ||
+      approve1.status === "error"
+    )
       return { status: "error" } as const;
 
     return {
       status: "success",
       data: (
         [
-          (native0 && approve0.tx) || (native1 && approve1.tx)
+          (!native0 && approve0.tx) || (!native1 && approve1.tx)
             ? {
                 title: "Approve tokens",
                 parallelTxs: [
-                  native0 && approve0.tx
+                  !native0 && approve0.tx
                     ? {
                         title: approve0.title,
                         description: approve0.title,
@@ -321,7 +354,7 @@ export const useDeposit = ({
                           }),
                       }
                     : undefined,
-                  native1 && approve1.tx
+                  !native1 && approve1.tx
                     ? {
                         title: approve1.title,
                         description: approve1.title,

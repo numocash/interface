@@ -6,6 +6,7 @@ import { erc20ABI } from "wagmi";
 
 import type { HookArg, ReadConfig } from "./internal/types";
 import { useContractRead } from "./internal/useContractRead";
+import { userRefectchInterval } from "./internal/utils";
 
 export const useAllowance = <T extends Token>(
   token: HookArg<T>,
@@ -27,6 +28,7 @@ export const useAllowance = <T extends Token>(
     enabled: !!token && !!address && !!spender,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     select: (data) => CurrencyAmount.fromRawAmount(token!, data.toString()),
+    refetchInterval: userRefectchInterval,
   });
 };
 

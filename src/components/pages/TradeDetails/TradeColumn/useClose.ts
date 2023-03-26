@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CurrencyAmount } from "@uniswap/sdk-core";
 import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
@@ -53,6 +53,7 @@ export const useClose = ({
 
   const awaitTX = useAwaitTX();
   const invalidate = useInvalidateCall();
+  const queryClient = useQueryClient();
 
   const { selectedLendgine, base, quote } = useTradeDetails();
   const mostLiquid = useMostLiquidMarket([base, quote]);
@@ -228,6 +229,9 @@ export const useClose = ({
         ),
         invalidate(getBalanceRead(input.amountOut.currency, input.address)),
         invalidate(getBalanceRead(input.shares.currency, input.address)),
+        queryClient.invalidateQueries({
+          queryKey: ["user trades", input.address],
+        }),
       ]);
     },
   });

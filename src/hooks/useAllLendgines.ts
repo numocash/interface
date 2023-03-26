@@ -9,6 +9,7 @@ import { isValidLendgine } from "../lib/lendgineValidity";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
 import { parseLendgines } from "../services/graphql/numoen";
+import { userRefectchInterval } from "./internal/utils";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 import { useGetAddressToToken } from "./useTokens";
@@ -34,7 +35,7 @@ export const useExistingLendginesQuery = () => {
 
   return useQuery<ReturnType<typeof parseLendgines>>(queryKey, queryFn, {
     staleTime: Infinity,
-    refetchInterval: 5 * 60 * 1_000,
+    refetchInterval: userRefectchInterval,
   });
 };
 

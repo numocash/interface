@@ -43,16 +43,17 @@ export const Beet = async (stages: readonly BeetStage[]) => {
       0
     );
 
-    await Promise.all([
-      stage.parallelTxs.map((beetTx, i) =>
-        beetTx.callback({
-          id: `${random}-${stageIndex}-${i}`,
-          title: beetTx.title,
-          description: beetTx.description,
-          humanCount: `${1 + i + previousTxs}/${totaltx}`,
-        })
-      ),
-    ]);
+    await Promise.all(
+      stage.parallelTxs.map(
+        async (beetTx, i) =>
+          await beetTx.callback({
+            id: `${random}-${stageIndex}-${i}`,
+            title: beetTx.title,
+            description: beetTx.description,
+            humanCount: `${1 + i + previousTxs}/${totaltx}`,
+          })
+      )
+    );
   }
 };
 

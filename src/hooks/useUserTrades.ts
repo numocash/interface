@@ -9,6 +9,7 @@ import { UserTradesQueryDocument } from "../gql/numoen/graphql";
 import { liquidityPerCollateral } from "../lib/lendgineMath";
 import { invert, numoenPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
+import { userRefectchInterval } from "./internal/utils";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 
@@ -133,7 +134,7 @@ export const useUserTrades = ({
     },
     {
       staleTime: Infinity,
-      refetchInterval: 60 * 1000,
+      refetchInterval: userRefectchInterval,
     }
   );
 };

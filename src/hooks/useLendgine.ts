@@ -8,6 +8,7 @@ import type { Lendgine } from "../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import type { HookArg, ReadConfig } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
+import { externalRefetchInterval } from "./internal/utils";
 import { useAllLendgines } from "./useAllLendgines";
 
 export const useLendginesForTokens = (
@@ -69,6 +70,7 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
         ),
       };
     },
+    refetchInterval: externalRefetchInterval,
   });
 };
 

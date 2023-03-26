@@ -49,6 +49,7 @@ import {
 import type { HookArg } from "./internal/types";
 import { useContractRead } from "./internal/useContractRead";
 import { useContractReads } from "./internal/useContractReads";
+import { externalRefetchInterval } from "./internal/utils";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 
@@ -291,6 +292,7 @@ const useV2Price = (tokens: HookArg<Market>) => {
         invert ? priceFraction.denominator : priceFraction.numerator
       );
     },
+    refetchInterval: externalRefetchInterval,
   });
 };
 
@@ -357,5 +359,6 @@ const useV3Prices = (tokens: HookArg<Market>) => {
         );
       });
     },
+    refetchInterval: externalRefetchInterval,
   });
 };

@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { Fraction, Token } from "@uniswap/sdk-core";
 import { constants } from "ethers";
 import { useCallback, useMemo, useState } from "react";
@@ -15,7 +14,7 @@ import { useTokens } from "../../../hooks/useTokens";
 import { isValidLendgine } from "../../../lib/lendgineValidity";
 import { fractionToPrice, priceToFraction } from "../../../lib/price";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
-import { useBeet } from "../../../utils/beet";
+import { Beet } from "../../../utils/beet";
 import {
   formatDisplayWithSoftLimit,
   formatPrice,
@@ -31,8 +30,6 @@ import { PageMargin } from "../../layout";
 import { useCreate, useDepositAmounts } from "./useCreate";
 
 export const Create: React.FC = () => {
-  const Beet = useBeet();
-  const queryClient = useQueryClient();
   const environment = useEnvironment();
   const { address } = useAccount();
   const chainID = useChain();
@@ -105,7 +102,7 @@ export const Create: React.FC = () => {
     () =>
       !token0 || !token1
         ? "Select a token"
-        : !priceQuery.data || lendgines === null
+        : !priceQuery.data || lendgines === null || create.status !== "success"
         ? "Loading"
         : !lendgine ||
           !isValidLendgine(
@@ -133,6 +130,7 @@ export const Create: React.FC = () => {
         : null,
     [
       bound,
+      create.status,
       environment.interface.specialtyMarkets,
       environment.interface.wrappedNative,
       lendgine,
@@ -241,15 +239,14 @@ export const Create: React.FC = () => {
           disabled={!!disableReason}
           onClick={async () => {
             invariant(token0 && token1, "token invariant");
-            invariant(create, "create invariant");
-            await Beet(create);
+            invariant(create.data, "create invariant");
+            await Beet(create.data);
 
             setToken0(undefined);
             setToken1(undefined);
             setToken0Input("");
             setToken1Input("");
             setBound(new Fraction(1));
-            await queryClient.invalidateQueries(["exisiting lendgines"]); // lendgines will be refetched, hopefully with our new one
           }}
         >
           {disableReason ?? "Create new market"}

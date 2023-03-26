@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import { BigNumber, constants, utils } from "ethers";
@@ -56,6 +56,7 @@ export const useBuy = ({
   const { address } = useAccount();
 
   const invalidate = useInvalidateCall();
+  const queryClient = useQueryClient();
   const awaitTX = useAwaitTX();
 
   const { borrowAmount, shares } = useBuyAmounts({ amountIn });
@@ -209,6 +210,9 @@ export const useBuy = ({
         ),
         invalidate(getBalanceRead(input.amountIn.currency, input.address)),
         invalidate(getBalanceRead(input.shares.currency, input.address)),
+        queryClient.invalidateQueries({
+          queryKey: ["user trades", input.address],
+        }),
       ]);
     },
   });
@@ -229,7 +233,7 @@ export const useBuy = ({
       status: "success",
       data: (
         [
-          native && approve.tx
+          !native && approve.tx
             ? {
                 title: approve.title,
                 parallelTxs: [

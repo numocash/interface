@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
 import { Token } from "@uniswap/sdk-core";
 import type { Address } from "abitype";
@@ -22,8 +22,10 @@ import { useInvalidateCall } from "../../../hooks/internal/useInvalidateCall";
 import { getAllowanceRead } from "../../../hooks/useAllowance";
 import { useApprove } from "../../../hooks/useApprove";
 import { useAwaitTX } from "../../../hooks/useAwaitTX";
+import { getBalanceRead } from "../../../hooks/useBalance";
 import { useChain } from "../../../hooks/useChain";
 import { useCurrentPrice } from "../../../hooks/useExternalExchange";
+import { getLendginePositionRead } from "../../../hooks/useLendginePosition";
 import { useIsWrappedNative } from "../../../hooks/useTokens";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../lib/constants";
 import {
@@ -33,7 +35,7 @@ import {
 } from "../../../lib/price";
 import type { Lendgine } from "../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
-import type { BeetStage, TxToast } from "../../../utils/beet";
+import type { BeetStage, BeetTx, TxToast } from "../../../utils/beet";
 
 export const useCreate = ({
   token0Input,
@@ -51,6 +53,7 @@ export const useCreate = ({
 
   const awaitTX = useAwaitTX();
   const invalidate = useInvalidateCall();
+  const queryClient = useQueryClient();
 
   const priceQuery = useCurrentPrice(
     !!token0Input && !!token1Input
@@ -94,13 +97,14 @@ export const useCreate = ({
     onError: (_, { toast }) => toaster.txError(toast),
     onSuccess: async (data, input) => {
       toaster.txSuccess({ ...input.toast, receipt: data });
-      await invalidate(
-        getAllowanceRead(
-          lendgine.token0,
-          address ?? constants.AddressZero,
-          environment.base.lendgineRouter
-        )
-      );
+      token0Input &&
+        (await invalidate(
+          getAllowanceRead(
+            token0Input.currency,
+            address ?? constants.AddressZero,
+            environment.base.lendgineRouter
+          )
+        ));
     },
   });
 
@@ -121,13 +125,14 @@ export const useCreate = ({
     onError: (_, { toast }) => toaster.txError(toast),
     onSuccess: async (data, input) => {
       toaster.txSuccess({ ...input.toast, receipt: data });
-      await invalidate(
-        getAllowanceRead(
-          lendgine.token1,
-          address ?? constants.AddressZero,
-          environment.base.lendgineRouter
-        )
-      );
+      token1Input &&
+        (await invalidate(
+          getAllowanceRead(
+            token1Input.currency,
+            address ?? constants.AddressZero,
+            environment.base.lendgineRouter
+          )
+        ));
     },
   });
 
@@ -162,6 +167,7 @@ export const useCreate = ({
     onError: (_, { toast }) => toaster.txError(toast),
     onSuccess: async (data, input) => {
       toaster.txSuccess({ ...input.toast, receipt: data });
+      await queryClient.invalidateQueries({ queryKey: ["existing lendgines"] });
     },
   });
 
@@ -255,10 +261,50 @@ export const useCreate = ({
 
       return awaitTX(transaction);
     },
+    onMutate: ({ toast }) => toaster.txSending(toast),
+    onError: (_, { toast }) => toaster.txError(toast),
+    onSuccess: async (data, input) => {
+      toaster.txSuccess({ ...input.toast, receipt: data });
+      await Promise.all([
+        invalidate(
+          getLendginePositionRead(
+            input.lendgine,
+            input.address,
+            environment.base.liquidityManager
+          )
+        ),
+        invalidate(
+          getAllowanceRead(
+            input.token0Input.currency,
+            input.address,
+            environment.base.liquidityManager
+          )
+        ),
+        invalidate(
+          getAllowanceRead(
+            input.token1Input.currency,
+            input.address,
+            environment.base.liquidityManager
+          )
+        ),
+        invalidate(getBalanceRead(input.token0Input.currency, input.address)),
+        invalidate(getBalanceRead(input.token1Input.currency, input.address)),
+      ]);
+    },
   });
 
   return useMemo(() => {
-    if (!token0Input || !token1Input || !address || !priceQuery.data || !bound)
+    if (approve0.status === "loading" || approve1.status === "loading")
+      return { status: "loading" } as const;
+    if (
+      !token0Input ||
+      !token1Input ||
+      !address ||
+      !priceQuery.data ||
+      !bound ||
+      approve0.status === "error" ||
+      approve1.status === "error"
+    )
       return { status: "error" } as const;
 
     const lendgine: Lendgine = {
@@ -275,41 +321,85 @@ export const useCreate = ({
 
     const liquidity = token0Amount.invert().quote(token0Input);
 
-    return [
-      native0 ? undefined : approveToken0.beetStage,
-      native1 ? undefined : approveToken1.beetStage,
-      {
-        stageTitle: createTitle,
-        parallelTransactions: [
+    return {
+      status: "success",
+      data: (
+        [
           {
-            title: createTitle,
-            tx: createTX,
+            title: "Approve tokens and create market",
+            parallelTxs: [
+              !native0 && approve0.tx
+                ? {
+                    title: approve0.title,
+                    description: approve0.title,
+                    callback: (toast: TxToast) =>
+                      approve0Mutation.mutateAsync({
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        approveTx: approve0.tx!,
+                        toast,
+                      }),
+                  }
+                : undefined,
+              !native1 && approve1.tx
+                ? {
+                    title: approve1.title,
+                    description: approve1.title,
+                    callback: (toast: TxToast) =>
+                      approve1Mutation.mutateAsync({
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        approveTx: approve1.tx!,
+                        toast,
+                      }),
+                  }
+                : undefined,
+              {
+                title: createTitle,
+                descriptio: createTitle,
+                callback: (toast: TxToast) =>
+                  createMutation.mutateAsync({ lendgine, toast }),
+              },
+            ].filter((btx): btx is BeetTx => !!btx),
           },
-        ],
-      },
-      {
-        stageTitle: title,
-        parallelTransactions: [
           {
             title,
-            tx,
+            parallelTxs: [
+              {
+                title,
+                description: title,
+                callback: (toast: TxToast) =>
+                  depositMutation.mutateAsync({
+                    token0Input,
+                    token1Input,
+                    address,
+                    liquidity,
+                    lendgine,
+                    toast,
+                  }),
+              },
+            ],
           },
-        ],
-      },
-    ].filter((s): s is BeetStage => !!s);
+        ] as readonly (BeetStage | undefined)[]
+      ).filter((s): s is BeetStage => !!s),
+    } as const satisfies { data: readonly BeetStage[]; status: "success" };
   }, [
     address,
-    approveToken0.beetStage,
-    approveToken1.beetStage,
+    approve0.status,
+    approve0.title,
+    approve0.tx,
+    approve0Mutation,
+    approve1.status,
+    approve1.title,
+    approve1.tx,
+    approve1Mutation,
     bound,
     chainID,
-    environment.base.factory,
-    environment.base.liquidityManager,
+    createMutation,
+    createTitle,
+    depositMutation,
     native0,
     native1,
     priceQuery.data,
-    settings.maxSlippagePercent,
-    settings.timeout,
+    title,
     token0Input,
     token1Input,
   ]);
