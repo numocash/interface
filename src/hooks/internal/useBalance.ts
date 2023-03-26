@@ -41,7 +41,6 @@ function queryFn({
 
       contracts: [
         {
-          address: token,
           args: [address],
         },
       ],
@@ -49,7 +48,7 @@ function queryFn({
   ],
 }: QueryFunctionArgs<typeof queryKey>) {
   if (!address) throw new Error("address is required");
-  return fetchBalance({ address, chainId, formatUnits, token });
+  return fetchBalance({ address, chainId, formatUnits });
 }
 
 export function useBalance<TSelectData = FetchBalanceResult>({
