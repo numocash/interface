@@ -102,7 +102,7 @@ export const Create: React.FC = () => {
     () =>
       !token0 || !token1
         ? "Select a token"
-        : !priceQuery.data || lendgines === null || create.status !== "success"
+        : !priceQuery.data || lendgines === null
         ? "Loading"
         : !lendgine ||
           !isValidLendgine(
@@ -127,6 +127,8 @@ export const Create: React.FC = () => {
           (token1Balance.data &&
             token1InputAmount.greaterThan(token1Balance.data))
         ? "Insufficient amount"
+        : create.status !== "success"
+        ? "Loading"
         : null,
     [
       bound,

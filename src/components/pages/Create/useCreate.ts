@@ -354,7 +354,7 @@ export const useCreate = ({
                 : undefined,
               {
                 title: createTitle,
-                descriptio: createTitle,
+                description: createTitle,
                 callback: (toast: TxToast) =>
                   createMutation.mutateAsync({ lendgine, toast }),
               },

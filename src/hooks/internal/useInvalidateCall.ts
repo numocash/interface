@@ -34,10 +34,15 @@ export const useInvalidateCall = () => {
                   }
                 ]
               )[0].contracts.find((c) => {
-                console.log(c);
                 return (
                   c.functionName === functionName &&
-                  // c.args === args &&
+                  c.args &&
+                  args &&
+                  c.args.every((a, i) =>
+                    typeof a === "string" && typeof args[i] === "string"
+                      ? a.toLowerCase() === (args[i] as string).toLowerCase()
+                      : a === args[i]
+                  ) &&
                   c.address &&
                   c.address.toLowerCase() === address.toLowerCase()
                 );

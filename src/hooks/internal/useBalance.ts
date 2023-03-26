@@ -1,9 +1,11 @@
 import type { UseQueryOptions } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
+import { utils } from "ethers";
 import * as React from "react";
 import type { FetchBalanceArgs, FetchBalanceResult } from "wagmi/actions";
 import { fetchBalance } from "wagmi/actions";
 
+import { useEnvironment } from "../../contexts/useEnvironment";
 import { useChain } from "../useChain";
 import type { QueryFunctionArgs } from "./types";
 
@@ -18,16 +20,33 @@ function queryKey({ address, chainId, formatUnits, token }: QueryKeyArgs) {
   return [
     {
       entity: "balance",
-      address,
       chainId,
       formatUnits,
-      token,
+      contracts: [
+        {
+          address: token,
+          args: [address],
+          functionName: "balanceOf",
+        },
+      ],
     },
   ] as const;
 }
 
 function queryFn({
-  queryKey: [{ address, chainId, formatUnits, token }],
+  queryKey: [
+    {
+      chainId,
+      formatUnits,
+
+      contracts: [
+        {
+          address: token,
+          args: [address],
+        },
+      ],
+    },
+  ],
 }: QueryFunctionArgs<typeof queryKey>) {
   if (!address) throw new Error("address is required");
   return fetchBalance({ address, chainId, formatUnits, token });
@@ -40,7 +59,6 @@ export function useBalance<TSelectData = FetchBalanceResult>({
   formatUnits,
   staleTime,
   suspense,
-  token,
 
   select,
   onError,
@@ -48,9 +66,16 @@ export function useBalance<TSelectData = FetchBalanceResult>({
   onSuccess,
 }: UseBalanceArgs & UseBalanceConfig<TSelectData> = {}) {
   const chainId = useChain();
+  const environment = useEnvironment();
   const queryKey_ = React.useMemo(
-    () => queryKey({ address, chainId, formatUnits, token }),
-    [address, chainId, formatUnits, token]
+    () =>
+      queryKey({
+        token: utils.getAddress(environment.interface.wrappedNative.address),
+        address,
+        chainId,
+        formatUnits,
+      }),
+    [address, chainId, environment.interface.wrappedNative.address, formatUnits]
   );
   const balanceQuery = useQuery(queryKey_, queryFn, {
     cacheTime,
