@@ -5,13 +5,11 @@ import type { Contract } from "@wagmi/core/internal";
 import type { Abi } from "abitype";
 import * as React from "react";
 import type { Address } from "wagmi";
-import { useBlockNumber } from "wagmi";
 import type { ReadContractsConfig, ReadContractsResult } from "wagmi/actions";
 import { readContracts } from "wagmi/actions";
 
 import { useChain } from "../useChain";
 import type { DeepPartial, QueryFunctionArgs } from "./types";
-import { useInvalidateOnBlock } from "./useInvalidateOnBlock";
 
 export type UseContractReadsConfig<
   TContracts extends Contract[],
@@ -21,17 +19,11 @@ export type UseContractReadsConfig<
   [K in keyof Config]?: K extends "contracts"
     ? DeepPartial<Config[K], 2>
     : Config[K];
-} & UseQueryOptions<ReadContractsResult<TContracts>, Error, TSelectData> & {
-    /** If set to `true`, the cache will depend on the block number */
-    cacheOnBlock?: boolean;
-    /** Subscribe to changes */
-    watch?: boolean;
-  };
+} & UseQueryOptions<ReadContractsResult<TContracts>, Error, TSelectData>;
 
 type QueryKeyArgs<TContracts extends Contract[]> =
   ReadContractsConfig<TContracts>;
 type QueryKeyConfig = {
-  blockNumber?: number;
   chainId?: number;
 };
 
@@ -44,7 +36,6 @@ function queryKey<
   }[]
 >({
   allowFailure,
-  blockNumber,
   chainId,
   contracts,
   overrides,
@@ -53,13 +44,11 @@ function queryKey<
     {
       entity: "readContracts",
       allowFailure,
-      blockNumber,
       chainId,
       contracts: ((contracts ?? []) as unknown as ContractConfig[]).map(
-        ({ address, args, chainId, functionName }) => ({
+        ({ address, args, functionName }) => ({
           address,
           args,
-          chainId,
           functionName,
         })
       ),
@@ -111,7 +100,6 @@ export function useContractReads<
   TSelectData = ReadContractsResult<TContracts>
 >({
   allowFailure = true,
-  cacheOnBlock = false,
   cacheTime,
   contracts,
   enabled: enabled_ = true,
@@ -124,51 +112,41 @@ export function useContractReads<
   select,
   staleTime,
   suspense,
-  watch,
+  refetchInterval,
 }: UseContractReadsConfig<
   TContracts,
   TSelectData
 >): // Need explicit type annotation so TypeScript doesn't expand return type into recursive conditional
 UseQueryResult<TSelectData, Error> {
-  const { data: blockNumber } = useBlockNumber({
-    enabled: watch || cacheOnBlock,
-    watch,
-  });
   const chainId = useChain();
 
   const queryKey_ = React.useMemo(
     () =>
       queryKey({
         allowFailure,
-        blockNumber: cacheOnBlock ? blockNumber : undefined,
         chainId,
         contracts: contracts as unknown as ContractConfig[],
         overrides,
       }),
-    [allowFailure, blockNumber, cacheOnBlock, chainId, contracts, overrides]
+    [allowFailure, chainId, contracts, overrides]
   );
 
   const enabled = React.useMemo(() => {
-    let enabled = Boolean(
+    const enabled = Boolean(
       enabled_ &&
         (contracts as unknown as ContractConfig[])?.every(
           (x) => x.abi && x.address && x.functionName
         )
     );
-    if (cacheOnBlock) enabled = Boolean(enabled && blockNumber);
     return enabled;
-  }, [blockNumber, cacheOnBlock, contracts, enabled_]);
-
-  useInvalidateOnBlock({
-    enabled: Boolean(enabled && watch && !cacheOnBlock),
-    queryKey: queryKey_,
-  });
+  }, [contracts, enabled_]);
 
   const abis = ((contracts ?? []) as unknown as ContractConfig[]).map(
     ({ abi }) => abi
   );
 
   return useQuery(queryKey_, queryFn({ abis }), {
+    refetchInterval: refetchInterval as number,
     cacheTime,
     enabled,
     isDataEqual,

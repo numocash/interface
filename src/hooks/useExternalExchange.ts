@@ -46,9 +46,10 @@ import {
   parsePriceHistoryHourV3,
   Q192,
 } from "../services/graphql/uniswapV3";
+import type { HookArg } from "./internal/types";
 import { useContractRead } from "./internal/useContractRead";
 import { useContractReads } from "./internal/useContractReads";
-import type { HookArg } from "./internal/utils";
+import { externalRefetchInterval } from "./internal/utils";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 
@@ -276,7 +277,6 @@ const useV2Price = (tokens: HookArg<Market>) => {
     enabled: !!v2PairAddress,
     abi: uniswapV2PairABI,
     functionName: "getReserves",
-    watch: true,
     select: (data) => {
       if (!tokens) return undefined;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -292,6 +292,7 @@ const useV2Price = (tokens: HookArg<Market>) => {
         invert ? priceFraction.denominator : priceFraction.numerator
       );
     },
+    refetchInterval: externalRefetchInterval,
   });
 };
 
@@ -336,7 +337,6 @@ const useV3Prices = (tokens: HookArg<Market>) => {
     allowFailure: true,
     staleTime: 3_000,
     enabled: !!contracts,
-    watch: true,
     select: (data) => {
       invariant(tokens && token0);
 
@@ -359,5 +359,6 @@ const useV3Prices = (tokens: HookArg<Market>) => {
         );
       });
     },
+    refetchInterval: externalRefetchInterval,
   });
 };
