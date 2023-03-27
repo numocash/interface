@@ -9,7 +9,7 @@ import { useEnvironment } from "../../../contexts/useEnvironment";
 import { useAllLendgines } from "../../../hooks/useAllLendgines";
 import { useBalance } from "../../../hooks/useBalance";
 import { useChain } from "../../../hooks/useChain";
-import { useCurrentPrice } from "../../../hooks/useExternalExchange";
+import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useTokens } from "../../../hooks/useTokens";
 import { isValidLendgine } from "../../../lib/lendgineValidity";
 import { fractionToPrice, priceToFraction } from "../../../lib/price";
@@ -47,7 +47,7 @@ export const Create: React.FC = () => {
   const token0Balance = useBalance(token0, address);
   const token1Balance = useBalance(token1, address);
 
-  const priceQuery = useCurrentPrice(
+  const priceQuery = useMostLiquidMarket(
     !!token0 && !!token1 ? ([token0, token1] as const) : null
   );
 
@@ -111,7 +111,7 @@ export const Create: React.FC = () => {
             environment.interface.specialtyMarkets
           )
         ? "Does not conform to the rules of valid markets"
-        : priceToFraction(priceQuery.data).greaterThan(bound)
+        : priceToFraction(priceQuery.data.price).greaterThan(bound)
         ? "Bound can't be below current price"
         : !token0InputAmount || !token1InputAmount
         ? "Enter an amount"
@@ -230,7 +230,8 @@ export const Create: React.FC = () => {
           <div tw="w-full justify-end flex mt-[-1rem]">
             <p tw="text-xs">
               <span tw="text-secondary">Current price: </span>
-              {formatPrice(priceQuery.data)} {token0?.symbol} / {token1?.symbol}
+              {formatPrice(priceQuery.data.price)} {token0?.symbol} /{" "}
+              {token1?.symbol}
             </p>
           </div>
         )}

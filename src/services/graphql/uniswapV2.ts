@@ -1,43 +1,18 @@
-import type { Token } from "@uniswap/sdk-core";
 import { Fraction } from "@uniswap/sdk-core";
-import { utils } from "ethers";
-import type { Address } from "wagmi";
 
 import type {
-  PairV2Query,
   PriceHistoryDayV2Query,
   PriceHistoryHourV2Query,
 } from "../../gql/uniswapV2/graphql";
-import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 
 export type UniswapV2Pool = {
-  token0: Token;
-  token1: Token;
-  address: Address;
+  version: "V2";
 };
 
 export type PricePoint = { timestamp: number; price: Fraction };
 
 export const parsePriceHelper = (price: number) =>
   new Fraction(Math.floor(price * 10 ** 9), 10 ** 9);
-
-export const parsePairV2 = (
-  pairV2Query: PairV2Query,
-  tokens: readonly [WrappedTokenInfo, WrappedTokenInfo]
-): {
-  pool: UniswapV2Pool;
-  totalLiquidity: number;
-} | null =>
-  pairV2Query.pairs[0]
-    ? {
-        pool: {
-          token0: tokens[0],
-          token1: tokens[1],
-          address: utils.getAddress(pairV2Query.pairs[0].id),
-        },
-        totalLiquidity: parseFloat(pairV2Query.pairs[0].reserve0) * 2,
-      }
-    : null;
 
 // returns null if the id used to query was not valid
 export const parsePriceHistoryHourV2 = (

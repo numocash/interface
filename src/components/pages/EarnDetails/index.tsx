@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 
 import { useEnvironment } from "../../../contexts/useEnvironment";
-import { useCurrentPrice } from "../../../hooks/useExternalExchange";
+import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useLendginesForTokens } from "../../../hooks/useLendgine";
 import { useAddressToToken } from "../../../hooks/useTokens";
 import { isValidMarket } from "../../../lib/lendgineValidity";
@@ -50,7 +50,7 @@ export const EarnDetails: React.FC = () => {
     navigate("/earn/");
 
   const lendgines = useLendginesForTokens(market);
-  const priceQuery = useCurrentPrice(market);
+  const priceQuery = useMostLiquidMarket(market);
 
   return (
     <PageMargin tw="w-full pb-12 sm:pb-0 flex flex-col gap-2">
@@ -68,7 +68,7 @@ export const EarnDetails: React.FC = () => {
           base={baseToken}
           quote={quoteToken}
           lendgines={lendgines}
-          price={priceQuery.data}
+          price={priceQuery.data.price}
         />
       ) : (
         <LoadingPage />

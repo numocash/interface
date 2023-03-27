@@ -284,7 +284,7 @@ export const useClose = ({
                     amountOut,
                     address,
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    mostLiquidPool: mostLiquid.data!.pool,
+                    mostLiquidPool: mostLiquid.data.pool,
                     toast,
                   }),
               },

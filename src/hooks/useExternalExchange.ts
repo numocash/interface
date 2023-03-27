@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Fraction, Price } from "@uniswap/sdk-core";
-import { utils } from "ethers";
+import { CurrencyAmount, Fraction, Price } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
+import { chunk } from "lodash";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import { objectKeys } from "ts-extras";
@@ -16,7 +16,6 @@ import type {
   PriceHistoryHourV2Query,
 } from "../gql/uniswapV2/graphql";
 import {
-  PairV2Document,
   PriceHistoryDayV2Document,
   PriceHistoryHourV2Document,
 } from "../gql/uniswapV2/graphql";
@@ -25,116 +24,191 @@ import type {
   PriceHistoryHourV3Query,
 } from "../gql/uniswapV3/graphql";
 import {
-  MostLiquidV3Document,
   PriceHistoryDayV3Document,
   PriceHistoryHourV3Document,
 } from "../gql/uniswapV3/graphql";
-import { fractionToPrice, priceToFraction } from "../lib/price";
 import type { Market } from "../lib/types/market";
-import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
+import {
+  calcMedianPrice,
+  calcV2Address,
+  calcV3Address,
+  sortTokens,
+} from "../lib/uniswap";
 import type { UniswapV2Pool } from "../services/graphql/uniswapV2";
 import {
-  parsePairV2,
   parsePriceHistoryDayV2,
   parsePriceHistoryHourV2,
 } from "../services/graphql/uniswapV2";
 import type { UniswapV3Pool } from "../services/graphql/uniswapV3";
 import {
   feeTiers,
-  parseMostLiquidV3,
   parsePriceHistoryDayV3,
   parsePriceHistoryHourV3,
   Q192,
 } from "../services/graphql/uniswapV3";
-import type { HookArg } from "./internal/types";
+import type { HookArg, ReadConfig } from "./internal/types";
 import { useContractRead } from "./internal/useContractRead";
 import { useContractReads } from "./internal/useContractReads";
 import { externalRefetchInterval } from "./internal/utils";
+import { getBalanceRead } from "./useBalance";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
 
 export const isV3 = (t: UniswapV2Pool | UniswapV3Pool): t is UniswapV3Pool =>
-  "feeTier" in t;
+  t.version === "V3";
 
 export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
-  const client = useClient();
-  const sortedTokens = tokens
-    ? tokens[0].sortsBefore(tokens[1])
-      ? ([tokens[0], tokens[1]] as const)
-      : ([tokens[1], tokens[0]] as const)
-    : null;
+  const environment = useEnvironment();
 
-  const chain = useChain();
+  const v2PriceQuery = useV2Price(tokens);
+  const v3PriceQuery = useV3Price(tokens);
 
-  // TODO: look into wagmi query caching
-  return useQuery<{
-    pool: UniswapV2Pool | UniswapV3Pool;
-  } | null>(
-    ["query liquidity", sortedTokens?.map((t) => t.address)],
-    async () => {
-      if (!sortedTokens) return null;
+  const { contracts } = useMemo(() => {
+    if (!tokens) return {};
+    const sortedTokens = sortTokens(tokens);
 
-      const variables = {
-        token0: sortedTokens[0].address.toLowerCase(),
-        token1: sortedTokens[1].address.toLowerCase(),
-      };
+    const v2Address = calcV2Address(
+      sortedTokens,
+      environment.interface.uniswapV2.factoryAddress as Address,
+      environment.interface.uniswapV2.pairInitCodeHash
+    ) as Address;
+    const v3Addresses = objectKeys(feeTiers).map(
+      (fee) =>
+        calcV3Address(
+          sortedTokens,
+          fee,
+          environment.interface.uniswapV3.factoryAddress as Address,
+          environment.interface.uniswapV3.pairInitCodeHash
+        ) as Address
+    );
 
-      const [v2, v3] = await Promise.all([
-        client.uniswapV2.request(PairV2Document, variables),
-        client.uniswapV3.request(MostLiquidV3Document, variables),
-      ] as const);
+    const contracts = [v2Address]
+      .concat(v3Addresses)
+      .flatMap((a) => [
+        getBalanceRead(tokens[0], a),
+        getBalanceRead(tokens[1], a),
+      ]);
 
-      const v2data = parsePairV2(v2, sortedTokens);
-      const v3data = parseMostLiquidV3(v3, sortedTokens);
+    return { contracts, sortedTokens };
+  }, [
+    environment.interface.uniswapV2.factoryAddress,
+    environment.interface.uniswapV2.pairInitCodeHash,
+    environment.interface.uniswapV3.factoryAddress,
+    environment.interface.uniswapV3.pairInitCodeHash,
+    tokens,
+  ]);
 
-      if (!v2data && !v3data) return null;
+  const balancesQuery = useContractReads({
+    allowFailure: true,
+    contracts,
+    staleTime: Infinity,
+    enabled: !!contracts,
+    refetchInterval: 1_000 * 60,
+    select: (data) =>
+      tokens
+        ? data.map((d, i) =>
+            d
+              ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                CurrencyAmount.fromRawAmount(tokens[i % 2]!, d.toString())
+              : undefined
+          )
+        : undefined,
+  });
 
-      if (chain === 42220) {
-        if (!v3data) return null;
-        invariant(v2data);
-        return {
-          pool: v3data.pool,
-        };
-      }
+  return useMemo(() => {
+    if (
+      v2PriceQuery.isLoading ||
+      v3PriceQuery.isLoading ||
+      balancesQuery.isLoading
+    )
+      return { status: "loading" } as const;
+    if (v2PriceQuery.isError || v3PriceQuery.isError || balancesQuery.isError)
+      return { status: "error" } as const;
+    invariant(tokens);
 
-      if (!v3data) {
-        invariant(v2data);
-        return { pool: v2data.pool };
-      }
+    // token0 / token1
+    const medianPrice = calcMedianPrice(
+      v3PriceQuery.data.concat(v2PriceQuery.data),
+      tokens
+    );
 
-      if (!v2data) {
-        invariant(v3data);
-        return { pool: v3data.pool };
-      }
+    const tvls = chunk(balancesQuery.data, 2).map((b) => {
+      if (!b) return undefined;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return b[0]!.add(medianPrice.quote(b[1]!));
+    });
 
+    const maxTVLIndex = tvls.reduce(
+      (acc, cur, i) =>
+        cur?.greaterThan(acc.max) ? { index: i, max: cur } : acc,
+      { index: 0, max: CurrencyAmount.fromRawAmount(tokens[0], 0) }
+    );
+
+    if (maxTVLIndex.index === 0)
       return {
-        pool:
-          v2data.totalLiquidity > v3data.totalLiquidity
-            ? v2data.pool
-            : v3data.pool,
+        status: "success",
+        data: {
+          price: v2PriceQuery.data,
+          pool: { version: "V2" } as UniswapV2Pool,
+        },
       };
-    },
-    {
-      staleTime: Infinity,
-      refetchInterval: 5_000,
+    else {
+      return {
+        status: "success",
+        data: {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          price: v3PriceQuery.data[maxTVLIndex.index - 1]!,
+          pool: {
+            version: "V3",
+            feeTier: objectKeys(feeTiers)[maxTVLIndex.index - 1],
+          } as UniswapV3Pool,
+        },
+      };
     }
-  );
+  }, [
+    balancesQuery.data,
+    balancesQuery.isError,
+    balancesQuery.isLoading,
+    tokens,
+    v2PriceQuery.data,
+    v2PriceQuery.isError,
+    v2PriceQuery.isLoading,
+    v3PriceQuery.data,
+    v3PriceQuery.isError,
+    v3PriceQuery.isLoading,
+  ]);
 };
 
 export const usePriceHistory = (
+  tokens: HookArg<Market>,
   externalExchange: HookArg<UniswapV2Pool | UniswapV3Pool>,
   timeframe: keyof typeof Times
 ) => {
   const client = useClient();
   const chain = useChain();
+  const environment = useEnvironment();
 
   return useQuery(
-    ["price history", externalExchange?.address, timeframe, chain],
+    ["price history", externalExchange, tokens, timeframe, chain],
     async () => {
-      if (!externalExchange) return null;
+      if (!externalExchange || !tokens) return undefined;
+
+      const sortedTokens = sortTokens(tokens);
+      const pairAddress = isV3(externalExchange)
+        ? (calcV3Address(
+            sortedTokens,
+            externalExchange.feeTier,
+            environment.interface.uniswapV3.factoryAddress as Address,
+            environment.interface.uniswapV3.pairInitCodeHash
+          ) as Address)
+        : (calcV2Address(
+            sortedTokens,
+            environment.interface.uniswapV2.factoryAddress as Address,
+            environment.interface.uniswapV2.pairInitCodeHash
+          ) as Address);
 
       const variables = {
-        id: externalExchange.address.toLowerCase(),
+        id: pairAddress.toLowerCase(),
         amount:
           timeframe === "ONE_DAY"
             ? 24
@@ -198,73 +272,19 @@ export const usePriceHistory = (
   );
 };
 
-export const useCurrentPrice = (tokens: HookArg<Market>) => {
-  const v2PriceQuery = useV2Price(tokens);
-  const v3PricesQuery = useV3Prices(tokens);
-
-  return useMemo(() => {
-    if (v2PriceQuery.status === "loading" || v3PricesQuery.status === "loading")
-      return { status: "loading" };
-
-    if (
-      !v2PriceQuery.data &&
-      (!v3PricesQuery.data || v3PricesQuery.data.length === 0)
-    )
-      return { status: "error" };
-
-    invariant(tokens);
-
-    // console.log(
-    //   v2PriceQuery.data?.toSignificant(4),
-    //   v3PricesQuery.data?.map((t) => t?.toSignificant(4))
-    // );
-
-    const allPrices = [v2PriceQuery.data]
-      .concat(v3PricesQuery.data)
-      .filter((d): d is Price<WrappedTokenInfo, WrappedTokenInfo> => !!d)
-      .sort((a, b) => (a.greaterThan(b) ? 1 : -1));
-
-    if (allPrices.length % 2 === 1) {
-      return {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        data: allPrices[(allPrices.length - 1) / 2]!,
-        status: "success",
-      };
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const lower = allPrices[allPrices.length / 2 - 1]!;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const upper = allPrices[allPrices.length / 2]!;
-
-    const sum = priceToFraction(lower).add(priceToFraction(upper));
-    return {
-      data: fractionToPrice(sum.divide(2), tokens[1], tokens[0]),
-      status: "success",
-    };
-  }, [tokens, v2PriceQuery, v3PricesQuery]);
-};
-
 const useV2Price = (tokens: HookArg<Market>) => {
   const environment = useEnvironment();
 
-  const { token0, v2PairAddress } = useMemo(() => {
+  const { contractRead } = useMemo(() => {
     if (!tokens) return {};
-    const [token0, token1] = tokens[0].sortsBefore(tokens[1])
-      ? [tokens[0], tokens[1]]
-      : [tokens[1], tokens[0]]; // does safety checks
-    const v2PairAddress = utils.getCreate2Address(
-      environment.interface.uniswapV2.factoryAddress,
-      utils.keccak256(
-        utils.solidityPack(
-          ["address", "address"],
-          [token0.address, token1.address]
-        )
-      ),
+    const sortedTokens = sortTokens(tokens);
+    const pairAddress = calcV2Address(
+      sortedTokens,
+      environment.interface.uniswapV2.factoryAddress as Address,
       environment.interface.uniswapV2.pairInitCodeHash
     );
-
-    return { token0, token1, v2PairAddress };
+    const contractRead = getUniswapV2Read(pairAddress as Address);
+    return { contractRead, sortedTokens };
   }, [
     environment.interface.uniswapV2.factoryAddress,
     environment.interface.uniswapV2.pairInitCodeHash,
@@ -272,15 +292,12 @@ const useV2Price = (tokens: HookArg<Market>) => {
   ]);
 
   return useContractRead({
-    address: (v2PairAddress as Address) ?? undefined,
-    staleTime: 3_000,
-    enabled: !!v2PairAddress,
-    abi: uniswapV2PairABI,
-    functionName: "getReserves",
+    ...contractRead,
+    staleTime: Infinity,
+    enabled: !!contractRead,
     select: (data) => {
-      if (!tokens) return undefined;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const invert = !token0!.equals(tokens[0]);
+      invariant(tokens);
+      const invert = tokens[1].sortsBefore(tokens[0]);
       const priceFraction = new Fraction(
         data.reserve0.toString(),
         data.reserve1.toString()
@@ -296,36 +313,24 @@ const useV2Price = (tokens: HookArg<Market>) => {
   });
 };
 
-const useV3Prices = (tokens: HookArg<Market>) => {
+const useV3Price = (tokens: HookArg<Market>) => {
   const environment = useEnvironment();
 
-  const { token0, contracts } = useMemo(() => {
+  const { contracts } = useMemo(() => {
     if (!tokens) return {};
-    const [token0, token1] = tokens[0].sortsBefore(tokens[1])
-      ? [tokens[0], tokens[1]]
-      : [tokens[1], tokens[0]]; // does safety checks
-    const calcAddress = (feeTier: UniswapV3Pool["feeTier"]) =>
-      utils.getCreate2Address(
-        environment.interface.uniswapV3.factoryAddress,
-        utils.keccak256(
-          utils.defaultAbiCoder.encode(
-            ["address", "address", "uint24"],
-            [token0.address, token1.address, feeTier]
-          )
-        ),
-        environment.interface.uniswapV3.pairInitCodeHash
-      );
+    const sortedTokens = sortTokens(tokens);
 
-    const contracts = objectKeys(feeTiers).map(
-      (fee) =>
-        ({
-          address: calcAddress(fee) as Address,
-          functionName: "slot0",
-          abi: uniswapV3PoolABI,
-        } as const)
+    const contracts = objectKeys(feeTiers).map((fee) =>
+      getUniswapV3Read(
+        calcV3Address(
+          sortedTokens,
+          fee,
+          environment.interface.uniswapV3.factoryAddress as Address,
+          environment.interface.uniswapV3.pairInitCodeHash
+        ) as Address
+      )
     );
-
-    return { token0, token1, contracts };
+    return { contracts };
   }, [
     environment.interface.uniswapV3.factoryAddress,
     environment.interface.uniswapV3.pairInitCodeHash,
@@ -335,12 +340,12 @@ const useV3Prices = (tokens: HookArg<Market>) => {
   return useContractReads({
     contracts,
     allowFailure: true,
-    staleTime: 3_000,
+    staleTime: Infinity,
     enabled: !!contracts,
     select: (data) => {
-      invariant(tokens && token0);
+      invariant(tokens);
 
-      const invert = token0.equals(tokens[0]);
+      const invert = tokens[1].sortsBefore(tokens[0]);
 
       return data.map((slot) => {
         if (!slot) return undefined;
@@ -362,3 +367,132 @@ const useV3Prices = (tokens: HookArg<Market>) => {
     refetchInterval: externalRefetchInterval,
   });
 };
+
+// const useV2Prices = (tokens: HookArg<readonly Market[]>) => {
+//   const environment = useEnvironment();
+
+//   const { contracts } = useMemo(() => {
+//     if (!tokens) return {};
+
+//     const contracts = tokens.map((ts) => {
+//       const sortedTokens = sortTokens(ts);
+//       const pairAddress = calcV2Address(
+//         sortedTokens,
+//         environment.interface.uniswapV2.factoryAddress as Address,
+//         environment.interface.uniswapV2.pairInitCodeHash
+//       );
+//       const contractRead = getUniswapV2Read(pairAddress as Address);
+//       return contractRead;
+//     });
+
+//     return { contracts };
+//   }, [
+//     environment.interface.uniswapV2.factoryAddress,
+//     environment.interface.uniswapV2.pairInitCodeHash,
+//     tokens,
+//   ]);
+
+//   return useContractReads({
+//     contracts,
+//     staleTime: Infinity,
+//     enabled: !!contracts,
+//     allowFailure: true,
+//     select: (data) => {
+//       invariant(tokens);
+
+//       return data.map((d, i) => {
+//         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+//         const invert = tokens[i]![1].sortsBefore(tokens[i]![0]);
+//         const priceFraction = new Fraction(
+//           d.reserve0.toString(),
+//           d.reserve1.toString()
+//         );
+//         return new Price(
+//           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+//           tokens[i]![1],
+//           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+//           tokens[i]![0],
+//           invert ? priceFraction.numerator : priceFraction.denominator,
+//           invert ? priceFraction.denominator : priceFraction.numerator
+//         );
+//       });
+//     },
+//     refetchInterval: externalRefetchInterval,
+//   });
+// };
+
+// const useV3Prices = (tokens: HookArg<readonly Market[]>) => {
+//   const environment = useEnvironment();
+
+//   const { contracts } = useMemo(() => {
+//     if (!tokens) return {};
+
+//     const contracts = tokens.flatMap((ts) => {
+//       const sortedTokens = sortTokens(ts);
+//       return objectKeys(feeTiers).map((fee) =>
+//         getUniswapV3Read(
+//           calcV3Address(
+//             sortedTokens,
+//             fee,
+//             environment.interface.uniswapV3.factoryAddress as Address,
+//             environment.interface.uniswapV3.pairInitCodeHash
+//           ) as Address
+//         )
+//       );
+//     });
+
+//     return { contracts };
+//   }, [
+//     environment.interface.uniswapV3.factoryAddress,
+//     environment.interface.uniswapV3.pairInitCodeHash,
+//     tokens,
+//   ]);
+
+//   return useContractReads({
+//     contracts,
+//     staleTime: Infinity,
+//     enabled: !!contracts,
+//     allowFailure: true,
+//     select: (data) => {
+//       invariant(tokens);
+
+//       return chunk(data, Object.keys(feeTiers).length).map((d, i) => {
+//         const ts = tokens[i];
+//         invariant(ts);
+//         const invert = ts[1].sortsBefore(ts[0]);
+
+//         return d.map((slot) => {
+//           if (!slot) return undefined;
+//           const sqrtPriceX96 = JSBI.BigInt(slot.sqrtPriceX96.toString());
+
+//           const priceFraction = new Fraction(
+//             JSBI.multiply(sqrtPriceX96, sqrtPriceX96),
+//             Q192
+//           );
+
+//           return new Price(
+//             ts[1],
+//             ts[0],
+//             invert ? priceFraction.numerator : priceFraction.denominator,
+//             invert ? priceFraction.denominator : priceFraction.numerator
+//           );
+//         });
+//       });
+//     },
+//     refetchInterval: externalRefetchInterval,
+//   });
+// };
+
+export const getUniswapV2Read = (pair: Address) =>
+  ({
+    address: pair,
+    abi: uniswapV2PairABI,
+    functionName: "getReserves",
+  } as const satisfies ReadConfig<typeof uniswapV2PairABI, "getReserves">);
+
+export const getUniswapV3Read = (pair: Address) =>
+  ({
+    address: pair,
+    abi: uniswapV3PoolABI,
+    functionName: "slot0",
+  } as const satisfies ReadConfig<typeof uniswapV3PoolABI, "slot0">);

@@ -1,15 +1,10 @@
-import type { Token } from "@uniswap/sdk-core";
 import { Fraction } from "@uniswap/sdk-core";
-import { utils } from "ethers";
 import JSBI from "jsbi";
-import type { Address } from "wagmi";
 
 import type {
-  MostLiquidV3Query,
   PriceHistoryDayV3Query,
   PriceHistoryHourV3Query,
 } from "../../gql/uniswapV3/graphql";
-import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 import type { PricePoint } from "./uniswapV2";
 
 export const feeTiers = {
@@ -20,37 +15,12 @@ export const feeTiers = {
 } as const;
 
 export type UniswapV3Pool = {
-  token0: Token;
-  token1: Token;
-  address: Address;
+  version: "V3";
   feeTier: (typeof feeTiers)[keyof typeof feeTiers];
 };
 
 export const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
 export const Q192 = JSBI.exponentiate(Q96, JSBI.BigInt(2));
-
-// TODO: is this sorting by how much token0 is locked or tvl in terms of token0
-export const parseMostLiquidV3 = (
-  mostLiquidV3Query: MostLiquidV3Query,
-  tokens: readonly [WrappedTokenInfo, WrappedTokenInfo]
-): {
-  pool: UniswapV3Pool;
-  totalLiquidity: number;
-} | null =>
-  mostLiquidV3Query.pools[0]
-    ? {
-        pool: {
-          token0: tokens[0],
-          token1: tokens[1],
-          address: utils.getAddress(mostLiquidV3Query.pools[0].id),
-          feeTier: mostLiquidV3Query.pools[0]
-            .feeTier as UniswapV3Pool["feeTier"],
-        },
-        totalLiquidity: parseFloat(
-          mostLiquidV3Query.pools[0].totalValueLockedToken0
-        ),
-      }
-    : null;
 
 // returns null if the id used to query was not valid
 export const parsePriceHistoryHourV3 = (

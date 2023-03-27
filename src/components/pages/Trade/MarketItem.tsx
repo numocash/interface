@@ -4,7 +4,6 @@ import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 
 import {
-  useCurrentPrice,
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../hooks/useExternalExchange";
@@ -19,13 +18,13 @@ interface Props {
 }
 
 export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
-  const referenceMarketQuery = useMostLiquidMarket(tokens);
-  const priceQuery = useCurrentPrice(tokens);
+  const priceQuery = useMostLiquidMarket(tokens);
 
   const invertPriceQuery = tokens[1].sortsBefore(tokens[0]);
 
   const priceHistoryQuery = usePriceHistory(
-    referenceMarketQuery.data?.pool,
+    tokens,
+    priceQuery.data?.pool,
     "ONE_DAY"
   );
 
@@ -45,7 +44,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
-    const f = priceToFraction(priceQuery.data)
+    const f = priceToFraction(priceQuery.data.price)
       .subtract(oneDayOldPrice)
       .divide(oneDayOldPrice);
 
@@ -73,7 +72,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
         {!!priceHistory && !!priceQuery.data ? (
           <MiniChart
             priceHistory={priceHistory}
-            currentPrice={priceQuery.data}
+            currentPrice={priceQuery.data.price}
           />
         ) : (
           <div tw="rounded-lg h-10 w-32 animate-pulse transform ease-in-out duration-300 bg-gray-100 justify-self-center hidden md:(flex col-span-2)" />

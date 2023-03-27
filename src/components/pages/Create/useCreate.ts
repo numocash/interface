@@ -24,7 +24,7 @@ import { useApprove } from "../../../hooks/useApprove";
 import { useAwaitTX } from "../../../hooks/useAwaitTX";
 import { getBalanceRead } from "../../../hooks/useBalance";
 import { useChain } from "../../../hooks/useChain";
-import { useCurrentPrice } from "../../../hooks/useExternalExchange";
+import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { getLendginePositionRead } from "../../../hooks/useLendginePosition";
 import { useIsWrappedNative } from "../../../hooks/useTokens";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../lib/constants";
@@ -55,7 +55,7 @@ export const useCreate = ({
   const invalidate = useInvalidateCall();
   const queryClient = useQueryClient();
 
-  const priceQuery = useCurrentPrice(
+  const priceQuery = useMostLiquidMarket(
     !!token0Input && !!token1Input
       ? ([token0Input.currency, token1Input.currency] as const)
       : null
@@ -317,7 +317,7 @@ export const useCreate = ({
       bound: fractionToPrice(bound, token1Input.currency, token0Input.currency),
     };
 
-    const { token0Amount } = priceToReserves(lendgine, priceQuery.data);
+    const { token0Amount } = priceToReserves(lendgine, priceQuery.data.price);
 
     const liquidity = token0Amount.invert().quote(token0Input);
 
@@ -418,7 +418,7 @@ export const useDepositAmounts = ({
 }) => {
   const chainID = useChain();
 
-  const priceQuery = useCurrentPrice(
+  const priceQuery = useMostLiquidMarket(
     !!token0 && !!token1 ? ([token0, token1] as const) : null
   );
   return useMemo(() => {
@@ -429,7 +429,7 @@ export const useDepositAmounts = ({
         token1Input: amount.currency.equals(token1) ? amount : undefined,
       };
 
-    if (priceToFraction(priceQuery.data).greaterThan(bound))
+    if (priceToFraction(priceQuery.data.price).greaterThan(bound))
       return {
         token0Input: amount.currency.equals(token0) ? amount : undefined,
         token1Input: amount.currency.equals(token1) ? amount : undefined,
@@ -447,7 +447,7 @@ export const useDepositAmounts = ({
 
     const { token0Amount, token1Amount } = priceToReserves(
       lendgine,
-      priceQuery.data
+      priceQuery.data.price
     );
 
     const liquidity = amount.currency.equals(lendgine.token0)
