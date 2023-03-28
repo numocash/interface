@@ -2,19 +2,26 @@ import { BsLightningChargeFill } from "react-icons/bs";
 import { NavLink } from "react-router-dom";
 import { styled } from "twin.macro";
 
+import { useEnvironment } from "../../../contexts/useEnvironment";
 import { Button } from "../../common/Button";
 
 export const LiquidStaking: React.FC = () => {
-  // const environment = useEnvironment();
+  const environment = useEnvironment();
 
   return (
-    <div tw="w-full max-w-5xl rounded bg-white  flex justify-between p-6 shadow bg-gradient-to-tr from-white to-[#a457ff] items-center my-12">
+    <Background
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      color={environment.interface.liquidStaking!.color}
+      tw="w-full max-w-5xl rounded flex justify-between p-6 shadow items-center mb-12"
+    >
       <div tw="grid gap-4">
         <p tw="text-3xl font-bold">Liquid Staking Boost</p>
         <p tw="text-secondary items-center flex gap-1">
           Boost your stMatic from 5.3% to
-          <span tw="text-xl font-bold">8.7%</span>
-          <Shake tw="fill-yellow-300 text-xl" />
+          <Shake tw="flex gap-1 items-center">
+            <p tw="text-xl font-bold">8.7%</p>
+            <BsLightningChargeFill tw="fill-yellow-300 text-xl" />
+          </Shake>
         </p>
       </div>
       <NavLink to="liquid-staking">
@@ -22,11 +29,19 @@ export const LiquidStaking: React.FC = () => {
           Stake now
         </Button>
       </NavLink>
-    </div>
+    </Background>
   );
 };
 
-const Shake = styled(BsLightningChargeFill)`
+const Background = styled.div<{ color: `#${string}` }>`
+  background-image: linear-gradient(
+    to top right,
+    white,
+    ${({ color }) => color}
+  );
+`;
+
+const Shake = styled.div`
   animation: shake 0.5s;
   animation-iteration-count: infinite;
   animation-direction: alternate;
