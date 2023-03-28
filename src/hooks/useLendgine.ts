@@ -6,8 +6,9 @@ import { scale } from "../lib/constants";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
+import type { HookArg, ReadConfig } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
-import type { HookArg } from "./internal/utils";
+import { externalRefetchInterval } from "./internal/utils";
 import { useAllLendgines } from "./useAllLendgines";
 
 export const useLendginesForTokens = (
@@ -26,57 +27,12 @@ export const useLendginesForTokens = (
 };
 
 export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
-  const contracts = lendgine
-    ? ([
-        {
-          address: lendgine.address,
-          abi: lendgineABI,
-          functionName: "totalPositionSize",
-        },
-        {
-          address: lendgine.address,
-          abi: lendgineABI,
-          functionName: "totalLiquidityBorrowed",
-        },
-        {
-          address: lendgine.address,
-          abi: lendgineABI,
-          functionName: "rewardPerPositionStored",
-        },
-        {
-          address: lendgine.address,
-          abi: lendgineABI,
-          functionName: "lastUpdate",
-        },
-        {
-          address: lendgine.address,
-          abi: lendgineABI,
-          functionName: "totalSupply",
-        },
-        {
-          address: lendgine.address,
-          abi: lendgineABI,
-          functionName: "reserve0",
-        },
-        {
-          address: lendgine.address,
-          abi: lendgineABI,
-          functionName: "reserve1",
-        },
-        {
-          address: lendgine.address,
-          abi: lendgineABI,
-          functionName: "totalLiquidity",
-        },
-      ] as const)
-    : undefined;
+  const contracts = lendgine ? getLendgineRead(lendgine) : undefined;
 
   return useContractReads({
-    //  ^?
     contracts,
     allowFailure: false,
     staleTime: Infinity,
-    watch: true,
     enabled: !!contracts,
     select: (data) => {
       if (!lendgine) return undefined;
@@ -114,5 +70,59 @@ export const useLendgine = <L extends Lendgine>(lendgine: HookArg<L>) => {
         ),
       };
     },
+    refetchInterval: externalRefetchInterval,
   });
 };
+
+export const getLendgineRead = <L extends Lendgine>(lendgine: L) =>
+  [
+    {
+      address: lendgine.address,
+      abi: lendgineABI,
+      functionName: "totalPositionSize",
+    },
+    {
+      address: lendgine.address,
+      abi: lendgineABI,
+      functionName: "totalLiquidityBorrowed",
+    },
+    {
+      address: lendgine.address,
+      abi: lendgineABI,
+      functionName: "rewardPerPositionStored",
+    },
+    {
+      address: lendgine.address,
+      abi: lendgineABI,
+      functionName: "lastUpdate",
+    },
+    {
+      address: lendgine.address,
+      abi: lendgineABI,
+      functionName: "totalSupply",
+    },
+    {
+      address: lendgine.address,
+      abi: lendgineABI,
+      functionName: "reserve0",
+    },
+    {
+      address: lendgine.address,
+      abi: lendgineABI,
+      functionName: "reserve1",
+    },
+    {
+      address: lendgine.address,
+      abi: lendgineABI,
+      functionName: "totalLiquidity",
+    },
+  ] as const satisfies readonly [
+    ReadConfig<typeof lendgineABI, "totalPositionSize">,
+    ReadConfig<typeof lendgineABI, "totalLiquidityBorrowed">,
+    ReadConfig<typeof lendgineABI, "rewardPerPositionStored">,
+    ReadConfig<typeof lendgineABI, "lastUpdate">,
+    ReadConfig<typeof lendgineABI, "totalSupply">,
+    ReadConfig<typeof lendgineABI, "reserve0">,
+    ReadConfig<typeof lendgineABI, "reserve1">,
+    ReadConfig<typeof lendgineABI, "totalLiquidity">
+  ];

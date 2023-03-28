@@ -5,9 +5,10 @@ import type { Address } from "wagmi";
 import { erc20ABI } from "wagmi";
 
 import { useEnvironment } from "../contexts/useEnvironment";
+import type { HookArg, ReadConfig } from "./internal/types";
 import { useBalance as useNativeBalance } from "./internal/useBalance";
 import { useContractRead } from "./internal/useContractRead";
-import type { HookArg } from "./internal/utils";
+import { userRefectchInterval } from "./internal/utils";
 import { useIsWrappedNative } from "./useTokens";
 
 export const useBalance = <T extends Token>(
@@ -15,31 +16,46 @@ export const useBalance = <T extends Token>(
   address: HookArg<Address>
 ) => {
   const environment = useEnvironment();
-
   const native = environment.interface.native;
+
   const nativeBalance = useNativeBalance({
     address: address ?? undefined,
     enabled: !!address && !!native,
     staleTime: Infinity,
-    watch: true,
     select: (data) =>
       CurrencyAmount.fromRawAmount(
         environment.interface.wrappedNative,
         data.value.toString()
       ),
   });
+
+  const config =
+    !!token && !!address
+      ? getBalanceRead(token, address)
+      : {
+          address: undefined,
+          abi: undefined,
+          functionName: undefined,
+          args: undefined,
+        };
+
   const balanceQuery = useContractRead({
-    address: token ? utils.getAddress(token.address) : undefined,
-    args: address ? [address] : undefined,
-    functionName: "balanceOf",
-    abi: erc20ABI,
+    ...config,
     staleTime: Infinity,
     enabled: !!token && !!address,
-    select: (data) =>
-      token ? CurrencyAmount.fromRawAmount(token, data.toString()) : undefined,
-    watch: true,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    select: (data) => CurrencyAmount.fromRawAmount(token!, data.toString()),
+    refetchInterval: userRefectchInterval,
   });
 
   if (useIsWrappedNative(token)) return nativeBalance;
   return balanceQuery;
 };
+
+export const getBalanceRead = <T extends Token>(token: T, address: Address) =>
+  ({
+    address: utils.getAddress(token.address),
+    args: [address],
+    abi: erc20ABI,
+    functionName: "balanceOf",
+  } as const satisfies ReadConfig<typeof erc20ABI, "balanceOf">);

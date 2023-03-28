@@ -1,4 +1,6 @@
 import type { QueryFunctionContext } from "@tanstack/react-query";
+import type { ReadContractConfig } from "@wagmi/core";
+import type { Abi } from "abitype";
 
 /**
  * Makes {@link TKeys} optional in {@link TType} while preserving type inference.
@@ -22,3 +24,13 @@ export type DeepPartial<
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type QueryFunctionArgs<T extends (...args: any) => any> =
   QueryFunctionContext<ReturnType<T>>;
+
+export type ReadConfig<
+  TAbi extends Abi = Abi,
+  TFunctionName extends string = string
+> = Pick<
+  ReadContractConfig<TAbi, TFunctionName>,
+  "abi" | "address" | "args" | "functionName"
+>;
+
+export type HookArg<T> = T | null | undefined;

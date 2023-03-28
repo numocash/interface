@@ -1,17 +1,15 @@
 import type { UseQueryOptions } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
+import { utils } from "ethers";
 import * as React from "react";
 import type { FetchBalanceArgs, FetchBalanceResult } from "wagmi/actions";
 import { fetchBalance } from "wagmi/actions";
 
+import { useEnvironment } from "../../contexts/useEnvironment";
 import { useChain } from "../useChain";
 import type { QueryFunctionArgs } from "./types";
-import { useInvalidateOnBlock } from "./useInvalidateOnBlock";
 
-export type UseBalanceArgs = Partial<FetchBalanceArgs> & {
-  /** Subscribe to changes */
-  watch?: boolean;
-};
+export type UseBalanceArgs = Partial<FetchBalanceArgs>;
 
 export type UseBalanceConfig<TSelectData = FetchBalanceResult> =
   UseQueryOptions<FetchBalanceResult, Error, TSelectData>;
@@ -22,19 +20,35 @@ function queryKey({ address, chainId, formatUnits, token }: QueryKeyArgs) {
   return [
     {
       entity: "balance",
-      address,
       chainId,
       formatUnits,
-      token,
+      contracts: [
+        {
+          address: token,
+          args: [address],
+          functionName: "balanceOf",
+        },
+      ],
     },
   ] as const;
 }
 
 function queryFn({
-  queryKey: [{ address, chainId, formatUnits, token }],
+  queryKey: [
+    {
+      chainId,
+      formatUnits,
+
+      contracts: [
+        {
+          args: [address],
+        },
+      ],
+    },
+  ],
 }: QueryFunctionArgs<typeof queryKey>) {
   if (!address) throw new Error("address is required");
-  return fetchBalance({ address, chainId, formatUnits, token });
+  return fetchBalance({ address, chainId, formatUnits });
 }
 
 export function useBalance<TSelectData = FetchBalanceResult>({
@@ -44,17 +58,23 @@ export function useBalance<TSelectData = FetchBalanceResult>({
   formatUnits,
   staleTime,
   suspense,
-  token,
-  watch,
+
   select,
   onError,
   onSettled,
   onSuccess,
 }: UseBalanceArgs & UseBalanceConfig<TSelectData> = {}) {
   const chainId = useChain();
+  const environment = useEnvironment();
   const queryKey_ = React.useMemo(
-    () => queryKey({ address, chainId, formatUnits, token }),
-    [address, chainId, formatUnits, token]
+    () =>
+      queryKey({
+        token: utils.getAddress(environment.interface.wrappedNative.address),
+        address,
+        chainId,
+        formatUnits,
+      }),
+    [address, chainId, environment.interface.wrappedNative.address, formatUnits]
   );
   const balanceQuery = useQuery(queryKey_, queryFn, {
     cacheTime,
@@ -66,12 +86,6 @@ export function useBalance<TSelectData = FetchBalanceResult>({
     onError,
     onSettled,
     onSuccess,
-  });
-
-  useInvalidateOnBlock({
-    chainId,
-    enabled: Boolean(enabled && watch && address),
-    queryKey: queryKey_,
   });
 
   return balanceQuery;

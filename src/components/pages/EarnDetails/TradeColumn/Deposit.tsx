@@ -7,7 +7,7 @@ import { useApprove } from "../../../../hooks/useApprove";
 import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
-import { useBeet } from "../../../../utils/beet";
+import { Beet } from "../../../../utils/beet";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
@@ -18,7 +18,6 @@ import { useDeposit, useDepositAmounts } from "./useDeposit";
 export const Deposit: React.FC = () => {
   const { address } = useAccount();
   const environment = useEnvironment();
-  const Beet = useBeet();
   const { selectedLendgine, base, quote } = useEarnDetails();
   const isLong = isLongLendgine(selectedLendgine, base);
   const baseBalance = useBalance(base, address);
@@ -84,7 +83,7 @@ export const Deposit: React.FC = () => {
           approveBase.allowanceQuery.isLoading ||
           !approveQuote.allowanceQuery ||
           approveQuote.allowanceQuery.isLoading ||
-          !deposit
+          deposit.status !== "success"
         ? "Loading"
         : (baseBalance.data && baseInputAmount.greaterThan(baseBalance.data)) ||
           (quoteBalance.data && quoteInputAmount.greaterThan(quoteBalance.data))
@@ -150,8 +149,8 @@ export const Deposit: React.FC = () => {
         disabled={!!disableReason}
         tw=" h-12 text-lg"
         onClick={async () => {
-          invariant(deposit);
-          await Beet(deposit);
+          invariant(deposit.data);
+          await Beet(deposit.data);
 
           onInput("", "base");
           onInput("", "quote");

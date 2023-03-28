@@ -21,7 +21,7 @@ import type {
   LendgineInfo,
   LendginePosition,
 } from "../../../../../lib/types/lendgine";
-import { useBeet } from "../../../../../utils/beet";
+import { Beet } from "../../../../../utils/beet";
 import { formatPercent } from "../../../../../utils/format";
 import { AsyncButton } from "../../../../common/AsyncButton";
 import { Button } from "../../../../common/Button";
@@ -40,7 +40,6 @@ export const PositionItem: React.FC<Props> = ({
   lendgineInfo,
   position,
 }: Props) => {
-  const Beet = useBeet();
   const { base, setSelectedLendgine, setClose } = useEarnDetails();
   const t = getT();
 
@@ -142,8 +141,8 @@ export const PositionItem: React.FC<Props> = ({
           tw="sm:(text-lg font-semibold) py-0.5"
           disabled={updatedPositionInfo.tokensOwed.equalTo(0)}
           onClick={async () => {
-            invariant(collect);
-            await Beet(collect);
+            invariant(collect.data);
+            await Beet(collect.data);
           }}
         >
           Collect

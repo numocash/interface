@@ -8,7 +8,7 @@ import invariant from "tiny-invariant";
 import { useEnvironment } from "../contexts/useEnvironment";
 import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import { dedupe } from "../utils/dedupe";
-import type { HookArg } from "./internal/utils";
+import type { HookArg } from "./internal/types";
 import { useChain } from "./useChain";
 
 export const useTokens = () => {

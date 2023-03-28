@@ -5,7 +5,7 @@ import { useAccount } from "wagmi";
 
 import { useBalance } from "../../../../hooks/useBalance";
 import { isShortLendgine } from "../../../../lib/lendgines";
-import { useBeet } from "../../../../utils/beet";
+import { Beet } from "../../../../utils/beet";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
@@ -23,7 +23,6 @@ interface Props {
 
 export const Close: React.FC<Props> = ({ modal }: Props) => {
   const { address } = useAccount();
-  const Beet = useBeet();
 
   const { setClose, quote, selectedLendgine, base } = useTradeDetails();
 
@@ -55,7 +54,7 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
         // ? "Enter more than zero"
         !parsedAmount
         ? "Invalid input"
-        : !shares || !balanceQuery.data || balanceQuery.isLoading || !close
+        : !shares || !balanceQuery.data || balanceQuery.isLoading || !close.data
         ? "Loading"
         : shares.greaterThan(balanceQuery.data)
         ? "Insufficient balance"
@@ -113,8 +112,8 @@ export const Close: React.FC<Props> = ({ modal }: Props) => {
         tw="h-12 text-xl font-bold items-center"
         disabled={!!disableReason}
         onClick={async () => {
-          invariant(close);
-          await Beet(close);
+          invariant(close.data);
+          await Beet(close.data);
 
           setInput("");
         }}

@@ -4,13 +4,14 @@ import { chunk } from "lodash";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import { lendgineABI } from "../abis/lendgine";
 import { scale } from "../lib/constants";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
 import type { Tuple } from "../utils/readonlyTuple";
+import type { HookArg } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
-import type { HookArg } from "./internal/utils";
+import { externalRefetchInterval } from "./internal/utils";
+import { getLendgineRead } from "./useLendgine";
 
 export const useLendgines = <L extends Lendgine>(
   lendgines: HookArg<readonly L[]>
@@ -18,51 +19,7 @@ export const useLendgines = <L extends Lendgine>(
   const contracts = useMemo(
     () =>
       lendgines
-        ? lendgines.flatMap(
-            (lendgine) =>
-              [
-                {
-                  address: lendgine.address,
-                  abi: lendgineABI,
-                  functionName: "totalPositionSize",
-                },
-                {
-                  address: lendgine.address,
-                  abi: lendgineABI,
-                  functionName: "totalLiquidityBorrowed",
-                },
-                {
-                  address: lendgine.address,
-                  abi: lendgineABI,
-                  functionName: "rewardPerPositionStored",
-                },
-                {
-                  address: lendgine.address,
-                  abi: lendgineABI,
-                  functionName: "lastUpdate",
-                },
-                {
-                  address: lendgine.address,
-                  abi: lendgineABI,
-                  functionName: "totalSupply",
-                },
-                {
-                  address: lendgine.address,
-                  abi: lendgineABI,
-                  functionName: "reserve0",
-                },
-                {
-                  address: lendgine.address,
-                  abi: lendgineABI,
-                  functionName: "reserve1",
-                },
-                {
-                  address: lendgine.address,
-                  abi: lendgineABI,
-                  functionName: "totalLiquidity",
-                },
-              ] as const
-          )
+        ? lendgines.flatMap((lendgine) => getLendgineRead(lendgine))
         : undefined,
     [lendgines]
   );
@@ -72,7 +29,6 @@ export const useLendgines = <L extends Lendgine>(
     allowFailure: false,
     staleTime: Infinity,
     enabled: !!lendgines,
-    watch: true,
     select: (data) => {
       if (!lendgines) return undefined;
 
@@ -115,5 +71,6 @@ export const useLendgines = <L extends Lendgine>(
         };
       });
     },
+    refetchInterval: externalRefetchInterval,
   });
 };

@@ -10,6 +10,7 @@ import { publicProvider } from "wagmi/providers/public";
 import { App } from "./App";
 import { SettingsProvider } from "./contexts/settings";
 import { EnvironmentProvider } from "./contexts/useEnvironment";
+import { DefaultToasterWrapper } from "./utils/beet";
 
 const { chains, provider, webSocketProvider } = configureChains(
   [
@@ -31,6 +32,8 @@ const { chains, provider, webSocketProvider } = configureChains(
 ); // TODO: use websockets provider
 
 export { chains };
+
+export const toaster = new DefaultToasterWrapper();
 
 const { connectors } = getDefaultWallets({
   appName: "Numoen",

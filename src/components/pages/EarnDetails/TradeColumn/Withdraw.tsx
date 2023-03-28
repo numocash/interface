@@ -4,7 +4,7 @@ import invariant from "tiny-invariant";
 
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
-import { useBeet } from "../../../../utils/beet";
+import { Beet } from "../../../../utils/beet";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { CenterSwitch } from "../../../common/CenterSwitch";
@@ -14,8 +14,6 @@ import { useWithdraw, useWithdrawAmounts } from "./useWithdraw";
 
 export const Withdraw: React.FC = () => {
   const { setClose, base, quote, selectedLendgine } = useEarnDetails();
-
-  const Beet = useBeet();
 
   const [withdrawPercent, setWithdrawPercent] = useState(20);
   const lendgineInfoQuery = useLendgine(selectedLendgine);
@@ -32,7 +30,7 @@ export const Withdraw: React.FC = () => {
     [amount0, amount1, isLong]
   );
 
-  const withdraw = useWithdraw({ size, liquidity, amount0, amount1 });
+  const withdraw = useWithdraw({ size, amount0, amount1 });
 
   const disableReason = useMemo(
     () =>
@@ -42,7 +40,8 @@ export const Withdraw: React.FC = () => {
           !baseAmount ||
           !size ||
           !liquidity ||
-          !lendgineInfoQuery.data
+          !lendgineInfoQuery.data ||
+          withdraw.status === "error"
         ? "Loading"
         : liquidity.greaterThan(lendgineInfoQuery.data.totalLiquidity)
         ? "Insufficient liquidity"
@@ -53,6 +52,7 @@ export const Withdraw: React.FC = () => {
       liquidity,
       quoteAmount,
       size,
+      withdraw.status,
       withdrawPercent,
     ]
   );
@@ -101,8 +101,8 @@ export const Withdraw: React.FC = () => {
         variant="primary"
         tw="h-12 text-lg"
         onClick={async () => {
-          invariant(withdraw);
-          await Beet(withdraw);
+          invariant(withdraw.data);
+          await Beet(withdraw.data);
           setClose(false);
         }}
       >
