@@ -17,7 +17,9 @@ export const LiquidStaking: React.FC = () => {
       <div tw="grid gap-4">
         <p tw="text-3xl font-bold">Liquid Staking Boost</p>
         <p tw="text-secondary items-center flex gap-1">
-          Boost your stMatic from 5.3% to
+          Boost your{" "}
+          {environment.interface.liquidStaking?.lendgine.token1.symbol} yield
+          from 5.3% to
           <Shake tw="flex gap-1 items-center">
             <p tw="text-xl font-bold">8.7%</p>
             <BsLightningChargeFill tw="fill-yellow-300 text-xl" />

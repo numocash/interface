@@ -1,4 +1,5 @@
 export const Stats: React.FC = () => {
+  // const environment = useEnvironment();
   return (
     <div tw="flex w-full justify-around">
       <Item label="Total deposited" item={"102 MATIC"} />
