@@ -1,4 +1,5 @@
 import { BsLightningChargeFill } from "react-icons/bs";
+import { NavLink } from "react-router-dom";
 import { styled } from "twin.macro";
 
 import { Button } from "../../common/Button";
@@ -7,7 +8,7 @@ export const LiquidStaking: React.FC = () => {
   // const environment = useEnvironment();
 
   return (
-    <div tw="w-full max-w-5xl rounded bg-white  flex justify-between p-6 shadow bg-gradient-to-tr from-white to-[#a457ff] items-center">
+    <div tw="w-full max-w-5xl rounded bg-white  flex justify-between p-6 shadow bg-gradient-to-tr from-white to-[#a457ff] items-center my-12">
       <div tw="grid gap-4">
         <p tw="text-3xl font-bold">Liquid Staking Boost</p>
         <p tw="text-secondary items-center flex gap-1">
@@ -16,9 +17,11 @@ export const LiquidStaking: React.FC = () => {
           <Shake tw="fill-yellow-300 text-xl" />
         </p>
       </div>
-      <Button variant="inverse" tw=" text-xl px-6 py-2 h-fit">
-        Stake now
-      </Button>
+      <NavLink to="liquid-staking">
+        <Button variant="inverse" tw=" text-xl px-6 py-2 h-fit">
+          Stake now
+        </Button>
+      </NavLink>
     </div>
   );
 };
