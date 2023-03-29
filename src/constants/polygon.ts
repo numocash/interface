@@ -1,5 +1,5 @@
 import type { Currency } from "@uniswap/sdk-core";
-import { NativeCurrency, Price, Token } from "@uniswap/sdk-core";
+import { NativeCurrency, Percent, Price, Token } from "@uniswap/sdk-core";
 import { utils } from "ethers";
 
 import { chainID } from "../lib/constants";
@@ -121,6 +121,7 @@ export const polygonConfig = {
         "0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54",
     },
     liquidStaking: {
+      return: new Percent(42, 1000),
       lendgine: {
         token0: WrappedNative[chainID.polygon],
         token0Exp: WrappedNative[chainID.polygon].decimals,

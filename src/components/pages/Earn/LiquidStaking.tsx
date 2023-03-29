@@ -1,12 +1,30 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { useMemo } from "react";
 import { BsLightningChargeFill } from "react-icons/bs";
 import { NavLink } from "react-router-dom";
 import { styled } from "twin.macro";
 
 import { useEnvironment } from "../../../contexts/useEnvironment";
+import { formatPercent } from "../../../utils/format";
 import { Button } from "../../common/Button";
+import { LoadingSpinner } from "../../common/LoadingSpinner";
+import { useLongReturns, useLPReturns } from "../LiquidStaking/useReturns";
 
 export const LiquidStaking: React.FC = () => {
   const environment = useEnvironment();
+  const longAPR = useLongReturns();
+  const lpAPR = useLPReturns();
+
+  const maxAPR = useMemo(
+    () =>
+      !longAPR || !lpAPR
+        ? undefined
+        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        longAPR.totalAPR?.greaterThan(lpAPR.totalAPR!)
+        ? longAPR.totalAPR
+        : lpAPR.totalAPR,
+    [longAPR, lpAPR]
+  );
 
   return (
     <Background
@@ -19,9 +37,11 @@ export const LiquidStaking: React.FC = () => {
         <p tw="text-secondary items-center flex gap-1">
           Boost your{" "}
           {environment.interface.liquidStaking?.lendgine.token1.symbol} yield
-          from 5.3% to
+          from {formatPercent(environment.interface.liquidStaking!.return)} to
           <Shake tw="flex gap-1 items-center">
-            <p tw="text-xl font-bold">8.7%</p>
+            <p tw="text-xl font-bold">
+              {maxAPR ? formatPercent(maxAPR) : <LoadingSpinner />}
+            </p>
             <BsLightningChargeFill tw="fill-yellow-300 text-xl" />
           </Shake>
         </p>

@@ -2,6 +2,10 @@ import { useState } from "react";
 import { objectKeys } from "ts-extras";
 import tw, { css } from "twin.macro";
 
+import { formatPercent } from "../../../../utils/format";
+import { LoadingSpinner } from "../../../common/LoadingSpinner";
+import { useLPReturns } from "../useReturns";
+
 const Tabs = {
   details: "Details",
   strategy: "Strategy",
@@ -9,6 +13,8 @@ const Tabs = {
 
 export const About: React.FC = () => {
   const [tab, setTab] = useState<keyof typeof Tabs>("details");
+
+  const returns = useLPReturns();
   return (
     <>
       <div tw=" w-fit flex  justify-start p-0.5 items-center rounded-xl bg-gray-100">
@@ -36,23 +42,34 @@ export const About: React.FC = () => {
         <div tw="flex flex-col gap-2">
           <div tw="flex justify-between  items-center ">
             <p tw="text-sm text-secondary">Expected returns</p>
-            <p tw=" ">5.00%</p>
+            <p tw=" ">
+              {returns.expectedReturns ? (
+                formatPercent(returns.expectedReturns)
+              ) : (
+                <LoadingSpinner />
+              )}
+            </p>
           </div>
           <div tw="flex justify-between  items-center ">
             <p tw="text-sm text-secondary">Lending returns</p>
-            <p tw=" ">1.00%</p>
+            <p tw=" ">
+              {returns.lendingReturns ? (
+                formatPercent(returns.lendingReturns)
+              ) : (
+                <LoadingSpinner />
+              )}
+            </p>
           </div>
+
           <div tw="flex justify-between  items-center ">
-            <p tw="text-sm text-secondary">Impermanent loss</p>
-            <p tw=" ">3.00%</p>
-          </div>
-          <div tw="flex justify-between  items-center ">
-            <p tw="text-sm text-secondary">Total APR</p>
-            <p tw=" ">7.25%</p>
-          </div>
-          <div tw="flex justify-between  items-center ">
-            <p tw="text-sm text-secondary">Net APY</p>
-            <p tw=" ">7.25%</p>
+            <p tw="text-sm text-secondary">Net APR</p>
+            <p tw=" ">
+              {returns.totalAPR ? (
+                formatPercent(returns.totalAPR)
+              ) : (
+                <LoadingSpinner />
+              )}
+            </p>
           </div>
         </div>
       )}

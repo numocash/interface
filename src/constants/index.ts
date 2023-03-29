@@ -1,4 +1,4 @@
-import type { NativeCurrency } from "@uniswap/sdk-core";
+import type { NativeCurrency, Percent } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
 import type { chains } from "../AppWithProviders";
@@ -25,6 +25,7 @@ type UniswapConfig = {
 
 type LiquidStakingConfig = {
   base: NumoenBaseConfig;
+  return: Percent;
   lendgine: Lendgine;
   color: `#${string}`;
 };

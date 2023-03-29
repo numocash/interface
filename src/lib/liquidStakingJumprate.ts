@@ -3,8 +3,8 @@ import { Percent } from "@uniswap/sdk-core";
 import type { Lendgine, LendgineInfo } from "./types/lendgine";
 
 const kink = new Percent(8, 10);
-const multiplier = new Percent(1375, 1_000);
-const jumpMultiplier = new Percent(89, 2);
+const multiplier = new Percent(375, 10_000);
+const jumpMultiplier = new Percent(45, 100);
 
 export const utilizationRate = (
   lendgineInfo: Pick<

@@ -41,6 +41,8 @@ export const WrappedNative = {
     decimals: 18,
     symbol: "MATIC",
     name: "Matic",
+    logoURI:
+      "https://assets.coingecko.com/coins/images/4713/small/matic-token-icon.png?1624446912",
   }),
   [chainID.arbitrum]: new WrappedTokenInfo({
     chainId: chainID.arbitrum,
@@ -48,6 +50,8 @@ export const WrappedNative = {
     decimals: 18,
     symbol: "ETH",
     name: "Ether",
+    logoURI:
+      "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
   }),
   [chainID.celo]: new WrappedTokenInfo({
     chainId: chainID.celo,

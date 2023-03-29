@@ -1,4 +1,4 @@
-import { Ether, Price, Token } from "@uniswap/sdk-core";
+import { Ether, Percent, Price, Token } from "@uniswap/sdk-core";
 import { utils } from "ethers";
 
 import { chainID } from "../lib/constants";
@@ -57,6 +57,7 @@ export const arbitrumConfig = {
         liquidityManager: "0xe964F66B143E2C4752F3F4d37bfc9e74dE4e6eEB",
         lendgineRouter: "0xC63292042D983C2196ab52F4101043F128EcEF67",
       },
+      return: new Percent(45, 1000),
       lendgine: {
         token0: WrappedNative[chainID.arbitrum],
         token0Exp: WrappedNative[chainID.arbitrum].decimals,
