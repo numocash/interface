@@ -33,7 +33,12 @@ export const celoConfig = {
       "https://api.thegraph.com/subgraphs/name/kyscott18/numoen-celo",
     wrappedNative: WrappedNative[chainID.celo],
 
-    specialtyMarkets: [[Stable[chainID.celo], WrappedNative[chainID.celo]]],
+    specialtyMarkets: [
+      {
+        base: WrappedNative[chainID.celo],
+        quote: Stable[chainID.celo],
+      },
+    ],
     blockFreq: 1,
   },
 } as const;

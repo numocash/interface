@@ -10,24 +10,20 @@ export const lendgineToMarket = (
   lendgine: Lendgine,
   wrappedNative: WrappedTokenInfo,
   specialtyMarkets?: readonly Market[]
-) => {
+): Market => {
   const specialtyMatches = specialtyMarkets?.find((m) =>
     isEqualToMarket(lendgine.token0, lendgine.token1, m)
   );
 
   if (specialtyMatches)
-    return [
-      lendgine.token0.equals(specialtyMatches[0])
-        ? lendgine.token0
-        : lendgine.token1,
-      lendgine.token0.equals(specialtyMatches[0])
-        ? lendgine.token1
-        : lendgine.token0,
-    ] as const;
+    return lendgine.token0.equals(specialtyMatches.base)
+      ? { base: lendgine.token0, quote: lendgine.token1 }
+      : { base: lendgine.token1, quote: lendgine.token0 };
 
+  // wrapped native is the preferred quote token
   return lendgine.token0.equals(wrappedNative)
-    ? ([lendgine.token0, lendgine.token1] as const)
-    : ([lendgine.token1, lendgine.token0] as const);
+    ? { base: lendgine.token1, quote: lendgine.token0 }
+    : { base: lendgine.token0, quote: lendgine.token1 };
 };
 
 export const marketToLendgines = (
@@ -51,11 +47,11 @@ export const isValidMarket = (
   wrappedNative: WrappedTokenInfo,
   specialtyMarkets?: readonly Market[]
 ) =>
-  !!market.find((t) => t.equals(wrappedNative)) ||
+  !![market.base, market.quote].find((t) => t.equals(wrappedNative)) ||
   !!(
     specialtyMarkets &&
     specialtyMarkets
-      .map((m) => market[0].equals(m[0]) && market[1].equals(m[1]))
+      .map((m) => market.base.equals(m.base) && market.quote.equals(m.quote))
       .includes(true)
   );
 
@@ -74,5 +70,5 @@ const isEqualToMarket = (
   token1: WrappedTokenInfo,
   market: Market
 ) =>
-  (market[0].equals(token0) && market[1].equals(token1)) ||
-  (market[0].equals(token1) && market[1].equals(token0));
+  (market.base.equals(token0) && market.quote.equals(token1)) ||
+  (market.base.equals(token1) && market.quote.equals(token0));

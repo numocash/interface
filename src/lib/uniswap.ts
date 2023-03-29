@@ -49,7 +49,7 @@ export const calcV3Address = (
 
 export const calcMedianPrice = (
   prices: (Price<WrappedTokenInfo, WrappedTokenInfo> | undefined)[],
-  tokens: Market
+  market: Market
 ) => {
   const filteredSortedPrices = prices
     .filter((d): d is Price<WrappedTokenInfo, WrappedTokenInfo> => !!d)
@@ -66,5 +66,5 @@ export const calcMedianPrice = (
   const upper = filteredSortedPrices[filteredSortedPrices.length / 2]!;
 
   const sum = priceToFraction(lower).add(priceToFraction(upper));
-  return fractionToPrice(sum.divide(2), tokens[1], tokens[0]);
+  return fractionToPrice(sum.divide(2), market.base, market.quote);
 };

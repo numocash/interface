@@ -57,15 +57,15 @@ import { useClient } from "./useClient";
 export const isV3 = (t: UniswapV2Pool | UniswapV3Pool): t is UniswapV3Pool =>
   t.version === "V3";
 
-export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
+export const useMostLiquidMarket = (market: HookArg<Market>) => {
   const environment = useEnvironment();
 
-  const v2PriceQuery = useV2Price(tokens);
-  const v3PriceQuery = useV3Price(tokens);
+  const v2PriceQuery = useV2Price(market);
+  const v3PriceQuery = useV3Price(market);
 
   const { contracts } = useMemo(() => {
-    if (!tokens) return {};
-    const sortedTokens = sortTokens(tokens);
+    if (!market) return {};
+    const sortedTokens = sortTokens([market.base, market.quote]);
 
     const v2Address = calcV2Address(
       sortedTokens,
@@ -85,8 +85,8 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
     const contracts = [v2Address]
       .concat(v3Addresses)
       .flatMap((a) => [
-        getBalanceRead(tokens[0], a),
-        getBalanceRead(tokens[1], a),
+        getBalanceRead(market.base, a),
+        getBalanceRead(market.quote, a),
       ]);
 
     return { contracts, sortedTokens };
@@ -95,7 +95,7 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
     environment.interface.uniswapV2.pairInitCodeHash,
     environment.interface.uniswapV3.factoryAddress,
     environment.interface.uniswapV3.pairInitCodeHash,
-    tokens,
+    market,
   ]);
 
   const balancesQuery = useContractReads({
@@ -105,11 +105,14 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
     enabled: !!contracts,
     refetchInterval: 1_000 * 60,
     select: (data) =>
-      tokens
+      market
         ? data.map((d, i) =>
             d
               ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                CurrencyAmount.fromRawAmount(tokens[i % 2]!, d.toString())
+                CurrencyAmount.fromRawAmount(
+                  i % 2 === 0 ? market.base : market.quote,
+                  d.toString()
+                )
               : undefined
           )
         : undefined,
@@ -124,24 +127,24 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
       return { status: "loading" } as const;
     if (v2PriceQuery.isError || v3PriceQuery.isError || balancesQuery.isError)
       return { status: "error" } as const;
-    invariant(tokens);
+    invariant(market);
 
     // token0 / token1
     const medianPrice = calcMedianPrice(
       v3PriceQuery.data.concat(v2PriceQuery.data),
-      tokens
+      market
     );
 
     const tvls = chunk(balancesQuery.data, 2).map((b) => {
       if (!b) return undefined;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return b[0]!.add(medianPrice.quote(b[1]!));
+      return b[1]!.add(medianPrice.quote(b[0]!));
     });
 
     const maxTVLIndex = tvls.reduce(
       (acc, cur, i) =>
         cur?.greaterThan(acc.max) ? { index: i, max: cur } : acc,
-      { index: 0, max: CurrencyAmount.fromRawAmount(tokens[0], 0) }
+      { index: 0, max: CurrencyAmount.fromRawAmount(market.quote, 0) }
     );
 
     if (maxTVLIndex.index === 0)
@@ -169,7 +172,7 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
     balancesQuery.data,
     balancesQuery.isError,
     balancesQuery.isLoading,
-    tokens,
+    market,
     v2PriceQuery.data,
     v2PriceQuery.isError,
     v2PriceQuery.isLoading,
@@ -180,7 +183,7 @@ export const useMostLiquidMarket = (tokens: HookArg<Market>) => {
 };
 
 export const usePriceHistory = (
-  tokens: HookArg<Market>,
+  market: HookArg<Market>,
   externalExchange: HookArg<UniswapV2Pool | UniswapV3Pool>,
   timeframe: keyof typeof Times
 ) => {
@@ -189,11 +192,11 @@ export const usePriceHistory = (
   const environment = useEnvironment();
 
   return useQuery(
-    ["price history", externalExchange, tokens, timeframe, chain],
+    ["price history", externalExchange, market, timeframe, chain],
     async () => {
-      if (!externalExchange || !tokens) return undefined;
+      if (!externalExchange || !market) return undefined;
 
-      const sortedTokens = sortTokens(tokens);
+      const sortedTokens = sortTokens([market.base, market.quote]);
       const pairAddress = isV3(externalExchange)
         ? (calcV3Address(
             sortedTokens,
@@ -272,12 +275,12 @@ export const usePriceHistory = (
   );
 };
 
-const useV2Price = (tokens: HookArg<Market>) => {
+const useV2Price = (market: HookArg<Market>) => {
   const environment = useEnvironment();
 
   const { contractRead } = useMemo(() => {
-    if (!tokens) return {};
-    const sortedTokens = sortTokens(tokens);
+    if (!market) return {};
+    const sortedTokens = sortTokens([market.base, market.quote]);
     const pairAddress = calcV2Address(
       sortedTokens,
       environment.interface.uniswapV2.factoryAddress as Address,
@@ -288,7 +291,7 @@ const useV2Price = (tokens: HookArg<Market>) => {
   }, [
     environment.interface.uniswapV2.factoryAddress,
     environment.interface.uniswapV2.pairInitCodeHash,
-    tokens,
+    market,
   ]);
 
   return useContractRead({
@@ -296,15 +299,15 @@ const useV2Price = (tokens: HookArg<Market>) => {
     staleTime: Infinity,
     enabled: !!contractRead,
     select: (data) => {
-      invariant(tokens);
-      const invert = tokens[1].sortsBefore(tokens[0]);
+      invariant(market);
+      const invert = !market.quote.sortsBefore(market.base);
       const priceFraction = new Fraction(
         data.reserve0.toString(),
         data.reserve1.toString()
       );
       return new Price(
-        tokens[1],
-        tokens[0],
+        market.base,
+        market.quote,
         invert ? priceFraction.numerator : priceFraction.denominator,
         invert ? priceFraction.denominator : priceFraction.numerator
       );
@@ -313,12 +316,12 @@ const useV2Price = (tokens: HookArg<Market>) => {
   });
 };
 
-const useV3Price = (tokens: HookArg<Market>) => {
+const useV3Price = (market: HookArg<Market>) => {
   const environment = useEnvironment();
 
   const { contracts } = useMemo(() => {
-    if (!tokens) return {};
-    const sortedTokens = sortTokens(tokens);
+    if (!market) return {};
+    const sortedTokens = sortTokens([market.base, market.quote]);
 
     const contracts = objectKeys(feeTiers).map((fee) =>
       getUniswapV3Read(
@@ -334,7 +337,7 @@ const useV3Price = (tokens: HookArg<Market>) => {
   }, [
     environment.interface.uniswapV3.factoryAddress,
     environment.interface.uniswapV3.pairInitCodeHash,
-    tokens,
+    market,
   ]);
 
   return useContractReads({
@@ -343,9 +346,9 @@ const useV3Price = (tokens: HookArg<Market>) => {
     staleTime: Infinity,
     enabled: !!contracts,
     select: (data) => {
-      invariant(tokens);
+      invariant(market);
 
-      const invert = tokens[1].sortsBefore(tokens[0]);
+      const invert = !market.quote.sortsBefore(market.base);
 
       return data.map((slot) => {
         if (!slot) return undefined;
@@ -357,8 +360,8 @@ const useV3Price = (tokens: HookArg<Market>) => {
         );
 
         return new Price(
-          tokens[1],
-          tokens[0],
+          market.base,
+          market.quote,
           invert ? priceFraction.numerator : priceFraction.denominator,
           invert ? priceFraction.denominator : priceFraction.numerator
         );
