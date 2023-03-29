@@ -24,6 +24,7 @@ type UniswapConfig = {
 };
 
 type LiquidStakingConfig = {
+  base: NumoenBaseConfig;
   lendgine: Lendgine;
   color: `#${string}`;
 };

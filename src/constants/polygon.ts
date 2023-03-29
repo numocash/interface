@@ -1,6 +1,6 @@
 import type { Currency } from "@uniswap/sdk-core";
 import { NativeCurrency, Price, Token } from "@uniswap/sdk-core";
-import { constants, utils } from "ethers";
+import { utils } from "ethers";
 
 import { chainID } from "../lib/constants";
 import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
@@ -126,9 +126,18 @@ export const polygonConfig = {
         token0Exp: WrappedNative[chainID.polygon].decimals,
         token1: stMATIC,
         token1Exp: stMATIC.decimals,
-        bound: new Price(stMATIC, WrappedNative[chainID.polygon], 1, 2),
-        address: constants.AddressZero,
-        lendgine: new Token(137, constants.AddressZero, 18),
+        bound: new Price(stMATIC, WrappedNative[chainID.polygon], 10, 16),
+        address: "0x0A435BC2488c85A7C87fA3dac0CD4fA538DDe4Ce",
+        lendgine: new Token(
+          137,
+          "0x0A435BC2488c85A7C87fA3dac0CD4fA538DDe4Ce",
+          18
+        ),
+      },
+      base: {
+        factory: "0x58db4e36755699188ff21E68A11308fDEb8792b5",
+        liquidityManager: "0xe964F66B143E2C4752F3F4d37bfc9e74dE4e6eEB",
+        lendgineRouter: "0xC63292042D983C2196ab52F4101043F128EcEF67",
       },
       color: "#a457ff",
     },

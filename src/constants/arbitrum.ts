@@ -1,5 +1,5 @@
 import { Ether, Price, Token } from "@uniswap/sdk-core";
-import { constants, utils } from "ethers";
+import { utils } from "ethers";
 
 import { chainID } from "../lib/constants";
 import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
@@ -16,7 +16,7 @@ const USDT = new WrappedTokenInfo({
     "https://assets.coingecko.com/coins/images/325/small/Tether.png?1668148663",
 });
 
-const stETH = new WrappedTokenInfo({
+const wstETH = new WrappedTokenInfo({
   name: "Wrapped liquid staked Ether 2.0",
   symbol: "wstETH",
   decimals: 18,
@@ -52,14 +52,23 @@ export const arbitrumConfig = {
         "0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54",
     },
     liquidStaking: {
+      base: {
+        factory: "0x58db4e36755699188ff21E68A11308fDEb8792b5",
+        liquidityManager: "0xe964F66B143E2C4752F3F4d37bfc9e74dE4e6eEB",
+        lendgineRouter: "0xC63292042D983C2196ab52F4101043F128EcEF67",
+      },
       lendgine: {
         token0: WrappedNative[chainID.arbitrum],
         token0Exp: WrappedNative[chainID.arbitrum].decimals,
-        token1: stETH,
-        token1Exp: stETH.decimals,
-        bound: new Price(stETH, WrappedNative[chainID.arbitrum], 1, 2),
-        address: constants.AddressZero,
-        lendgine: new Token(42161, constants.AddressZero, 18),
+        token1: wstETH,
+        token1Exp: wstETH.decimals,
+        bound: new Price(wstETH, WrappedNative[chainID.arbitrum], 1, 2),
+        address: "0x327319fdce6fac0eb1751dc2234cBdA7F5B43E2A",
+        lendgine: new Token(
+          42161,
+          "0x327319fdce6fac0eb1751dc2234cBdA7F5B43E2A",
+          18
+        ),
       },
       color: "#00a3ff",
     },
