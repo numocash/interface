@@ -17,10 +17,10 @@ export const LiquidStaking: React.FC = () => {
 
   const maxAPR = useMemo(
     () =>
-      !longAPR || !lpAPR
+      !longAPR.totalAPR || !lpAPR.totalAPR
         ? undefined
         : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        longAPR.totalAPR?.greaterThan(lpAPR.totalAPR!)
+        longAPR.totalAPR?.greaterThan(lpAPR.totalAPR)
         ? longAPR.totalAPR
         : lpAPR.totalAPR,
     [longAPR, lpAPR]
@@ -30,11 +30,11 @@ export const LiquidStaking: React.FC = () => {
     <Background
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       color={environment.interface.liquidStaking!.color}
-      tw="w-full max-w-5xl rounded flex justify-between p-6 shadow items-center mb-12"
+      tw="w-full max-w-5xl rounded grid gap-4 sm:(justify-between flex) p-6 shadow items-center mb-12"
     >
       <div tw="grid gap-4">
         <p tw="text-3xl font-bold">Liquid Staking Boost</p>
-        <p tw="text-secondary items-center flex gap-1">
+        <p tw="text-secondary items-center ">
           Boost your{" "}
           {environment.interface.liquidStaking?.lendgine.token1.symbol} yield
           from {formatPercent(environment.interface.liquidStaking!.return)} to
@@ -63,7 +63,7 @@ const Background = styled.div<{ color: `#${string}` }>`
   );
 `;
 
-const Shake = styled.div`
+const Shake = styled.span`
   animation: shake 0.5s;
   animation-iteration-count: infinite;
   animation-direction: alternate;

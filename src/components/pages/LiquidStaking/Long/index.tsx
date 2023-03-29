@@ -1,17 +1,16 @@
-import { useMemo, useState } from "react";
-import invariant from "tiny-invariant";
+import { useState } from "react";
+import { FaChevronLeft } from "react-icons/fa";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useBalance } from "../../../../hooks/useBalance";
-import { useCurrentPrice } from "../../../../hooks/useExternalExchange";
-import { useLendgine } from "../../../../hooks/useLendgine";
-import { Beet } from "../../../../utils/beet";
-import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
-import { AssetSelection } from "../../../common/AssetSelection";
-import { AsyncButton } from "../../../common/AsyncButton";
+import { Button } from "../../../common/Button";
+import { LoadingSpinner } from "../../../common/LoadingSpinner";
+import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
+import { useLongValue } from "../useValue";
 import { About } from "./About";
-import { useBuy, useBuyAmounts } from "./useBuy";
+import { Burn } from "./Burn";
+import { Mint } from "./Mint";
 
 export const Long: React.FC = () => {
   const environment = useEnvironment();
@@ -19,56 +18,10 @@ export const Long: React.FC = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const lendgine = environment.interface.liquidStaking!.lendgine;
-  const lendgineInfo = useLendgine(lendgine);
 
-  const [input, setInput] = useState("");
-  const balance = useBalance(lendgine.token1, address);
-
-  const parsedAmount = useMemo(
-    () => tryParseCurrencyAmount(input, lendgine.token1),
-    [input, lendgine.token1]
-  );
-
-  const priceQuery = useCurrentPrice([
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    environment.interface.liquidStaking!.lendgine.token0,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    environment.interface.liquidStaking!.lendgine.token1,
-  ] as const);
-
-  const { liquidity, shares } = useBuyAmounts({
-    amountIn: parsedAmount,
-    price: priceQuery.data,
-  });
-  const buy = useBuy({ amountIn: parsedAmount, price: priceQuery.data });
-
-  const disableReason = useMemo(
-    () =>
-      input === ""
-        ? "Enter an amount"
-        : !parsedAmount
-        ? "Invalid amount"
-        : !lendgineInfo.data || !balance.data
-        ? "Loading"
-        : parsedAmount.greaterThan(balance.data)
-        ? "Insufficient balance"
-        : lendgineInfo.data.totalLiquidity.equalTo(0)
-        ? "Insufficient liquidity"
-        : !liquidity || !shares || !buy.data
-        ? "Loading"
-        : liquidity.greaterThan(lendgineInfo.data.totalLiquidity)
-        ? "Insufficient liquidity"
-        : null,
-    [
-      balance.data,
-      buy.data,
-      input,
-      lendgineInfo.data,
-      liquidity,
-      parsedAmount,
-      shares,
-    ]
-  );
+  const [close, setClose] = useState(false);
+  const userBalanceQuery = useBalance(lendgine.lendgine, address);
+  const positionValue = useLongValue(userBalanceQuery.data);
 
   return (
     <div tw="w-full max-w-5xl rounded bg-white  border border-[#dfdfdf] p-4 shadow flex flex-col gap-4 h-fit">
@@ -77,34 +30,47 @@ export const Long: React.FC = () => {
           Long
         </div>
       </div>
-      <AssetSelection
-        tw="border border-gray-200 rounded-lg mt-[-2rem]"
-        label={<span>Deposit</span>}
-        selectedValue={
-          environment.interface.liquidStaking?.lendgine.token1 ?? null
-        }
-        inputValue={input}
-        inputOnChange={(value) => setInput(value)}
-        currentAmount={{
-          amount: balance.data,
-          allowSelect: true,
-        }}
-      />
 
-      <AsyncButton
-        variant="primary"
-        tw="h-12 text-xl font-bold items-center"
-        disabled={!!disableReason}
-        onClick={async () => {
-          invariant(buy.data);
-          await Beet(buy.data);
-
-          setInput("");
-        }}
-      >
-        {disableReason ?? <p>Deposit</p>}
-      </AsyncButton>
-      <div tw="w-full border-gray-200 border-b my-4" />
+      {close ? (
+        <>
+          <button
+            onClick={() => setClose(false)}
+            tw="items-center flex mt-[-2rem]"
+          >
+            <div tw="text-xs flex gap-1 items-center">
+              <FaChevronLeft />
+              Back
+            </div>
+          </button>
+          <Burn />
+        </>
+      ) : (
+        <Mint />
+      )}
+      <div tw="flex flex-col gap-1 my-4">
+        <div tw="w-full text-secondary items-center grid-cols-2 grid">
+          <p tw="">Position value</p>
+        </div>
+        <div tw="border-b border-gray-200 w-full" />
+        <div tw="w-full grid grid-cols-2 items-center h-12">
+          {positionValue.value ? (
+            <TokenAmountDisplay amount={positionValue.value} showSymbol />
+          ) : (
+            <LoadingSpinner />
+          )}
+          <Button
+            variant="danger"
+            tw="w-fit px-2 justify-self-end text-lg font-semibold"
+            disabled={!positionValue.value || positionValue.value.equalTo(0)}
+            onClick={() => {
+              setClose(true);
+            }}
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+      <div tw="w-full border-gray-200 border-b" />
       <About />
     </div>
   );
