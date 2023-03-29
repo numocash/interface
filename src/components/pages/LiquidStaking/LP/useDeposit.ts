@@ -54,6 +54,8 @@ export const useDeposit = ({
 }) => {
   const environment = useEnvironment();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const base = environment.interface.liquidStaking!.base;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const lendgine = environment.interface.liquidStaking!.lendgine;
   const t = getT();
 
@@ -66,13 +68,13 @@ export const useDeposit = ({
   const native0 = useIsWrappedNative(lendgine.token0);
   const native1 = useIsWrappedNative(lendgine.token1);
 
-  const approve0 = useApprove(token0Input, environment.base.liquidityManager);
-  const approve1 = useApprove(token1Input, environment.base.liquidityManager);
+  const approve0 = useApprove(token0Input, base.liquidityManager);
+  const approve1 = useApprove(token1Input, base.liquidityManager);
   const lendgineInfo = useLendgine(lendgine);
 
   const liquidityManagerContract = getContract({
     abi: liquidityManagerABI,
-    address: environment.base.liquidityManager,
+    address: base.liquidityManager,
   });
 
   const title = `Add ${token0Input?.currency.symbol ?? ""} / ${
@@ -100,7 +102,7 @@ export const useDeposit = ({
         getAllowanceRead(
           lendgine.token0,
           address ?? constants.AddressZero,
-          environment.base.lendgineRouter
+          base.lendgineRouter
         )
       );
     },
@@ -127,7 +129,7 @@ export const useDeposit = ({
         getAllowanceRead(
           lendgine.token1,
           address ?? constants.AddressZero,
-          environment.base.lendgineRouter
+          base.liquidityManager
         )
       );
     },
@@ -251,7 +253,7 @@ export const useDeposit = ({
               const config = await prepareWriteContract({
                 abi: liquidityManagerABI,
                 functionName: "multicall",
-                address: environment.base.liquidityManager,
+                address: base.liquidityManager,
                 args: [
                   [
                     liquidityManagerContract.interface.encodeFunctionData(
@@ -280,7 +282,7 @@ export const useDeposit = ({
                   typeof liquidityManagerABI,
                   "addLiquidity"
                 >["args"],
-                address: environment.base.liquidityManager,
+                address: base.liquidityManager,
               });
               const data = writeContract(config);
               return data;
@@ -301,21 +303,21 @@ export const useDeposit = ({
           getLendginePositionRead(
             lendgine,
             input.address,
-            environment.base.liquidityManager
+            base.liquidityManager
           )
         ),
         invalidate(
           getAllowanceRead(
             input.token0Input.currency,
             input.address,
-            environment.base.liquidityManager
+            base.liquidityManager
           )
         ),
         invalidate(
           getAllowanceRead(
             input.token1Input.currency,
             input.address,
-            environment.base.liquidityManager
+            base.liquidityManager
           )
         ),
         invalidate(getBalanceRead(input.token0Input.currency, input.address)),
@@ -453,8 +455,6 @@ export const useDepositAmounts = ({
       const liquidity = amount.currency.equals(lendgine.token0)
         ? token0Amount.invert().quote(amount)
         : token1Amount.invert().quote(amount);
-
-      console.log(liquidity.toSignificant(5));
 
       const token0Input = token0Amount.quote(liquidity);
       const token1Input = token1Amount.quote(liquidity);

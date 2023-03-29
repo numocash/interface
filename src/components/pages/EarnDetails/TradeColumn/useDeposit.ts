@@ -99,7 +99,7 @@ export const useDeposit = ({
         getAllowanceRead(
           lendgine.token0,
           address ?? constants.AddressZero,
-          environment.base.lendgineRouter
+          environment.base.liquidityManager
         )
       );
     },
@@ -126,7 +126,7 @@ export const useDeposit = ({
         getAllowanceRead(
           lendgine.token1,
           address ?? constants.AddressZero,
-          environment.base.lendgineRouter
+          environment.base.liquidityManager
         )
       );
     },
@@ -443,8 +443,6 @@ export const useDepositAmounts = ({
       const liquidity = amount.currency.equals(lendgine.token0)
         ? token0Amount.invert().quote(amount)
         : token1Amount.invert().quote(amount);
-
-      console.log(liquidity.toSignificant(5));
 
       const token0Input = token0Amount.quote(liquidity);
       const token1Input = token1Amount.quote(liquidity);

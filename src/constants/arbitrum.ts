@@ -62,7 +62,7 @@ export const arbitrumConfig = {
         token0Exp: WrappedNative[chainID.arbitrum].decimals,
         token1: wstETH,
         token1Exp: wstETH.decimals,
-        bound: new Price(wstETH, WrappedNative[chainID.arbitrum], 1, 2),
+        bound: new Price(wstETH, WrappedNative[chainID.arbitrum], 10, 16),
         address: "0x327319fdce6fac0eb1751dc2234cBdA7F5B43E2A",
         lendgine: new Token(
           42161,

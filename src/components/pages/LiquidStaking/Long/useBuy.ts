@@ -53,6 +53,8 @@ export const useBuy = ({
   const settings = useSettings();
   // matic = base
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const base = environment.interface.liquidStaking!.base;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const lendgine = environment.interface.liquidStaking!.lendgine;
   const { address } = useAccount();
 
@@ -67,13 +69,13 @@ export const useBuy = ({
   ] as const);
 
   const isLong = true;
-  const approve = useApprove(amountIn, environment.base.lendgineRouter);
+  const approve = useApprove(amountIn, base.lendgineRouter);
 
   const native = false;
 
   const lendgineRouterContract = getContract({
     abi: lendgineRouterABI,
-    address: environment.base.lendgineRouter,
+    address: base.lendgineRouter,
   });
 
   const title = useMemo(
@@ -102,7 +104,7 @@ export const useBuy = ({
         getAllowanceRead(
           lendgine.token1,
           address ?? constants.AddressZero,
-          environment.base.lendgineRouter
+          base.lendgineRouter
         )
       );
     },
@@ -164,7 +166,7 @@ export const useBuy = ({
             const config = await prepareWriteContract({
               abi: lendgineRouterABI,
               functionName: "multicall",
-              address: environment.base.lendgineRouter,
+              address: base.lendgineRouter,
               args: [
                 [
                   lendgineRouterContract.interface.encodeFunctionData(
@@ -186,7 +188,7 @@ export const useBuy = ({
             const config = await prepareWriteContract({
               abi: lendgineRouterABI,
               functionName: "mint",
-              address: environment.base.lendgineRouter,
+              address: base.lendgineRouter,
               args,
             });
             return await writeContract(config);
@@ -207,7 +209,7 @@ export const useBuy = ({
           getAllowanceRead(
             input.amountIn.currency,
             input.address,
-            environment.base.lendgineRouter
+            base.lendgineRouter
           )
         ),
         invalidate(getBalanceRead(input.amountIn.currency, input.address)),
