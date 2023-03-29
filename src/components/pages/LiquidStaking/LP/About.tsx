@@ -35,19 +35,19 @@ export const About: React.FC = () => {
       {tab === "details" && (
         <div tw="flex flex-col gap-2">
           <div tw="flex justify-between  items-center ">
-            <p tw="text-sm text-secondary">Staking APR</p>
+            <p tw="text-sm text-secondary">Expected returns</p>
             <p tw=" ">5.00%</p>
           </div>
           <div tw="flex justify-between  items-center ">
-            <p tw="text-sm text-secondary">Max boost w/o funding</p>
-            <p tw=" ">10.25%</p>
+            <p tw="text-sm text-secondary">Lending returns</p>
+            <p tw=" ">1.00%</p>
           </div>
           <div tw="flex justify-between  items-center ">
-            <p tw="text-sm text-secondary">Funding APR</p>
+            <p tw="text-sm text-secondary">Impermanent loss</p>
             <p tw=" ">3.00%</p>
           </div>
           <div tw="flex justify-between  items-center ">
-            <p tw="text-sm text-secondary">Total boosted APR</p>
+            <p tw="text-sm text-secondary">Total APR</p>
             <p tw=" ">7.25%</p>
           </div>
           <div tw="flex justify-between  items-center ">

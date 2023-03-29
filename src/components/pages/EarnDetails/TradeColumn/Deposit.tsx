@@ -2,8 +2,6 @@ import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { useEnvironment } from "../../../../contexts/useEnvironment";
-import { useApprove } from "../../../../hooks/useApprove";
 import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
@@ -17,7 +15,6 @@ import { useDeposit, useDepositAmounts } from "./useDeposit";
 
 export const Deposit: React.FC = () => {
   const { address } = useAccount();
-  const environment = useEnvironment();
   const { selectedLendgine, base, quote } = useEarnDetails();
   const isLong = isLongLendgine(selectedLendgine, base);
   const baseBalance = useBalance(base, address);
@@ -60,15 +57,6 @@ export const Deposit: React.FC = () => {
     [lendgineInfo.data, lendgineInfo.isLoading]
   );
 
-  const approveBase = useApprove(
-    baseInputAmount,
-    environment.base.liquidityManager
-  );
-  const approveQuote = useApprove(
-    quoteInputAmount,
-    environment.base.liquidityManager
-  );
-
   const disableReason = useMemo(
     () =>
       lendgineInfo.isLoading
@@ -79,10 +67,6 @@ export const Deposit: React.FC = () => {
         ? "Enter an amount"
         : baseBalance.isLoading ||
           quoteBalance.isLoading ||
-          !approveBase.allowanceQuery ||
-          approveBase.allowanceQuery.isLoading ||
-          !approveQuote.allowanceQuery ||
-          approveQuote.allowanceQuery.isLoading ||
           deposit.status !== "success"
         ? "Loading"
         : (baseBalance.data && baseInputAmount.greaterThan(baseBalance.data)) ||
@@ -90,8 +74,6 @@ export const Deposit: React.FC = () => {
         ? "Insufficient amount"
         : null,
     [
-      approveBase.allowanceQuery,
-      approveQuote.allowanceQuery,
       baseBalance.data,
       baseBalance.isLoading,
       baseInputAmount,
