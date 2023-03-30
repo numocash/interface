@@ -44,7 +44,6 @@ export const Deposit: React.FC = () => {
 
   const onInput = useCallback(
     (value: string, field: "token0" | "token1") => {
-      if (lendgineInfo.isLoading) return;
       if (!lendgineInfo.data) {
         field === "token0" ? setToken0Input(value) : setToken1Input(value);
         return;
@@ -53,7 +52,7 @@ export const Deposit: React.FC = () => {
       field === "token0" ? setToken0Input(value) : setToken1Input(value);
       field === "token0" ? setToken1Input("") : setToken0Input("");
     },
-    [lendgineInfo.data, lendgineInfo.isLoading]
+    [lendgineInfo.data]
   );
 
   const disableReason = useMemo(
@@ -94,7 +93,7 @@ export const Deposit: React.FC = () => {
           selectedValue={lendgine.token0}
           inputValue={
             token0Input === ""
-              ? token1Amount?.toSignificant(5) ?? ""
+              ? token0Amount?.toSignificant(5) ?? ""
               : token0Input
           }
           inputOnChange={(value) => {
