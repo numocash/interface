@@ -76,8 +76,9 @@ export const About: React.FC = () => {
       {tab === "strategy" && (
         <div tw="flex flex-col gap-2">
           <p tw="text-secondary">
-            This represents a tokenized leveraged long stMATIC position. Holders
-            earn because of the inherently increasing nature of staking.
+            This strategy provides liquidity to an automated market maker and
+            profits by lending the position out to longs. Because it holds a
+            basket of assets, it is less exposed to depeg risks.
           </p>
         </div>
       )}

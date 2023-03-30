@@ -71,6 +71,8 @@ export const About: React.FC = () => {
           <p tw="text-secondary">
             This represents a tokenized leveraged long stMATIC position. Holders
             earn because of the inherently increasing nature of staking.
+            However, in the event of a depeg, this strategy is 2x more exposed
+            than the liquid staking asset but still cannot be liquidated.
           </p>
         </div>
       )}
