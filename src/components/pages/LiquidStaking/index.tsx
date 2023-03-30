@@ -17,7 +17,7 @@ export const LiquidStaking: React.FC = () => {
         </div>
       </div>
       <Stats />
-      <div tw="grid gap-4 grid-cols-2 w-full mt-12">
+      <div tw="grid gap-10 sm:gap-4 sm:grid-cols-2 w-full mt-12">
         <Long />
         <LP />
       </div>

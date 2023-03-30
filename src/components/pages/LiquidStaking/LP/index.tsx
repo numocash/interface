@@ -79,12 +79,12 @@ export const LP: React.FC = () => {
       )}
 
       <div tw="flex flex-col">
-        <div tw="w-full text-secondary items-center grid-cols-2 sm:grid-cols-3 grid">
+        <div tw="w-full text-secondary items-center grid-cols-2 md:grid-cols-3 grid">
           <p tw=" justify-self-start">Value</p>
-          <p tw="justify-self-start hidden sm:flex">Interest</p>
+          <p tw="justify-self-start hidden md:flex">Interest</p>
         </div>
         <div tw="border-b border-gray-200 w-full" />
-        <div tw="w-full grid grid-cols-2 sm:grid-cols-3 items-center py-3">
+        <div tw="w-full grid grid-cols-2 md:grid-cols-3 items-center py-3">
           {positionValue.value ? (
             <TokenAmountDisplay
               amount={positionValue.value}
@@ -92,17 +92,17 @@ export const LP: React.FC = () => {
               tw=" w-full "
             />
           ) : (
-            <div tw="w-14 sm:w-20 h-6 rounded-lg bg-gray-100 " />
+            <div tw="w-14 md:w-20 h-6 rounded-lg bg-gray-100 " />
           )}
           {updatedPosition?.tokensOwed ? (
             <TokenAmountDisplay
-              tw=" w-full hidden sm:flex"
+              tw=" w-full hidden md:flex"
               amount={updatedPosition.tokensOwed}
               showIcon
               showSymbol
             />
           ) : (
-            <div tw="w-14 sm:w-20 h-6 rounded-lg  bg-gray-100 " />
+            <div tw="w-14 md:w-20 h-6 rounded-lg  bg-gray-100 " />
           )}
           <div tw="grid grid-cols-2 gap-2  w-full justify-self-end">
             <AsyncButton
