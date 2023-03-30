@@ -12,7 +12,6 @@ import {
 import { useLendgine } from "../../../hooks/useLendgine";
 import { ONE_HUNDRED_PERCENT } from "../../../lib/constants";
 import {
-  accruedLendgineInfo,
   getT,
   liquidityPerCollateral,
   liquidityPerPosition,
@@ -20,6 +19,7 @@ import {
 } from "../../../lib/lendgineMath";
 import { pricePerLiquidity } from "../../../lib/price";
 import type { Lendgine, LendginePosition } from "../../../lib/types/lendgine";
+import { accruedLendgineInfo } from "./LP/math";
 
 export const useLongValue = (position: HookArg<CurrencyAmount<Token>>) => {
   const environment = useEnvironment();
@@ -107,10 +107,7 @@ export const useLPValue = (
   const t = getT();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const staking = environment.interface.liquidStaking!;
-  const mostLiquidQuery = useMostLiquidMarket([
-    staking.lendgine.token0,
-    staking.lendgine.token1,
-  ] as const);
+
   const currentPriceQuery = useCurrentPrice([
     staking.lendgine.token0,
     staking.lendgine.token1,
@@ -119,12 +116,7 @@ export const useLPValue = (
   const lendgineInfoQuery = useLendgine(staking.lendgine);
 
   return useMemo(() => {
-    if (
-      !position ||
-      !lendgineInfoQuery.data ||
-      !mostLiquidQuery.data ||
-      !currentPriceQuery.data
-    )
+    if (!position || !lendgineInfoQuery.data || !currentPriceQuery.data)
       return {};
 
     const updatedLendgineInfo = accruedLendgineInfo(
@@ -167,7 +159,6 @@ export const useLPValue = (
   }, [
     currentPriceQuery.data,
     lendgineInfoQuery.data,
-    mostLiquidQuery.data,
     position,
     staking.lendgine,
     t,

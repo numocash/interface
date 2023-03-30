@@ -1,90 +1,58 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { FaChevronLeft } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../../contexts/useEnvironment";
-import { useBalance } from "../../../../hooks/useBalance";
-import { useCurrentPrice } from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
+import { useLendginePosition } from "../../../../hooks/useLendginePosition";
+import { getT } from "../../../../lib/lendgineMath";
 import { Beet } from "../../../../utils/beet";
-import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
-import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
-import { CenterSwitch } from "../../../common/CenterSwitch";
+import { Button } from "../../../common/Button";
+import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
+import { useLPValue } from "../useValue";
 import { About } from "./About";
-import { useDeposit, useDepositAmounts } from "./useDeposit";
+import { Deposit } from "./Deposit";
+import { accruedLendgineInfo, accruedLendginePositionInfo } from "./math";
+import { useCollect } from "./useCollect";
+import { Withdraw } from "./Withdraw";
 
 export const LP: React.FC = () => {
   const { address } = useAccount();
   const environment = useEnvironment();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const lendgine = environment.interface.liquidStaking!.lendgine;
-  const token0Balance = useBalance(lendgine.token0, address);
-  const token1Balance = useBalance(lendgine.token1, address);
-  const lendgineInfo = useLendgine(lendgine);
-  const [token0Input, setToken0Input] = useState("");
-  const [token1Input, setToken1Input] = useState("");
-  const priceQuery = useCurrentPrice([
-    lendgine.token0,
-    lendgine.token1,
-  ] as const);
+  const t = getT();
 
-  const { token0Input: token0Amount, token1Input: token1Amount } =
-    useDepositAmounts({
-      amount:
-        tryParseCurrencyAmount(token0Input, lendgine.token0) ??
-        tryParseCurrencyAmount(token1Input, lendgine.token1),
-      price: priceQuery.data,
-    });
+  const [close, setClose] = useState(false);
 
-  const deposit = useDeposit({
-    token0Input: token0Amount,
-    token1Input: token1Amount,
-    price: priceQuery.data,
+  const lendgineInfoQuery = useLendgine(lendgine);
+  const userPositionQuery = useLendginePosition(
+    lendgine,
+    address,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    environment.interface.liquidStaking!.base.liquidityManager
+  );
+  const positionValue = useLPValue(userPositionQuery.data);
+
+  const collect = useCollect({
+    lendgineInfo: lendgineInfoQuery.data,
+    position: userPositionQuery.data,
   });
 
-  const onInput = useCallback(
-    (value: string, field: "token0" | "token1") => {
-      if (lendgineInfo.isLoading) return;
-      if (!lendgineInfo.data) {
-        field === "token0" ? setToken0Input(value) : setToken1Input(value);
-        return;
-      }
-
-      field === "token0" ? setToken0Input(value) : setToken1Input(value);
-      field === "token0" ? setToken1Input("") : setToken0Input("");
-    },
-    [lendgineInfo.data, lendgineInfo.isLoading]
-  );
-
-  const disableReason = useMemo(
-    () =>
-      lendgineInfo.isLoading
-        ? "Loading"
-        : // : lendgineInfo.data?.totalLiquidity.equalTo(0)
-        // ? "No liquidity in pair"
-        !token0Amount || !token1Amount
-        ? "Enter an amount"
-        : token0Balance.isLoading ||
-          token1Balance.isLoading ||
-          deposit.status !== "success"
-        ? "Loading"
-        : (token0Balance.data &&
-            token0Amount.greaterThan(token0Balance.data)) ||
-          (token1Balance.data && token1Amount.greaterThan(token1Balance.data))
-        ? "Insufficient amount"
-        : null,
-    [
-      lendgineInfo.isLoading,
-      token0Amount,
-      token1Amount,
-      token0Balance.isLoading,
-      token0Balance.data,
-      token1Balance.isLoading,
-      token1Balance.data,
-      deposit.status,
-    ]
-  );
+  const updatedPosition = useMemo(() => {
+    if (!userPositionQuery.data || !lendgineInfoQuery.data) return undefined;
+    const updatedLendgineInfo = accruedLendgineInfo(
+      lendgine,
+      lendgineInfoQuery.data,
+      t
+    );
+    return accruedLendginePositionInfo(
+      updatedLendgineInfo,
+      userPositionQuery.data
+    );
+  }, [lendgine, lendgineInfoQuery.data, t, userPositionQuery.data]);
 
   return (
     <div tw="w-full max-w-5xl rounded bg-white  border border-[#dfdfdf] p-4 shadow flex flex-col gap-4 h-fit">
@@ -93,59 +61,75 @@ export const LP: React.FC = () => {
           Provide Liquidity
         </div>
       </div>
-      <div tw="flex flex-col rounded-lg border border-gray-200">
-        <AssetSelection
-          tw="pb-2"
-          label={<span>Input</span>}
-          selectedValue={lendgine.token0}
-          inputValue={
-            token0Input === ""
-              ? token1Amount?.toSignificant(5) ?? ""
-              : token0Input
-          }
-          inputOnChange={(value) => {
-            onInput(value, "token0");
-          }}
-          currentAmount={{
-            amount: token0Balance.data,
-            allowSelect: true,
-          }}
-        />
-        <div tw=" border-b w-full border-gray-200" />
-        <CenterSwitch icon="plus" />
-        <AssetSelection
-          label={<span>Input</span>}
-          tw="pt-4"
-          selectedValue={lendgine.token1}
-          inputValue={
-            token1Input === ""
-              ? token1Amount?.toSignificant(5) ?? ""
-              : token1Input
-          }
-          inputOnChange={(value) => {
-            onInput(value, "token1");
-          }}
-          currentAmount={{
-            amount: token1Balance.data,
-            allowSelect: true,
-          }}
-        />
+      {close ? (
+        <>
+          <button
+            onClick={() => setClose(false)}
+            tw="items-center flex mt-[-2rem]"
+          >
+            <div tw="text-xs flex gap-1 items-center">
+              <FaChevronLeft />
+              Back
+            </div>
+          </button>
+          <Withdraw />
+        </>
+      ) : (
+        <Deposit />
+      )}
+
+      <div tw="flex flex-col">
+        <div tw="w-full text-secondary items-center grid-cols-2 sm:grid-cols-3 grid">
+          <p tw=" justify-self-start">Value</p>
+          <p tw="justify-self-start hidden sm:flex">Interest</p>
+        </div>
+        <div tw="border-b border-gray-200 w-full" />
+        <div tw="w-full grid grid-cols-2 sm:grid-cols-3 items-center py-3">
+          {positionValue.value ? (
+            <TokenAmountDisplay
+              amount={positionValue.value}
+              showSymbol
+              tw=" w-full "
+            />
+          ) : (
+            <div tw="w-14 sm:w-20 h-6 rounded-lg bg-gray-100 " />
+          )}
+          {updatedPosition?.tokensOwed ? (
+            <TokenAmountDisplay
+              tw=" w-full hidden sm:flex"
+              amount={updatedPosition.tokensOwed}
+              showIcon
+              showSymbol
+            />
+          ) : (
+            <div tw="w-14 sm:w-20 h-6 rounded-lg  bg-gray-100 " />
+          )}
+          <div tw="grid grid-cols-2 gap-2  w-full justify-self-end">
+            <AsyncButton
+              variant="primary"
+              tw="sm:(text-lg font-semibold) py-0.5"
+              disabled={
+                !updatedPosition || updatedPosition.tokensOwed.equalTo(0)
+              }
+              onClick={async () => {
+                invariant(collect.data);
+                await Beet(collect.data);
+              }}
+            >
+              Collect
+            </AsyncButton>
+            <Button
+              variant="danger"
+              tw="sm:(text-lg font-semibold) py-0.5"
+              onClick={() => {
+                setClose(true);
+              }}
+            >
+              Close
+            </Button>
+          </div>
+        </div>
       </div>
-
-      <AsyncButton
-        variant="primary"
-        disabled={!!disableReason}
-        tw=" h-12 text-lg"
-        onClick={async () => {
-          invariant(deposit.data);
-          await Beet(deposit.data);
-
-          onInput("", "token0");
-          onInput("", "token1");
-        }}
-      >
-        {disableReason ?? "Add liquidity"}
-      </AsyncButton>
       <div tw="w-full border-gray-200 border-b my-4" />
       <About />
     </div>

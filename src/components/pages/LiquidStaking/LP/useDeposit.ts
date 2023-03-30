@@ -29,11 +29,7 @@ import { useLendgine } from "../../../../hooks/useLendgine";
 import { getLendginePositionRead } from "../../../../hooks/useLendginePosition";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
-import {
-  accruedLendgineInfo,
-  getT,
-  liquidityPerPosition,
-} from "../../../../lib/lendgineMath";
+import { getT, liquidityPerPosition } from "../../../../lib/lendgineMath";
 import {
   invert,
   priceToFraction,
@@ -42,6 +38,7 @@ import {
 import type { Lendgine, LendgineInfo } from "../../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
 import type { BeetStage, BeetTx, TxToast } from "../../../../utils/beet";
+import { accruedLendgineInfo } from "./math";
 
 export const useDeposit = ({
   token0Input,

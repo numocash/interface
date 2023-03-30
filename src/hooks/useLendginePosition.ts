@@ -3,6 +3,7 @@ import type { Address } from "wagmi";
 
 import { liquidityManagerABI } from "../abis/liquidityManager";
 import { useEnvironment } from "../contexts/useEnvironment";
+import { scale } from "../lib/constants";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
 import type { HookArg, ReadConfig } from "./internal/types";
@@ -11,7 +12,8 @@ import { userRefectchInterval } from "./internal/utils";
 
 export const useLendginePosition = <L extends Lendgine>(
   lendgine: HookArg<L>,
-  address: HookArg<Address>
+  address: HookArg<Address>,
+  liquidityManager?: Address
 ) => {
   const environment = useEnvironment();
 
@@ -20,7 +22,7 @@ export const useLendginePosition = <L extends Lendgine>(
       ? getLendginePositionRead(
           lendgine,
           address,
-          environment.base.liquidityManager
+          liquidityManager ?? environment.base.liquidityManager
         )
       : {
           address: undefined,
@@ -41,7 +43,7 @@ export const useLendginePosition = <L extends Lendgine>(
           data.size.toString()
         ),
         rewardPerPositionPaid: fractionToPrice(
-          new Fraction(data.rewardPerPositionPaid.toString()),
+          new Fraction(data.rewardPerPositionPaid.toString(), scale),
           lendgine.lendgine,
           lendgine.token1
         ),
