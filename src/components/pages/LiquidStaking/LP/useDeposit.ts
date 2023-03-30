@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import type { CurrencyAmount } from "@uniswap/sdk-core";
+import type { CurrencyAmount, Price } from "@uniswap/sdk-core";
 import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
@@ -29,12 +29,7 @@ import { useLendgine } from "../../../../hooks/useLendgine";
 import { getLendginePositionRead } from "../../../../hooks/useLendginePosition";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
-import {
-  accruedLendgineInfo,
-  getT,
-  liquidityPerPosition,
-} from "../../../../lib/lendgineMath";
-import { isLongLendgine } from "../../../../lib/lendgines";
+import { getT, liquidityPerPosition } from "../../../../lib/lendgineMath";
 import {
   invert,
   priceToFraction,
@@ -43,19 +38,24 @@ import {
 import type { Lendgine, LendgineInfo } from "../../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
 import type { BeetStage, BeetTx, TxToast } from "../../../../utils/beet";
-import { useEarnDetails } from "../EarnDetailsInner";
+import { accruedLendgineInfo } from "./math";
 
 export const useDeposit = ({
   token0Input,
   token1Input,
+  price,
 }: {
   token0Input: HookArg<CurrencyAmount<WrappedTokenInfo>>;
   token1Input: HookArg<CurrencyAmount<WrappedTokenInfo>>;
+  price: HookArg<Price<WrappedTokenInfo, WrappedTokenInfo>>;
 }) => {
-  const { price, selectedLendgine: lendgine, base } = useEarnDetails();
+  const environment = useEnvironment();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const base = environment.interface.liquidStaking!.base;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const lendgine = environment.interface.liquidStaking!.lendgine;
   const t = getT();
 
-  const environment = useEnvironment();
   const settings = useSettings();
   const { address } = useAccount();
 
@@ -65,13 +65,13 @@ export const useDeposit = ({
   const native0 = useIsWrappedNative(lendgine.token0);
   const native1 = useIsWrappedNative(lendgine.token1);
 
-  const approve0 = useApprove(token0Input, environment.base.liquidityManager);
-  const approve1 = useApprove(token1Input, environment.base.liquidityManager);
+  const approve0 = useApprove(token0Input, base.liquidityManager);
+  const approve1 = useApprove(token1Input, base.liquidityManager);
   const lendgineInfo = useLendgine(lendgine);
 
   const liquidityManagerContract = getContract({
     abi: liquidityManagerABI,
-    address: environment.base.liquidityManager,
+    address: base.liquidityManager,
   });
 
   const title = `Add ${token0Input?.currency.symbol ?? ""} / ${
@@ -99,7 +99,7 @@ export const useDeposit = ({
         getAllowanceRead(
           lendgine.token0,
           address ?? constants.AddressZero,
-          environment.base.liquidityManager
+          base.lendgineRouter
         )
       );
     },
@@ -126,7 +126,7 @@ export const useDeposit = ({
         getAllowanceRead(
           lendgine.token1,
           address ?? constants.AddressZero,
-          environment.base.liquidityManager
+          base.liquidityManager
         )
       );
     },
@@ -139,11 +139,13 @@ export const useDeposit = ({
       lendgineInfo,
       address,
       toast,
+      price,
     }: {
       token0Input: CurrencyAmount<WrappedTokenInfo>;
       token1Input: CurrencyAmount<WrappedTokenInfo>;
       address: Address;
       lendgineInfo: LendgineInfo<Lendgine>;
+      price: Price<WrappedTokenInfo, WrappedTokenInfo>;
     } & { toast: TxToast }) => {
       let args:
         | PrepareWriteContractConfig<
@@ -152,7 +154,7 @@ export const useDeposit = ({
           >["args"]
         | undefined = undefined;
       if (lendgineInfo.totalLiquidity.equalTo(0)) {
-        const isLong = isLongLendgine(lendgine, base);
+        const isLong = true;
 
         const { token0Amount } = priceToReserves(
           lendgine,
@@ -248,7 +250,7 @@ export const useDeposit = ({
               const config = await prepareWriteContract({
                 abi: liquidityManagerABI,
                 functionName: "multicall",
-                address: environment.base.liquidityManager,
+                address: base.liquidityManager,
                 args: [
                   [
                     liquidityManagerContract.interface.encodeFunctionData(
@@ -277,7 +279,7 @@ export const useDeposit = ({
                   typeof liquidityManagerABI,
                   "addLiquidity"
                 >["args"],
-                address: environment.base.liquidityManager,
+                address: base.liquidityManager,
               });
               const data = writeContract(config);
               return data;
@@ -298,21 +300,21 @@ export const useDeposit = ({
           getLendginePositionRead(
             lendgine,
             input.address,
-            environment.base.liquidityManager
+            base.liquidityManager
           )
         ),
         invalidate(
           getAllowanceRead(
             input.token0Input.currency,
             input.address,
-            environment.base.liquidityManager
+            base.liquidityManager
           )
         ),
         invalidate(
           getAllowanceRead(
             input.token1Input.currency,
             input.address,
-            environment.base.liquidityManager
+            base.liquidityManager
           )
         ),
         invalidate(getBalanceRead(input.token0Input.currency, input.address)),
@@ -328,6 +330,7 @@ export const useDeposit = ({
       !token0Input ||
       !token1Input ||
       !lendgineInfo.data ||
+      !price ||
       !address ||
       approve0.status === "error" ||
       approve1.status === "error"
@@ -383,6 +386,7 @@ export const useDeposit = ({
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     lendgineInfo: lendgineInfo.data!,
                     toast,
+                    price,
                   }),
               },
             ],
@@ -404,6 +408,7 @@ export const useDeposit = ({
     lendgineInfo.data,
     native0,
     native1,
+    price,
     title,
     token0Input,
     token1Input,
@@ -412,17 +417,21 @@ export const useDeposit = ({
 
 export const useDepositAmounts = ({
   amount,
+  price,
 }: {
   amount: HookArg<CurrencyAmount<WrappedTokenInfo>>;
+  price: HookArg<Price<WrappedTokenInfo, WrappedTokenInfo>>;
 }) => {
-  const { price, selectedLendgine: lendgine, base } = useEarnDetails();
+  const environment = useEnvironment();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const lendgine = environment.interface.liquidStaking!.lendgine;
 
   const lendgineInfo = useLendgine(lendgine);
   const t = getT();
 
   return useMemo(() => {
     if (!amount) return {};
-    if (!lendgineInfo.data)
+    if (!lendgineInfo.data || !price)
       return {
         token0Input: amount.currency.equals(lendgine.token0)
           ? amount
@@ -432,7 +441,7 @@ export const useDepositAmounts = ({
           : undefined,
       };
 
-    const isLong = isLongLendgine(lendgine, base);
+    const isLong = true;
 
     if (lendgineInfo.data.totalLiquidity.equalTo(0)) {
       const { token0Amount, token1Amount } = priceToReserves(
@@ -462,5 +471,5 @@ export const useDepositAmounts = ({
       token0Input: updatedInfo.reserve0.multiply(share),
       token1Input: updatedInfo.reserve1.multiply(share),
     };
-  }, [amount, base, lendgine, lendgineInfo.data, price, t]);
+  }, [amount, lendgine, lendgineInfo.data, price, t]);
 };

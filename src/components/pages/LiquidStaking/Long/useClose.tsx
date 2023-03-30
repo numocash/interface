@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Token } from "@uniswap/sdk-core";
-import { CurrencyAmount } from "@uniswap/sdk-core";
+import type { CurrencyAmount } from "@uniswap/sdk-core";
 import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
 import type { Address } from "wagmi";
@@ -21,61 +20,55 @@ import { useInvalidateCall } from "../../../../hooks/internal/useInvalidateCall"
 import { getAllowanceRead } from "../../../../hooks/useAllowance";
 import { useApprove } from "../../../../hooks/useApprove";
 import { useAwaitTX } from "../../../../hooks/useAwaitTX";
-import { getBalanceRead } from "../../../../hooks/useBalance";
+import { getBalanceRead, useBalance } from "../../../../hooks/useBalance";
 import {
   isV3,
+  useCurrentPrice,
   useMostLiquidMarket,
 } from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
-import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
-import { borrowRate } from "../../../../lib/jumprate";
 import {
   accruedLendgineInfo,
   getT,
-  liquidityPerCollateral,
   liquidityPerShare,
 } from "../../../../lib/lendgineMath";
-import { isLongLendgine } from "../../../../lib/lendgines";
-import { priceToFraction } from "../../../../lib/price";
-import { determineBorrowAmount } from "../../../../lib/trade";
+import { invert, priceToFraction } from "../../../../lib/price";
+import type { Lendgine } from "../../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
 import type { UniswapV2Pool } from "../../../../services/graphql/uniswapV2";
 import type { UniswapV3Pool } from "../../../../services/graphql/uniswapV3";
 import type { BeetStage, TxToast } from "../../../../utils/beet";
-import { useTradeDetails } from "../TradeDetailsInner";
+import { useLongValue } from "../useValue";
 
-export const useBuy = ({
-  amountIn,
+export const useClose = ({
+  amountOut,
 }: {
-  amountIn: HookArg<CurrencyAmount<WrappedTokenInfo>>;
+  amountOut: HookArg<CurrencyAmount<WrappedTokenInfo>>;
 }) => {
   const environment = useEnvironment();
   const settings = useSettings();
-  const { selectedLendgine, base, quote } = useTradeDetails();
+  // matic = base
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const base = environment.interface.liquidStaking!.base;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const lendgine = environment.interface.liquidStaking!.lendgine;
+
   const { address } = useAccount();
 
+  const awaitTX = useAwaitTX();
   const invalidate = useInvalidateCall();
   const queryClient = useQueryClient();
-  const awaitTX = useAwaitTX();
 
-  const { borrowAmount, shares } = useBuyAmounts({ amountIn });
-  const mostLiquid = useMostLiquidMarket([base, quote] as const);
+  const mostLiquid = useMostLiquidMarket([
+    lendgine.token0,
+    lendgine.token1,
+  ] as const);
+  const { shares, amount0, amount1 } = useCloseAmounts({ amountOut });
 
-  const isLong = isLongLendgine(selectedLendgine, base);
-  const approve = useApprove(amountIn, environment.base.lendgineRouter);
+  const native = false;
 
-  const native = useIsWrappedNative(selectedLendgine.token1);
-
-  const lendgineRouterContract = getContract({
-    abi: lendgineRouterABI,
-    address: environment.base.lendgineRouter,
-  });
-
-  const title = useMemo(
-    () => `Buy ${quote.symbol}${isLong ? "+" : "-"}`,
-    [isLong, quote.symbol]
-  );
+  const approve = useApprove(shares, base.lendgineRouter);
 
   const approveMutation = useMutation({
     mutationFn: async ({
@@ -96,44 +89,64 @@ export const useBuy = ({
       toaster.txSuccess({ ...input.toast, receipt: data });
       await invalidate(
         getAllowanceRead(
-          selectedLendgine.token1,
+          lendgine.lendgine,
           address ?? constants.AddressZero,
-          environment.base.lendgineRouter
+          base.lendgineRouter
         )
       );
     },
   });
 
-  const mintMutation = useMutation({
+  const lendgineRouterContract = getContract({
+    abi: lendgineRouterABI,
+    address: base.lendgineRouter,
+  });
+
+  const title = `Sell ${lendgine.token1.symbol}+`;
+
+  const burnMutation = useMutation({
     mutationFn: async ({
-      borrowAmount,
       shares,
-      address,
-      amountIn,
+      amount0,
+      amount1,
+      amountOut,
       mostLiquidPool,
+      address,
       toast,
     }: {
-      borrowAmount: CurrencyAmount<WrappedTokenInfo>;
-      shares: CurrencyAmount<Token>;
-      address: Address;
-      amountIn: CurrencyAmount<WrappedTokenInfo>;
+      shares: CurrencyAmount<Lendgine["lendgine"]>;
+      amount0: CurrencyAmount<WrappedTokenInfo>;
+      amount1: CurrencyAmount<WrappedTokenInfo>;
+      amountOut: CurrencyAmount<WrappedTokenInfo>;
       mostLiquidPool: UniswapV2Pool | UniswapV3Pool;
+      address: Address;
     } & { toast: TxToast }) => {
       const args = [
         {
-          token0: utils.getAddress(selectedLendgine.token0.address),
-          token1: utils.getAddress(selectedLendgine.token1.address),
-          token0Exp: BigNumber.from(selectedLendgine.token0.decimals),
-          token1Exp: BigNumber.from(selectedLendgine.token1.decimals),
+          token0: utils.getAddress(lendgine.token0.address),
+          token1: utils.getAddress(lendgine.token1.address),
+          token0Exp: BigNumber.from(lendgine.token0.decimals),
+          token1Exp: BigNumber.from(lendgine.token1.decimals),
           upperBound: BigNumber.from(
-            priceToFraction(selectedLendgine.bound)
-              .multiply(scale)
+            priceToFraction(lendgine.bound).multiply(scale).quotient.toString()
+          ),
+          shares: BigNumber.from(shares.quotient.toString()),
+          collateralMin: BigNumber.from(
+            amountOut
+              .multiply(
+                ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+              )
               .quotient.toString()
           ),
-          amountIn: BigNumber.from(amountIn.quotient.toString()),
-          amountBorrow: BigNumber.from(borrowAmount.quotient.toString()),
-          sharesMin: BigNumber.from(
-            shares
+          amount0Min: BigNumber.from(
+            amount0
+              .multiply(
+                ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
+              )
+              .quotient.toString()
+          ),
+          amount1Min: BigNumber.from(
+            amount1
               .multiply(
                 ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
               )
@@ -145,16 +158,25 @@ export const useBuy = ({
                 ["tuple(uint24 fee)"],
                 [
                   {
-                    fee: +mostLiquidPool.feeTier,
+                    fee: mostLiquidPool.feeTier,
                   },
                 ]
               ) as Address)
             : constants.AddressZero,
-          recipient: address,
+          recipient: native ? constants.AddressZero : address,
           deadline: BigNumber.from(
             Math.round(Date.now() / 1000) + settings.timeout * 60
           ),
         },
+      ] as const;
+
+      const unwrapArgs = [
+        BigNumber.from(
+          amountOut
+            .multiply(ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent))
+            .quotient.toString()
+        ),
+        address,
       ] as const;
 
       const tx = native
@@ -162,39 +184,41 @@ export const useBuy = ({
             const config = await prepareWriteContract({
               abi: lendgineRouterABI,
               functionName: "multicall",
-              address: environment.base.lendgineRouter,
+              address: base.lendgineRouter,
               args: [
                 [
                   lendgineRouterContract.interface.encodeFunctionData(
-                    "mint",
+                    "burn",
                     args
                   ),
                   lendgineRouterContract.interface.encodeFunctionData(
-                    "refundETH"
+                    "unwrapWETH",
+                    unwrapArgs
                   ),
                 ] as `0x${string}`[],
               ],
-              overrides: {
-                value: args[0].amountIn,
-              },
             });
-            return await writeContract(config);
+
+            const data = await writeContract(config);
+            return data;
           }
         : async () => {
             const config = await prepareWriteContract({
               abi: lendgineRouterABI,
-              functionName: "mint",
-              address: environment.base.lendgineRouter,
+              functionName: "burn",
+              address: base.lendgineRouter,
               args,
             });
-            return await writeContract(config);
+
+            const data = await writeContract(config);
+            return data;
           };
 
       const transaction = await tx();
 
       toaster.txPending({ ...toast, hash: transaction.hash });
 
-      return await awaitTX(transaction);
+      return awaitTX(transaction);
     },
     onMutate: ({ toast }) => toaster.txSending(toast),
     onError: (_, { toast }) => toaster.txError(toast),
@@ -203,12 +227,12 @@ export const useBuy = ({
       await Promise.all([
         invalidate(
           getAllowanceRead(
-            input.amountIn.currency,
+            input.shares.currency,
             input.address,
-            environment.base.lendgineRouter
+            base.lendgineRouter
           )
         ),
-        invalidate(getBalanceRead(input.amountIn.currency, input.address)),
+        invalidate(getBalanceRead(input.amountOut.currency, input.address)),
         invalidate(getBalanceRead(input.shares.currency, input.address)),
         queryClient.invalidateQueries({
           queryKey: ["user trades", input.address],
@@ -219,13 +243,14 @@ export const useBuy = ({
 
   return useMemo(() => {
     if (approve.status === "loading") return { status: "loading" } as const;
+
     if (
-      !borrowAmount ||
       !shares ||
-      !address ||
-      !amountIn ||
+      !amount0 ||
+      !amount1 ||
+      !amountOut ||
       !mostLiquid.data ||
-      approve.status === "error"
+      !address
     )
       return { status: "error" } as const;
 
@@ -233,7 +258,7 @@ export const useBuy = ({
       status: "success",
       data: (
         [
-          !native && approve.tx
+          approve.tx
             ? {
                 title: approve.title,
                 parallelTxs: [
@@ -257,11 +282,12 @@ export const useBuy = ({
                 title,
                 description: title,
                 callback: (toast: TxToast) =>
-                  mintMutation.mutateAsync({
-                    borrowAmount,
+                  burnMutation.mutateAsync({
                     shares,
+                    amount0,
+                    amount1,
+                    amountOut,
                     address,
-                    amountIn,
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     mostLiquidPool: mostLiquid.data!.pool,
                     toast,
@@ -274,86 +300,81 @@ export const useBuy = ({
     } as const satisfies { data: readonly BeetStage[]; status: "success" };
   }, [
     address,
-    amountIn,
+    amount0,
+    amount1,
+    amountOut,
     approve.status,
     approve.title,
     approve.tx,
     approveMutation,
-    borrowAmount,
-    mintMutation,
+    burnMutation,
     mostLiquid.data,
-    native,
     shares,
     title,
   ]);
 };
 
-export const useBuyAmounts = ({
-  amountIn,
+export const useCloseAmounts = ({
+  amountOut,
 }: {
-  amountIn: HookArg<CurrencyAmount<WrappedTokenInfo>>;
+  amountOut: HookArg<CurrencyAmount<WrappedTokenInfo>>;
 }) => {
-  const { selectedLendgine, price, base, quote } = useTradeDetails();
-  const mostLiquidQuery = useMostLiquidMarket([base, quote] as const);
-  const selectedLendgineInfo = useLendgine(selectedLendgine);
+  const environment = useEnvironment();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const lendgine = environment.interface.liquidStaking!.lendgine;
+
+  const { address } = useAccount();
+
+  const lendgineInfoQuery = useLendgine(lendgine);
+  const balanceQuery = useBalance(lendgine.lendgine, address);
+  const positionValue = useLongValue(balanceQuery.data);
+  const currentPriceQuery = useCurrentPrice([
+    lendgine.token0,
+    lendgine.token1,
+  ] as const);
+
   const t = getT();
-  const settings = useSettings();
 
   return useMemo(() => {
-    if (!selectedLendgineInfo.data || !mostLiquidQuery.data) return {};
+    if (
+      !lendgineInfoQuery.data ||
+      !balanceQuery.data ||
+      !amountOut ||
+      !positionValue.value ||
+      !currentPriceQuery.data
+    )
+      return {};
 
-    const updatedLendgineInfo = accruedLendgineInfo(
-      selectedLendgine,
-      selectedLendgineInfo.data,
+    const updateLendgineInfo = accruedLendgineInfo(
+      lendgine,
+      lendgineInfoQuery.data,
       t
     );
+    const shares = balanceQuery.data
+      .multiply(amountOut)
+      .divide(invert(currentPriceQuery.data).quote(positionValue.value));
 
-    const liqPerShare = liquidityPerShare(
-      selectedLendgine,
-      updatedLendgineInfo
-    );
-    const liqPerCol = liquidityPerCollateral(selectedLendgine);
+    const liquidityMinted = liquidityPerShare(
+      lendgine,
+      updateLendgineInfo
+    ).quote(shares);
 
-    const borrowAmount = amountIn
-      ? determineBorrowAmount(
-          amountIn,
-          selectedLendgine,
-          updatedLendgineInfo,
-          { pool: mostLiquidQuery.data.pool, price },
-          settings.maxSlippagePercent
-        )
-      : undefined;
+    const amount0 = updateLendgineInfo.reserve0
+      .multiply(liquidityMinted)
+      .divide(updateLendgineInfo.totalLiquidity);
 
-    const liquidity =
-      borrowAmount && amountIn
-        ? liqPerCol.quote(borrowAmount.add(amountIn))
-        : undefined;
+    const amount1 = updateLendgineInfo.reserve1
+      .multiply(liquidityMinted)
+      .divide(updateLendgineInfo.totalLiquidity);
 
-    const shares = liquidity
-      ? liqPerShare.invert().quote(liquidity)
-      : undefined;
-
-    const bRate = borrowRate({
-      totalLiquidity: updatedLendgineInfo.totalLiquidity.subtract(
-        liquidity
-          ? liquidity
-          : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
-      ),
-      totalLiquidityBorrowed: updatedLendgineInfo.totalLiquidityBorrowed.add(
-        liquidity
-          ? liquidity
-          : CurrencyAmount.fromRawAmount(selectedLendgine.lendgine, 0)
-      ),
-    });
-
-    return { borrowAmount, liquidity, shares, bRate };
+    return { shares, liquidityMinted, amount0, amount1 };
   }, [
-    amountIn,
-    mostLiquidQuery.data,
-    price,
-    selectedLendgine,
-    selectedLendgineInfo.data,
-    settings.maxSlippagePercent,
+    amountOut,
+    balanceQuery.data,
+    currentPriceQuery.data,
+    lendgine,
+    lendgineInfoQuery.data,
+    positionValue.value,
     t,
   ]);
 };
