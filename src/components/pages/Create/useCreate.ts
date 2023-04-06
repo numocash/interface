@@ -57,7 +57,7 @@ export const useCreate = ({
 
   const priceQuery = useMostLiquidMarket(
     !!token0Input && !!token1Input
-      ? ([token0Input.currency, token1Input.currency] as const)
+      ? { quote: token0Input.currency, base: token1Input.currency }
       : null
   );
 
@@ -419,7 +419,7 @@ export const useDepositAmounts = ({
   const chainID = useChain();
 
   const priceQuery = useMostLiquidMarket(
-    !!token0 && !!token1 ? ([token0, token1] as const) : null
+    !!token0 && !!token1 ? { base: token1, quote: token0 } : null
   );
   return useMemo(() => {
     if (!amount || !token0 || !token1 || !bound) return {};

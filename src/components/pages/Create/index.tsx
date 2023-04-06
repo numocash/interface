@@ -48,7 +48,7 @@ export const Create: React.FC = () => {
   const token1Balance = useBalance(token1, address);
 
   const priceQuery = useMostLiquidMarket(
-    !!token0 && !!token1 ? ([token0, token1] as const) : null
+    !!token0 && !!token1 ? { quote: token0, base: token1 } : null
   );
 
   const { token0Input: token0InputAmount, token1Input: token1InputAmount } =
