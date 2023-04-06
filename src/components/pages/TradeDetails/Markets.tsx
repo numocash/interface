@@ -34,7 +34,10 @@ export const Markets: React.FC = () => {
       )
     );
 
-    const dedupedMarkets = dedupe(markets, (m) => m[0].address + m[1].address);
+    const dedupedMarkets = dedupe(
+      markets,
+      (m) => m.base.address + m.quote.address
+    );
 
     return dedupedMarkets;
   }, [
@@ -70,11 +73,11 @@ export const Markets: React.FC = () => {
         tw="flex items-center gap-3 "
       >
         <div tw="flex items-center space-x-[-0.5rem]">
-          <TokenIcon token={quote} size={32} />
           <TokenIcon token={base} size={32} />
+          <TokenIcon token={quote} size={32} />
         </div>
         <p tw="text-lg sm:text-2xl font-bold">
-          {quote.symbol} / {base.symbol}
+          {base.symbol} / {quote.symbol}
         </p>
         <IoIosArrowDown tw="text-lg sm:text-2xl font-bold" />
       </button>
@@ -110,16 +113,16 @@ const MarketsInner: React.FC<InnerProps> = ({ markets }: InnerProps) => {
 
       return (
         <NavLink
-          to={`/trade/details/${market[0].address}/${market[1].address}`}
+          to={`/trade/details/${market.base.address}/${market.quote.address}`}
           tw="flex items-center gap-3 h-8"
           style={style}
         >
           <div tw="flex items-center space-x-[-0.5rem]">
-            <TokenIcon token={market[1]} size={26} />
-            <TokenIcon token={market[0]} size={26} />
+            <TokenIcon token={market.base} size={26} />
+            <TokenIcon token={market.quote} size={26} />
           </div>
           <p tw="text-lg sm:text-lg font-bold">
-            {market[1].symbol} / {market[0].symbol}
+            {market.base.symbol} / {market.quote.symbol}
           </p>
         </NavLink>
       );

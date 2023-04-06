@@ -60,7 +60,7 @@ export const useBuy = ({
   const awaitTX = useAwaitTX();
 
   const { borrowAmount, shares } = useBuyAmounts({ amountIn });
-  const mostLiquid = useMostLiquidMarket([base, quote] as const);
+  const mostLiquid = useMostLiquidMarket({ base, quote });
 
   const isLong = isLongLendgine(selectedLendgine, base);
   const approve = useApprove(amountIn, environment.base.lendgineRouter);
@@ -294,7 +294,7 @@ export const useBuyAmounts = ({
   amountIn: HookArg<CurrencyAmount<WrappedTokenInfo>>;
 }) => {
   const { selectedLendgine, price, base, quote } = useTradeDetails();
-  const mostLiquidQuery = useMostLiquidMarket([base, quote] as const);
+  const mostLiquidQuery = useMostLiquidMarket({ base, quote });
   const selectedLendgineInfo = useLendgine(selectedLendgine);
   const t = getT();
   const settings = useSettings();

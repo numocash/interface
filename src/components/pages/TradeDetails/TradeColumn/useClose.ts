@@ -56,7 +56,7 @@ export const useClose = ({
   const queryClient = useQueryClient();
 
   const { selectedLendgine, base, quote } = useTradeDetails();
-  const mostLiquid = useMostLiquidMarket([base, quote]);
+  const mostLiquid = useMostLiquidMarket({ base, quote });
   const { shares, amount0, amount1 } = useCloseAmounts({ amountOut });
 
   const native = useIsWrappedNative(selectedLendgine.token1);

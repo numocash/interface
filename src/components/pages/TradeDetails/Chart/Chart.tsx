@@ -28,12 +28,12 @@ import { EmptyChart } from "./EmptyChart";
 
 export const Chart: React.FC = () => {
   const { base, quote, timeframe, price } = useTradeDetails();
-  const referenceMarketQuery = useMostLiquidMarket([base, quote] as const);
+  const referenceMarketQuery = useMostLiquidMarket({ base, quote });
 
-  const invertPriceQuery = quote.sortsBefore(base);
+  const invertPriceQuery = base.sortsBefore(quote);
 
   const priceHistoryQuery = usePriceHistory(
-    [base, quote] as const,
+    { base, quote },
     referenceMarketQuery.data?.pool,
     timeframe
   );

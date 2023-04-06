@@ -4,7 +4,7 @@ import invariant from "tiny-invariant";
 
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
-import { useLendginesForTokens } from "../../../hooks/useLendgine";
+import { useMarketToLendgines } from "../../../hooks/useMarket";
 import { useAddressToToken } from "../../../hooks/useTokens";
 import { isValidMarket } from "../../../lib/lendgineValidity";
 import { LoadingPage } from "../../common/LoadingPage";
@@ -39,7 +39,7 @@ export const EarnDetails: React.FC = () => {
   invariant(baseToken && quoteToken);
 
   // if the market isn't valid
-  const market = [baseToken, quoteToken] as const;
+  const market = { base: baseToken, quote: quoteToken };
   if (
     !isValidMarket(
       market,
@@ -49,7 +49,7 @@ export const EarnDetails: React.FC = () => {
   )
     navigate("/earn/");
 
-  const lendgines = useLendginesForTokens(market);
+  const lendgines = useMarketToLendgines(market);
   const priceQuery = useMostLiquidMarket(market);
 
   return (
