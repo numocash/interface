@@ -4,7 +4,7 @@ import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useBalance } from "../../../../hooks/useBalance";
-import { useCurrentPrice } from "../../../../hooks/useExternalExchange";
+import { useMostLiquidMarket } from "../../../../hooks/useExternalExchange";
 import { invert } from "../../../../lib/price";
 import { Beet } from "../../../../utils/beet";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
@@ -31,10 +31,10 @@ export const Burn: React.FC = () => {
 
   const userBalanceQuery = useBalance(lendgine.lendgine, address);
   const positionValue = useLongValue(userBalanceQuery.data);
-  const currentPriceQuery = useCurrentPrice([
-    lendgine.token0,
-    lendgine.token1,
-  ] as const);
+  const currentPriceQuery = useMostLiquidMarket({
+    base: lendgine.token1,
+    quote: lendgine.token0,
+  });
 
   const { shares } = useCloseAmounts({
     amountOut: parsedAmount,
@@ -80,7 +80,7 @@ export const Burn: React.FC = () => {
         currentAmount={{
           amount:
             currentPriceQuery.data && positionValue.value
-              ? invert(currentPriceQuery.data).quote(positionValue.value)
+              ? invert(currentPriceQuery.data.price).quote(positionValue.value)
               : undefined,
           allowSelect: true,
           label: "Value",

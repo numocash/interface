@@ -4,7 +4,7 @@ import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useBalance } from "../../../../hooks/useBalance";
-import { useCurrentPrice } from "../../../../hooks/useExternalExchange";
+import { useMostLiquidMarket } from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { Beet } from "../../../../utils/beet";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
@@ -23,23 +23,23 @@ export const Deposit: React.FC = () => {
   const lendgineInfo = useLendgine(lendgine);
   const [token0Input, setToken0Input] = useState("");
   const [token1Input, setToken1Input] = useState("");
-  const priceQuery = useCurrentPrice([
-    lendgine.token0,
-    lendgine.token1,
-  ] as const);
+  const priceQuery = useMostLiquidMarket({
+    quote: lendgine.token0,
+    base: lendgine.token1,
+  });
 
   const { token0Input: token0Amount, token1Input: token1Amount } =
     useDepositAmounts({
       amount:
         tryParseCurrencyAmount(token0Input, lendgine.token0) ??
         tryParseCurrencyAmount(token1Input, lendgine.token1),
-      price: priceQuery.data,
+      price: priceQuery.data?.price,
     });
 
   const deposit = useDeposit({
     token0Input: token0Amount,
     token1Input: token1Amount,
-    price: priceQuery.data,
+    price: priceQuery.data?.price,
   });
 
   const onInput = useCallback(

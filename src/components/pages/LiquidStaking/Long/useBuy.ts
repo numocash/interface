@@ -63,10 +63,10 @@ export const useBuy = ({
   const awaitTX = useAwaitTX();
 
   const { borrowAmount, shares } = useBuyAmounts({ amountIn, price });
-  const mostLiquid = useMostLiquidMarket([
-    lendgine.token0,
-    lendgine.token1,
-  ] as const);
+  const mostLiquid = useMostLiquidMarket({
+    base: lendgine.token1,
+    quote: lendgine.token0,
+  });
 
   const isLong = true;
   const approve = useApprove(amountIn, base.lendgineRouter);
@@ -267,7 +267,7 @@ export const useBuy = ({
                     address,
                     amountIn,
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    mostLiquidPool: mostLiquid.data!.pool,
+                    mostLiquidPool: mostLiquid.data.pool,
                     toast,
                   }),
               },
@@ -302,10 +302,10 @@ export const useBuyAmounts = ({
   const environment = useEnvironment();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const lendgine = environment.interface.liquidStaking!.lendgine;
-  const mostLiquidQuery = useMostLiquidMarket([
-    lendgine.token0,
-    lendgine.token1,
-  ] as const);
+  const mostLiquidQuery = useMostLiquidMarket({
+    base: lendgine.token1,
+    quote: lendgine.token0,
+  });
   const selectedLendgineInfo = useLendgine(lendgine);
   const t = getT();
   const settings = useSettings();
