@@ -13,7 +13,7 @@ export const pickShortLendgines = (
 ) => lendgines.filter((l) => l.token1.equals(base));
 
 export const isLongLendgine = (lendgine: Lendgine, base: Token) =>
-  lendgine.token0.equals(base);
+  lendgine.token1.equals(base);
 
 export const isShortLendgine = (lendgine: Lendgine, base: Token) =>
-  lendgine.token1.equals(base);
+  lendgine.token0.equals(base);
