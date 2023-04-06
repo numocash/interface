@@ -23,7 +23,6 @@ import { useAwaitTX } from "../../../../hooks/useAwaitTX";
 import { getBalanceRead, useBalance } from "../../../../hooks/useBalance";
 import {
   isV3,
-  useCurrentPrice,
   useMostLiquidMarket,
 } from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
@@ -60,10 +59,10 @@ export const useClose = ({
   const invalidate = useInvalidateCall();
   const queryClient = useQueryClient();
 
-  const mostLiquid = useMostLiquidMarket([
-    lendgine.token0,
-    lendgine.token1,
-  ] as const);
+  const mostLiquid = useMostLiquidMarket({
+    base: lendgine.token1,
+    quote: lendgine.token0,
+  });
   const { shares, amount0, amount1 } = useCloseAmounts({ amountOut });
 
   const native = false;
@@ -289,7 +288,7 @@ export const useClose = ({
                     amountOut,
                     address,
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    mostLiquidPool: mostLiquid.data!.pool,
+                    mostLiquidPool: mostLiquid.data.pool,
                     toast,
                   }),
               },
@@ -328,10 +327,10 @@ export const useCloseAmounts = ({
   const lendgineInfoQuery = useLendgine(lendgine);
   const balanceQuery = useBalance(lendgine.lendgine, address);
   const positionValue = useLongValue(balanceQuery.data);
-  const currentPriceQuery = useCurrentPrice([
-    lendgine.token0,
-    lendgine.token1,
-  ] as const);
+  const priceQuery = useMostLiquidMarket({
+    base: lendgine.token1,
+    quote: lendgine.token0,
+  });
 
   const t = getT();
 
@@ -341,7 +340,7 @@ export const useCloseAmounts = ({
       !balanceQuery.data ||
       !amountOut ||
       !positionValue.value ||
-      !currentPriceQuery.data
+      !priceQuery.data
     )
       return {};
 
@@ -352,7 +351,7 @@ export const useCloseAmounts = ({
     );
     const shares = balanceQuery.data
       .multiply(amountOut)
-      .divide(invert(currentPriceQuery.data).quote(positionValue.value));
+      .divide(invert(priceQuery.data.price).quote(positionValue.value));
 
     const liquidityMinted = liquidityPerShare(
       lendgine,
@@ -371,10 +370,10 @@ export const useCloseAmounts = ({
   }, [
     amountOut,
     balanceQuery.data,
-    currentPriceQuery.data,
     lendgine,
     lendgineInfoQuery.data,
     positionValue.value,
+    priceQuery.data,
     t,
   ]);
 };

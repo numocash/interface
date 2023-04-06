@@ -24,7 +24,7 @@ const useEarnInternal = (): IEarn => {
   const lendgines = useAllLendgines();
 
   const markets = useMemo(() => {
-    if (!lendgines) return null;
+    if (lendgines === null) return null;
     const markets = lendgines.map((l) =>
       lendgineToMarket(
         l,
@@ -33,15 +33,18 @@ const useEarnInternal = (): IEarn => {
       )
     );
 
-    const dedupedMarkets = dedupe(markets, (m) => m[0].address + m[1].address);
+    const dedupedMarkets = dedupe(
+      markets,
+      (m) => m.base.address + m.quote.address
+    );
 
     const filteredMarkets =
       assets.length === 0
         ? dedupedMarkets
         : dedupedMarkets.filter(
             (m) =>
-              !!assets.find((a) => a.equals(m[0])) ||
-              !!assets.find((a) => a.equals(m[1]))
+              !!assets.find((a) => a.equals(m.base)) ||
+              !!assets.find((a) => a.equals(m.quote))
           );
 
     return filteredMarkets;

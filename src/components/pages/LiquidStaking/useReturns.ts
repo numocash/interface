@@ -2,7 +2,7 @@ import { Percent } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
 import { useEnvironment } from "../../../contexts/useEnvironment";
-import { useCurrentPrice } from "../../../hooks/useExternalExchange";
+import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../hooks/useLendgine";
 import { ONE_HUNDRED_PERCENT } from "../../../lib/constants";
 import { borrowRate, supplyRate } from "../../../lib/liquidStakingJumprate";
@@ -35,31 +35,31 @@ export const useLPReturns = () => {
   const staking = environment.interface.liquidStaking!;
 
   const lendgineInfo = useLendgine(staking.lendgine);
-  const priceQuery = useCurrentPrice([
-    staking.lendgine.token0,
-    staking.lendgine.token1,
-  ] as const);
+  const priceQuery = useMostLiquidMarket({
+    quote: staking.lendgine.token0,
+    base: staking.lendgine.token1,
+  });
 
   return useMemo(() => {
     if (!lendgineInfo.data || !priceQuery.data) return {};
 
     const cf = priceToFraction(staking.lendgine.bound)
-      .multiply(priceToFraction(priceQuery.data))
+      .multiply(priceToFraction(priceQuery.data.price))
       .multiply(2);
 
-    const cs = priceToFraction(priceQuery.data).multiply(
-      priceToFraction(priceQuery.data)
+    const cs = priceToFraction(priceQuery.data.price).multiply(
+      priceToFraction(priceQuery.data.price)
     );
     const currentValue = cf.subtract(cs);
 
     const ff = priceToFraction(staking.lendgine.bound)
-      .multiply(priceToFraction(priceQuery.data))
+      .multiply(priceToFraction(priceQuery.data.price))
       .multiply(2)
       .multiply(staking.return.add(ONE_HUNDRED_PERCENT));
-    const fs = priceToFraction(priceQuery.data)
+    const fs = priceToFraction(priceQuery.data.price)
       .multiply(staking.return.add(ONE_HUNDRED_PERCENT))
       .multiply(
-        priceToFraction(priceQuery.data).multiply(
+        priceToFraction(priceQuery.data.price).multiply(
           staking.return.add(ONE_HUNDRED_PERCENT)
         )
       );
@@ -77,8 +77,8 @@ export const useLPReturns = () => {
 
     const sRate = supplyRate(lendgineInfo.data);
 
-    const conversionCoeff = priceToFraction(priceQuery.data).multiply(
-      priceToFraction(priceQuery.data).divide(currentValue)
+    const conversionCoeff = priceToFraction(priceQuery.data.price).multiply(
+      priceToFraction(priceQuery.data.price).divide(currentValue)
     );
 
     const lendingReturns = sRate.multiply(conversionCoeff);

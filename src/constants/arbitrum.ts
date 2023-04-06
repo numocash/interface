@@ -78,8 +78,11 @@ export const arbitrumConfig = {
     wrappedNative: WrappedNative[chainID.arbitrum],
     native: Ether.onChain(chainID.arbitrum),
     specialtyMarkets: [
-      [USDT, Stable[chainID.arbitrum]],
-      [Stable[chainID.arbitrum], WrappedNative[chainID.arbitrum]],
+      { base: Stable[chainID.arbitrum], quote: USDT },
+      {
+        base: WrappedNative[chainID.arbitrum],
+        quote: Stable[chainID.arbitrum],
+      },
     ],
   } as const satisfies NumoenInterfaceConfig,
 };

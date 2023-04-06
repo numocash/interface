@@ -29,7 +29,7 @@ export const AppRouter: React.FC = () => {
           <Navigate
             to={
               specialty
-                ? `/trade/details/${specialty[0].address}/${specialty[1].address}`
+                ? `/trade/details/${specialty.base.address}/${specialty.quote.address}`
                 : "/trade"
             }
             replace

@@ -147,12 +147,15 @@ export const polygonConfig = {
     wrappedNative: WrappedNative[chainID.polygon],
     native: Matic.onChain(chainID.polygon),
     specialtyMarkets: [
-      [WETH, WrappedNative[chainID.polygon]],
-      [USDT, USDC],
-      [USDC, WETH],
-      [USDC, WBTC],
-      [USDC, BOB],
-      [USDC, GHST],
+      {
+        base: WrappedNative[chainID.polygon],
+        quote: WETH,
+      },
+      { base: USDC, quote: USDT },
+      { base: WETH, quote: USDC },
+      { base: WBTC, quote: USDC },
+      { base: BOB, quote: USDC },
+      { base: GHST, quote: USDC },
     ],
   } as const satisfies NumoenInterfaceConfig,
 };

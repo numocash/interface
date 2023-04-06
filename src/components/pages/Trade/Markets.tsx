@@ -10,10 +10,10 @@ export const Markets: React.FC = () => {
       {!!markets && markets.length !== 0 ? (
         markets.map((m) => (
           <div
-            key={m[0].address + m[1].address}
+            key={m.base.address + m.quote.address}
             tw="gap-2 flex flex-col w-full"
           >
-            <MarketItem tokens={m} />
+            <MarketItem market={m} />
           </div>
         ))
       ) : (

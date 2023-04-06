@@ -20,7 +20,7 @@ export const usePositionValue = (lendgine: Lendgine) => {
   const { address } = useAccount();
   const { price: referencePrice, base, quote } = useTradeDetails();
   const t = getT();
-  const mostLiquidQuery = useMostLiquidMarket([base, quote]);
+  const mostLiquidQuery = useMostLiquidMarket({ base, quote });
 
   const balanceQuery = useBalance(lendgine.lendgine, address);
   const lendgineInfoQuery = useLendgine(lendgine);

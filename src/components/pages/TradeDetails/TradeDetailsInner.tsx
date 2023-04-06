@@ -20,7 +20,7 @@ import { TradeColumn } from "./TradeColumn/TradeColumn";
 interface Props {
   base: WrappedTokenInfo;
   quote: WrappedTokenInfo;
-  lendgines: Lendgine[];
+  lendgines: readonly Lendgine[];
   price: Price<WrappedTokenInfo, WrappedTokenInfo>;
 }
 
