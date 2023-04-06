@@ -71,11 +71,11 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       const liquidityValue = liquidityPrice.quote(liquidity);
 
       return (
-        lendgine.token0.equals(market[0])
+        lendgine.token0.equals(market.quote)
           ? liquidityValue
           : invert(price).quote(liquidityValue)
       ).add(acc);
-    }, CurrencyAmount.fromRawAmount(market[0], 0));
+    }, CurrencyAmount.fromRawAmount(market.quote, 0));
     return { bestSupplyRate, tvl };
   }, [
     lendgineInfosQuery.data,
@@ -88,16 +88,16 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
   return (
     <NavLink
       tw=""
-      to={`/earn/details/${market[0].address}/${market[1].address}`}
+      to={`/earn/details/${market.base.address}/${market.quote.address}`}
     >
       <Wrapper>
         <div tw="flex items-center gap-2 col-span-2">
           <div tw="flex items-center space-x-[-0.5rem]">
-            <TokenIcon token={market[1]} size={32} />
-            <TokenIcon token={market[0]} size={32} />
+            <TokenIcon token={market.base} size={32} />
+            <TokenIcon token={market.quote} size={32} />
           </div>
           <span tw="font-semibold text-lg sm:text-xl text-default leading-tight">
-            {market[1].symbol} / {market[0].symbol}
+            {market.base.symbol} / {market.quote.symbol}
           </span>
         </div>
 

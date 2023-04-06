@@ -4,11 +4,7 @@ import { useMemo } from "react";
 
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import type { HookArg } from "../../../hooks/internal/types";
-import {
-  isV3,
-  useCurrentPrice,
-  useMostLiquidMarket,
-} from "../../../hooks/useExternalExchange";
+import { isV3, useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../hooks/useLendgine";
 import { ONE_HUNDRED_PERCENT } from "../../../lib/constants";
 import {
@@ -26,24 +22,15 @@ export const useLongValue = (position: HookArg<CurrencyAmount<Token>>) => {
   const t = getT();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const staking = environment.interface.liquidStaking!;
-  const mostLiquidQuery = useMostLiquidMarket([
-    staking.lendgine.token0,
-    staking.lendgine.token1,
-  ] as const);
-  const currentPriceQuery = useCurrentPrice([
-    staking.lendgine.token0,
-    staking.lendgine.token1,
-  ] as const);
+  const currentPriceQuery = useMostLiquidMarket({
+    quote: staking.lendgine.token0,
+    base: staking.lendgine.token1,
+  });
 
   const lendgineInfoQuery = useLendgine(staking.lendgine);
 
   return useMemo(() => {
-    if (
-      !position ||
-      !lendgineInfoQuery.data ||
-      !mostLiquidQuery.data ||
-      !currentPriceQuery.data
-    )
+    if (!position || !lendgineInfoQuery.data || !currentPriceQuery.data)
       return {};
 
     const updatedLendgineInfo = accruedLendgineInfo(
@@ -75,13 +62,13 @@ export const useLongValue = (position: HookArg<CurrencyAmount<Token>>) => {
           .divide(updatedLendgineInfo.totalLiquidity)
       : CurrencyAmount.fromRawAmount(updatedLendgineInfo.reserve1.currency, 0);
 
-    const dexFee = isV3(mostLiquidQuery.data.pool)
-      ? new Percent(mostLiquidQuery.data.pool.feeTier, "1000000")
+    const dexFee = isV3(currentPriceQuery.data.pool)
+      ? new Percent(currentPriceQuery.data.pool.feeTier, "1000000")
       : new Percent("3000", "1000000");
 
     // token1
     const debtValue = amount1.add(
-      currentPriceQuery.data
+      currentPriceQuery.data.price
         .invert()
         .quote(amount0)
         .multiply(ONE_HUNDRED_PERCENT.add(dexFee))
@@ -89,11 +76,10 @@ export const useLongValue = (position: HookArg<CurrencyAmount<Token>>) => {
 
     const value = collateral.subtract(debtValue);
 
-    return { value: currentPriceQuery.data.quote(value) };
+    return { value: currentPriceQuery.data.price.quote(value) };
   }, [
     currentPriceQuery.data,
     lendgineInfoQuery.data,
-    mostLiquidQuery.data,
     position,
     staking.lendgine,
     t,
@@ -108,10 +94,10 @@ export const useLPValue = (
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const staking = environment.interface.liquidStaking!;
 
-  const currentPriceQuery = useCurrentPrice([
-    staking.lendgine.token0,
-    staking.lendgine.token1,
-  ] as const);
+  const currentPriceQuery = useMostLiquidMarket({
+    base: staking.lendgine.token1,
+    quote: staking.lendgine.token0,
+  });
 
   const lendgineInfoQuery = useLendgine(staking.lendgine);
 

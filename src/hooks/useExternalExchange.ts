@@ -62,11 +62,6 @@ export const useMostLiquidMarket = (market: HookArg<Market>) => {
 
   const v2PriceQuery = useV2Price(market);
   const v3PriceQuery = useV3Price(market);
-  market?.base.symbol === "ARB" &&
-    console.log(
-      v2PriceQuery.data?.toSignificant(),
-      v3PriceQuery.data?.map((d) => d?.toSignificant())
-    );
 
   const { contracts } = useMemo(() => {
     if (!market) return {};

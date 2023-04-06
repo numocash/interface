@@ -19,8 +19,6 @@ interface Props {
 
 export const MarketItem: React.FC<Props> = ({ market }: Props) => {
   const priceQuery = useMostLiquidMarket(market);
-  market.base.symbol === "ARB" &&
-    console.log("JRE", priceQuery.data?.price.toSignificant(), market);
 
   const invertPriceQuery = market.base.sortsBefore(market.quote);
 
