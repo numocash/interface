@@ -7,22 +7,17 @@ import { lendgineToMarket } from "../../../lib/lendgineValidity";
 import type { Market } from "../../../lib/types/market";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { dedupe } from "../../../utils/dedupe";
-import type { Sorts } from "./Sort";
 import { TradeInner } from "./TradeInner";
 
 interface ITrade {
   assets: readonly WrappedTokenInfo[];
   setAssets: (val: readonly WrappedTokenInfo[]) => void;
 
-  sort: keyof typeof Sorts;
-  setSort: (val: keyof typeof Sorts) => void;
-
   markets: readonly Market[] | null;
 }
 
 const useTradeInternal = (): ITrade => {
   const [assets, setAssets] = useState<readonly WrappedTokenInfo[]>([]);
-  const [sort, setSort] = useState<keyof typeof Sorts>("default");
 
   const environment = useEnvironment();
 
@@ -38,15 +33,18 @@ const useTradeInternal = (): ITrade => {
       )
     );
 
-    const dedupedMarkets = dedupe(markets, (m) => m[0].address + m[1].address);
+    const dedupedMarkets = dedupe(
+      markets,
+      (m) => m.base.address + m.quote.address
+    );
 
     const filteredMarkets =
       assets.length === 0
         ? dedupedMarkets
         : dedupedMarkets.filter(
             (m) =>
-              !!assets.find((a) => a.equals(m[0])) ||
-              !!assets.find((a) => a.equals(m[1]))
+              !!assets.find((a) => a.equals(m.base)) ||
+              !!assets.find((a) => a.equals(m.quote))
           );
 
     return filteredMarkets;
@@ -60,8 +58,7 @@ const useTradeInternal = (): ITrade => {
   return {
     assets,
     setAssets,
-    sort,
-    setSort,
+
     markets,
   };
 };

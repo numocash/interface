@@ -56,7 +56,7 @@ export const useClose = ({
   const queryClient = useQueryClient();
 
   const { selectedLendgine, base, quote } = useTradeDetails();
-  const mostLiquid = useMostLiquidMarket([base, quote]);
+  const mostLiquid = useMostLiquidMarket({ base, quote });
   const { shares, amount0, amount1 } = useCloseAmounts({ amountOut });
 
   const native = useIsWrappedNative(selectedLendgine.token1);
@@ -284,7 +284,7 @@ export const useClose = ({
                     amountOut,
                     address,
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    mostLiquidPool: mostLiquid.data!.pool,
+                    mostLiquidPool: mostLiquid.data.pool,
                     toast,
                   }),
               },

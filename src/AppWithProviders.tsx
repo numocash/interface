@@ -47,7 +47,11 @@ const wagmiClient = createClient({
   webSocketProvider,
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    mutations: { retry: 3, retryDelay: (attempt) => attempt * 250 },
+  },
+});
 
 export const AppWithProviders: React.FC = () => {
   return (

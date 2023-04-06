@@ -28,11 +28,12 @@ import { EmptyChart } from "./EmptyChart";
 
 export const Chart: React.FC = () => {
   const { base, quote, timeframe, price } = useTradeDetails();
-  const referenceMarketQuery = useMostLiquidMarket([base, quote]);
+  const referenceMarketQuery = useMostLiquidMarket({ base, quote });
 
-  const invertPriceQuery = quote.sortsBefore(base);
+  const invertPriceQuery = base.sortsBefore(quote);
 
   const priceHistoryQuery = usePriceHistory(
+    { base, quote },
     referenceMarketQuery.data?.pool,
     timeframe
   );
@@ -129,23 +130,20 @@ export const Chart: React.FC = () => {
     <div tw="col-span-2 w-full flex flex-col gap-12">
       <div tw="flex w-full">
         <div tw="flex gap-2 items-center">
-          {loading ? (
-            <div tw="bg-gray-100 animate-pulse h-8 w-20 rounded" />
-          ) : (
-            <p tw="text-lg sm:text-2xl font-semibold">
-              {displayPrice
-                ? formatDisplayWithSoftLimit(
-                    fractionToFloat(displayPrice.price),
-                    4,
-                    6,
-                    {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 4,
-                    }
-                  )
-                : formatPrice(price)}
-            </p>
-          )}
+          <p tw="text-lg sm:text-2xl font-semibold">
+            {displayPrice
+              ? formatDisplayWithSoftLimit(
+                  fractionToFloat(displayPrice.price),
+                  4,
+                  6,
+                  {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 4,
+                  }
+                )
+              : formatPrice(price)}
+          </p>
+
           {loading ? (
             <div tw="bg-gray-100 animate-pulse h-5 w-12 rounded" />
           ) : priceChange.greaterThan(0) ? (

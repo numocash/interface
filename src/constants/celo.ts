@@ -33,6 +33,11 @@ export const celoConfig = {
 
     wrappedNative: WrappedNative[chainID.celo],
 
-    specialtyMarkets: [[Stable[chainID.celo], WrappedNative[chainID.celo]]],
+    specialtyMarkets: [
+      {
+        base: WrappedNative[chainID.celo],
+        quote: Stable[chainID.celo],
+      },
+    ],
   } as const satisfies NumoenInterfaceConfig,
 };

@@ -4,28 +4,27 @@ import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 
 import {
-  useCurrentPrice,
   useMostLiquidMarket,
   usePriceHistory,
 } from "../../../hooks/useExternalExchange";
 import { priceToFraction } from "../../../lib/price";
-import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
+import type { Market } from "../../../lib/types/market";
 import { formatPercent } from "../../../utils/format";
 import { TokenIcon } from "../../common/TokenIcon";
 import { MiniChart } from "./MiniChart";
 
 interface Props {
-  tokens: readonly [WrappedTokenInfo, WrappedTokenInfo];
+  market: Market;
 }
 
-export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
-  const referenceMarketQuery = useMostLiquidMarket(tokens);
-  const priceQuery = useCurrentPrice(tokens);
+export const MarketItem: React.FC<Props> = ({ market }: Props) => {
+  const priceQuery = useMostLiquidMarket(market);
 
-  const invertPriceQuery = tokens[1].sortsBefore(tokens[0]);
+  const invertPriceQuery = market.base.sortsBefore(market.quote);
 
   const priceHistoryQuery = usePriceHistory(
-    referenceMarketQuery.data?.pool,
+    market,
+    priceQuery.data?.pool,
     "ONE_DAY"
   );
 
@@ -45,7 +44,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
     const oneDayOldPrice = priceHistory[priceHistory.length - 1]?.price;
     invariant(oneDayOldPrice, "no prices returned");
 
-    const f = priceToFraction(priceQuery.data)
+    const f = priceToFraction(priceQuery.data.price)
       .subtract(oneDayOldPrice)
       .divide(oneDayOldPrice);
 
@@ -55,17 +54,17 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
   return (
     <NavLink
       tw=""
-      to={`/trade/details/${tokens[0].address}/${tokens[1].address}`}
+      to={`/trade/details/${market.base.address}/${market.quote.address}`}
     >
       <div tw="w-full rounded-xl sm:hover:scale-102 transform ease-in-out duration-300 grid grid-cols-3 md:grid-cols-5  h-16 items-center justify-between  bg-white border border-[#dfdfdf] shadow px-6 ">
         <div tw="flex items-center gap-3 col-span-2">
           <div tw="flex items-center space-x-[-0.5rem] ">
-            <TokenIcon token={tokens[1]} size={32} />
-            <TokenIcon token={tokens[0]} size={32} />
+            <TokenIcon token={market.base} size={32} />
+            <TokenIcon token={market.quote} size={32} />
           </div>
           <div tw="grid gap-0.5">
             <span tw="font-semibold sm:text-xl text-default leading-tight">
-              {tokens[1].symbol} / {tokens[0].symbol}
+              {market.base.symbol} / {market.quote.symbol}
             </span>
           </div>
         </div>
@@ -73,7 +72,7 @@ export const MarketItem: React.FC<Props> = ({ tokens }: Props) => {
         {!!priceHistory && !!priceQuery.data ? (
           <MiniChart
             priceHistory={priceHistory}
-            currentPrice={priceQuery.data}
+            currentPrice={priceQuery.data.price}
           />
         ) : (
           <div tw="rounded-lg h-10 w-32 animate-pulse transform ease-in-out duration-300 bg-gray-100 justify-self-center hidden md:(flex col-span-2)" />

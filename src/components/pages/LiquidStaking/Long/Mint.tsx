@@ -4,7 +4,7 @@ import { useAccount } from "wagmi";
 
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useBalance } from "../../../../hooks/useBalance";
-import { useCurrentPrice } from "../../../../hooks/useExternalExchange";
+import { useMostLiquidMarket } from "../../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { Beet } from "../../../../utils/beet";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
@@ -28,18 +28,18 @@ export const Mint: React.FC = () => {
     [input, lendgine.token1]
   );
 
-  const priceQuery = useCurrentPrice([
+  const priceQuery = useMostLiquidMarket({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    environment.interface.liquidStaking!.lendgine.token0,
+    quote: environment.interface.liquidStaking!.lendgine.token0,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    environment.interface.liquidStaking!.lendgine.token1,
-  ] as const);
+    base: environment.interface.liquidStaking!.lendgine.token1,
+  });
 
   const { liquidity, shares } = useBuyAmounts({
     amountIn: parsedAmount,
-    price: priceQuery.data,
+    price: priceQuery.data?.price,
   });
-  const buy = useBuy({ amountIn: parsedAmount, price: priceQuery.data });
+  const buy = useBuy({ amountIn: parsedAmount, price: priceQuery.data?.price });
 
   const disableReason = useMemo(
     () =>

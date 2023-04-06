@@ -23,12 +23,20 @@ export const More: React.FC = () => {
         tw="w-full px-4"
       >
         <Module tw="px-4 py-2 gap-2 rounded-2xl bg-[#303030] w-full md:hidden flex flex-col">
-          <NavLink tw="text-white hover:opacity-80 w-full" to="/trade/">
+          <NavLink
+            tw="text-white hover:opacity-80 w-full"
+            to="/trade/"
+            onClick={() => setShow(false)}
+          >
             <p>Trade</p>
           </NavLink>
           <div tw="border-b border-[#505050] w-full" />
 
-          <NavLink tw="text-white hover:opacity-80 w-full" to="/earn/">
+          <NavLink
+            tw="text-white hover:opacity-80 w-full"
+            to="/earn/"
+            onClick={() => setShow(false)}
+          >
             <p>Earn</p>
           </NavLink>
           <div tw="border-b border-[#505050] w-full" />
