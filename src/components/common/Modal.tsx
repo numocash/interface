@@ -2,9 +2,9 @@ import "@reach/dialog/styles.css";
 
 import { DialogContent, DialogOverlay } from "@reach/dialog";
 import { animated, useSpring, useTransition } from "@react-spring/web";
+import { useGesture } from "@use-gesture/react";
 import React from "react";
 import { isMobile } from "react-device-detect";
-import { useGesture } from "react-use-gesture";
 import tw, { css, styled } from "twin.macro";
 
 export interface ModalProps {
@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({
       });
       if (
         state.movement[1] > 300 ||
-        (state.velocity > 3 && state.direction[1] > 0)
+        (state.velocity[1] > 3 && state.direction[1] > 0)
       ) {
         onDismiss();
       }

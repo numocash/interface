@@ -69,7 +69,7 @@ export const useMostLiquidMarket = (market: HookArg<Market>) => {
 
     const v2Address = calcV2Address(
       sortedTokens,
-      environment.interface.uniswapV2.factoryAddress as Address,
+      environment.interface.uniswapV2.factoryAddress,
       environment.interface.uniswapV2.pairInitCodeHash
     ) as Address;
     const v3Addresses = objectKeys(feeTiers).map(
@@ -77,7 +77,7 @@ export const useMostLiquidMarket = (market: HookArg<Market>) => {
         calcV3Address(
           sortedTokens,
           fee,
-          environment.interface.uniswapV3.factoryAddress as Address,
+          environment.interface.uniswapV3.factoryAddress,
           environment.interface.uniswapV3.pairInitCodeHash
         ) as Address
     );
@@ -201,12 +201,12 @@ export const usePriceHistory = (
         ? (calcV3Address(
             sortedTokens,
             externalExchange.feeTier,
-            environment.interface.uniswapV3.factoryAddress as Address,
+            environment.interface.uniswapV3.factoryAddress,
             environment.interface.uniswapV3.pairInitCodeHash
           ) as Address)
         : (calcV2Address(
             sortedTokens,
-            environment.interface.uniswapV2.factoryAddress as Address,
+            environment.interface.uniswapV2.factoryAddress,
             environment.interface.uniswapV2.pairInitCodeHash
           ) as Address);
 
@@ -283,7 +283,7 @@ const useV2Price = (market: HookArg<Market>) => {
     const sortedTokens = sortTokens([market.base, market.quote]);
     const pairAddress = calcV2Address(
       sortedTokens,
-      environment.interface.uniswapV2.factoryAddress as Address,
+      environment.interface.uniswapV2.factoryAddress,
       environment.interface.uniswapV2.pairInitCodeHash
     );
     const contractRead = getUniswapV2Read(pairAddress as Address);
@@ -328,7 +328,7 @@ const useV3Price = (market: HookArg<Market>) => {
         calcV3Address(
           sortedTokens,
           fee,
-          environment.interface.uniswapV3.factoryAddress as Address,
+          environment.interface.uniswapV3.factoryAddress,
           environment.interface.uniswapV3.pairInitCodeHash
         ) as Address
       )

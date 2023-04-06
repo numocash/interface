@@ -1,9 +1,10 @@
-import type { Currency, Token } from "@uniswap/sdk-core";
-import { NativeCurrency } from "@uniswap/sdk-core";
+import type { Currency } from "@uniswap/sdk-core";
+import { NativeCurrency, Percent, Price, Token } from "@uniswap/sdk-core";
 import { utils } from "ethers";
 
 import { chainID } from "../lib/constants";
 import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
+import type { NumoenInterfaceConfig } from ".";
 import { WrappedNative } from "./tokens";
 
 const USDC = new WrappedTokenInfo({
@@ -62,6 +63,15 @@ const GHST = new WrappedTokenInfo({
   logoURI:
     "https://assets.coingecko.com/coins/images/12467/small/ghst_200.png?1600750321",
 });
+const stMATIC = new WrappedTokenInfo({
+  name: "Staked MATIC",
+  symbol: "stMATIC",
+  address: "0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4",
+  decimals: 18,
+  chainId: 137,
+  logoURI:
+    "https://assets.coingecko.com/coins/images/24185/small/stMATIC.png?1646789287",
+});
 
 export class Matic extends NativeCurrency {
   protected constructor(chainId: number) {
@@ -102,7 +112,6 @@ export const polygonConfig = {
       factoryAddress: "0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32",
       pairInitCodeHash:
         "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
-      routerAddress: "0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff",
     },
     uniswapV3: {
       subgraph:
@@ -110,7 +119,28 @@ export const polygonConfig = {
       factoryAddress: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
       pairInitCodeHash:
         "0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54",
-      quoterAddress: "0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6",
+    },
+    liquidStaking: {
+      return: new Percent(42, 1000),
+      lendgine: {
+        token0: WrappedNative[chainID.polygon],
+        token0Exp: WrappedNative[chainID.polygon].decimals,
+        token1: stMATIC,
+        token1Exp: stMATIC.decimals,
+        bound: new Price(stMATIC, WrappedNative[chainID.polygon], 10, 16),
+        address: "0x0A435BC2488c85A7C87fA3dac0CD4fA538DDe4Ce",
+        lendgine: new Token(
+          137,
+          "0x0A435BC2488c85A7C87fA3dac0CD4fA538DDe4Ce",
+          18
+        ),
+      },
+      base: {
+        factory: "0x58db4e36755699188ff21E68A11308fDEb8792b5",
+        liquidityManager: "0xe964F66B143E2C4752F3F4d37bfc9e74dE4e6eEB",
+        lendgineRouter: "0xC63292042D983C2196ab52F4101043F128EcEF67",
+      },
+      color: "#a457ff",
     },
     numoenSubgraph:
       "https://api.thegraph.com/subgraphs/name/kyscott18/numoen-polygon",
@@ -127,6 +157,5 @@ export const polygonConfig = {
       { base: BOB, quote: USDC },
       { base: GHST, quote: USDC },
     ],
-    blockFreq: 1,
-  },
-} as const;
+  } as const satisfies NumoenInterfaceConfig,
+};
