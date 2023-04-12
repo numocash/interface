@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import invariant from "tiny-invariant";
 
+import { MiniChart } from "./MiniChart";
 import {
   useMostLiquidMarket,
   usePriceHistory,
@@ -11,7 +12,6 @@ import { priceToFraction } from "../../../lib/price";
 import type { Market } from "../../../lib/types/market";
 import { formatPercent } from "../../../utils/format";
 import { TokenIcon } from "../../common/TokenIcon";
-import { MiniChart } from "./MiniChart";
 
 interface Props {
   market: Market;

@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 
+import { useTradeDetails } from "./TradeDetailsInner";
 import { pickLongLendgines, pickShortLendgines } from "../../../lib/lendgines";
 import { nextHighestLendgine, nextLowestLendgine } from "../../../lib/price";
-import { useTradeDetails } from "./TradeDetailsInner";
 
 export const useNextLendgines = () => {
   const { lendgines, base, price } = useTradeDetails();

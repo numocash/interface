@@ -2,6 +2,7 @@ import { Percent } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
 
+import { useTradeDetails } from "./TradeDetailsInner";
 import { useBalance } from "../../../hooks/useBalance";
 import { isV3, useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useLendgine } from "../../../hooks/useLendgine";
@@ -14,7 +15,6 @@ import {
 } from "../../../lib/lendgineMath";
 import { isShortLendgine } from "../../../lib/lendgines";
 import type { Lendgine } from "../../../lib/types/lendgine";
-import { useTradeDetails } from "./TradeDetailsInner";
 
 export const usePositionValue = (lendgine: Lendgine) => {
   const { address } = useAccount();

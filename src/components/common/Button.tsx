@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import type { DetailedHTMLProps } from "react";
 import React, { useState } from "react";
 import tw from "twin.macro";
 
@@ -11,7 +12,7 @@ interface AdditionalButtonProps {
 }
 
 export interface ButtonProps
-  extends React.DetailedHTMLProps<
+  extends DetailedHTMLProps<
       React.ButtonHTMLAttributes<HTMLButtonElement>,
       HTMLButtonElement
     >,

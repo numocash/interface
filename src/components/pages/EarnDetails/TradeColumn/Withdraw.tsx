@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import invariant from "tiny-invariant";
 
+import { useWithdraw, useWithdrawAmounts } from "./useWithdraw";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
 import { Beet } from "../../../../utils/beet";
@@ -10,7 +11,6 @@ import { AsyncButton } from "../../../common/AsyncButton";
 import { CenterSwitch } from "../../../common/CenterSwitch";
 import { PercentageSlider } from "../../../common/inputs/PercentageSlider";
 import { useEarnDetails } from "../EarnDetailsInner";
-import { useWithdraw, useWithdrawAmounts } from "./useWithdraw";
 
 export const Withdraw: React.FC = () => {
   const { setClose, base, quote, selectedLendgine } = useEarnDetails();

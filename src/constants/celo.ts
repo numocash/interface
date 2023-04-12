@@ -1,8 +1,8 @@
 import { utils } from "ethers";
 
-import { chainID } from "../lib/constants";
 import type { NumoenBaseConfig, NumoenInterfaceConfig } from ".";
 import { Stable, WrappedNative } from "./tokens";
+import { chainID } from "../lib/constants";
 
 export const celoConfig = {
   base: {

@@ -1,7 +1,7 @@
 import { CurrencyAmount } from "@uniswap/sdk-core";
 
-import type { UserTrade } from "../hooks/useUserTrades";
 import type { Lendgine } from "./types/lendgine";
+import type { UserTrade } from "../hooks/useUserTrades";
 
 export const calculateAmountBoughtAndSold = ({
   trades,

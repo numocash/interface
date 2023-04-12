@@ -3,13 +3,13 @@ import { utils } from "ethers";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
+import { useTradeDetails } from "./TradeDetailsInner";
 import { useLendgines } from "../../../hooks/useLendgines";
 import { liquidityPerCollateral } from "../../../lib/lendgineMath";
 import { invert, numoenPrice, pricePerLiquidity } from "../../../lib/price";
 import { AddressLink } from "../../../utils/beet";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
-import { useTradeDetails } from "./TradeDetailsInner";
 
 export const TotalStats: React.FC = () => {
   const { base, quote, lendgines } = useTradeDetails();

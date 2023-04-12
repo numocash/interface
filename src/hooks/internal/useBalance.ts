@@ -5,9 +5,9 @@ import * as React from "react";
 import type { FetchBalanceArgs, FetchBalanceResult } from "wagmi/actions";
 import { fetchBalance } from "wagmi/actions";
 
+import type { QueryFunctionArgs } from "./types";
 import { useEnvironment } from "../../contexts/useEnvironment";
 import { useChain } from "../useChain";
-import type { QueryFunctionArgs } from "./types";
 
 export type UseBalanceArgs = Partial<FetchBalanceArgs>;
 

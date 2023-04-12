@@ -1,12 +1,12 @@
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
+import { PositionItem } from "./PositionItem";
 import { useLendgines } from "../../../../../hooks/useLendgines";
 import { useLendginesPositions } from "../../../../../hooks/useLendginesPositions";
 import { EmptyPosition } from "../../../../common/EmptyPosition";
 import { Divider } from "../../../Trade/Loading";
 import { useEarnDetails } from "../../EarnDetailsInner";
-import { PositionItem } from "./PositionItem";
 
 export const Positions: React.FC = () => {
   const { lendgines } = useEarnDetails();

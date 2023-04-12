@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
+import { useBuy, useBuyAmounts } from "./useBuy";
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useBalance } from "../../../../hooks/useBalance";
 import { useMostLiquidMarket } from "../../../../hooks/useExternalExchange";
@@ -10,7 +11,6 @@ import { Beet } from "../../../../utils/beet";
 import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
-import { useBuy, useBuyAmounts } from "./useBuy";
 
 export const Mint: React.FC = () => {
   const environment = useEnvironment();

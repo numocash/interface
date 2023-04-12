@@ -1,10 +1,35 @@
 {
-  "extends": "@saberhq/tsconfig/tsconfig.react.json",
   "compilerOptions": {
+    // target
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "node",
+
+    // build
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "allowJs": true,
     "resolveJsonModule": true,
-    "noEmit": true
+    "downlevelIteration": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "jsx": "preserve",
+    "paths": {
+      "@/*": ["./*"]
+    },
+
+    // linting
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "noErrorTruncation": true
   },
-  "include": ["src/", "codegen.ts", "wagmi.config.ts"],
-  "exclude": ["src/generated/*", "src/gql/*", "src/generated.ts"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }

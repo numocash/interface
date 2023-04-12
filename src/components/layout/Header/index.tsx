@@ -32,7 +32,7 @@ export const Header: React.FC = () => {
 const NumoenIcon: React.FC = () => {
   return (
     <div tw="p-1.5 bg-white rounded-xl">
-      <img src="/numoen.png" alt="Numoen Logo" width={30} height={30} />
+      <img src="/numoen.svg" alt="Numoen Logo" width={30} height={30} />
     </div>
   );
 };

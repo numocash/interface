@@ -1,7 +1,7 @@
 import tw, { styled } from "twin.macro";
 
-import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 import { TokenIcon } from "./TokenIcon";
+import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 
 type IProps<T extends WrappedTokenInfo> = {
   token: T;

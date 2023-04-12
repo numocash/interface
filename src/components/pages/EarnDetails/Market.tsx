@@ -1,5 +1,5 @@
-import { TokenIcon } from "../../common/TokenIcon";
 import { useEarnDetails } from "./EarnDetailsInner";
+import { TokenIcon } from "../../common/TokenIcon";
 
 export const Market: React.FC = () => {
   const { base, quote } = useEarnDetails();

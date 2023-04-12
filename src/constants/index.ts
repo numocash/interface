@@ -1,13 +1,13 @@
 import type { NativeCurrency, Percent } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
+import { arbitrumConfig } from "./arbitrum";
+import { celoConfig } from "./celo";
+import { polygonConfig } from "./polygon";
 import type { chains } from "../AppWithProviders";
 import type { Lendgine } from "../lib/types/lendgine";
 import type { Market } from "../lib/types/market";
 import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
-import { arbitrumConfig } from "./arbitrum";
-import { celoConfig } from "./celo";
-import { polygonConfig } from "./polygon";
 
 export type SupportedChainIDs = (typeof chains)[number]["id"];
 

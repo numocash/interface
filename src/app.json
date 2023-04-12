@@ -1,8 +1,9 @@
 {
   "name": "Numoen",
   "fullName": "Numoen",
-  "description": "Permissionless Options Exchange",
+  "description": "Permissionless Derivatives Exchange",
   "url": "https://app.numoen.com",
+  "image": "https://app.numoen.com/image.png",
   "socials": {
     "twitter": "numoen",
     "github": "numoen",

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
+import { useClose, useCloseAmounts } from "./useClose";
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useBalance } from "../../../../hooks/useBalance";
 import { useMostLiquidMarket } from "../../../../hooks/useExternalExchange";
@@ -11,7 +12,6 @@ import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { useLongValue } from "../useValue";
-import { useClose, useCloseAmounts } from "./useClose";
 
 export const Burn: React.FC = () => {
   const environment = useEnvironment();

@@ -1,10 +1,10 @@
 import { NavLink } from "react-router-dom";
 
+import { LiquidStaking } from "./LiquidStaking";
+import { Markets } from "./Markets";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import { Button } from "../../common/Button";
 import { PageMargin } from "../../layout";
-import { LiquidStaking } from "./LiquidStaking";
-import { Markets } from "./Markets";
 
 export const EarnInner: React.FC = () => {
   const environment = useEnvironment();

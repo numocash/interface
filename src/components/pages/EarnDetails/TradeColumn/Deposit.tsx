@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
+import { useDeposit, useDepositAmounts } from "./useDeposit";
 import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
@@ -11,7 +12,6 @@ import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { CenterSwitch } from "../../../common/CenterSwitch";
 import { useEarnDetails } from "../EarnDetailsInner";
-import { useDeposit, useDepositAmounts } from "./useDeposit";
 
 export const Deposit: React.FC = () => {
   const { address } = useAccount();

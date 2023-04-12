@@ -3,10 +3,6 @@ import { useState } from "react";
 import invariant from "tiny-invariant";
 import { createContainer } from "unstated-next";
 
-import { pickLongLendgines, pickShortLendgines } from "../../../lib/lendgines";
-import { nextHighestLendgine, nextLowestLendgine } from "../../../lib/price";
-import type { Lendgine } from "../../../lib/types/lendgine";
-import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { Chart } from "./Chart/Chart";
 import { History } from "./History/History";
 import { Markets } from "./Markets";
@@ -16,6 +12,10 @@ import { TimeSelector } from "./TimeSelector";
 import { TotalStats } from "./TotalStats";
 import type { TradeTab } from "./TradeColumn/TradeColumn";
 import { TradeColumn } from "./TradeColumn/TradeColumn";
+import { pickLongLendgines, pickShortLendgines } from "../../../lib/lendgines";
+import { nextHighestLendgine, nextLowestLendgine } from "../../../lib/price";
+import type { Lendgine } from "../../../lib/types/lendgine";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 
 interface Props {
   base: WrappedTokenInfo;

@@ -1,9 +1,9 @@
 import type { CurrencyAmount, Percent } from "@uniswap/sdk-core";
-import { css, styled } from "twin.macro";
+import { styled } from "twin.macro";
 
+import { TokenIcon } from "./TokenIcon";
 import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 import { formatDisplayWithSoftLimit, formatPercent } from "../../utils/format";
-import { TokenIcon } from "./TokenIcon";
 
 export type IProps<T extends WrappedTokenInfo> = {
   amount: CurrencyAmount<T>;
@@ -25,15 +25,7 @@ export const TokenAmountDisplay = <T extends WrappedTokenInfo>({
 }: IProps<T>) => {
   return (
     <TokenAmountWrapper className={className}>
-      {showIcon && (
-        <TokenIcon
-          size={20}
-          css={css`
-            margin-right: 4px;
-          `}
-          token={amount.currency}
-        />
-      )}
+      {showIcon && <TokenIcon size={20} tw="mr-1" token={amount.currency} />}
 
       {formatDisplayWithSoftLimit(Number(amount.toFixed(6)), 4, 10)}
 

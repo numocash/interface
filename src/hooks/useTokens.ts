@@ -5,11 +5,11 @@ import { utils } from "ethers";
 import { useCallback } from "react";
 import invariant from "tiny-invariant";
 
+import type { HookArg } from "./internal/types";
+import { useChain } from "./useChain";
 import { useEnvironment } from "../contexts/useEnvironment";
 import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import { dedupe } from "../utils/dedupe";
-import type { HookArg } from "./internal/types";
-import { useChain } from "./useChain";
 
 export const useTokens = () => {
   const chain = useChain();

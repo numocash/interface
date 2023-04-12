@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
 import { createContainer } from "unstated-next";
 
+import { TradeInner } from "./TradeInner";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import { useAllLendgines } from "../../../hooks/useAllLendgines";
 import { lendgineToMarket } from "../../../lib/lendgineValidity";
 import type { Market } from "../../../lib/types/market";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { dedupe } from "../../../utils/dedupe";
-import { TradeInner } from "./TradeInner";
 
 interface ITrade {
   assets: readonly WrappedTokenInfo[];

@@ -2,10 +2,10 @@ import { useState } from "react";
 import { IoIosArrowDown, IoIosMore } from "react-icons/io";
 import { NavLink } from "react-router-dom";
 
-import { Drop } from "../../common/Drop";
-import { Module } from "../../common/Module";
 import { MoreInner } from "./MoreInfo";
 import { SettingsInner } from "./Settings";
+import { Drop } from "../../common/Drop";
+import { Module } from "../../common/Module";
 
 export const More: React.FC = () => {
   const [show, setShow] = useState(false);

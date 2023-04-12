@@ -4,6 +4,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { NavLink } from "react-router-dom";
 import { useVirtual } from "react-virtual";
 
+import { useTradeDetails } from "./TradeDetailsInner";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import { useAllLendgines } from "../../../hooks/useAllLendgines";
 import { lendgineToMarket } from "../../../lib/lendgineValidity";
@@ -13,7 +14,6 @@ import { Drop } from "../../common/Drop";
 import { LoadingSpinner } from "../../common/LoadingSpinner";
 import { Module } from "../../common/Module";
 import { TokenIcon } from "../../common/TokenIcon";
-import { useTradeDetails } from "./TradeDetailsInner";
 
 export const Markets: React.FC = () => {
   const { base, quote } = useTradeDetails();

@@ -1,10 +1,10 @@
 import { utils } from "ethers";
 import tw, { css } from "twin.macro";
 
+import { Trade } from "./Trade";
 import { isLongLendgine } from "../../../../lib/lendgines";
 import { useTradeDetails } from "../TradeDetailsInner";
 import { useNextLendgines } from "../useNextLendgine";
-import { Trade } from "./Trade";
 
 export const TradeTab = {
   Long: "Long",

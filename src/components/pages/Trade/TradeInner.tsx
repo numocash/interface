@@ -1,5 +1,5 @@
-import { PageMargin } from "../../layout";
 import { Markets } from "./Markets";
+import { PageMargin } from "../../layout";
 
 export const TradeInner: React.FC = () => {
   return (
