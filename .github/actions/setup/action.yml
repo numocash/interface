@@ -28,3 +28,5 @@ runs:
       shell: bash
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: pnpm i
+    - name: Generate graphql code
+      run: pnpm graphql-codegen
