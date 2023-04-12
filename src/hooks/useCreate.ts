@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
-import { Token } from "@uniswap/sdk-core";
+import type { CurrencyAmount } from "@uniswap/sdk-core";
 import type { Address } from "abitype";
 import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
@@ -12,72 +11,68 @@ import {
   writeContract,
 } from "wagmi/actions";
 
-import { toaster } from "../../../AppWithProviders";
-import { factoryABI } from "../../../abis/factory";
-import { liquidityManagerABI } from "../../../abis/liquidityManager";
-import { useSettings } from "../../../contexts/settings";
-import { useEnvironment } from "../../../contexts/useEnvironment";
-import type { HookArg } from "../../../hooks/internal/types";
-import { useInvalidateCall } from "../../../hooks/internal/useInvalidateCall";
-import { getAllowanceRead } from "../../../hooks/useAllowance";
-import { useApprove } from "../../../hooks/useApprove";
-import { useAwaitTX } from "../../../hooks/useAwaitTX";
-import { getBalanceRead } from "../../../hooks/useBalance";
-import { useChain } from "../../../hooks/useChain";
-import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
-import { getLendginePositionRead } from "../../../hooks/useLendginePosition";
-import { useIsWrappedNative } from "../../../hooks/useTokens";
-import { ONE_HUNDRED_PERCENT, scale } from "../../../lib/constants";
-import {
-  fractionToPrice,
-  priceToFraction,
-  priceToReserves,
-} from "../../../lib/price";
-import type { Lendgine } from "../../../lib/types/lendgine";
-import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
-import type { BeetStage, BeetTx, TxToast } from "../../../utils/beet";
+import type { HookArg } from "./internal/types";
+import { useInvalidateCall } from "./internal/useInvalidateCall";
+import { getAllowanceRead } from "./useAllowance";
+import { useDepositAmount } from "./useAmounts";
+import { useApprove } from "./useApprove";
+import { useAwaitTX } from "./useAwaitTX";
+import { getBalanceRead } from "./useBalance";
+import { getLendginePositionRead } from "./useLendginePosition";
+import { useIsWrappedNative } from "./useTokens";
+import { toaster } from "../AppWithProviders";
+import { factoryABI } from "../abis/factory";
+import { liquidityManagerABI } from "../abis/liquidityManager";
+import type { Protocol } from "../constants";
+import { useSettings } from "../contexts/settings";
+import { useEnvironment } from "../contexts/useEnvironment";
+import { ONE_HUNDRED_PERCENT, scale } from "../lib/constants";
+import { priceToFraction } from "../lib/price";
+import type { Lendgine } from "../lib/types/lendgine";
+import type { BeetStage, BeetTx, TxToast } from "../utils/beet";
 
-export const useCreate = ({
-  token0Input,
-  token1Input,
-  bound,
-}: {
-  token0Input: HookArg<CurrencyAmount<WrappedTokenInfo>>;
-  token1Input: HookArg<CurrencyAmount<WrappedTokenInfo>>;
-  bound: HookArg<Fraction>;
-}) => {
+export const useCreate = <L extends Lendgine>(
+  lendgine: HookArg<L>,
+  amount:
+    | HookArg<CurrencyAmount<L["token0"]>>
+    | HookArg<CurrencyAmount<L["token1"]>>,
+  protocol: Protocol
+) => {
   const environment = useEnvironment();
+  const protocolConfig = environment.procotol[protocol]!;
+
   const settings = useSettings();
   const { address } = useAccount();
-  const chainID = useChain();
 
   const awaitTX = useAwaitTX();
   const invalidate = useInvalidateCall();
   const queryClient = useQueryClient();
 
-  const priceQuery = useMostLiquidMarket(
-    !!token0Input && !!token1Input
-      ? { quote: token0Input.currency, base: token1Input.currency }
-      : null
+  const native0 = useIsWrappedNative(lendgine?.token0);
+  const native1 = useIsWrappedNative(lendgine?.token1);
+
+  const depositAmount = useDepositAmount(lendgine, amount, protocol);
+
+  const approve0 = useApprove(
+    depositAmount.amount0,
+    protocolConfig.liquidityManager
   );
-
-  const native0 = useIsWrappedNative(token0Input?.currency);
-  const native1 = useIsWrappedNative(token1Input?.currency);
-
-  const approve0 = useApprove(token0Input, environment.base.liquidityManager);
-  const approve1 = useApprove(token1Input, environment.base.liquidityManager);
+  const approve1 = useApprove(
+    depositAmount.amount1,
+    protocolConfig.liquidityManager
+  );
 
   const liquidityManagerContract = getContract({
     abi: liquidityManagerABI,
-    address: environment.base.liquidityManager,
+    address: protocolConfig.liquidityManager,
   });
 
-  const createTitle = `New ${token1Input?.currency.symbol ?? ""} + ${
-    token0Input?.currency.symbol ?? ""
+  const createTitle = `New ${lendgine?.token0.symbol ?? ""} + ${
+    lendgine?.token1.symbol ?? ""
   } market`;
 
-  const title = `Add ${token0Input?.currency.symbol ?? ""} / ${
-    token1Input?.currency.symbol ?? ""
+  const title = `Add ${lendgine?.token0.symbol ?? ""} / ${
+    lendgine?.token1.symbol ?? ""
   } liquidty`;
 
   const approve0Mutation = useMutation({
@@ -97,12 +92,12 @@ export const useCreate = ({
     onError: (_, { toast }) => toaster.txError(toast),
     onSuccess: async (data, input) => {
       toaster.txSuccess({ ...input.toast, receipt: data });
-      token0Input &&
+      lendgine &&
         (await invalidate(
           getAllowanceRead(
-            token0Input.currency,
+            lendgine.token0,
             address ?? constants.AddressZero,
-            environment.base.lendgineRouter
+            protocolConfig.liquidityManager
           )
         ));
     },
@@ -125,12 +120,12 @@ export const useCreate = ({
     onError: (_, { toast }) => toaster.txError(toast),
     onSuccess: async (data, input) => {
       toaster.txSuccess({ ...input.toast, receipt: data });
-      token1Input &&
+      lendgine &&
         (await invalidate(
           getAllowanceRead(
-            token1Input.currency,
+            lendgine.token1,
             address ?? constants.AddressZero,
-            environment.base.lendgineRouter
+            protocolConfig.liquidityManager
           )
         ));
     },
@@ -154,7 +149,7 @@ export const useCreate = ({
       const config = await prepareWriteContract({
         abi: factoryABI,
         functionName: "createLendgine",
-        address: environment.base.factory,
+        address: protocolConfig.factory,
         args: createArgs,
       });
       const transaction = await writeContract(config);
@@ -174,17 +169,21 @@ export const useCreate = ({
   const depositMutation = useMutation({
     mutationFn: async ({
       lendgine,
+      amount0,
+      amount1,
       liquidity,
-      token0Input,
-      token1Input,
+      size,
+
       address,
 
       toast,
     }: {
       lendgine: Lendgine;
-      liquidity: CurrencyAmount<Token>;
-      token0Input: CurrencyAmount<WrappedTokenInfo>;
-      token1Input: CurrencyAmount<WrappedTokenInfo>;
+      amount0: CurrencyAmount<L["token0"]>;
+      amount1: CurrencyAmount<L["token1"]>;
+      liquidity: CurrencyAmount<L["lendgine"]>;
+      size: CurrencyAmount<L["lendgine"]>;
+
       address: Address;
     } & {
       toast: TxToast;
@@ -201,10 +200,10 @@ export const useCreate = ({
           liquidity: BigNumber.from(
             liquidity.multiply(999990).divide(1000000).quotient.toString()
           ),
-          amount0Min: BigNumber.from(token0Input.quotient.toString()),
-          amount1Min: BigNumber.from(token1Input.quotient.toString()),
+          amount0Min: BigNumber.from(amount0.quotient.toString()),
+          amount1Min: BigNumber.from(amount1.quotient.toString()),
           sizeMin: BigNumber.from(
-            liquidity
+            size
               .multiply(
                 ONE_HUNDRED_PERCENT.subtract(settings.maxSlippagePercent)
               )
@@ -223,7 +222,7 @@ export const useCreate = ({
               const config = await prepareWriteContract({
                 abi: liquidityManagerABI,
                 functionName: "multicall",
-                address: environment.base.liquidityManager,
+                address: protocolConfig.liquidityManager,
                 args: [
                   [
                     liquidityManagerContract.interface.encodeFunctionData(
@@ -237,8 +236,8 @@ export const useCreate = ({
                 ],
                 overrides: {
                   value: native0
-                    ? BigNumber.from(token0Input?.quotient.toString() ?? 0)
-                    : BigNumber.from(token1Input?.quotient.toString() ?? 0),
+                    ? BigNumber.from(amount0.quotient.toString() ?? 0)
+                    : BigNumber.from(amount1.quotient.toString() ?? 0),
                 },
               });
               const data = await writeContract(config);
@@ -248,7 +247,7 @@ export const useCreate = ({
               const config = await prepareWriteContract({
                 abi: liquidityManagerABI,
                 functionName: "addLiquidity",
-                address: environment.base.liquidityManager,
+                address: protocolConfig.liquidityManager,
                 args,
               });
               const data = await writeContract(config);
@@ -270,56 +269,44 @@ export const useCreate = ({
           getLendginePositionRead(
             input.lendgine,
             input.address,
-            environment.base.liquidityManager
+            protocolConfig.liquidityManager
           )
         ),
         invalidate(
           getAllowanceRead(
-            input.token0Input.currency,
+            input.amount0.currency,
             input.address,
-            environment.base.liquidityManager
+            protocolConfig.liquidityManager
           )
         ),
         invalidate(
           getAllowanceRead(
-            input.token1Input.currency,
+            input.amount1.currency,
             input.address,
-            environment.base.liquidityManager
+            protocolConfig.liquidityManager
           )
         ),
-        invalidate(getBalanceRead(input.token0Input.currency, input.address)),
-        invalidate(getBalanceRead(input.token1Input.currency, input.address)),
+        invalidate(getBalanceRead(input.amount0.currency, input.address)),
+        invalidate(getBalanceRead(input.amount1.currency, input.address)),
       ]);
     },
   });
 
   return useMemo(() => {
-    if (approve0.status === "loading" || approve1.status === "loading")
+    if (
+      approve0.status === "loading" ||
+      approve1.status === "loading" ||
+      depositAmount.status === "loading"
+    )
       return { status: "loading" } as const;
     if (
-      !token0Input ||
-      !token1Input ||
+      !lendgine ||
+      depositAmount.status === "error" ||
       !address ||
-      !priceQuery.data ||
-      !bound ||
       approve0.status === "error" ||
       approve1.status === "error"
     )
       return { status: "error" } as const;
-
-    const lendgine: Lendgine = {
-      token0: token0Input.currency,
-      token0Exp: token0Input.currency.decimals,
-      token1: token1Input.currency,
-      token1Exp: token1Input.currency.decimals,
-      lendgine: new Token(chainID, constants.AddressZero, 18),
-      address: constants.AddressZero,
-      bound: fractionToPrice(bound, token1Input.currency, token0Input.currency),
-    };
-
-    const { token0Amount } = priceToReserves(lendgine, priceQuery.data.price);
-
-    const liquidity = token0Amount.invert().quote(token0Input);
 
     return {
       status: "success",
@@ -368,10 +355,8 @@ export const useCreate = ({
                 description: title,
                 callback: (toast: TxToast) =>
                   depositMutation.mutateAsync({
-                    token0Input,
-                    token1Input,
+                    ...depositAmount,
                     address,
-                    liquidity,
                     lendgine,
                     toast,
                   }),
@@ -391,75 +376,13 @@ export const useCreate = ({
     approve1.title,
     approve1.tx,
     approve1Mutation,
-    bound,
-    chainID,
     createMutation,
     createTitle,
+    depositAmount,
     depositMutation,
+    lendgine,
     native0,
     native1,
-    priceQuery.data,
     title,
-    token0Input,
-    token1Input,
   ]);
-};
-
-export const useDepositAmounts = ({
-  amount,
-  token0,
-  token1,
-  bound,
-}: {
-  amount: HookArg<CurrencyAmount<WrappedTokenInfo>>;
-  token0: HookArg<WrappedTokenInfo>;
-  token1: HookArg<WrappedTokenInfo>;
-  bound: HookArg<Fraction>;
-}) => {
-  const chainID = useChain();
-
-  const priceQuery = useMostLiquidMarket(
-    !!token0 && !!token1 ? { base: token1, quote: token0 } : null
-  );
-  return useMemo(() => {
-    if (!amount || !token0 || !token1 || !bound) return {};
-    if (!priceQuery.data)
-      return {
-        token0Input: amount.currency.equals(token0) ? amount : undefined,
-        token1Input: amount.currency.equals(token1) ? amount : undefined,
-      };
-
-    if (priceToFraction(priceQuery.data.price).greaterThan(bound))
-      return {
-        token0Input: amount.currency.equals(token0) ? amount : undefined,
-        token1Input: amount.currency.equals(token1) ? amount : undefined,
-      };
-
-    const lendgine: Lendgine = {
-      token0,
-      token0Exp: token0.decimals,
-      token1,
-      token1Exp: token1.decimals,
-      lendgine: new Token(chainID, constants.AddressZero, 18),
-      address: constants.AddressZero,
-      bound: fractionToPrice(bound, token1, token0),
-    };
-
-    const { token0Amount, token1Amount } = priceToReserves(
-      lendgine,
-      priceQuery.data.price
-    );
-
-    const liquidity = amount.currency.equals(lendgine.token0)
-      ? token0Amount.invert().quote(amount)
-      : token1Amount.invert().quote(amount);
-
-    const token0Input = token0Amount.quote(liquidity);
-    const token1Input = token1Amount.quote(liquidity);
-
-    return {
-      token0Input,
-      token1Input,
-    };
-  }, [amount, bound, chainID, priceQuery.data, token0, token1]);
 };

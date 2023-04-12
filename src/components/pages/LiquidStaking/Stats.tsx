@@ -1,66 +1,52 @@
-import { useMemo } from "react";
-
-import { useLPReturns, useLongReturns } from "./useReturns";
-import { useLPValue, useLongValue } from "./useValue";
+import { useLongReturns } from "./useReturns";
 import { useEnvironment } from "../../../contexts/useEnvironment";
-import { useLendgine } from "../../../hooks/useLendgine";
+import { useTotalValue, useValue } from "../../../hooks/useValue";
 import { formatPercent } from "../../../utils/format";
 import { LoadingSpinner } from "../../common/LoadingSpinner";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
 
 export const Stats: React.FC = () => {
   const environment = useEnvironment();
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const staking = environment.interface.liquidStaking!;
 
-  const longAPR = useLongReturns();
-  const lpAPR = useLPReturns();
+  const userValueQuery = useValue(staking.lendgine, "stpmmp");
+  const totalValueQuery = useTotalValue(staking.lendgine, "stpmmp");
 
-  const maxAPR = useMemo(
-    () =>
-      !longAPR.totalAPR || !lpAPR.totalAPR
-        ? undefined
-        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        longAPR.totalAPR?.greaterThan(lpAPR.totalAPR)
-        ? longAPR.totalAPR
-        : lpAPR.totalAPR,
-    [longAPR, lpAPR]
-  );
-
-  const lendgineInfoQuery = useLendgine(staking.lendgine);
-  const longTVL = useLongValue(lendgineInfoQuery.data?.totalSupply);
-  const lpTVL = useLPValue(
-    lendgineInfoQuery.data
-      ? { size: lendgineInfoQuery.data?.totalPositionSize }
-      : null
-  );
-
-  const tvl = useMemo(
-    () =>
-      !longTVL.value || !lpTVL.value
-        ? undefined
-        : longTVL.value?.add(lpTVL.value),
-    [longTVL.value, lpTVL.value]
-  );
+  const longAPRQuery = useLongReturns();
 
   return (
     <div tw="flex w-full justify-around">
       <Item
         label="Total deposited"
         item={
-          tvl ? (
-            <TokenAmountDisplay amount={tvl} showSymbol />
+          totalValueQuery.value ? (
+            <TokenAmountDisplay amount={totalValueQuery.value} showSymbol />
           ) : (
             <LoadingSpinner />
           )
         }
       />
-      <Item label="Staking APR" item={formatPercent(staking.return)} />
+      {/* <Item label="Staking APR" item={formatPercent(staking.return)} /> */}
       <Item
-        label="Max APR"
-        item={maxAPR ? formatPercent(maxAPR) : <LoadingSpinner />}
+        label="APR"
+        item={
+          longAPRQuery.status === "success" ? (
+            formatPercent(longAPRQuery.data.totalAPR)
+          ) : (
+            <LoadingSpinner />
+          )
+        }
       />
-      {/* <Item label="Balance" item={"0 MATIC"} /> */}
+      <Item
+        label="Balance"
+        item={
+          userValueQuery.value ? (
+            <TokenAmountDisplay amount={userValueQuery.value} showSymbol />
+          ) : (
+            <LoadingSpinner />
+          )
+        }
+      />
     </div>
   );
 };

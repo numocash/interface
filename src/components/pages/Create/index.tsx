@@ -5,11 +5,12 @@ import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 import { useAccount } from "wagmi";
 
-import { useCreate, useDepositAmounts } from "./useCreate";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import { useAllLendgines } from "../../../hooks/useAllLendgines";
+import { useDepositAmount } from "../../../hooks/useAmounts";
 import { useBalance } from "../../../hooks/useBalance";
 import { useChain } from "../../../hooks/useChain";
+import { useCreate } from "../../../hooks/useCreate";
 import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useTokens } from "../../../hooks/useTokens";
 import { isValidLendgine } from "../../../lib/lendgineValidity";
@@ -35,7 +36,7 @@ export const Create: React.FC = () => {
   const chainID = useChain();
 
   const tokens = useTokens();
-  const lendgines = useAllLendgines();
+  const lendginesQuery = useAllLendgines();
 
   const [token0, setToken0] = useState<WrappedTokenInfo | undefined>(undefined);
   const [token1, setToken1] = useState<WrappedTokenInfo | undefined>(undefined);
@@ -50,16 +51,6 @@ export const Create: React.FC = () => {
   const priceQuery = useMostLiquidMarket(
     !!token0 && !!token1 ? { quote: token0, base: token1 } : null
   );
-
-  const { token0Input: token0InputAmount, token1Input: token1InputAmount } =
-    useDepositAmounts({
-      amount:
-        tryParseCurrencyAmount(token0Input, token0) ??
-        tryParseCurrencyAmount(token1Input, token1),
-      token0,
-      token1,
-      bound,
-    });
 
   const lendgine = useMemo(
     () =>
@@ -77,11 +68,18 @@ export const Create: React.FC = () => {
     [bound, chainID, token0, token1]
   );
 
-  const create = useCreate({
-    token0Input: token0InputAmount,
-    token1Input: token1InputAmount,
-    bound,
-  });
+  const depositAmount = useDepositAmount(
+    lendgine,
+    tryParseCurrencyAmount(token0Input, token0) ??
+      tryParseCurrencyAmount(token1Input, token1),
+    "pmmp"
+  );
+  const create = useCreate(
+    lendgine,
+    tryParseCurrencyAmount(token0Input, token0) ??
+      tryParseCurrencyAmount(token1Input, token1),
+    "pmmp"
+  );
 
   const onInput = useCallback((value: string, field: "token0" | "token1") => {
     field === "token0" ? setToken0Input(value) : setToken1Input(value);
@@ -102,8 +100,10 @@ export const Create: React.FC = () => {
     () =>
       !token0 || !token1
         ? "Select a token"
-        : !priceQuery.data || lendgines === null
+        : !priceQuery.data
         ? "Loading"
+        : priceToFraction(priceQuery.data.price).greaterThan(bound)
+        ? "Bound can't be below current price"
         : !lendgine ||
           !isValidLendgine(
             lendgine,
@@ -111,39 +111,47 @@ export const Create: React.FC = () => {
             environment.interface.specialtyMarkets
           )
         ? "Does not conform to the rules of valid markets"
-        : priceToFraction(priceQuery.data.price).greaterThan(bound)
-        ? "Bound can't be below current price"
-        : !token0InputAmount || !token1InputAmount
+        : !token0Input && !token1Input
         ? "Enter an amount"
-        : lendgines.find(
+        : !tryParseCurrencyAmount(token0Input, token0) ??
+          !tryParseCurrencyAmount(token1Input, token1)
+        ? "Invalid amount"
+        : lendginesQuery.status !== "success"
+        ? "Loading"
+        : lendginesQuery.lendgines.find(
             (l) =>
               l.token0.equals(token0) &&
               l.token1.equals(token1) &&
               l.bound.equalTo(fractionToPrice(bound, token1, token0))
           )
         ? " Market already exists"
-        : (token0Balance.data &&
-            token0InputAmount.greaterThan(token0Balance.data)) ||
-          (token1Balance.data &&
-            token1InputAmount.greaterThan(token1Balance.data))
-        ? "Insufficient amount"
-        : create.status !== "success"
+        : depositAmount.status !== "success" ||
+          create.status !== "success" ||
+          !token0Balance.data ||
+          !token1Balance.data
         ? "Loading"
+        : depositAmount.amount0.greaterThan(token0Balance.data) ||
+          depositAmount.amount1.greaterThan(token1Balance.data)
+        ? "Insufficient amount"
         : null,
     [
       bound,
       create.status,
+      depositAmount.amount0,
+      depositAmount.amount1,
+      depositAmount.status,
       environment.interface.specialtyMarkets,
       environment.interface.wrappedNative,
       lendgine,
-      lendgines,
+      lendginesQuery.lendgines,
+      lendginesQuery.status,
       priceQuery.data,
       token0,
       token0Balance.data,
-      token0InputAmount,
+      token0Input,
       token1,
       token1Balance.data,
-      token1InputAmount,
+      token1Input,
     ]
   );
 
@@ -174,11 +182,11 @@ export const Create: React.FC = () => {
             tw="pb-4"
             onSelect={setToken1}
             tokens={removeToken0}
-            selectedValue={token1 ?? null}
+            selectedValue={token1}
             label="Long"
             inputValue={
               token1Input === ""
-                ? token1InputAmount?.toSignificant(5) ?? "" // TODO: use smart currency formatter
+                ? depositAmount.amount1?.toSignificant(5) ?? "" // TODO: use smart currency formatter
                 : token1Input
             }
             inputOnChange={(value) => {
@@ -196,11 +204,11 @@ export const Create: React.FC = () => {
             tw="pb-4"
             onSelect={setToken0}
             tokens={removeToken1}
-            selectedValue={token0 ?? null}
+            selectedValue={token0}
             label="Short"
             inputValue={
               token0Input === ""
-                ? token0InputAmount?.toSignificant(5) ?? ""
+                ? depositAmount.amount0?.toSignificant(5) ?? ""
                 : token0Input
             }
             inputOnChange={(value) => {

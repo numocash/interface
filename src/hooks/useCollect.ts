@@ -10,52 +10,49 @@ import {
   writeContract,
 } from "wagmi/actions";
 
-import { toaster } from "../../../../AppWithProviders";
-import { liquidityManagerABI } from "../../../../abis/liquidityManager";
-import { useEnvironment } from "../../../../contexts/useEnvironment";
-import { useInvalidateCall } from "../../../../hooks/internal/useInvalidateCall";
-import { useAwaitTX } from "../../../../hooks/useAwaitTX";
-import { getBalanceRead } from "../../../../hooks/useBalance";
-import { getLendginePositionRead } from "../../../../hooks/useLendginePosition";
-import { useIsWrappedNative } from "../../../../hooks/useTokens";
-import {
-  accruedLendgineInfo,
-  accruedLendginePositionInfo,
-  getT,
-} from "../../../../lib/lendgineMath";
-import type {
-  Lendgine,
-  LendgineInfo,
-  LendginePosition,
-} from "../../../../lib/types/lendgine";
-import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
-import type { BeetStage, TxToast } from "../../../../utils/beet";
+import type { HookArg } from "./internal/types";
+import { useInvalidateCall } from "./internal/useInvalidateCall";
+import { useCollectAmount } from "./useAmounts";
+import { useAwaitTX } from "./useAwaitTX";
+import { getBalanceRead } from "./useBalance";
+import { getLendginePositionRead } from "./useLendginePosition";
+import { useIsWrappedNative } from "./useTokens";
+import { toaster } from "../AppWithProviders";
+import { liquidityManagerABI } from "../abis/liquidityManager";
+import type { Protocol } from "../constants";
+import { useEnvironment } from "../contexts/useEnvironment";
+import type { Lendgine, LendginePosition } from "../lib/types/lendgine";
+import type { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
+import type { BeetStage, TxToast } from "../utils/beet";
 
-export const useCollect = ({
-  lendgine,
-  lendgineInfo,
-  position,
-}: {
-  lendgine: Lendgine;
-  lendgineInfo: LendgineInfo<Lendgine>;
-  position: LendginePosition<Lendgine>;
-}) => {
+export const useCollect = <L extends Lendgine>(
+  lendgine: HookArg<L>,
+  position: HookArg<LendginePosition<L>>,
+  protocol: Protocol
+) => {
   const environment = useEnvironment();
+  const protolConfig = environment.procotol[protocol]!;
   const { address } = useAccount();
-  const t = getT();
 
   const awaitTX = useAwaitTX();
   const invalidate = useInvalidateCall();
 
-  const native = useIsWrappedNative(lendgine.token1);
+  const native = useIsWrappedNative(lendgine?.token1);
   const title = "Collect interest";
+
+  const collectAmount = useCollectAmount(lendgine, position, protocol);
 
   const mutate = useMutation({
     mutationFn: async ({
+      lendgine,
       address,
       tokensOwed,
       toast,
-    }: { tokensOwed: CurrencyAmount<WrappedTokenInfo>; address: Address } & {
+    }: {
+      lendgine: Lendgine;
+      tokensOwed: CurrencyAmount<WrappedTokenInfo>;
+      address: Address;
+    } & {
       toast: TxToast;
     }) => {
       const args = [
@@ -70,14 +67,14 @@ export const useCollect = ({
 
       const liquidityManagerContract = getContract({
         abi: liquidityManagerABI,
-        address: environment.base.liquidityManager,
+        address: protolConfig.liquidityManager,
       });
 
       const tx = native
         ? async () => {
             const config = await prepareWriteContract({
               abi: liquidityManagerABI,
-              address: environment.base.liquidityManager,
+              address: protolConfig.liquidityManager,
               functionName: "multicall",
               args: [
                 [
@@ -97,7 +94,7 @@ export const useCollect = ({
         : async () => {
             const config = await prepareWriteContract({
               abi: liquidityManagerABI,
-              address: environment.base.liquidityManager,
+              address: protolConfig.liquidityManager,
               functionName: "collect",
               args,
             });
@@ -114,23 +111,25 @@ export const useCollect = ({
     onError: (_, { toast }) => toaster.txError(toast),
     onSuccess: async (data, input) => {
       toaster.txSuccess({ ...input.toast, receipt: data });
-      await Promise.all([
-        invalidate(
-          getLendginePositionRead(
-            lendgine,
-            input.address,
-            environment.base.liquidityManager
-          )
-        ),
-        invalidate(getBalanceRead(lendgine.token1, input.address)),
-      ]);
+      lendgine &&
+        (await Promise.all([
+          invalidate(
+            getLendginePositionRead(
+              lendgine,
+              input.address,
+              protolConfig.liquidityManager
+            )
+          ),
+          invalidate(getBalanceRead(lendgine.token1, input.address)),
+        ]));
     },
   });
 
   return useMemo(() => {
-    if (!address) return { status: "error" } as const;
-    const updatedInfo = accruedLendgineInfo(lendgine, lendgineInfo, t);
-    const updatedPosition = accruedLendginePositionInfo(updatedInfo, position);
+    if (collectAmount.status === "loading")
+      return { status: "loading" } as const;
+    if (!address || !lendgine || collectAmount.status !== "success")
+      return { status: "error" } as const;
 
     return {
       status: "success",
@@ -143,7 +142,8 @@ export const useCollect = ({
               description: title,
               callback: (toast: TxToast) =>
                 mutate.mutateAsync({
-                  tokensOwed: updatedPosition.tokensOwed,
+                  lendgine,
+                  tokensOwed: collectAmount.tokensOwed,
                   address: address,
                   toast,
                 }),
@@ -152,5 +152,11 @@ export const useCollect = ({
         },
       ],
     } as const satisfies { data: readonly BeetStage[]; status: "success" };
-  }, [address, lendgine, lendgineInfo, mutate, position, t]);
+  }, [
+    address,
+    collectAmount.status,
+    collectAmount.tokensOwed,
+    lendgine,
+    mutate,
+  ]);
 };

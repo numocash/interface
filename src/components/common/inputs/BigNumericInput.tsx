@@ -60,23 +60,18 @@ const StyledInput = styled.input<{
   disabled?: boolean;
 }>`
   outline: none;
-  &::active {
+  &:active {
     border: none;
     outline: none;
   }
   border: none;
-  width: 0;
   flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 100%;
 
   ${tw` text-[#8f8f8f]`}
 
-  font-weight: 400;
-  font-size: 24px;
-
-  &::placeholder {
+  &:placeholder {
     color: #888;
   }
 

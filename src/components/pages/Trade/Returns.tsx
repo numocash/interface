@@ -11,16 +11,15 @@ import { bisect } from "d3-array";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
-import { useTradeDetails } from "./TradeDetailsInner";
-import { isLongLendgine } from "../../../lib/lendgines";
+import type { Lendgine } from "../../../lib/types/lendgine";
+
 import { formatPercent } from "../../../utils/format";
 
-export const Returns: React.FC = () => {
-  const { quote, base, selectedLendgine } = useTradeDetails();
-  const long = useMemo(
-    () => isLongLendgine(selectedLendgine, base),
-    [base, selectedLendgine]
-  );
+interface Props {
+  lendgine: Lendgine;
+}
+
+export const Returns: React.FC<Props> = ({ lendgine }: Props) => {
   const min = -0.75;
   const max = 1.5;
   const points = 300;
@@ -42,7 +41,7 @@ export const Returns: React.FC = () => {
     .fill(null)
     .map((_, i) => ((max - min) * i) / points + min);
   // TODO: account for bounds
-  const optionReturns = (r: number) => (long ? r * r + 2 * r : 1 / (r + 1) - 1);
+  const optionReturns = (r: number) => r * r + 2 * r;
 
   const data: [number, number][] = baseReturns.map((b) => [
     b,
@@ -98,7 +97,7 @@ export const Returns: React.FC = () => {
   const derivReturns = new Percent(Math.round(displayPoint[1] * 100), 100);
 
   return (
-    <div tw="w-full flex flex-col gap-1 bg-white border rounded-xl border-gray-200 p-6 shadow">
+    <div tw="w-full flex flex-col gap-1">
       <p tw="text-xl font-semibold">Expected Profit and Loss</p>
       {derivReturns.lessThan(0) ? (
         <p tw="font-semibold text-red text-lg">{formatPercent(derivReturns)}</p>
@@ -183,7 +182,7 @@ export const Returns: React.FC = () => {
         }}
       </ParentSize>
       <p tw="pt-4">
-        {quote.symbol} / {base.symbol} price
+        {lendgine.token0.symbol} / {lendgine.token1.symbol} price
       </p>
       {underlyingReturns.lessThan(0) ? (
         <p tw="text-secondary text-sm">{formatPercent(underlyingReturns)}</p>

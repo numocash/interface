@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import type { CurrencyAmount, Token } from "@uniswap/sdk-core";
+import type { CurrencyAmount } from "@uniswap/sdk-core";
 import type { Address } from "abitype";
 import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
@@ -10,68 +10,55 @@ import {
   writeContract,
 } from "wagmi/actions";
 
-import { accruedLendgineInfo } from "./math";
-import { toaster } from "../../../../AppWithProviders";
-import { liquidityManagerABI } from "../../../../abis/liquidityManager";
-import { useSettings } from "../../../../contexts/settings";
-import { useEnvironment } from "../../../../contexts/useEnvironment";
-import type { HookArg } from "../../../../hooks/internal/types";
-import { useInvalidateCall } from "../../../../hooks/internal/useInvalidateCall";
-import { useAwaitTX } from "../../../../hooks/useAwaitTX";
-import { getBalanceRead } from "../../../../hooks/useBalance";
-import { useLendgine } from "../../../../hooks/useLendgine";
-import {
-  getLendginePositionRead,
-  useLendginePosition,
-} from "../../../../hooks/useLendginePosition";
-import { useIsWrappedNative } from "../../../../hooks/useTokens";
-import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
-import { getT, liquidityPerPosition } from "../../../../lib/lendgineMath";
-import { priceToFraction } from "../../../../lib/price";
-import type {
-  Lendgine,
-  LendginePosition,
-} from "../../../../lib/types/lendgine";
-import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
-import type { BeetStage, TxToast } from "../../../../utils/beet";
+import type { HookArg } from "./internal/types";
+import { useInvalidateCall } from "./internal/useInvalidateCall";
+import { useWithdrawAmount } from "./useAmounts";
+import { useAwaitTX } from "./useAwaitTX";
+import { getBalanceRead } from "./useBalance";
+import { getLendginePositionRead } from "./useLendginePosition";
+import { useIsWrappedNative } from "./useTokens";
+import { toaster } from "../AppWithProviders";
+import { liquidityManagerABI } from "../abis/liquidityManager";
+import type { Protocol } from "../constants";
+import { useSettings } from "../contexts/settings";
+import { useEnvironment } from "../contexts/useEnvironment";
+import { ONE_HUNDRED_PERCENT, scale } from "../lib/constants";
+import { priceToFraction } from "../lib/price";
+import type { Lendgine, LendginePosition } from "../lib/types/lendgine";
+import type { BeetStage, TxToast } from "../utils/beet";
 
-export const useWithdraw = ({
-  size,
-  amount0,
-  amount1,
-}: {
-  size: HookArg<CurrencyAmount<Token>>;
-  amount0: HookArg<CurrencyAmount<WrappedTokenInfo>>;
-  amount1: HookArg<CurrencyAmount<WrappedTokenInfo>>;
-}) => {
-  const environment = useEnvironment();
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const base = environment.interface.liquidStaking!.base;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const lendgine = environment.interface.liquidStaking!.lendgine;
-
+export const useWithdraw = <L extends Lendgine>(
+  lendgine: HookArg<L>,
+  position: HookArg<Pick<LendginePosition<L>, "size">>,
+  protocol: Protocol
+) => {
   const settings = useSettings();
+  const environment = useEnvironment();
+  const protocolConfig = environment.procotol[protocol]!;
+
   const { address } = useAccount();
   const awaitTX = useAwaitTX();
   const invalidate = useInvalidateCall();
 
-  const native0 = useIsWrappedNative(lendgine.token0);
-  const native1 = useIsWrappedNative(lendgine.token1);
+  const native0 = useIsWrappedNative(lendgine?.token0);
+  const native1 = useIsWrappedNative(lendgine?.token1);
 
-  const title = useMemo(
-    () =>
-      `Remove ${lendgine.token0.symbol} / ${lendgine.token1.symbol} liquidty`,
-    [lendgine.token0.symbol, lendgine.token1.symbol]
-  );
+  const withdrawAmount = useWithdrawAmount(lendgine, position, protocol);
+
+  const title = `Remove ${lendgine?.token0.symbol ?? ""} / ${
+    lendgine?.token1.symbol ?? ""
+  } liquidty`;
 
   const mutation = useMutation({
     mutationFn: async ({
+      lendgine,
       amount0,
       amount1,
       size,
       address,
       toast,
     }: {
+      lendgine: Lendgine;
       amount0: CurrencyAmount<Lendgine["token0"]>;
       amount1: CurrencyAmount<Lendgine["token1"]>;
       size: LendginePosition<Lendgine>["size"];
@@ -117,7 +104,7 @@ export const useWithdraw = ({
 
       const liquidityManagerContract = getContract({
         abi: liquidityManagerABI,
-        address: base.liquidityManager,
+        address: protocolConfig.liquidityManager,
       });
 
       const tx =
@@ -126,7 +113,7 @@ export const useWithdraw = ({
               const config = await prepareWriteContract({
                 abi: liquidityManagerABI,
                 functionName: "multicall",
-                address: base.liquidityManager,
+                address: protocolConfig.liquidityManager,
                 args: [
                   [
                     liquidityManagerContract.interface.encodeFunctionData(
@@ -151,7 +138,7 @@ export const useWithdraw = ({
               const config = await prepareWriteContract({
                 abi: liquidityManagerABI,
                 functionName: "removeLiquidity",
-                address: base.liquidityManager,
+                address: protocolConfig.liquidityManager,
                 args,
               });
               const data = await writeContract(config);
@@ -170,22 +157,30 @@ export const useWithdraw = ({
     onError: (_, { toast }) => toaster.txError(toast),
     onSuccess: async (data, input) => {
       toaster.txSuccess({ ...input.toast, receipt: data });
-      await Promise.all([
-        invalidate(
-          getLendginePositionRead(
-            lendgine,
-            input.address,
-            base.liquidityManager
-          )
-        ),
-        invalidate(getBalanceRead(input.amount0.currency, input.address)),
-        invalidate(getBalanceRead(input.amount1.currency, input.address)),
-      ]);
+      lendgine &&
+        (await Promise.all([
+          invalidate(
+            getLendginePositionRead(
+              lendgine,
+              input.address,
+              protocolConfig.liquidityManager
+            )
+          ),
+          invalidate(getBalanceRead(input.amount0.currency, input.address)),
+          invalidate(getBalanceRead(input.amount1.currency, input.address)),
+        ]));
     },
   });
 
   return useMemo(() => {
-    if (!size || !address || !amount0 || !amount1)
+    if (withdrawAmount.status === "loading")
+      return { status: "loading" } as const;
+    if (
+      !address ||
+      withdrawAmount.status !== "success" ||
+      !lendgine ||
+      !position
+    )
       return { status: "error" } as const;
 
     return {
@@ -199,9 +194,9 @@ export const useWithdraw = ({
               description: title,
               callback: (toast: TxToast) =>
                 mutation.mutateAsync({
-                  amount0,
-                  amount1,
-                  size,
+                  lendgine,
+                  ...withdrawAmount,
+                  size: position.size,
                   address,
                   toast,
                 }),
@@ -210,49 +205,5 @@ export const useWithdraw = ({
         },
       ],
     } as const satisfies { data: readonly BeetStage[]; status: "success" };
-  }, [address, amount0, amount1, mutation, size, title]);
-};
-
-export const useWithdrawAmounts = ({
-  withdrawPercent,
-}: {
-  withdrawPercent: HookArg<number>;
-}) => {
-  const environment = useEnvironment();
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const lendgine = environment.interface.liquidStaking!.lendgine;
-  const { address } = useAccount();
-  const position = useLendginePosition(
-    lendgine,
-    address,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    environment.interface.liquidStaking!.base.liquidityManager
-  );
-  const lendgineInfoQuery = useLendgine(lendgine);
-  const t = getT();
-
-  return useMemo(() => {
-    if (!position.data || !withdrawPercent || !lendgineInfoQuery.data)
-      return {};
-
-    const size = position.data.size.multiply(withdrawPercent).divide(100);
-    const updatedLendgineInfo = accruedLendgineInfo(
-      lendgine,
-      lendgineInfoQuery.data,
-      t
-    );
-
-    const liqPerPosition = liquidityPerPosition(lendgine, updatedLendgineInfo);
-    const liquidity = liqPerPosition.quote(size);
-
-    const amount0 = updatedLendgineInfo.reserve0
-      .multiply(liquidity)
-      .divide(updatedLendgineInfo.totalLiquidity);
-
-    const amount1 = updatedLendgineInfo.reserve1
-      .multiply(liquidity)
-      .divide(updatedLendgineInfo.totalLiquidity);
-
-    return { size, liquidity, amount0, amount1 };
-  }, [lendgineInfoQuery.data, position.data, lendgine, t, withdrawPercent]);
+  }, [address, lendgine, mutation, position, title, withdrawAmount]);
 };
