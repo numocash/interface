@@ -2,6 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Fraction, Token } from "@uniswap/sdk-core";
 import { useCallback, useMemo } from "react";
 
+import { userRefectchInterval } from "./internal/utils";
+import { useChain } from "./useChain";
+import { useClient } from "./useClient";
+import { useGetAddressToToken } from "./useTokens";
 import { useEnvironment } from "../contexts/useEnvironment";
 import { LendginesDocument } from "../gql/numoen/graphql";
 import { scale } from "../lib/constants";
@@ -9,10 +13,6 @@ import { isValidLendgine } from "../lib/lendgineValidity";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
 import { parseLendgines } from "../services/graphql/numoen";
-import { userRefectchInterval } from "./internal/utils";
-import { useChain } from "./useChain";
-import { useClient } from "./useClient";
-import { useGetAddressToToken } from "./useTokens";
 
 export const useExistingLendginesQueryKey = () => {
   const chain = useChain();

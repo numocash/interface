@@ -11,9 +11,9 @@ import { bisect } from "d3-array";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
+import { useTradeDetails } from "./TradeDetailsInner";
 import { isLongLendgine } from "../../../lib/lendgines";
 import { formatPercent } from "../../../utils/format";
-import { useTradeDetails } from "./TradeDetailsInner";
 
 export const Returns: React.FC = () => {
   const { quote, base, selectedLendgine } = useTradeDetails();

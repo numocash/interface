@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
+import { useWithdraw, useWithdrawAmounts } from "./useWithdraw";
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { Beet } from "../../../../utils/beet";
@@ -8,7 +9,6 @@ import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { CenterSwitch } from "../../../common/CenterSwitch";
 import { PercentageSlider } from "../../../common/inputs/PercentageSlider";
-import { useWithdraw, useWithdrawAmounts } from "./useWithdraw";
 
 export const Withdraw: React.FC = () => {
   const [withdrawPercent, setWithdrawPercent] = useState(20);

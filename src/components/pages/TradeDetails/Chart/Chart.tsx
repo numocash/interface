@@ -11,6 +11,7 @@ import { extent } from "d3-array";
 import { useCallback, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 
+import { EmptyChart } from "./EmptyChart";
 import {
   useMostLiquidMarket,
   usePriceHistory,
@@ -24,7 +25,6 @@ import {
   fractionToFloat,
 } from "../../../../utils/format";
 import { useTradeDetails } from "../TradeDetailsInner";
-import { EmptyChart } from "./EmptyChart";
 
 export const Chart: React.FC = () => {
   const { base, quote, timeframe, price } = useTradeDetails();

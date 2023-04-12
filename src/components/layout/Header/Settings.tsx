@@ -5,9 +5,9 @@ import { IoIosArrowDown } from "react-icons/io";
 import { useSettings } from "../../../contexts/settings";
 import { formatPercent } from "../../../utils/format";
 import { Drop } from "../../common/Drop";
+import { Module } from "../../common/Module";
 import { BigNumericInput } from "../../common/inputs/BigNumericInput";
 import { Switch } from "../../common/inputs/Switch";
-import { Module } from "../../common/Module";
 
 interface Props {
   className?: string;

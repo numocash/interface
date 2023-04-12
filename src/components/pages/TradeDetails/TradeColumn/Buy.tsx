@@ -2,6 +2,9 @@ import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
+import { BuyStats } from "./BuyStats";
+import { ProvideLiquidity } from "./ProvideLiquidity";
+import { useBuy, useBuyAmounts } from "./useBuy";
 import { useBalance } from "../../../../hooks/useBalance";
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { isLongLendgine } from "../../../../lib/lendgines";
@@ -10,9 +13,6 @@ import tryParseCurrencyAmount from "../../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../../common/AssetSelection";
 import { AsyncButton } from "../../../common/AsyncButton";
 import { useTradeDetails } from "../TradeDetailsInner";
-import { BuyStats } from "./BuyStats";
-import { ProvideLiquidity } from "./ProvideLiquidity";
-import { useBuy, useBuyAmounts } from "./useBuy";
 
 export const Buy: React.FC = () => {
   const { quote, base, selectedLendgine } = useTradeDetails();

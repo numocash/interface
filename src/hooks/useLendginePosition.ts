@@ -1,14 +1,14 @@
 import { CurrencyAmount, Fraction } from "@uniswap/sdk-core";
 import type { Address } from "wagmi";
 
+import type { HookArg, ReadConfig } from "./internal/types";
+import { useContractRead } from "./internal/useContractRead";
+import { userRefectchInterval } from "./internal/utils";
 import { liquidityManagerABI } from "../abis/liquidityManager";
 import { useEnvironment } from "../contexts/useEnvironment";
 import { scale } from "../lib/constants";
 import { fractionToPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
-import type { HookArg, ReadConfig } from "./internal/types";
-import { useContractRead } from "./internal/useContractRead";
-import { userRefectchInterval } from "./internal/utils";
 
 export const useLendginePosition = <L extends Lendgine>(
   lendgine: HookArg<L>,

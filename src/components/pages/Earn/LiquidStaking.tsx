@@ -8,7 +8,7 @@ import { useEnvironment } from "../../../contexts/useEnvironment";
 import { formatPercent } from "../../../utils/format";
 import { Button } from "../../common/Button";
 import { LoadingSpinner } from "../../common/LoadingSpinner";
-import { useLongReturns, useLPReturns } from "../LiquidStaking/useReturns";
+import { useLPReturns, useLongReturns } from "../LiquidStaking/useReturns";
 
 export const LiquidStaking: React.FC = () => {
   const environment = useEnvironment();

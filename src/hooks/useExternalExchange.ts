@@ -7,6 +7,13 @@ import invariant from "tiny-invariant";
 import { objectKeys } from "ts-extras";
 import type { Address } from "wagmi";
 
+import type { HookArg, ReadConfig } from "./internal/types";
+import { useContractRead } from "./internal/useContractRead";
+import { useContractReads } from "./internal/useContractReads";
+import { externalRefetchInterval } from "./internal/utils";
+import { getBalanceRead } from "./useBalance";
+import { useChain } from "./useChain";
+import { useClient } from "./useClient";
 import { uniswapV2PairABI } from "../abis/uniswapV2Pair";
 import { uniswapV3PoolABI } from "../abis/uniswapV3Pool";
 import type { Times } from "../components/pages/TradeDetails/TimeSelector";
@@ -41,18 +48,11 @@ import {
 } from "../services/graphql/uniswapV2";
 import type { UniswapV3Pool } from "../services/graphql/uniswapV3";
 import {
+  Q192,
   feeTiers,
   parsePriceHistoryDayV3,
   parsePriceHistoryHourV3,
-  Q192,
 } from "../services/graphql/uniswapV3";
-import type { HookArg, ReadConfig } from "./internal/types";
-import { useContractRead } from "./internal/useContractRead";
-import { useContractReads } from "./internal/useContractReads";
-import { externalRefetchInterval } from "./internal/utils";
-import { getBalanceRead } from "./useBalance";
-import { useChain } from "./useChain";
-import { useClient } from "./useClient";
 
 export const isV3 = (t: UniswapV2Pool | UniswapV3Pool): t is UniswapV3Pool =>
   t.version === "V3";

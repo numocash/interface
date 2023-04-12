@@ -6,8 +6,8 @@ import * as React from "react";
 import type { ReadContractConfig, ReadContractResult } from "wagmi/actions";
 import { readContract } from "wagmi/actions";
 
-import { useChain } from "../useChain";
 import type { PartialBy, QueryFunctionArgs } from "./types";
+import { useChain } from "../useChain";
 
 export type UseContractReadConfig<
   TAbi extends Abi = Abi,

@@ -2,10 +2,10 @@ import type { Currency } from "@uniswap/sdk-core";
 import { NativeCurrency, Percent, Price, Token } from "@uniswap/sdk-core";
 import { utils } from "ethers";
 
-import { chainID } from "../lib/constants";
-import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 import type { NumoenInterfaceConfig } from ".";
 import { WrappedNative } from "./tokens";
+import { chainID } from "../lib/constants";
+import { WrappedTokenInfo } from "../lib/types/wrappedTokenInfo";
 
 const USDC = new WrappedTokenInfo({
   name: "USDCoin",

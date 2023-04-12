@@ -1,7 +1,7 @@
-import { PageMargin } from "../../layout";
-import { Long } from "./Long";
 import { LP } from "./LP";
+import { Long } from "./Long";
 import { Stats } from "./Stats";
+import { PageMargin } from "../../layout";
 
 export const LiquidStaking: React.FC = () => {
   return (

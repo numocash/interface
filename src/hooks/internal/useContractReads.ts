@@ -8,8 +8,8 @@ import type { Address } from "wagmi";
 import type { ReadContractsConfig, ReadContractsResult } from "wagmi/actions";
 import { readContracts } from "wagmi/actions";
 
-import { useChain } from "../useChain";
 import type { DeepPartial, QueryFunctionArgs } from "./types";
+import { useChain } from "../useChain";
 
 export type UseContractReadsConfig<
   TContracts extends Contract[],

@@ -10,8 +10,8 @@ import {
   writeContract,
 } from "wagmi/actions";
 
-import { liquidityManagerABI } from "../../../../abis/liquidityManager";
 import { toaster } from "../../../../AppWithProviders";
+import { liquidityManagerABI } from "../../../../abis/liquidityManager";
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useInvalidateCall } from "../../../../hooks/internal/useInvalidateCall";
 import { useAwaitTX } from "../../../../hooks/useAwaitTX";

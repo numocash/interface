@@ -4,14 +4,14 @@ import { chunk } from "lodash";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import { scale } from "../lib/constants";
-import { fractionToPrice } from "../lib/price";
-import type { Lendgine } from "../lib/types/lendgine";
-import type { Tuple } from "../utils/readonlyTuple";
 import type { HookArg } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
 import { externalRefetchInterval } from "./internal/utils";
 import { getLendgineRead } from "./useLendgine";
+import { scale } from "../lib/constants";
+import { fractionToPrice } from "../lib/price";
+import type { Lendgine } from "../lib/types/lendgine";
+import type { Tuple } from "../utils/readonlyTuple";
 
 export const useLendgines = <L extends Lendgine>(
   lendgines: HookArg<readonly L[]>

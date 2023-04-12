@@ -2,6 +2,7 @@ import { utils } from "ethers";
 import { useMemo } from "react";
 import tw, { styled } from "twin.macro";
 
+import { useEarnDetails } from "./EarnDetailsInner";
 import { supplyRate } from "../../../lib/jumprate";
 import { accruedLendgineInfo, getT } from "../../../lib/lendgineMath";
 import {
@@ -15,7 +16,6 @@ import type { Lendgine, LendgineInfo } from "../../../lib/types/lendgine";
 import { formatPercent } from "../../../utils/format";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
-import { useEarnDetails } from "./EarnDetailsInner";
 
 type Props<L extends Lendgine = Lendgine> = {
   lendgine: L;

@@ -1,6 +1,6 @@
-import { useEarnDetails } from "../EarnDetailsInner";
 import { DepositWithdraw } from "./DepositWithdraw";
 import { Trade } from "./Trade";
+import { useEarnDetails } from "../EarnDetailsInner";
 
 export const TradeColumn: React.FC = () => {
   const { close } = useEarnDetails();

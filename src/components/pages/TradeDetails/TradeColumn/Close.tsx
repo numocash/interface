@@ -3,6 +3,7 @@ import { FaChevronLeft } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
+import { useClose, useCloseAmounts } from "./useClose";
 import { useBalance } from "../../../../hooks/useBalance";
 import { isShortLendgine } from "../../../../lib/lendgines";
 import { Beet } from "../../../../utils/beet";
@@ -15,7 +16,6 @@ import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
 import { VerticalItem } from "../../../common/VerticalItem";
 import { useTradeDetails } from "../TradeDetailsInner";
 import { usePositionValue } from "../usePositionValue";
-import { useClose, useCloseAmounts } from "./useClose";
 
 interface Props {
   modal: boolean;

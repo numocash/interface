@@ -15,8 +15,9 @@ import {
   writeContract,
 } from "wagmi/actions";
 
-import { liquidityManagerABI } from "../../../../abis/liquidityManager";
+import { accruedLendgineInfo } from "./math";
 import { toaster } from "../../../../AppWithProviders";
+import { liquidityManagerABI } from "../../../../abis/liquidityManager";
 import { useSettings } from "../../../../contexts/settings";
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import type { HookArg } from "../../../../hooks/internal/types";
@@ -38,7 +39,6 @@ import {
 import type { Lendgine, LendgineInfo } from "../../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../../lib/types/wrappedTokenInfo";
 import type { BeetStage, BeetTx, TxToast } from "../../../../utils/beet";
-import { accruedLendgineInfo } from "./math";
 
 export const useDeposit = ({
   token0Input,

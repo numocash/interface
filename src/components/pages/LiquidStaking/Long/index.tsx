@@ -2,15 +2,15 @@ import { useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { useAccount } from "wagmi";
 
+import { About } from "./About";
+import { Burn } from "./Burn";
+import { Mint } from "./Mint";
 import { useEnvironment } from "../../../../contexts/useEnvironment";
 import { useBalance } from "../../../../hooks/useBalance";
 import { Button } from "../../../common/Button";
 import { LoadingSpinner } from "../../../common/LoadingSpinner";
 import { TokenAmountDisplay } from "../../../common/TokenAmountDisplay";
 import { useLongValue } from "../useValue";
-import { About } from "./About";
-import { Burn } from "./Burn";
-import { Mint } from "./Mint";
 
 export const Long: React.FC = () => {
   const environment = useEnvironment();

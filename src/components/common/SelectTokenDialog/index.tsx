@@ -1,8 +1,8 @@
 import React from "react";
 
+import { TokenSearch } from "./TokenSearch";
 import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
 import { Modal } from "../Modal";
-import { TokenSearch } from "./TokenSearch";
 
 export enum TokenModalView {
   search,

@@ -2,6 +2,7 @@ import type { Token } from "@uniswap/sdk-core";
 import { CurrencyAmount, Percent } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 
+import { accruedLendgineInfo } from "./LP/math";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import type { HookArg } from "../../../hooks/internal/types";
 import { isV3, useMostLiquidMarket } from "../../../hooks/useExternalExchange";
@@ -15,7 +16,6 @@ import {
 } from "../../../lib/lendgineMath";
 import { pricePerLiquidity } from "../../../lib/price";
 import type { Lendgine, LendginePosition } from "../../../lib/types/lendgine";
-import { accruedLendgineInfo } from "./LP/math";
 
 export const useLongValue = (position: HookArg<CurrencyAmount<Token>>) => {
   const environment = useEnvironment();

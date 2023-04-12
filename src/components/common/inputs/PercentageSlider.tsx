@@ -1,6 +1,6 @@
 import {
-  SliderHandle,
   SliderInput as ReachSlider,
+  SliderHandle,
   SliderRange,
   SliderTrack,
 } from "@reach/slider";

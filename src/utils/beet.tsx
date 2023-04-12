@@ -1,6 +1,6 @@
 import type { ContractReceipt } from "ethers";
 import React from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { styled } from "twin.macro";
 import type { Address } from "wagmi";
 import { useNetwork } from "wagmi";

@@ -1,6 +1,6 @@
-import { useTradeDetails } from "../TradeDetailsInner";
 import { Buy } from "./Buy";
 import { Close } from "./Close";
+import { useTradeDetails } from "../TradeDetailsInner";
 
 export const Trade: React.FC = () => {
   const { close } = useTradeDetails();

@@ -4,12 +4,12 @@ import { CurrencyAmount } from "@uniswap/sdk-core";
 import { utils } from "ethers";
 import invariant from "tiny-invariant";
 
+import { useChain } from "./useChain";
+import { useClient } from "./useClient";
 import { AllTradesQueryDocument } from "../gql/numoen/graphql";
 import { liquidityPerCollateral } from "../lib/lendgineMath";
 import { invert, numoenPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
-import { useChain } from "./useChain";
-import { useClient } from "./useClient";
 
 export const useTrades = ({
   lendgines,

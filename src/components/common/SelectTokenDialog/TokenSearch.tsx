@@ -2,10 +2,10 @@ import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 
-import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
-import { LoadingSpinner } from "../LoadingSpinner";
 import { SearchInput } from "./SearchInput";
 import { TokenResults } from "./TokenResults";
+import type { WrappedTokenInfo } from "../../../lib/types/wrappedTokenInfo";
+import { LoadingSpinner } from "../LoadingSpinner";
 
 interface TokenSearchProps {
   isOpen: boolean;

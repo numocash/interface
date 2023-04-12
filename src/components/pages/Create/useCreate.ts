@@ -12,9 +12,9 @@ import {
   writeContract,
 } from "wagmi/actions";
 
+import { toaster } from "../../../AppWithProviders";
 import { factoryABI } from "../../../abis/factory";
 import { liquidityManagerABI } from "../../../abis/liquidityManager";
-import { toaster } from "../../../AppWithProviders";
 import { useSettings } from "../../../contexts/settings";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import type { HookArg } from "../../../hooks/internal/types";

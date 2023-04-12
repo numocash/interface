@@ -3,11 +3,11 @@ import type { Fraction } from "@uniswap/sdk-core";
 import { useMemo, useState } from "react";
 import tw, { styled } from "twin.macro";
 
+import { useEarnDetails } from "./EarnDetailsInner";
+import { LendgineItem } from "./LendgineItem";
 import { useLendgines } from "../../../hooks/useLendgines";
 import { isLongLendgine } from "../../../lib/lendgines";
 import { priceToFraction } from "../../../lib/price";
-import { useEarnDetails } from "./EarnDetailsInner";
-import { LendgineItem } from "./LendgineItem";
 
 export const Lendgines: React.FC = () => {
   const { lendgines, base, price } = useEarnDetails();

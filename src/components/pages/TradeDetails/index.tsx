@@ -2,6 +2,7 @@ import { utils } from "ethers";
 import { useNavigate, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 
+import { TradeDetailsInner } from "./TradeDetailsInner";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import { useMostLiquidMarket } from "../../../hooks/useExternalExchange";
 import { useMarketToLendgines } from "../../../hooks/useMarket";
@@ -9,7 +10,6 @@ import { useAddressToToken } from "../../../hooks/useTokens";
 import { isValidMarket } from "../../../lib/lendgineValidity";
 import { LoadingPage } from "../../common/LoadingPage";
 import { PageMargin } from "../../layout";
-import { TradeDetailsInner } from "./TradeDetailsInner";
 
 export const TradeDetails: React.FC = () => {
   const navigate = useNavigate();

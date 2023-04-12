@@ -1,9 +1,9 @@
 import type { CurrencyAmount, Percent } from "@uniswap/sdk-core";
 import { styled } from "twin.macro";
 
+import { TokenIcon } from "./TokenIcon";
 import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
 import { formatDisplayWithSoftLimit, formatPercent } from "../../utils/format";
-import { TokenIcon } from "./TokenIcon";
 
 export type IProps<T extends WrappedTokenInfo> = {
   amount: CurrencyAmount<T>;

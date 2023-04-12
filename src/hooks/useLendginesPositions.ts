@@ -3,14 +3,14 @@ import { useMemo } from "react";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 
-import { useEnvironment } from "../contexts/useEnvironment";
-import { scale } from "../lib/constants";
-import { fractionToPrice } from "../lib/price";
-import type { Lendgine } from "../lib/types/lendgine";
 import type { HookArg } from "./internal/types";
 import { useContractReads } from "./internal/useContractReads";
 import { userRefectchInterval } from "./internal/utils";
 import { getLendginePositionRead } from "./useLendginePosition";
+import { useEnvironment } from "../contexts/useEnvironment";
+import { scale } from "../lib/constants";
+import { fractionToPrice } from "../lib/price";
+import type { Lendgine } from "../lib/types/lendgine";
 
 export const useLendginesPositions = <L extends Lendgine>(
   lendgines: HookArg<readonly L[]>,

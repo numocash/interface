@@ -3,12 +3,12 @@ import { FiCheck, FiX } from "react-icons/fi";
 import { IoIosArrowDown } from "react-icons/io";
 import tw, { styled } from "twin.macro";
 
-import { useAllLendgines } from "../../hooks/useAllLendgines";
-import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
-import { dedupe } from "../../utils/dedupe";
 import { Modal } from "./Modal";
 import { Module } from "./Module";
 import { TokenIcon } from "./TokenIcon";
+import { useAllLendgines } from "../../hooks/useAllLendgines";
+import type { WrappedTokenInfo } from "../../lib/types/wrappedTokenInfo";
+import { dedupe } from "../../utils/dedupe";
 
 interface Props {
   assets: readonly WrappedTokenInfo[];

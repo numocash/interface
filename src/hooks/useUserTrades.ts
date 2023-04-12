@@ -5,13 +5,13 @@ import { utils } from "ethers";
 import invariant from "tiny-invariant";
 import type { Address } from "wagmi";
 
+import { userRefectchInterval } from "./internal/utils";
+import { useChain } from "./useChain";
+import { useClient } from "./useClient";
 import { UserTradesQueryDocument } from "../gql/numoen/graphql";
 import { liquidityPerCollateral } from "../lib/lendgineMath";
 import { invert, numoenPrice } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
-import { userRefectchInterval } from "./internal/utils";
-import { useChain } from "./useChain";
-import { useClient } from "./useClient";
 
 export const useUserTrades = ({
   address,

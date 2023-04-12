@@ -4,12 +4,12 @@ import { utils } from "ethers";
 import type { Address } from "wagmi";
 import { erc20ABI } from "wagmi";
 
-import { useEnvironment } from "../contexts/useEnvironment";
 import type { HookArg, ReadConfig } from "./internal/types";
 import { useBalance as useNativeBalance } from "./internal/useBalance";
 import { useContractRead } from "./internal/useContractRead";
 import { userRefectchInterval } from "./internal/utils";
 import { useIsWrappedNative } from "./useTokens";
+import { useEnvironment } from "../contexts/useEnvironment";
 
 export const useBalance = <T extends Token>(
   token: HookArg<T>,

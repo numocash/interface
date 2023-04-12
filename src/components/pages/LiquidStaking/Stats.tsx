@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 
+import { useLPReturns, useLongReturns } from "./useReturns";
+import { useLPValue, useLongValue } from "./useValue";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import { useLendgine } from "../../../hooks/useLendgine";
 import { formatPercent } from "../../../utils/format";
 import { LoadingSpinner } from "../../common/LoadingSpinner";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
-import { useLongReturns, useLPReturns } from "./useReturns";
-import { useLongValue, useLPValue } from "./useValue";
 
 export const Stats: React.FC = () => {
   const environment = useEnvironment();
