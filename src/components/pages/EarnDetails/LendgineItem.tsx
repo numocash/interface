@@ -2,11 +2,11 @@ import { utils } from "ethers";
 import { useMemo } from "react";
 import tw, { styled } from "twin.macro";
 
-import { supplyRate } from "../../../lib/jumprate";
+import { calculateSupplyRate } from "../../../lib/jumprate";
 import { accruedLendgineInfo, getT } from "../../../lib/lendgineMath";
 import {
   invert,
-  numoenPrice,
+  calculateQuotePrice,
   pricePerCollateral,
   pricePerLiquidity,
 } from "../../../lib/price";
@@ -47,14 +47,14 @@ export const LendgineItem: React.FC<Props> = ({ lendgine, info }: Props) => {
       .subtract(liquidityPrice)
       .divide(liquidityPrice);
 
-    const price = numoenPrice(lendgine, updatedInfo);
+    const price = calculateQuotePrice(lendgine, updatedInfo);
 
     // token0
     const tvl = liquidityPrice.quote(
       updatedInfo.totalLiquidity.add(updatedInfo.totalLiquidityBorrowed)
     );
 
-    const apr = supplyRate(updatedInfo).multiply(interestPremium);
+    const apr = calculateSupplyRate(updatedInfo).multiply(interestPremium);
 
     const lvr = lvrCoef(price, lendgine);
     const il = lvr.multiply(8);

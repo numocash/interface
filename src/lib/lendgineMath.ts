@@ -1,6 +1,6 @@
 import { Fraction } from "@uniswap/sdk-core";
 
-import { borrowRate } from "./jumprate";
+import { calculateBorrowRate } from "./jumprate";
 import { fractionToPrice, priceToFraction, tokenToFraction } from "./price";
 import type {
   Lendgine,
@@ -61,7 +61,7 @@ export const accruedLendgineInfo = <L extends Lendgine>(
 
   const timeElapsed = t - lendgineInfo.lastUpdate;
 
-  const br = borrowRate(lendgineInfo);
+  const br = calculateBorrowRate(lendgineInfo);
   const dilutionLPRequested = lendgineInfo.totalLiquidityBorrowed
     .multiply(br)
     .multiply(timeElapsed)

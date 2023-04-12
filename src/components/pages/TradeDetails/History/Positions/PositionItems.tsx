@@ -8,9 +8,9 @@ import { useBalances } from "../../../../../hooks/useBalances";
 import { useLendgines } from "../../../../../hooks/useLendgines";
 import type { UserTrade } from "../../../../../hooks/useUserTrades";
 import { useUserTrades } from "../../../../../hooks/useUserTrades";
-import { borrowRate } from "../../../../../lib/jumprate";
+import { calculateBorrowRate } from "../../../../../lib/jumprate";
 import { accruedLendgineInfo, getT } from "../../../../../lib/lendgineMath";
-import { numoenPrice } from "../../../../../lib/price";
+import { calculateQuotePrice } from "../../../../../lib/price";
 import { calculateAmountBoughtAndSold } from "../../../../../lib/returns";
 import type { Lendgine, LendgineInfo } from "../../../../../lib/types/lendgine";
 import type { WrappedTokenInfo } from "../../../../../lib/types/wrappedTokenInfo";
@@ -127,13 +127,13 @@ const PositionItem: React.FC<ItemProps> = ({
 
   const funding = useMemo(() => {
     const updatedLendgineInfo = accruedLendgineInfo(lendgine, lendgineInfo, t);
-    return borrowRate(updatedLendgineInfo);
+    return calculateBorrowRate(updatedLendgineInfo);
   }, [lendgine, lendgineInfo, t]);
 
   const value = useMemo(() => {
     if (!positionValue) return undefined;
     // token0 / token1
-    const price = numoenPrice(lendgine, lendgineInfo);
+    const price = calculateQuotePrice(lendgine, lendgineInfo);
 
     return isInverse ? positionValue : price.quote(positionValue);
   }, [isInverse, lendgine, lendgineInfo, positionValue]);

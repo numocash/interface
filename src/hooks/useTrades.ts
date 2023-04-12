@@ -6,7 +6,7 @@ import invariant from "tiny-invariant";
 
 import { AllTradesQueryDocument } from "../gql/numoen/graphql";
 import { liquidityPerCollateral } from "../lib/lendgineMath";
-import { invert, numoenPrice } from "../lib/price";
+import { calculateQuotePrice, invert } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
 import { useChain } from "./useChain";
 import { useClient } from "./useClient";
@@ -52,7 +52,7 @@ export const useTrades = ({
         );
 
         // token0 / token1
-        const price = numoenPrice(lendgine, {
+        const price = calculateQuotePrice(lendgine, {
           reserve0: amount0,
           reserve1: amount1,
           totalLiquidity: liquidity,
@@ -97,7 +97,7 @@ export const useTrades = ({
         );
 
         // token0 / token1
-        const price = numoenPrice(lendgine, {
+        const price = calculateQuotePrice(lendgine, {
           reserve0: amount0,
           reserve1: amount1,
           totalLiquidity: liquidity,

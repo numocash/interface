@@ -5,7 +5,11 @@ import invariant from "tiny-invariant";
 
 import { useLendgines } from "../../../hooks/useLendgines";
 import { liquidityPerCollateral } from "../../../lib/lendgineMath";
-import { invert, numoenPrice, pricePerLiquidity } from "../../../lib/price";
+import {
+  calculateQuotePrice,
+  invert,
+  pricePerLiquidity,
+} from "../../../lib/price";
 import { AddressLink } from "../../../utils/beet";
 import { RowBetween } from "../../common/RowBetween";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
@@ -23,7 +27,7 @@ export const TotalStats: React.FC = () => {
       const lendgine = lendgines[i];
       invariant(lendgine);
       // token0 / token1
-      const price = numoenPrice(lendgine, cur);
+      const price = calculateQuotePrice(lendgine, cur);
 
       // token0 / liq
       const liquidityPrice = pricePerLiquidity({ lendgine, price });
@@ -44,7 +48,7 @@ export const TotalStats: React.FC = () => {
       const lendgine = lendgines[i];
       invariant(lendgine);
       // token0 / token1
-      const price = numoenPrice(lendgine, cur);
+      const price = calculateQuotePrice(lendgine, cur);
       // liq / token1
       const liqPerCol = liquidityPerCollateral(lendgine);
 

@@ -2,7 +2,7 @@ import { CurrencyAmount } from "@uniswap/sdk-core";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";
 
-import { supplyRate } from "../../../../../lib/jumprate";
+import { calculateSupplyRate } from "../../../../../lib/jumprate";
 import {
   accruedLendgineInfo,
   accruedLendginePositionInfo,
@@ -11,8 +11,8 @@ import {
 } from "../../../../../lib/lendgineMath";
 import { isLongLendgine } from "../../../../../lib/lendgines";
 import {
+  calculateQuotePrice,
   invert,
-  numoenPrice,
   pricePerCollateral,
   pricePerLiquidity,
 } from "../../../../../lib/price";
@@ -70,7 +70,9 @@ export const PositionItem: React.FC<Props> = ({
       .subtract(liquidityPrice)
       .divide(liquidityPrice);
 
-    return { apr: supplyRate(updatedLendgineInfo).multiply(interestPremium) };
+    return {
+      apr: calculateSupplyRate(updatedLendgineInfo).multiply(interestPremium),
+    };
   }, [lendgine, updatedLendgineInfo]);
 
   const { value } = useMemo(() => {
@@ -84,7 +86,7 @@ export const PositionItem: React.FC<Props> = ({
     });
 
     // token0 / token1
-    const price = numoenPrice(lendgine, updatedLendgineInfo);
+    const price = calculateQuotePrice(lendgine, updatedLendgineInfo);
 
     // token0
     const value = liqPerPosition

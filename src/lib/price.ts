@@ -7,7 +7,7 @@ import type { Lendgine, LendgineInfo } from "./types/lendgine";
 import type { WrappedTokenInfo } from "./types/wrappedTokenInfo";
 
 // returns price in token0 / token1
-export const numoenPrice = <L extends Lendgine>(
+export const calculateQuotePrice = <L extends Lendgine>(
   lendgine: L,
   lendgineInfo: Pick<
     LendgineInfo<L>,
@@ -33,7 +33,7 @@ export const pricePerCollateral = <L extends Lendgine>(
   lendgine: L,
   lendgineInfo: LendgineInfo<L>
 ) => {
-  const price = numoenPrice(lendgine, lendgineInfo);
+  const price = calculateQuotePrice(lendgine, lendgineInfo);
 
   return liquidityPerCollateral(lendgine).invert().multiply(price);
 };
@@ -47,7 +47,7 @@ export const pricePerLiquidity = <L extends Lendgine>(
 ) => {
   const price = priceToFraction(
     "lendgineInfo" in args
-      ? numoenPrice(args.lendgine, args.lendgineInfo)
+      ? calculateQuotePrice(args.lendgine, args.lendgineInfo)
       : args.price
   );
 

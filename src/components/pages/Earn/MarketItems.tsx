@@ -5,11 +5,11 @@ import invariant from "tiny-invariant";
 
 import { useLendgines } from "../../../hooks/useLendgines";
 import { useMarketToLendgines } from "../../../hooks/useMarket";
-import { supplyRate } from "../../../lib/jumprate";
+import { calculateSupplyRate } from "../../../lib/jumprate";
 import { accruedLendgineInfo, getT } from "../../../lib/lendgineMath";
 import {
+  calculateQuotePrice,
   invert,
-  numoenPrice,
   pricePerCollateral,
   pricePerLiquidity,
 } from "../../../lib/price";
@@ -50,7 +50,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
         .subtract(liquidityPrice)
         .divide(liquidityPrice);
 
-      const rate = supplyRate(updatedInfo).multiply(interestPremium);
+      const rate = calculateSupplyRate(updatedInfo).multiply(interestPremium);
       return rate.greaterThan(acc) ? rate : acc;
     }, new Percent(0));
 
@@ -62,7 +62,7 @@ export const MarketItem: React.FC<Props> = ({ market }: Props) => {
       const liquidity = cur.totalLiquidity.add(cur.totalLiquidityBorrowed);
 
       // token0 / token1
-      const price = numoenPrice(lendgine, cur);
+      const price = calculateQuotePrice(lendgine, cur);
 
       // token0 / liq
       const liquidityPrice = pricePerLiquidity({ lendgine, lendgineInfo: cur });

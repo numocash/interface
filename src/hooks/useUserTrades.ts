@@ -7,7 +7,7 @@ import type { Address } from "wagmi";
 
 import { UserTradesQueryDocument } from "../gql/numoen/graphql";
 import { liquidityPerCollateral } from "../lib/lendgineMath";
-import { invert, numoenPrice } from "../lib/price";
+import { calculateQuotePrice, invert } from "../lib/price";
 import type { Lendgine } from "../lib/types/lendgine";
 import { userRefectchInterval } from "./internal/utils";
 import { useChain } from "./useChain";
@@ -60,7 +60,7 @@ export const useUserTrades = ({
         );
 
         // token0 / token1
-        const price = numoenPrice(lendgine, {
+        const price = calculateQuotePrice(lendgine, {
           reserve0: amount0,
           reserve1: amount1,
           totalLiquidity: liquidity,
@@ -104,7 +104,7 @@ export const useUserTrades = ({
         );
 
         // token0 / token1
-        const price = numoenPrice(lendgine, {
+        const price = calculateQuotePrice(lendgine, {
           reserve0: amount0,
           reserve1: amount1,
           totalLiquidity: liquidity,

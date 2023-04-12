@@ -29,7 +29,7 @@ import {
 import { useLendgine } from "../../../../hooks/useLendgine";
 import { useIsWrappedNative } from "../../../../hooks/useTokens";
 import { ONE_HUNDRED_PERCENT, scale } from "../../../../lib/constants";
-import { borrowRate } from "../../../../lib/jumprate";
+import { calculateBorrowRate } from "../../../../lib/jumprate";
 import {
   accruedLendgineInfo,
   getT,
@@ -333,7 +333,7 @@ export const useBuyAmounts = ({
       ? liqPerShare.invert().quote(liquidity)
       : undefined;
 
-    const bRate = borrowRate({
+    const bRate = calculateBorrowRate({
       totalLiquidity: updatedLendgineInfo.totalLiquidity.subtract(
         liquidity
           ? liquidity
