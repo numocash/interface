@@ -107,8 +107,6 @@
     "@graphql-codegen/cli": "^3.3.0",
     "@graphql-codegen/client-preset": "^2.1.1",
     "@graphql-typed-document-node/core": "^3.2.0",
-    "@saberhq/eslint-config-react": "2.1.0",
-    "@saberhq/tsconfig": "^2.1.0",
     "@simbathesailor/babel-plugin-use-what-changed": "^2.1.0",
     "@simbathesailor/use-what-changed": "^2.0.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
