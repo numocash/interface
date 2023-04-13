@@ -11,6 +11,7 @@ import { useMint } from "../../../hooks/useMint";
 import tryParseCurrencyAmount from "../../../utils/tryParseCurrencyAmount";
 import { AssetSelection } from "../../common/AssetSelection";
 import { AsyncButton } from "../../common/AsyncButton";
+import { TabSelection } from "../../common/TabSelection";
 import { TokenIcon } from "../../common/TokenIcon";
 import { PageMargin } from "../../layout";
 
@@ -61,6 +62,10 @@ export const LiquidStaking: React.FC = () => {
       parsedAmount,
     ]
   );
+
+  const tabs = { deposit: "Deposit", withdraw: "Withdraw" };
+  const [tab, setTab] = useState<keyof typeof tabs>("deposit");
+
   return (
     <PageMargin tw="w-full pb-12 sm:pb-0 flex flex-col  gap-6 max-w-5xl">
       <div tw="w-full max-w-5xl rounded bg-white  border border-[#dfdfdf] pt-12 md:pt-20 px-6 pb-6 shadow mb-12">
@@ -80,6 +85,11 @@ export const LiquidStaking: React.FC = () => {
       />
       <Stats />
       <div tw="flex border border-gray-200 rounded-xl overflow-hidden p-2 flex-col bg-white gap-6">
+        <TabSelection
+          tabs={{ deposit: "Deposit", withdraw: "Withdraw" }}
+          selectedTab={tab}
+          setSelectedTab={(val) => setTab(val)}
+        />
         <AssetSelection
           tw="p-2"
           label="Deposit"
