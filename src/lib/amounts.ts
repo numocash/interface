@@ -22,7 +22,7 @@ export const calculateAccrual = <L extends Lendgine>(
   const t = Math.round(Date.now() / 1000);
   const timeElapsed = t - lendgineInfo.lastUpdate;
 
-  const br = calculateBorrowRate({ lendgineInfo, protocol }); // TODO: selector for which constants to use
+  const br = calculateBorrowRate({ lendgineInfo, protocol });
   const dilutionLPRequested = lendgineInfo.totalLiquidityBorrowed
     .multiply(br)
     .multiply(timeElapsed)
@@ -119,6 +119,11 @@ export const calculateEstimatedWithdrawAmount = <L extends Lendgine>(
   position: Pick<LendginePosition<L>, "size">,
   protocol: Protocol
 ): { liquidity: CurrencyAmount<L["lendgine"]> } => {
+  if (lendgineInfo.totalPositionSize.equalTo(0))
+    return {
+      liquidity: CurrencyAmount.fromRawAmount(lendgine.lendgine, 0),
+    };
+
   const accruedLendgineInfo = calculateAccrual(
     lendgine,
     lendgineInfo,
@@ -180,6 +185,12 @@ export const calculateEstimatedBurnAmount = <L extends Lendgine>(
   liquidity: CurrencyAmount<L["lendgine"]>;
   collateral: CurrencyAmount<L["token1"]>;
 } => {
+  if (lendgineInfo.totalSupply.equalTo(0))
+    return {
+      liquidity: CurrencyAmount.fromRawAmount(lendgine.lendgine, 0),
+      collateral: CurrencyAmount.fromRawAmount(lendgine.token1, 0),
+    };
+
   // convert balance to liquidity
   const accruedLendgineInfo = calculateAccrual(
     lendgine,
@@ -204,12 +215,19 @@ export const calculateEstimatedBurnAmount = <L extends Lendgine>(
 };
 
 export const calculateEstimatedPairBurnAmount = <L extends Lendgine>(
+  lendgine: L,
   lendgineInfo: LendgineInfo<L>,
   liquidity: CurrencyAmount<L["lendgine"]>
 ): {
   amount0: CurrencyAmount<L["token0"]>;
   amount1: CurrencyAmount<L["token1"]>;
 } => {
+  if (lendgineInfo.totalLiquidity.equalTo(0))
+    return {
+      amount0: CurrencyAmount.fromRawAmount(lendgine.token0, 0),
+      amount1: CurrencyAmount.fromRawAmount(lendgine.token1, 0),
+    };
+
   return {
     amount0: lendgineInfo.reserve0
       .multiply(liquidity)

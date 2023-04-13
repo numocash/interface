@@ -182,11 +182,11 @@ export const AssetSelection: React.FC<Props<WrappedTokenInfo>> = ({
         {!hideInput && (
           <div tw="flex grow flex-1">
             <BigNumericInput
-              tw="text-right text-black w-full py-1"
+              tw="text-right text-black w-full py-1 text-xl"
               disabled={inputDisabled}
               value={inputValue}
               onChange={inputOnChange}
-              placeholder="0.0"
+              placeholder="0"
             />
           </div>
         )}

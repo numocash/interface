@@ -69,6 +69,7 @@ export const useValue = <L extends Lendgine>(
       protocol
     );
     const { amount0, amount1 } = calculateEstimatedPairBurnAmount(
+      lendgine,
       lendgineInfoQuery.data,
       liquidity
     );
@@ -139,6 +140,7 @@ export const useTotalValue = <L extends Lendgine>(
       protocol
     );
     const { amount0, amount1 } = calculateEstimatedPairBurnAmount(
+      lendgine,
       lendgineInfoQuery.data,
       liquidity
     );
@@ -168,42 +170,27 @@ export const usePositionValue = <L extends Lendgine>(
   protocol: Protocol
 ) => {
   const { address } = useAccount();
-  const environment = useEnvironment();
 
   const positionQuery = useLendginePosition(lendgine, address, protocol);
   const lendgineInfoQuery = useLendgine(lendgine);
 
-  const market = useMemo(
-    () =>
-      lendgine
-        ? lendgineToMarket(
-            lendgine,
-            environment.interface.wrappedNative,
-            environment.interface.specialtyMarkets
-          )
-        : undefined,
-    [
-      environment.interface.specialtyMarkets,
-      environment.interface.wrappedNative,
-      lendgine,
-    ]
+  const priceQuery = useMostLiquidMarket(
+    lendgine ? { quote: lendgine.token0, base: lendgine.token1 } : undefined
   );
-  const currentPriceQuery = useMostLiquidMarket(market);
 
   return useMemo(() => {
     if (
       positionQuery.isLoading ||
       lendgineInfoQuery.isLoading ||
-      currentPriceQuery.status === "loading"
+      priceQuery.status === "loading"
     )
       return { status: "loading" } as const;
 
     if (
       !lendgine ||
       !lendgineInfoQuery.data ||
-      !currentPriceQuery.data ||
-      !positionQuery.data ||
-      !market
+      !priceQuery.data ||
+      !positionQuery.data
     )
       return { status: "error" } as const;
 
@@ -214,6 +201,7 @@ export const usePositionValue = <L extends Lendgine>(
       protocol
     );
     const { amount0, amount1 } = calculateEstimatedPairBurnAmount(
+      lendgine,
       lendgineInfoQuery.data,
       liquidity
     );
@@ -224,22 +212,19 @@ export const usePositionValue = <L extends Lendgine>(
       protocol
     );
 
-    const price = lendgine.token0.equals(market.quote)
-      ? currentPriceQuery.data.price
-      : invert(currentPriceQuery.data.price);
-
-    const value = amount0.add(price.quote(amount1.add(tokensOwed)));
+    const value = amount0.add(
+      priceQuery.data.price.quote(amount1.add(tokensOwed))
+    );
 
     return { status: "success", value } as const;
   }, [
-    currentPriceQuery.data,
-    currentPriceQuery.status,
     lendgine,
     lendgineInfoQuery.data,
     lendgineInfoQuery.isLoading,
-    market,
     positionQuery.data,
     positionQuery.isLoading,
+    priceQuery.data,
+    priceQuery.status,
     protocol,
   ]);
 };

@@ -68,6 +68,7 @@ export const useMintAmount = <L extends Lendgine>(
       protocol
     );
     const { amount0, amount1 } = calculateEstimatedPairBurnAmount(
+      lendgine,
       lendgineInfoQuery.data,
       liquidity
     );
@@ -158,6 +159,7 @@ export const useBurnAmount = <L extends Lendgine>(
       protocol
     );
     const { amount0, amount1 } = calculateEstimatedPairBurnAmount(
+      lendgine,
       lendgineInfoQuery.data,
       liquidity
     );
@@ -254,6 +256,7 @@ export const useDepositAmount = <L extends Lendgine>(
         protocol
       );
       const { amount0, amount1 } = calculateEstimatedPairBurnAmount(
+        lendgine,
         lendgineInfoQuery.data,
         liquidity
       );
@@ -282,6 +285,7 @@ export const useDepositAmount = <L extends Lendgine>(
       protocol
     );
     const { amount0, amount1 } = calculateEstimatedPairBurnAmount(
+      lendgine,
       lendgineInfoQuery.data,
       liquidity
     );
@@ -325,6 +329,7 @@ export const useWithdrawAmount = <L extends Lendgine>(
       protocol
     );
     const { amount0, amount1 } = calculateEstimatedPairBurnAmount(
+      lendgine,
       lendgineInfoQuery.data,
       liquidity
     );

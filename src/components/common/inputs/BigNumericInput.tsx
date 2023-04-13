@@ -59,12 +59,6 @@ const StyledInput = styled.input<{
   hasBackground?: boolean;
   disabled?: boolean;
 }>`
-  outline: none;
-  &:active {
-    border: none;
-    outline: none;
-  }
-  border: none;
   flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
