@@ -14,6 +14,14 @@ const USDT = new WrappedTokenInfo({
   chainId: 42161,
   logoURI:
     "https://assets.coingecko.com/coins/images/325/small/Tether.png?1668148663",
+  color: {
+    muted: undefined,
+    vibrant: undefined,
+    lightMuted: undefined,
+    lightVibrant: undefined,
+    darkMuted: undefined,
+    darkVibrant: undefined,
+  },
 });
 
 const wstETH = new WrappedTokenInfo({
@@ -24,6 +32,14 @@ const wstETH = new WrappedTokenInfo({
   chainId: 42161,
   logoURI:
     "https://assets.coingecko.com/coins/images/18834/small/wstETH.png?1633565443",
+  color: {
+    muted: "#00a3ff",
+    vibrant: "#00a3ff",
+    lightMuted: "#00a3ff",
+    lightVibrant: "#00a3ff",
+    darkMuted: "#00a3ff",
+    darkVibrant: "#00a3ff",
+  },
 });
 
 export const arbitrumConfig = {

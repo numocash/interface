@@ -27,8 +27,8 @@ dependencies:
     specifier: ^0.2.0
     version: 0.2.0(@fortawesome/fontawesome-svg-core@6.4.0)(react@18.2.0)
   '@numoen/default-token-list':
-    specifier: ^0.0.11
-    version: 0.0.11
+    specifier: ^0.0.14
+    version: 0.0.14
   '@popperjs/core':
     specifier: ^2.11.7
     version: 2.11.7
@@ -3602,8 +3602,8 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
-  /@numoen/default-token-list@0.0.11:
-    resolution: {integrity: sha512-iTsu+zItEqFod4CHxnhTrSb+85PZUdWNdubGriaf2TwiL8Xy+PTPkA4c2EyAOkIXuIqe/gkMACga2B4A/If6yA==}
+  /@numoen/default-token-list@0.0.14:
+    resolution: {integrity: sha512-11WTg3M/IlriRUbz7+OTK/jAoya+uXSD69Ab3+3uoexWHUSeTMe1iPysj1a7XcAR1tXwFR/XsCIV6/PYQVFscw==}
     dev: false
 
   /@parcel/watcher@2.1.0:

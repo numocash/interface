@@ -35,8 +35,8 @@ export const EarnInner: React.FC = () => {
           <p tw="font-bold text-2xl sm:text-4xl">Earn on your assets</p>
           <div tw="gap-2 grid">
             <p tw="sm:text-lg text-[#8f8f8f] max-w-md">
-              Provide liquidity to an automated market maker and earn interest
-              from lending out your position.
+              Numoen has created several strategies using our underlying PMMP.
+              All strategies maintain maximum safety and decentralization.
             </p>
             <NavLink to="/create" tw="">
               <Button variant="primary" tw="px-2 py-1 text-lg ">

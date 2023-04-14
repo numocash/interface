@@ -2,7 +2,8 @@ import { useLongReturns } from "./useReturns";
 import { useEnvironment } from "../../../contexts/useEnvironment";
 import { useTotalValue, useValue } from "../../../hooks/useValue";
 import { formatPercent } from "../../../utils/format";
-import { LoadingSpinner } from "../../common/LoadingSpinner";
+import { LoadingBox } from "../../common/LoadingBox";
+import { MainStats } from "../../common/MainStats";
 import { TokenAmountDisplay } from "../../common/TokenAmountDisplay";
 
 export const Stats: React.FC = () => {
@@ -15,52 +16,37 @@ export const Stats: React.FC = () => {
   const longAPRQuery = useLongReturns();
 
   return (
-    <div tw="flex w-full justify-around">
-      <Item
-        label="Total deposited"
-        item={
-          totalValueQuery.value ? (
-            <TokenAmountDisplay amount={totalValueQuery.value} showSymbol />
-          ) : (
-            <LoadingSpinner />
-          )
-        }
-      />
-      {/* <Item label="Staking APR" item={formatPercent(staking.return)} /> */}
-      <Item
-        label="APR"
-        item={
-          longAPRQuery.status === "success" ? (
-            formatPercent(longAPRQuery.data.totalAPR)
-          ) : (
-            <LoadingSpinner />
-          )
-        }
-      />
-      <Item
-        label="Balance"
-        item={
-          userValueQuery.value ? (
-            <TokenAmountDisplay amount={userValueQuery.value} showSymbol />
-          ) : (
-            <LoadingSpinner />
-          )
-        }
-      />
-    </div>
-  );
-};
-
-interface ItemProps {
-  label: string;
-  item: React.ReactNode;
-}
-
-const Item: React.FC<ItemProps> = ({ label, item }: ItemProps) => {
-  return (
-    <div tw="flex flex-col gap-1 items-center">
-      <p tw="text-secondary text-sm">{label}</p>
-      <div tw="text-2xl font-semibold">{item}</div>
-    </div>
+    <MainStats
+      items={
+        [
+          {
+            label: "Total deposited",
+            item: totalValueQuery.value ? (
+              <TokenAmountDisplay amount={totalValueQuery.value} showSymbol />
+            ) : (
+              <LoadingBox tw="bg-gray-300 h-10 w-20" />
+            ),
+          },
+          {
+            label: "APR",
+            item:
+              longAPRQuery.status === "success" ? (
+                formatPercent(longAPRQuery.data.totalAPR)
+              ) : (
+                <LoadingBox tw="bg-gray-300 h-10 w-20" />
+              ),
+          },
+          {
+            label: "Balance",
+            item:
+              userValueQuery.status === "success" ? (
+                <TokenAmountDisplay amount={userValueQuery.value} showSymbol />
+              ) : (
+                <LoadingBox tw="bg-gray-300 h-10 w-20" />
+              ),
+          },
+        ] as const
+      }
+    />
   );
 };

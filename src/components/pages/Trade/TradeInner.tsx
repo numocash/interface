@@ -143,9 +143,9 @@ export const TradeInner: React.FC = () => {
           </p>
         </div>
       </div>
-      <div tw="flex border border-gray-200 rounded-xl overflow-hidden p-2 flex-col bg-white gap-6">
-        <div tw="flex border border-gray-200 rounded-xl overflow-hidden bg-white">
-          <div tw="border-gray-200 border">
+      <div tw="flex border border-gray-200 rounded-xl overflow-hidden p-2 flex-col bg-white gap-6 max-w-lg">
+        <div tw="flex border border-gray-200 rounded-xl overflow-hidden bg-white w-full">
+          <div tw="flex flex-col">
             <AssetSelection
               tw="p-2"
               label="Long"
@@ -165,13 +165,13 @@ export const TradeInner: React.FC = () => {
               tokens={tokens0}
             />
           </div>
-          <div tw="bg-gray-100 p-2">
+          <div tw="bg-gray-100 p-2 w-full">
             <p tw="text-secondary text-sm z-20 fixed">
               Amount{token1 && ` (${token1.symbol})`}
             </p>
             {/* TODO: add balance */}
             <BigNumericInput
-              tw="text-right text-5xl text-black w-full max-w-sm overflow-hidden bg-gray-100 h-full"
+              tw="text-right text-5xl text-black w-full overflow-hidden bg-gray-100 h-full"
               disabled={!token1}
               value={input}
               onChange={setInput}

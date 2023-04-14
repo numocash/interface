@@ -2,7 +2,7 @@ import { objectKeys } from "ts-extras";
 import tw, { css } from "twin.macro";
 
 type Props<T extends string> = {
-  tabs: Record<T, string>;
+  tabs: { [key in T]: string };
   selectedTab: T;
   setSelectedTab: (val: T) => void;
 };
