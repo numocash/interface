@@ -62,13 +62,15 @@ export const Mint: React.FC = () => {
 
   return (
     <>
-      <AssetSelection
-        tw="p-2"
-        selectedValue={staking.lendgine.token1}
-        inputValue={input}
-        inputOnChange={setInput}
-        currentAmount={{ allowSelect: true, amount: balanceQuery.data }}
-      />
+      <div tw="border-2 border-gray-200 bg-white rounded-xl">
+        <AssetSelection
+          tw="p-2"
+          selectedValue={staking.lendgine.token1}
+          inputValue={input}
+          inputOnChange={setInput}
+          currentAmount={{ allowSelect: true, amount: balanceQuery.data }}
+        />
+      </div>
 
       <AsyncButton
         variant="primary"

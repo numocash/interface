@@ -47,26 +47,24 @@ export const Burn: React.FC = () => {
 
   return (
     <>
-      <div tw="flex flex-col rounded-lg border border-gray-200">
-        <div tw=" px-2 py-2 gap-2 flex flex-col w-full">
+      <div tw="flex flex-col rounded-xl border-2 border-gray-200 bg-white">
+        <div tw=" px-6 h-20 justify-center py-2 gap-2 flex flex-col w-full">
           <PercentageSlider
             disabled={false}
             input={withdrawPercent}
             onChange={setWithdrawPercent}
           />
         </div>
-        <div tw=" border-b w-full border-gray-200" />
+        <div tw=" border-b-2 w-full border-gray-200" />
         <CenterSwitch icon="arrow" />
-        <div tw="flex flex-col gap-2 pt-3">
-          <AssetSelection
-            tw=""
-            selectedValue={staking.lendgine.token1}
-            inputValue={burnAmount.collateral?.toSignificant(6, {
-              groupSeparator: ",",
-            })}
-            inputDisabled={true}
-          />
-        </div>
+        <AssetSelection
+          tw="justify-center"
+          selectedValue={staking.lendgine.token1}
+          inputValue={burnAmount.collateral?.toSignificant(6, {
+            groupSeparator: ",",
+          })}
+          inputDisabled={true}
+        />
       </div>
       <AsyncButton
         variant="primary"

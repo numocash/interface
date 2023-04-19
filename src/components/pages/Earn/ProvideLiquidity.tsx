@@ -1,5 +1,6 @@
 import { CurrencyAmount, Percent } from "@uniswap/sdk-core";
 import { useMemo } from "react";
+import { NavLink } from "react-router-dom";
 import { css } from "twin.macro";
 
 import type { Protocol } from "../../../constants";
@@ -76,7 +77,7 @@ export const ProvideLiquidity: React.FC<Props> = ({
   }, [lendgines, lendginesQuery.data, protocol]);
 
   return (
-    <div tw="border shadow rounded-xl w-full flex flex-col overflow-clip bg-white">
+    <EarnCard to={"earn"}>
       <div
         tw="w-full h-24 p-2"
         css={css`
@@ -87,7 +88,7 @@ export const ProvideLiquidity: React.FC<Props> = ({
           );
         `}
       >
-        <p tw="p-2 rounded-lg bg-white w-fit bg-opacity-50">
+        <p tw="p-2 rounded-lg bg-white w-fit bg-opacity-50 font-medium">
           Provide liquidity
         </p>
       </div>
@@ -97,22 +98,45 @@ export const ProvideLiquidity: React.FC<Props> = ({
       </div>
 
       <div tw="p-4 flex flex-col gap-4  -mt-8">
-        <p tw="font-bold text-2xl">
+        <p tw="font-bold text-xl">
           {token0.symbol} + {token1.symbol}
         </p>
         <div tw="flex flex-col ">
-          <p tw="text-sm text-secondary">Max APR</p>
-          <p tw="text-default font-bold text-2xl">
+          <p tw="text-xs text-secondary font-medium">Max APR</p>
+          <p tw=" font-bold text-xl text-green">
             {bestAPR ? formatPercent(bestAPR) : <LoadingBox />}
           </p>
         </div>
         <div tw="flex flex-col ">
-          <p tw="text-sm text-secondary">TVL</p>
+          <p tw="text-xs text-secondary font-medium">TVL</p>
           <p tw="text-default font-semibold text-lg">
             {tvl ? <TokenAmountDisplay amount={tvl} /> : <LoadingBox />}
           </p>
         </div>
       </div>
-    </div>
+    </EarnCard>
+  );
+};
+
+interface EarnCardProps {
+  children: React.ReactNode;
+  to: string;
+  className?: string;
+}
+
+export const EarnCard: React.FC<EarnCardProps> = ({
+  children,
+  to,
+  className,
+}: EarnCardProps) => {
+  return (
+    <NavLink to={to}>
+      <div
+        tw="w-full flex flex-col rounded-xl bg-white overflow-clip border transform sm:hover:scale-105 duration-300 cursor-pointer h-[320px]"
+        className={className}
+      >
+        {children}
+      </div>
+    </NavLink>
   );
 };

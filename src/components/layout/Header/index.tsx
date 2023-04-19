@@ -11,9 +11,9 @@ export const Header: React.FC = () => {
     <div tw="fixed z-10 flex justify-center w-full top-4 px-6">
       <div tw="justify-between bg-[#303030] rounded-2xl max-w-xl  w-full flex items-center p-1">
         <NumoenIcon />
-        <NavLink tw="text-white hover:opacity-80 hidden md:flex" to="/trade/">
+        {/* <NavLink tw="text-white hover:opacity-80 hidden md:flex" to="/trade/">
           <p>Trade</p>
-        </NavLink>
+        </NavLink> */}
         <NavLink tw="text-white hover:opacity-80 hidden md:flex" to="/earn/">
           <p>Earn</p>
         </NavLink>

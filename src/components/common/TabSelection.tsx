@@ -5,25 +5,26 @@ type Props<T extends string> = {
   tabs: { [key in T]: string };
   selectedTab: T;
   setSelectedTab: (val: T) => void;
+  className?: string;
 };
 
 export const TabSelection = <T extends string>({
   tabs,
   selectedTab,
   setSelectedTab,
+  className,
 }: Props<T>) => {
   return (
-    <div tw="w-full justify-start flex">
-      <div tw="flex text-lg justify-end p-0.5 items-center rounded-xl bg-gray-100">
+    <div tw="w-full justify-start flex h-12" className={className}>
+      <div tw="flex text-lg justify-end p-0.5 items-center rounded-xl bg-gray-200 w-full">
         {objectKeys(tabs).map((t) => {
           return (
-            <div key={tabs[t as T]}>
+            <div key={tabs[t as T]} tw="w-full h-full">
               <button
                 css={css`
-                  ${tw`grid px-2 py-1 font-semibold text-gray-500 border border-transparent rounded-xl justify-items-center`}
-                  ${tw`hover:(text-gray-700) transform duration-300 ease-in-out`}
-                ${t === selectedTab &&
-                  tw`text-black bg-white rounded-[10px] border-gray-300/50`}
+                  ${tw`grid items-center w-full h-full font-semibold border border-transparent text-secondary rounded-[10px] justify-items-center`}
+                  ${tw`hover:(text-black) transform duration-300 ease-in-out`}
+                ${t === selectedTab && tw`text-black bg-white `}
                 `}
                 onClick={() => {
                   setSelectedTab(t as T);

@@ -1,7 +1,4 @@
 import React from "react";
-import tw, { styled } from "twin.macro";
-
-import { breakpoints } from "../../../theme/breakpoints";
 
 interface IProps
   extends Omit<
@@ -24,14 +21,14 @@ export const BigNumericInput: React.FC<IProps> = ({
   integerOnly,
   ...rest
 }: IProps) => (
-  <StyledInput
+  <input
     {...rest}
+    tw="p-0 border-none outline-none ring-0 placeholder:text-secondary"
     inputMode="decimal"
     autoComplete="off"
     autoCorrect="off"
     type="text"
     spellCheck="false"
-    // style={{ borderWidth: "0px" }}
     onChange={(e) => {
       const { value } = e.target;
       if (integerOnly) {
@@ -53,25 +50,3 @@ export const BigNumericInput: React.FC<IProps> = ({
     }}
   />
 );
-
-// TODO: global css is setting with width to 1px
-const StyledInput = styled.input<{
-  hasBackground?: boolean;
-  disabled?: boolean;
-}>`
-  flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  ${tw` text-[#8f8f8f]`}
-
-  &:placeholder {
-    color: #888;
-  }
-
-  padding: 0px;
-
-  ${breakpoints.mobile} {
-    font-size: 20px;
-  }
-`;

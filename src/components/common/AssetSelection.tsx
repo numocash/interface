@@ -80,7 +80,7 @@ export const AssetSelection: React.FC<Props<WrappedTokenInfo>> = ({
   // const disp
 
   return (
-    <div tw="flex w-full flex-col pt-2 px-2" className={className}>
+    <div tw="flex w-full flex-col pt-2 px-2 h-20" className={className}>
       <>
         <Section>
           <div tw=" text-secondary text-xs">{label}</div>
@@ -182,7 +182,7 @@ export const AssetSelection: React.FC<Props<WrappedTokenInfo>> = ({
         {!hideInput && (
           <div tw="flex grow flex-1">
             <BigNumericInput
-              tw="text-right text-black w-full py-1 text-xl"
+              tw="text-right text-black w-full py-1 text-3xl"
               disabled={inputDisabled}
               value={inputValue}
               onChange={inputOnChange}

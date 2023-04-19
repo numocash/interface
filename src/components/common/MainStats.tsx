@@ -21,7 +21,7 @@ interface Props {
 
 export const MainStats: React.FC<Props> = ({ items }: Props) => {
   return (
-    <div tw="flex w-full justify-around">
+    <div tw="w-full grid grid-cols-3">
       {items.map((i) => (
         <Item key={i.label} label={i.label} item={i.item} />
       ))}
