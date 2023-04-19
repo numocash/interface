@@ -338,6 +338,7 @@ export const useWithdrawAmount = <L extends Lendgine>(
       status: "success",
       amount0,
       amount1,
+      liquidity,
     } as const;
   }, [
     lendgine,

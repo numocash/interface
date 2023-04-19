@@ -77,7 +77,9 @@ export const ProvideLiquidity: React.FC<Props> = ({
   }, [lendgines, lendginesQuery.data, protocol]);
 
   return (
-    <EarnCard to={"earn"}>
+    <EarnCard
+      to={`provide-liquidity/${protocol}/${token0.address}/${token1.address}`}
+    >
       <div
         tw="w-full h-24 p-2"
         css={css`

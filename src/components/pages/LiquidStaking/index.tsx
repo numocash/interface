@@ -31,7 +31,7 @@ export const LiquidStaking: React.FC = () => {
       <div tw="flex w-full max-w-md flex-col gap-2">
         <TabSelection
           tw="max-w-md"
-          tabs={{ deposit: "Deposit", withdraw: "Withdraw" }}
+          tabs={tabs}
           selectedTab={tab}
           setSelectedTab={(val) => setTab(val)}
         />
