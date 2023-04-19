@@ -33,7 +33,9 @@ export const useExistingLendginesQuery = () => {
   const queryKey = useExistingLendginesQueryKey();
   const queryFn = useExistingLendginesQueryFn();
 
-  return useQuery<ReturnType<typeof parseLendgines>>(queryKey, queryFn, {
+  return useQuery<ReturnType<typeof parseLendgines>>({
+    queryKey,
+    queryFn,
     staleTime: Infinity,
     refetchInterval: userRefectchInterval,
   });
