@@ -34,13 +34,11 @@ export const calculateAccrual = <L extends Lendgine>(
     : dilutionLPRequested;
 
   // convert liquidty to collateral
-  const f1 = dilutionLP.multiply(priceToFraction(lendgine.bound).multiply(2));
-
-  const dilutionToken1 = CurrencyAmount.fromFractionalAmount(
-    lendgine.token1,
-    f1.numerator,
-    f1.denominator
-  );
+  const dilutionToken1 = fractionToPrice(
+    priceToFraction(lendgine.bound).multiply(2),
+    lendgine.lendgine,
+    lendgine.token1
+  ).quote(dilutionLP);
 
   const f2 = priceToFraction(lendgineInfo.rewardPerPositionStored).add(
     tokenToFraction(dilutionToken1).divide(
@@ -151,12 +149,13 @@ export const calculateEstimatedMintAmount = <L extends Lendgine>(
   balance: CurrencyAmount<L["lendgine"]>;
 } => {
   // convert collateral to liquidity
-  const f = collateral.divide(priceToFraction(lendgine.bound).multiply(2));
-  const liquidity = CurrencyAmount.fromFractionalAmount(
+  const liquidity = fractionToPrice(
+    priceToFraction(lendgine.bound).multiply(2),
     lendgine.lendgine,
-    f.numerator,
-    f.denominator
-  );
+    lendgine.token1
+  )
+    .invert()
+    .quote(collateral);
 
   // convert liquidity to balance
   const accruedLendgineInfo = calculateAccrual(
@@ -203,13 +202,11 @@ export const calculateEstimatedBurnAmount = <L extends Lendgine>(
     .divide(accruedLendgineInfo.totalSupply);
 
   // convert liquidty to collateral
-  const f = liquidity.multiply(priceToFraction(lendgine.bound).multiply(2));
-
-  const collateral = CurrencyAmount.fromFractionalAmount(
-    lendgine.token1,
-    f.numerator,
-    f.denominator
-  );
+  const collateral = fractionToPrice(
+    priceToFraction(lendgine.bound).multiply(2),
+    lendgine.lendgine,
+    lendgine.token1
+  ).quote(liquidity);
 
   return { liquidity, collateral };
 };

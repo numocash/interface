@@ -2,10 +2,13 @@ import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 
 import { useEarn } from ".";
+import { HedgeUniswap } from "./HedgeUniswap";
 import { LiquidStaking } from "./LiquidStaking";
 import { ProvideLiquidity } from "./ProvideLiquidity";
 import { useEnvironment } from "../../../contexts/useEnvironment";
+import { lendgineToMarket } from "../../../lib/lendgineValidity";
 import type { Lendgine } from "../../../lib/types/lendgine";
+import type { Market } from "../../../lib/types/market";
 import { Button } from "../../common/Button";
 import { PageMargin } from "../../layout";
 
@@ -26,6 +29,38 @@ export const EarnInner: React.FC = () => {
         }, {})
       ),
     [lendgines]
+  );
+
+  const partitionedMarkets = useMemo(
+    () =>
+      Object.values(
+        lendgines.reduce(
+          (
+            acc: Record<string, { market: Market; lendgines: Lendgine[] }>,
+            cur
+          ) => {
+            const market = lendgineToMarket(
+              cur,
+              environment.interface.wrappedNative,
+              environment.interface.specialtyMarkets
+            );
+            const key = `${market.quote.address}_${market.base.address}`;
+            const value = acc[key];
+            return {
+              ...acc,
+              [key]: value
+                ? { market: market, lendgines: value.lendgines.concat(cur) }
+                : { market, lendgines: [cur] },
+            };
+          },
+          {}
+        )
+      ),
+    [
+      environment.interface.specialtyMarkets,
+      environment.interface.wrappedNative,
+      lendgines,
+    ]
   );
 
   return (
@@ -57,9 +92,16 @@ export const EarnInner: React.FC = () => {
         )}
         {partitionedLendgines.map((pl) => (
           <ProvideLiquidity
-            key={pl[0]!.address}
+            key={"pl" + pl[0]!.address}
             lendgines={pl}
             protocol="pmmp"
+          />
+        ))}
+        {partitionedMarkets.map((pm) => (
+          <HedgeUniswap
+            key={"pm" + pm.market.quote.address + pm.market.base.address}
+            lendgines={pm.lendgines}
+            market={pm.market}
           />
         ))}
       </div>
