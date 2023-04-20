@@ -44,12 +44,11 @@ export const ProvideLiquidityInner: React.FC = () => {
             {token0.symbol} + {token1.symbol}
           </p>
           <div tw="gap-2 grid">
-            <p tw="sm:text-lg text-[#8f8f8f] max-w-md lg:text-right">
-              Numoen has created several strategies using our underlying PMMP.
-              All strategies maintain maximum trustlessness and
-              decentralization.
+            <p tw="sm:text-lg text-[#8f8f8f] max-w-md">
+              Provide liquidity to an AMM and earn from lending the position
+              out.
             </p>
-            <p tw="text-sm font-normal underline lg:text-right">View details</p>
+            <p tw="text-sm font-normal underline ">View details</p>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Create } from "./components/pages/Create";
 import { Earn } from "./components/pages/Earn";
 import { LiquidStaking } from "./components/pages/LiquidStaking";
+import { Position } from "./components/pages/Positions";
 import { ProvideLiquidity } from "./components/pages/ProvideLiquidity";
 // import { Trade } from "./components/pages/Trade";
 import { useEnvironment } from "./contexts/useEnvironment";
@@ -15,6 +16,7 @@ export const AppRouter: React.FC = () => {
   return (
     <Routes>
       {/* <Route path="/trade" element={<Trade />} /> */}
+      <Route path="/positions" element={<Position />} />
       <Route path="/earn" element={<Earn />} />
       <Route path="/earn/liquid-staking" element={<LiquidStaking />} />
       <Route
