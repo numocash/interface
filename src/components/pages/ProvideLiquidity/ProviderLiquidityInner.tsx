@@ -18,8 +18,8 @@ export const ProvideLiquidityInner: React.FC = () => {
   const tabs = { deposit: "Deposit", withdraw: "Withdraw" };
   const [tab, setTab] = useState<keyof typeof tabs>("deposit");
   return (
-    <PageMargin tw="w-full pb-12 sm:pb-0 flex flex-col gap-12">
-      <div tw="w-full max-w-5xl bg-white">
+    <PageMargin tw="w-full pb-12 sm:pb-0 flex flex-col gap-12 max-w-5xl">
+      <div tw="w-full bg-white">
         <div
           tw="w-full h-36 p-4 flex flex-col justify-end"
           css={css`
@@ -54,9 +54,8 @@ export const ProvideLiquidityInner: React.FC = () => {
         </div>
       </div>
       <Stats />
-      <div tw="flex w-full max-w-md flex-col gap-2">
+      <div tw="flex w-full max-w-lg flex-col gap-2">
         <TabSelection
-          tw="max-w-md"
           tabs={tabs}
           selectedTab={tab}
           setSelectedTab={(val) => setTab(val)}

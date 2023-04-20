@@ -176,7 +176,7 @@ export const Create: React.FC = () => {
           </p>
         </div>
       </div>
-      <div tw="flex flex-col gap-2 w-full max-w-xl">
+      <div tw="flex flex-col gap-2 w-full max-w-lg">
         <div tw="border-2 border-gray-200 bg-white rounded-xl">
           <AssetSelection
             tw="p-2"

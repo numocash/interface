@@ -28,9 +28,8 @@ export const LiquidStaking: React.FC = () => {
         size={64}
       /> */}
       <Stats />
-      <div tw="flex w-full max-w-md flex-col gap-2">
+      <div tw="flex w-full max-w-lg flex-col gap-2">
         <TabSelection
-          tw="max-w-md"
           tabs={tabs}
           selectedTab={tab}
           setSelectedTab={(val) => setTab(val)}
