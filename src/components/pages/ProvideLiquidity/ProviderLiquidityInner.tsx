@@ -39,17 +39,17 @@ export const ProvideLiquidityInner: React.FC = () => {
           <TokenIcon token={token1} size={48} />
         </div>
 
-        <div tw="flex flex-col lg:flex-row lg:justify-between gap-4 lg:items-center -mt-8 p-6">
+        <div tw="flex flex-col lg:flex-row lg:justify-between gap-4 -mt-8 p-6">
           <p tw="font-bold text-2xl sm:text-4xl">
             {token0.symbol} + {token1.symbol}
           </p>
           <div tw="gap-2 grid">
-            <p tw="sm:text-lg text-[#8f8f8f] max-w-md text-right">
+            <p tw="sm:text-lg text-[#8f8f8f] max-w-md lg:text-right">
               Numoen has created several strategies using our underlying PMMP.
               All strategies maintain maximum trustlessness and
               decentralization.
             </p>
-            <p tw="text-sm font-normal underline text-right">View details</p>
+            <p tw="text-sm font-normal underline lg:text-right">View details</p>
           </div>
         </div>
       </div>
