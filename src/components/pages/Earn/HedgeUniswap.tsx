@@ -90,7 +90,7 @@ export const HedgeUniswap: React.FC<Props> = ({ lendgines, market }: Props) => {
           {market.quote.symbol} + {market.base.symbol}
         </p>
         <div tw="flex flex-col ">
-          <p tw="text-xs text-secondary font-medium">Max APR</p>
+          <p tw="text-xs text-secondary font-medium">Est. APR</p>
           <p tw=" font-bold text-xl text-green">
             {formatPercent(new Percent(34, 200))}
           </p>
