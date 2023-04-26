@@ -53,19 +53,19 @@ export const PowerTokens: React.FC = () => {
       {!isConnected ? (
         <Button
           variant="primary"
-          tw="text-xl font-semibold h-12 px-6"
+          tw="text-xl font-semibold h-12 mx-6"
           onClick={openConnectModal}
         >
           Connect Wallet
         </Button>
       ) : !validLendgines ? (
-        <div tw="flex flex-col w-full gap-2 px-6">
+        <div tw="flex flex-col w-full gap-2 mx-6">
           {[...Array(5).keys()].map((i) => (
             <LoadingBox tw="h-12 w-full" key={i + "load"} />
           ))}
         </div>
       ) : validLendgines.length === 0 ? (
-        <div tw="h-12 w-full rounded-xl bg-gray-200 text-lg font-medium items-center flex justify-center px-6">
+        <div tw="h-12  rounded-xl bg-gray-200 text-lg font-medium items-center flex justify-center mx-6">
           No positions
         </div>
       ) : (

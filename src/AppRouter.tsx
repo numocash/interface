@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { Create } from "./components/pages/Create";
 import { Earn } from "./components/pages/Earn";
+import { Hedge } from "./components/pages/Hedge";
 import { LiquidStaking } from "./components/pages/LiquidStaking";
 import { Position } from "./components/pages/Positions";
 import { ProvideLiquidity } from "./components/pages/ProvideLiquidity";
@@ -23,6 +24,7 @@ export const AppRouter: React.FC = () => {
         path="/earn/provide-liquidity/:protocol/:token0/:token1"
         element={<ProvideLiquidity />}
       />
+      <Route path="/earn/hedge-uniswap/:token0/:token1" element={<Hedge />} />
 
       <Route path="/create/" element={<Create />} />
 

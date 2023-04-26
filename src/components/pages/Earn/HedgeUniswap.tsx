@@ -63,12 +63,12 @@ export const HedgeUniswap: React.FC<Props> = ({ lendgines, market }: Props) => {
       to={`hedge-uniswap/${market.quote.address}/${market.base.address}`}
     >
       <div
-        tw="w-full h-24 p-2 overflow-clip"
+        tw="w-full h-24 p-2 overflow-clip grid"
         css={css`
           background-image: linear-gradient(to top right, #fff, #ff007a);
         `}
       >
-        <p tw="p-2 rounded-lg bg-white w-fit bg-opacity-50 font-medium">
+        <p tw="p-2 rounded-lg bg-white w-fit bg-opacity-50 font-medium ">
           Hedge Uniswap V3
         </p>
         <div tw="w-full justify-end">
