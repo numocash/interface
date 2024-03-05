@@ -1,6 +1,6 @@
-# Numoen Application
+# Numo Web Application
 
-An application for interacting PMMP, a protocol for automated liquidity provisioning and exchange of power tokens. 
+An application for interacting PowerMaker, a protocol for automated liquidity provisioning and exchange of power perpetuals. 
 
 ## Developing
 
